@@ -40,6 +40,9 @@ export const ChooseTokens = ({ address }: { address: Address }) => {
       <ScaffoldAddress address={address} />
       <TokenSelect setToken={setToken1} tokenOptions={selectableTokens} />
       <TokenSelect setToken={setToken2} tokenOptions={selectableTokens} />
+      <p className="text-xl">
+        The second step is to select two tokens and approve the pool to spend an amount of each token
+      </p>
     </div>
   );
 };

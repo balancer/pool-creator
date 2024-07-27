@@ -50,7 +50,7 @@ const CoW: NextPage = () => {
     <div className="flex-grow">
       <div className="max-w-screen-2xl mx-auto">
         <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 bg-base-200">
-          <h1 className="text-5xl font-bold my-5">CoW AMM</h1>
+          <h1 className="text-5xl font-bold my-5">CoW AMMs</h1>
 
           <p className="text-xl mb-7">Create and initialize 50/50 weighted CoW AMMs</p>
 
