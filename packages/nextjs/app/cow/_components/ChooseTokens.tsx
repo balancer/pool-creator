@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { type Address } from "viem";
-import { TokenSelect } from "~~/components/cow/TokenSelect";
+import { TokenSelect } from "~~/components/common/TokenSelect";
 import { Address as ScaffoldAddress } from "~~/components/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import tokenList from "~~/utils/balancer/tokenlist.json";
@@ -20,13 +20,17 @@ export type Token = {
  *  Approve each selected token
  *  Bind each selected token
  */
-export const Pool = ({ address }: { address: Address }) => {
+export const ChooseTokens = ({ address }: { address: Address }) => {
   const { targetNetwork } = useTargetNetwork();
   const TOKENS = tokenList.tokens.filter(t => t.chainId === targetNetwork.id);
 
   const [selectableTokens] = useState<Token[]>(TOKENS);
   const [token1, setToken1] = useState<Address | undefined>();
   const [token2, setToken2] = useState<Address | undefined>();
+
+  // const handleSetToken = (e, setToken) => {
+  //     setToken(e.target.value);
+  // }
 
   console.log("token1", token1);
   console.log("token2", token2);

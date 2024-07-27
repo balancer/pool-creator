@@ -1,7 +1,6 @@
-"use client";
-
+// "use client";
 import { Dispatch, SetStateAction } from "react";
-import { type Token } from "./Pool";
+import { type Token } from "~~/app/cow/_components/ChooseTokens";
 
 export const TokenSelect = ({
   tokenOptions,
@@ -11,7 +10,7 @@ export const TokenSelect = ({
   setToken: Dispatch<SetStateAction<string | undefined>>;
 }) => {
   return (
-    <select onChange={e => setToken(e.target.value)} className="select select-bordered w-full max-w-xs">
+    <select onChange={e => setToken(e.target.value)} className="select select-bordered w-full max-w-xs rounded-lg">
       <option disabled selected>
         Select Token
       </option>
