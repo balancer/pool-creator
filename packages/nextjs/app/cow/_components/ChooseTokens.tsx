@@ -37,12 +37,16 @@ export const ChooseTokens = ({ address }: { address: Address }) => {
 
   return (
     <div className="flex flex-col justify-center items-center gap-4">
-      <ScaffoldAddress address={address} />
-      <TokenSelect setToken={setToken1} tokenOptions={selectableTokens} />
-      <TokenSelect setToken={setToken2} tokenOptions={selectableTokens} />
+      <h5 className="text-2xl font-bold">Approve Tokens</h5>
       <p className="text-xl">
         The second step is to select two tokens and approve the pool to spend an amount of each token
       </p>
+      <TokenSelect setToken={setToken1} tokenOptions={selectableTokens} />
+      <TokenSelect setToken={setToken2} tokenOptions={selectableTokens} />
+      <div className="flex gap-4 mt-5">
+        <div>Pool:</div>
+        <ScaffoldAddress address={address} />
+      </div>
     </div>
   );
 };

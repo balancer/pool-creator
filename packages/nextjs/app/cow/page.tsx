@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { ChooseTokens, CreatePool } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
+import { useCowPool } from "~~/hooks/cow/";
 import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
 
 const CoW: NextPage = () => {
-  //   const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [userPools, setUserPools] = useState<string[]>([]);
 
   const { address } = useAccount();
@@ -24,6 +25,12 @@ const CoW: NextPage = () => {
     filters: { caller: address },
   });
 
+  const newestPool = userPools[0];
+
+  const { data: pool, isLoading, isError } = useCowPool(newestPool);
+  console.log("isLoading", isLoading);
+  console.log("isError", isError);
+
   useScaffoldWatchContractEvent({
     contractName: "BCoWFactory",
     eventName: "LOG_NEW_POOL",
@@ -37,6 +44,7 @@ const CoW: NextPage = () => {
     },
   });
 
+  // Add user created pools to state
   useEffect(() => {
     if (!isLoadingEvents && events) {
       const pools = events.map(e => e.args.bPool).filter((pool): pool is string => pool !== undefined);
@@ -44,7 +52,18 @@ const CoW: NextPage = () => {
     }
   }, [!isLoadingEvents && events]);
 
-  const newPool = userPools[0];
+  // Manage the steps progress
+  useEffect(() => {
+    // If all of the user's pools are already finalized, set the current step to 1
+
+    // If the user has no pools, set the current step to 1
+    if (userPools.length === 0) {
+      setCurrentStep(1);
+    } else if (pool && !pool.isFinalized) {
+      setCurrentStep(2);
+    }
+  }, [newestPool, address]);
+  console.log("currentStep", currentStep);
 
   return (
     <div className="flex-grow">
@@ -52,18 +71,18 @@ const CoW: NextPage = () => {
         <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 bg-base-200">
           <h1 className="text-5xl font-bold my-5">CoW AMMs</h1>
 
-          <p className="text-xl mb-7">Create and initialize 50/50 weighted CoW AMMs</p>
+          <p className="text-xl mb-7">Create and initialize two token (50/50) pools with a max swap fee (99.99%)</p>
 
-          <ul className="steps steps-vertical md:steps-horizontal md:w-[700px]">
+          <ul className="steps steps-vertical md:steps-horizontal md:w-[700px] mb-10">
             <li className="step step-accent">Create Pool</li>
-            <li className="step">Approve Tokens</li>
+            <li className={`step ${currentStep === 2 && "step-accent"}`}>Approve Tokens</li>
             <li className="step">Bind Tokens</li>
             <li className="step">Set Swap Fees</li>
             <li className="step">Finalize Pool</li>
           </ul>
 
-          <CreatePool />
-          <ChooseTokens address={newPool} />
+          {currentStep === 1 && <CreatePool />}
+          {currentStep > 1 && <ChooseTokens address={newestPool} />}
         </div>
       </div>
     </div>

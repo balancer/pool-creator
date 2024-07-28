@@ -10,8 +10,12 @@ export const TokenSelect = ({
   setToken: Dispatch<SetStateAction<string | undefined>>;
 }) => {
   return (
-    <select onChange={e => setToken(e.target.value)} className="select select-bordered w-full max-w-xs rounded-lg">
-      <option disabled selected>
+    <select
+      defaultValue={"Select Token"}
+      onChange={e => setToken(e.target.value)}
+      className="select select-bordered w-full max-w-xs rounded-lg"
+    >
+      <option value={"Select Token"} disabled>
         Select Token
       </option>
       {tokenOptions.map(token => (

@@ -1,4 +1,4 @@
-# Build A Pool
+# Buidl A Pool
 
 A frontend tool for creating and initializing various pool types on Balancer
 

@@ -15,13 +15,14 @@ export const CreatePool = () => {
     }
   };
   return (
-    <div className="my-10">
+    <div className="flex flex-col justify-center items-center gap-4">
+      <h5 className="text-2xl font-bold text-center">Create Pool</h5>
+      <p className="text-xl">The first step is to create a new BPool using the BCoWFactory contract</p>
       <div className="flex justify-center">
         <button className="btn btn-lg btn-accent rounded-lg text-xl" onClick={newBPool}>
-          Create Pool
+          New Pool
         </button>
       </div>
-      <p className="text-xl mt-10">The first step is to create a new BPool using the BCoWFactory contract</p>
     </div>
   );
 };
