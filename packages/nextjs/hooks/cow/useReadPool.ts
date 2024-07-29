@@ -3,10 +3,7 @@ import { type Address } from "viem";
 import { usePublicClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 
-/**
- * Fetch pool details for a CoW AMM
- */
-export const useCowPool = (address: Address) => {
+export const useReadPool = (address: Address) => {
   const client = usePublicClient();
   const abi = abis.CoW.BCoWPool;
 
@@ -15,7 +12,7 @@ export const useCowPool = (address: Address) => {
     queryFn: async () => {
       if (!client) throw new Error("Client not found");
 
-      const [isFinalized, getNumTokens, getCurrentTokens, getSwapFee] = await Promise.all([
+      const [isFinalized, getNumTokens, getCurrentTokens, getSwapFee, MAX_FEE] = await Promise.all([
         client.readContract({
           abi,
           address,
@@ -36,15 +33,14 @@ export const useCowPool = (address: Address) => {
           address,
           functionName: "getSwapFee",
         }),
-        // NOTICE: getFinalTokens reverts if pool has not been finalized
-        // client.readContract({
-        //   abi,
-        //   address,
-        //   functionName: "getFinalTokens",
-        // }),
+        client.readContract({
+          abi,
+          address,
+          functionName: "MAX_FEE",
+        }),
       ]);
 
-      return { isFinalized, getNumTokens, getCurrentTokens, getSwapFee };
+      return { address, isFinalized, getNumTokens, getCurrentTokens, getSwapFee, MAX_FEE };
     },
     enabled: !!address,
   });

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreatePool, ManageTokens } from "./_components";
+import { CreatePool, FinalizePool, InitializePool } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { Address as ScaffoldAddress } from "~~/components/scaffold-eth";
-import { useCowPool } from "~~/hooks/cow/";
+import { useReadPool } from "~~/hooks/cow/";
 import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
 
 const CoW: NextPage = () => {
@@ -28,7 +28,7 @@ const CoW: NextPage = () => {
 
   const newestPool = userPools[0];
 
-  const { data: pool, isLoading, isError } = useCowPool(newestPool);
+  const { data: pool, isLoading, isError } = useReadPool(newestPool);
   console.log("isLoading", isLoading);
   console.log("isError", isError);
 
@@ -55,14 +55,17 @@ const CoW: NextPage = () => {
 
   // Manage the steps progress
   useEffect(() => {
-    // If all of the user's pools are already finalized, set the current step to 1
-
-    // If the user has no pools, set the current step to 1
-    if (userPools.length === 0) {
+    // If the user has no pools or your most recent pool is finalized
+    if (userPools.length === 0 || pool?.isFinalized) {
       setCurrentStep(1);
     }
-    if (pool !== undefined) {
+    // If the user has created a pool, but it is not finalized and the tokens are not binded
+    if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
       setCurrentStep(2);
+    }
+    // If the user has a pool with 2 tokens binded, but it has not been finalized
+    if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
+      setCurrentStep(3);
     }
   }, [pool, address, events, isLoadingEvents]);
 
@@ -76,15 +79,14 @@ const CoW: NextPage = () => {
 
           <ul className="steps steps-vertical md:steps-horizontal md:w-[700px] mb-10">
             <li className="step step-accent">Create Pool</li>
-            <li className={`step ${currentStep === 2 && "step-accent"}`}>Approve Tokens</li>
-            <li className="step">Bind Tokens</li>
-            <li className="step">Set Swap Fees</li>
-            <li className="step">Finalize Pool</li>
+            <li className={`step ${currentStep > 1 && "step-accent"}`}>Initialize Pool</li>
+            <li className={`step ${currentStep > 2 && "step-accent"}`}>Finalize Pool</li>
           </ul>
 
           <div className="bg-base-300 p-7 rounded-xl w-[555px]">
             {currentStep === 1 && <CreatePool />}
-            {currentStep > 1 && <ManageTokens address={newestPool} />}
+            {currentStep === 2 && <InitializePool pool={newestPool} />}
+            {currentStep === 3 && <FinalizePool pool={pool} />}
           </div>
 
           {newestPool && (

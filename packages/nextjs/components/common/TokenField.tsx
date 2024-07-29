@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { type Token } from "~~/app/cow/_components/ManageTokens";
+import { type Token } from "~~/app/cow/_components/InitializePool";
 import { TokenSelectModal } from "~~/components/common";
 import { formatToHuman } from "~~/utils/formatToHuman";
 
@@ -11,11 +11,15 @@ export const TokenField = ({
   setToken,
   selectedToken,
   balance,
+  allowance,
+  handleAmountChange,
 }: {
   balance: bigint;
+  allowance: bigint;
   tokenOptions: Token[];
   setToken: Dispatch<SetStateAction<Token | undefined>>;
   selectedToken: Token | undefined;
+  handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,9 +28,10 @@ export const TokenField = ({
       <div className="relative w-full">
         <input
           type="number"
-          // onChange={e => onAmountChange(e.target.value)}
+          onChange={handleAmountChange}
+          min="0"
           placeholder="0.0"
-          className={`text-right text-2xl w-full input input-bordered rounded-xl bg-base-200 p-5 h-24`}
+          className={`text-right text-2xl w-full input input-bordered rounded-xl bg-base-200 p-5 h-28`}
         />
         <div className="absolute top-0 left-0 ">
           <div className="flex-col p-3">
@@ -36,8 +41,9 @@ export const TokenField = ({
             >
               {selectedToken ? selectedToken.symbol : "Select Token"} <ChevronDownIcon className="w-4 h-4 mt-0.5" />
             </button>
-            <div className="ml-1 text-neutral-400 text-sm">
-              Balance: {formatToHuman(balance, selectedToken?.decimals || 0)}
+            <div className="ml-1 text-neutral-400 text-sm ">
+              <div>Balance: {formatToHuman(balance, selectedToken?.decimals || 0)}</div>
+              <div>Allowance: {formatToHuman(allowance, selectedToken?.decimals || 0)}</div>
             </div>
           </div>
         </div>
