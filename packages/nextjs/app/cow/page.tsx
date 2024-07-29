@@ -59,11 +59,11 @@ const CoW: NextPage = () => {
     // If the user has no pools, set the current step to 1
     if (userPools.length === 0) {
       setCurrentStep(1);
-    } else if (pool && !pool.isFinalized) {
+    }
+    if (pool !== undefined) {
       setCurrentStep(2);
     }
-  }, [newestPool, address]);
-  console.log("currentStep", currentStep);
+  }, [pool, address, events, isLoadingEvents]);
 
   return (
     <div className="flex-grow">
@@ -81,8 +81,10 @@ const CoW: NextPage = () => {
             <li className="step">Finalize Pool</li>
           </ul>
 
-          {currentStep === 1 && <CreatePool />}
-          {currentStep > 1 && <ChooseTokens address={newestPool} />}
+          <div className="bg-base-300 p-10 rounded-xl">
+            {currentStep === 1 && <CreatePool />}
+            {currentStep > 1 && <ChooseTokens address={newestPool} />}
+          </div>
         </div>
       </div>
     </div>
