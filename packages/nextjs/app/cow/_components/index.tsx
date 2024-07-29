@@ -1,2 +1,2 @@
 export * from "./CreatePool";
-export * from "./ChooseTokens";
+export * from "./ManageTokens";

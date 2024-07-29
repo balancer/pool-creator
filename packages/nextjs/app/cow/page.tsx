@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChooseTokens, CreatePool } from "./_components";
+import { CreatePool, ManageTokens } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
+import { Address as ScaffoldAddress } from "~~/components/scaffold-eth";
 import { useCowPool } from "~~/hooks/cow/";
 import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
 
@@ -71,7 +72,7 @@ const CoW: NextPage = () => {
         <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 bg-base-200">
           <h1 className="text-5xl font-bold my-5">CoW AMMs</h1>
 
-          <p className="text-xl mb-7">Create and initialize two token (50/50) pools with a max swap fee (99.99%)</p>
+          <p className="text-2xl mb-7">Create and initialize two token (50/50) pools with a max swap fee (99.99%)</p>
 
           <ul className="steps steps-vertical md:steps-horizontal md:w-[700px] mb-10">
             <li className="step step-accent">Create Pool</li>
@@ -81,10 +82,16 @@ const CoW: NextPage = () => {
             <li className="step">Finalize Pool</li>
           </ul>
 
-          <div className="bg-base-300 p-10 rounded-xl">
+          <div className="bg-base-300 p-7 rounded-xl w-[555px]">
             {currentStep === 1 && <CreatePool />}
-            {currentStep > 1 && <ChooseTokens address={newestPool} />}
+            {currentStep > 1 && <ManageTokens address={newestPool} />}
           </div>
+
+          {newestPool && (
+            <div className="mt-5">
+              <ScaffoldAddress size="xl" address={newestPool} />
+            </div>
+          )}
         </div>
       </div>
     </div>

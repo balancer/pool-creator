@@ -279,6 +279,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@balancer/sdk@npm:^0.20.5":
+  version: 0.20.5
+  resolution: "@balancer/sdk@npm:0.20.5"
+  dependencies:
+    decimal.js-light: ^2.5.1
+    lodash.clonedeep: ^4.5.0
+    viem: ^2.12.1
+  checksum: ec6f4202ab98984a88fb39fba49c397d28880bc59b716fcbf6969e541014e3c75a617600065ffbf8e623f6e5ef89605678c64f725193d3dcb34a361f2f2596ff
+  languageName: node
+  linkType: hard
+
 "@chainsafe/as-sha256@npm:^0.3.1":
   version: 0.3.1
   resolution: "@chainsafe/as-sha256@npm:0.3.1"
@@ -1496,7 +1507,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:~1.4.0":
+"@noble/curves@npm:^1.4.0, @noble/curves@npm:~1.4.0":
   version: 1.4.2
   resolution: "@noble/curves@npm:1.4.2"
   dependencies:
@@ -1526,7 +1537,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.4.0, @noble/hashes@npm:~1.4.0":
+"@noble/hashes@npm:1.4.0, @noble/hashes@npm:^1.4.0, @noble/hashes@npm:~1.4.0":
   version: 1.4.0
   resolution: "@noble/hashes@npm:1.4.0"
   checksum: 8ba816ae26c90764b8c42493eea383716396096c5f7ba6bea559993194f49d80a73c081f315f4c367e51bd2d5891700bcdfa816b421d24ab45b41cb03e4f3342
@@ -2294,6 +2305,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
+    "@balancer/sdk": ^0.20.5
     "@heroicons/react": ^2.0.11
     "@rainbow-me/rainbowkit": 2.1.2
     "@tanstack/react-query": ^5.28.6
@@ -5809,7 +5821,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js-light@npm:^2.5.0":
+"decimal.js-light@npm:^2.5.0, decimal.js-light@npm:^2.5.1":
   version: 2.5.1
   resolution: "decimal.js-light@npm:2.5.1"
   checksum: f5a2c7eac1c4541c8ab8a5c8abea64fc1761cefc7794bd5f8afd57a8a78d1b51785e0c4e4f85f4895a043eaa90ddca1edc3981d1263eb6ddce60f32bf5fe66c9
@@ -14700,6 +14712,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"viem@npm:^2.12.1":
+  version: 2.18.2
+  resolution: "viem@npm:2.18.2"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.0
+    "@noble/curves": 1.4.0
+    "@noble/hashes": 1.4.0
+    "@scure/bip32": 1.4.0
+    "@scure/bip39": 1.3.0
+    abitype: 1.0.5
+    isows: 1.0.4
+    webauthn-p256: 0.0.5
+    ws: 8.17.1
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: e7cd42d0a5c94d3ad5ee1d0fcf42520b904f2ca863b859c0e836ebf3ecc137375b22cd4ceb108c2d725d3e694d90d42e145e0c9adb4f4a512aae6095f052a619
+  languageName: node
+  linkType: hard
+
 "wagmi@npm:2.10.10":
   version: 2.10.10
   resolution: "wagmi@npm:2.10.10"
@@ -14749,6 +14783,16 @@ __metadata:
     randombytes: ^2.1.0
     utf8: 3.0.0
   checksum: a5f8db69603fdd5e984aa6407f47f7a4e0dab83af42e10de25a6d9eeaf2e7d4d18fe665b569e364b2e916233fb73b26cc70ff0d730e7909720118c4790dfb043
+  languageName: node
+  linkType: hard
+
+"webauthn-p256@npm:0.0.5":
+  version: 0.0.5
+  resolution: "webauthn-p256@npm:0.0.5"
+  dependencies:
+    "@noble/curves": ^1.4.0
+    "@noble/hashes": ^1.4.0
+  checksum: 2837188d1e6d947c87c5728374fb6aec96387cb766f78e7a04d5903774264feb278d68a639748f09997f591e5278796c662bb5c4e8b8286b0f22254694023584
   languageName: node
   linkType: hard
 
