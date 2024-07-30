@@ -9,15 +9,35 @@ type UseToken = {
   balance: bigint;
   refetchBalance: () => void;
   approve: (amount: bigint) => Promise<void>;
+  symbol: string | undefined;
+  name: string | undefined;
+  decimals: number | undefined;
 };
 
-export const useToken = (token: Address | undefined, spender: Address): UseToken => {
+export const useToken = (token: Address | undefined, spender: Address = zeroAddress): UseToken => {
   const { data: walletClient } = useWalletClient();
   const connectedAddress = walletClient?.account.address || zeroAddress;
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
 
-  // Balance of token for the connected account
+  const { data: symbol } = useReadContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "symbol",
+  });
+
+  const { data: name } = useReadContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "name",
+  });
+
+  const { data: decimals } = useReadContract({
+    address: token,
+    abi: erc20Abi,
+    functionName: "decimals",
+  });
+
   const { data: balance, refetch: refetchBalance } = useReadContract({
     address: token,
     abi: erc20Abi,
@@ -25,7 +45,6 @@ export const useToken = (token: Address | undefined, spender: Address): UseToken
     args: [connectedAddress],
   });
 
-  // Allowance of token for spender from the connected account
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: token,
     abi: erc20Abi,
@@ -64,5 +83,8 @@ export const useToken = (token: Address | undefined, spender: Address): UseToken
     balance: balance ? balance : 0n,
     refetchBalance,
     approve,
+    symbol,
+    name,
+    decimals,
   };
 };

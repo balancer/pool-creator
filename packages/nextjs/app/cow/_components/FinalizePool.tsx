@@ -2,24 +2,24 @@
 
 import { useState } from "react";
 import { TransactionButton } from "~~/components/common";
-import { useWritePool } from "~~/hooks/cow";
+import { type BCowPool, RefetchPool, useWritePool } from "~~/hooks/cow";
+import { useToken } from "~~/hooks/cow/";
 
-/**
- * Display the pool configurations
- * Set swap fee to maximum
- * Allow user to finalize the pool
- */
-export const FinalizePool = ({ pool }: { pool: any }) => {
+export const FinalizePool = ({ pool, refetchPool }: { pool: BCowPool; refetchPool: RefetchPool }) => {
   const [isSettingFee, setIsSettingFee] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   const { setSwapFee, finalize } = useWritePool(pool.address);
+
+  const { name: name1, symbol: symbol1 } = useToken(pool.getCurrentTokens[0]);
+  const { name: name2, symbol: symbol2 } = useToken(pool.getCurrentTokens[1]);
 
   const handleSetSwapFee = async () => {
     try {
       setIsSettingFee(true);
       await setSwapFee(pool.MAX_FEE);
       setIsSettingFee(false);
+      refetchPool();
     } catch (e) {
       console.error("Error setting swap fee", e);
       setIsSettingFee(false);
@@ -31,6 +31,7 @@ export const FinalizePool = ({ pool }: { pool: any }) => {
       setIsFinalizing(true);
       await finalize();
       setIsFinalizing(false);
+      refetchPool();
     } catch (e) {
       console.error("Error finalizing pool", e);
       setIsFinalizing(false);
@@ -40,10 +41,26 @@ export const FinalizePool = ({ pool }: { pool: any }) => {
   const requiredSwapFee = pool.MAX_FEE === pool.getSwapFee;
 
   return (
-    <div className="flex flex-col justify-center items-center gap-7">
+    <div className="flex flex-col flex-grow justify-between items-center gap-7">
       <h5 className="text-2xl font-bold text-center">Finalize Pool</h5>
 
-      <p className="text-xl text-center">Set the swap fee to the maximum and review pool configurations</p>
+      <div className="text-lg">{pool.address.toString()}</div>
+
+      <div className="flex flex-col gap-3">
+        <div className="bg-base-100 p-3 rounded-lg">
+          <div className="font-bold">{symbol1}</div>
+          <div>{name1}</div>
+        </div>
+
+        <div className="bg-base-100 p-3 rounded-lg">
+          <div className="font-bold">{symbol2}</div>
+          <div>{name2}</div>
+        </div>
+      </div>
+
+      <div className="text-lg">
+        Swap Fee: {pool.getSwapFee.toString()} {requiredSwapFee ? "✅" : "🚫"}{" "}
+      </div>
 
       {!requiredSwapFee ? (
         <TransactionButton

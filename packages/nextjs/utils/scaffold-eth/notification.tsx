@@ -60,7 +60,7 @@ const Notification = ({
         <div className="absolute -inset-1.5 rounded-xl bg-base-100 opacity-100"></div>
 
         {/* Notification Content */}
-        <div className="relative flex flex-row items-start justify-between w-full rounded-xl p-2 space-x-2 z-10 text-lg">
+        <div className="relative flex flex-row items-start justify-between w-full rounded-xl p-2 space-x-2 z-10">
           <div className="leading-[0] self-center">{icon ? icon : ENUM_STATUSES[status]}</div>
           <div className={`overflow-x-hidden break-words whitespace-pre-line ${icon ? "mt-1" : ""}`}>{content}</div>
 

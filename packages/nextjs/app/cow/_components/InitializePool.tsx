@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { type Address } from "viem";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parseUnits } from "viem";
 import { TokenField, TransactionButton } from "~~/components/common/";
 import { useToken, useWritePool } from "~~/hooks/cow";
+import { type BCowPool, RefetchPool } from "~~/hooks/cow/";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import tokenList from "~~/utils/balancer/tokenlist.json";
 
@@ -16,12 +16,15 @@ export type Token = {
   decimals: number;
 };
 
-/**
- * 1. Send approve txs for the selected tokens with user defined amounts
- * 2. Wait for the approvals to complete
- * 3. Bind the selected tokens to the pool
- */
-export const InitializePool = ({ pool }: { pool: Address }) => {
+export const InitializePool = ({
+  pool,
+  setCurrentStep,
+  refetchPool,
+}: {
+  pool: BCowPool;
+  setCurrentStep: Dispatch<SetStateAction<number>>;
+  refetchPool: RefetchPool;
+}) => {
   const [token1, setToken1] = useState<Token>();
   const [token2, setToken2] = useState<Token>();
   const [amountToken1, setAmountToken1] = useState("");
@@ -38,20 +41,21 @@ export const InitializePool = ({ pool }: { pool: Address }) => {
     allowance: allowance1,
     refetchAllowance: refetchAllowance1,
     approve: approve1,
-  } = useToken(token1?.address, pool);
+  } = useToken(token1?.address, pool.address);
   const {
     balance: balance2,
     allowance: allowance2,
     refetchAllowance: refetchAllowance2,
     approve: approve2,
-  } = useToken(token2?.address, pool);
+  } = useToken(token2?.address, pool.address);
 
-  const { bind } = useWritePool(pool);
+  const { bind } = useWritePool(pool.address);
 
   const handleBindTokens = async () => {
     if (!token1 || !token2) throw new Error("Must select tokens before binding");
     setIsBinding(true);
     await Promise.all([bind(token1, rawAmount1), bind(token2, rawAmount2)]);
+    refetchPool();
     setIsBinding(false);
   };
 
@@ -75,10 +79,17 @@ export const InitializePool = ({ pool }: { pool: Address }) => {
   // Determine if token allowances are sufficient
   const isSufficientAllowance =
     allowance1 >= rawAmount1 && allowance2 >= rawAmount2 && rawAmount1 > 0n && rawAmount2 > 0n;
-  console.log("isSufficientAllowance", isSufficientAllowance);
+
+  useEffect(() => {
+    if (isSufficientAllowance) {
+      setCurrentStep(3);
+    } else {
+      setCurrentStep(2);
+    }
+  }, [isSufficientAllowance, amountToken1, amountToken2, setCurrentStep]);
 
   return (
-    <div className="flex flex-col justify-center items-center gap-5">
+    <div className="flex flex-col justify-center items-center gap-5 w-full">
       <h5 className="text-2xl font-bold">Initialize Pool</h5>
 
       <div className="text-xl mb-3">Choose tokens and amounts for the pool</div>

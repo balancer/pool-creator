@@ -3,11 +3,22 @@ import { type Address } from "viem";
 import { usePublicClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 
+export type BCowPool = {
+  address: Address;
+  isFinalized: boolean;
+  getNumTokens: bigint;
+  getCurrentTokens: Address[];
+  getSwapFee: bigint;
+  MAX_FEE: bigint;
+};
+
+export type RefetchPool = ReturnType<typeof useReadPool>["refetch"];
+
 export const useReadPool = (address: Address) => {
   const client = usePublicClient();
   const abi = abis.CoW.BCoWPool;
 
-  return useQuery({
+  return useQuery<BCowPool>({
     queryKey: ["BCoWPool", address],
     queryFn: async () => {
       if (!client) throw new Error("Client not found");
@@ -27,7 +38,7 @@ export const useReadPool = (address: Address) => {
           abi,
           address,
           functionName: "getCurrentTokens",
-        }),
+        }) as Promise<Address[]>,
         client.readContract({
           abi,
           address,

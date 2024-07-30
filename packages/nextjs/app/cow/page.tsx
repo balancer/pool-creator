@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreatePool, FinalizePool, InitializePool } from "./_components";
+import { CreatePool, FinalizePool, InitializePool, StepTracker } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { Address as ScaffoldAddress } from "~~/components/scaffold-eth";
 import { useReadPool } from "~~/hooks/cow/";
 import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
 
@@ -13,6 +12,9 @@ const CoW: NextPage = () => {
   const [userPools, setUserPools] = useState<string[]>([]);
 
   const { address } = useAccount();
+  const newestPool = userPools[0];
+
+  const { data: pool, isLoading: isPoolLoading, isError: isPoolError, refetch: refetchPool } = useReadPool(newestPool);
 
   const {
     data: events,
@@ -25,12 +27,6 @@ const CoW: NextPage = () => {
     watch: true,
     filters: { caller: address },
   });
-
-  const newestPool = userPools[0];
-
-  const { data: pool, isLoading: isPoolLoading, isError: isPoolError } = useReadPool(newestPool);
-  console.log("isPoolLoading", isPoolLoading);
-  console.log("isPoolError", isPoolError);
 
   useScaffoldWatchContractEvent({
     contractName: "BCoWFactory",
@@ -45,7 +41,6 @@ const CoW: NextPage = () => {
     },
   });
 
-  // Add user created pools to state
   useEffect(() => {
     if (!isLoadingEvents && events) {
       const pools = events.map(e => e.args.bPool).filter((pool): pool is string => pool !== undefined);
@@ -53,9 +48,8 @@ const CoW: NextPage = () => {
     }
   }, [isLoadingEvents, events]);
 
-  // Manage the steps progress
   useEffect(() => {
-    // If the user has no pools or your most recent pool is finalized
+    // If the user has no pools or their most recent pool is finalized
     if (userPools.length === 0 || pool?.isFinalized) {
       setCurrentStep(1);
     }
@@ -65,34 +59,40 @@ const CoW: NextPage = () => {
     }
     // If the user has a pool with 2 tokens binded, but it has not been finalized
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
-      setCurrentStep(3);
+      if (pool.getSwapFee !== pool.MAX_FEE) {
+        setCurrentStep(4);
+      } else {
+        setCurrentStep(5);
+      }
     }
-  }, [pool, address, events, isLoadingEvents, userPools.length]);
+  }, [pool, address, events, isLoadingEvents, userPools.length, pool?.isFinalized, pool?.getNumTokens]);
 
   return (
-    <div className="flex-grow">
+    <div className="flex-grow bg-base-300">
       <div className="max-w-screen-2xl mx-auto">
-        <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 bg-base-200">
-          <h1 className="text-5xl font-bold my-5">CoW AMMs</h1>
+        <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 gap-7">
+          <h1 className="text-5xl font-bold">CoW AMMs</h1>
 
-          <p className="text-2xl mb-7">Create and initialize two token (50/50) pools with a max swap fee (99.99%)</p>
-
-          <ul className="steps steps-vertical md:steps-horizontal md:w-[700px] mb-10 text-lg">
-            <li className="step step-accent">Create Pool</li>
-            <li className={`step ${currentStep > 1 && "step-accent"}`}>Initialize Pool</li>
-            <li className={`step ${currentStep > 2 && "step-accent"}`}>Finalize Pool</li>
-          </ul>
-
-          <div className="bg-base-300 p-7 rounded-xl w-[555px]">
-            {currentStep === 1 && <CreatePool />}
-            {currentStep === 2 && <InitializePool pool={newestPool} />}
-            {currentStep === 3 && <FinalizePool pool={pool} />}
+          <div className="text-2xl mb-3">
+            Create two token pools with a 50/50 weight distribution and a max swap fee of 99.99%
           </div>
 
-          {newestPool && (
-            <div className="mt-5">
-              <ScaffoldAddress size="xl" address={newestPool} />
-            </div>
+          {isPoolLoading ? (
+            <div>...</div>
+          ) : isPoolError ? (
+            <div>Error fetching pool</div>
+          ) : (
+            <>
+              <div className="bg-base-200 p-7 rounded-xl w-[555px] min-h-[450px] flex flex-grow">
+                {currentStep === 1 && <CreatePool setCurrentStep={setCurrentStep} />}
+                {pool && (currentStep === 2 || currentStep === 3) && (
+                  <InitializePool pool={pool} setCurrentStep={setCurrentStep} refetchPool={refetchPool} />
+                )}
+                {pool && currentStep > 3 && <FinalizePool pool={pool} refetchPool={refetchPool} />}
+              </div>
+
+              <StepTracker currentStep={currentStep} />
+            </>
           )}
         </div>
       </div>
