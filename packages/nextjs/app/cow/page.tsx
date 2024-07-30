@@ -28,9 +28,9 @@ const CoW: NextPage = () => {
 
   const newestPool = userPools[0];
 
-  const { data: pool, isLoading, isError } = useReadPool(newestPool);
-  console.log("isLoading", isLoading);
-  console.log("isError", isError);
+  const { data: pool, isLoading: isPoolLoading, isError: isPoolError } = useReadPool(newestPool);
+  console.log("isPoolLoading", isPoolLoading);
+  console.log("isPoolError", isPoolError);
 
   useScaffoldWatchContractEvent({
     contractName: "BCoWFactory",
@@ -51,7 +51,7 @@ const CoW: NextPage = () => {
       const pools = events.map(e => e.args.bPool).filter((pool): pool is string => pool !== undefined);
       setUserPools(pools);
     }
-  }, [!isLoadingEvents && events]);
+  }, [isLoadingEvents, events]);
 
   // Manage the steps progress
   useEffect(() => {
@@ -67,7 +67,7 @@ const CoW: NextPage = () => {
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
       setCurrentStep(3);
     }
-  }, [pool, address, events, isLoadingEvents]);
+  }, [pool, address, events, isLoadingEvents, userPools.length]);
 
   return (
     <div className="flex-grow">
@@ -77,7 +77,7 @@ const CoW: NextPage = () => {
 
           <p className="text-2xl mb-7">Create and initialize two token (50/50) pools with a max swap fee (99.99%)</p>
 
-          <ul className="steps steps-vertical md:steps-horizontal md:w-[700px] mb-10">
+          <ul className="steps steps-vertical md:steps-horizontal md:w-[700px] mb-10 text-lg">
             <li className="step step-accent">Create Pool</li>
             <li className={`step ${currentStep > 1 && "step-accent"}`}>Initialize Pool</li>
             <li className={`step ${currentStep > 2 && "step-accent"}`}>Finalize Pool</li>

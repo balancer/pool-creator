@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { TransactionButton } from "~~/components/common";
 import { useWritePool } from "~~/hooks/cow";
 
 /**
@@ -8,23 +10,30 @@ import { useWritePool } from "~~/hooks/cow";
  * Allow user to finalize the pool
  */
 export const FinalizePool = ({ pool }: { pool: any }) => {
-  console.log("finalize pool", pool);
+  const [isSettingFee, setIsSettingFee] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   const { setSwapFee, finalize } = useWritePool(pool.address);
 
   const handleSetSwapFee = async () => {
     try {
+      setIsSettingFee(true);
       await setSwapFee(pool.MAX_FEE);
+      setIsSettingFee(false);
     } catch (e) {
       console.error("Error setting swap fee", e);
+      setIsSettingFee(false);
     }
   };
 
   const handleFinalize = async () => {
     try {
+      setIsFinalizing(true);
       await finalize();
+      setIsFinalizing(false);
     } catch (e) {
       console.error("Error finalizing pool", e);
+      setIsFinalizing(false);
     }
   };
 
@@ -37,13 +46,19 @@ export const FinalizePool = ({ pool }: { pool: any }) => {
       <p className="text-xl text-center">Set the swap fee to the maximum and review pool configurations</p>
 
       {!requiredSwapFee ? (
-        <button className="btn btn-accent w-full rounded-xl text-lg mb-7 text-base-300" onClick={handleSetSwapFee}>
-          Set Swap Fee
-        </button>
+        <TransactionButton
+          title="Set Swap Fee"
+          onClick={handleSetSwapFee}
+          isPending={isSettingFee}
+          isDisabled={isSettingFee}
+        />
       ) : (
-        <button className="btn btn-accent w-full rounded-xl text-lg mb-7 text-base-300" onClick={handleFinalize}>
-          Finalize Pool
-        </button>
+        <TransactionButton
+          title="Finalize"
+          onClick={handleFinalize}
+          isPending={isFinalizing}
+          isDisabled={isFinalizing}
+        />
       )}
     </div>
   );

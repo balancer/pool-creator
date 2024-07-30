@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { type Address } from "viem";
 import { parseUnits } from "viem";
-import { TokenField } from "~~/components/common/";
+import { TokenField, TransactionButton } from "~~/components/common/";
 import { useToken, useWritePool } from "~~/hooks/cow";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import tokenList from "~~/utils/balancer/tokenlist.json";
@@ -102,17 +102,19 @@ export const InitializePool = ({ pool }: { pool: Address }) => {
       />
 
       {!isSufficientAllowance ? (
-        <button
-          disabled={isApproveDisabled || isApproving}
+        <TransactionButton
+          title="Approve"
+          isPending={isApproving}
+          isDisabled={isApproveDisabled || isApproving}
           onClick={handleApprovals}
-          className="btn btn-accent text-base-300 text-lg w-full rounded-xl mt-3"
-        >
-          {isApproving ? "..." : "Approve"}
-        </button>
+        />
       ) : (
-        <button onClick={handleBindTokens} className="btn btn-accent text-base-300 text-lg w-full rounded-xl mt-3">
-          {isBinding ? "..." : "Add Liquidity"}
-        </button>
+        <TransactionButton
+          title="Add Liquidity"
+          isPending={isBinding}
+          isDisabled={isBinding}
+          onClick={handleBindTokens}
+        />
       )}
     </div>
   );

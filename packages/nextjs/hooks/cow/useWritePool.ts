@@ -16,8 +16,6 @@ export const useWritePool = (pool: Address) => {
     if (!publicClient) throw new Error("No public client found");
     if (!walletClient) throw new Error("No wallet client found");
 
-    console.log("rawAmount", rawAmount);
-
     const { request: setSwapFee } = await publicClient.simulateContract({
       abi: POOL_ABI,
       address: pool,
