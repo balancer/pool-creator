@@ -3,20 +3,10 @@ import { type Address } from "viem";
 import { usePublicClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 
-export type BCowPool = {
-  address: Address;
-  isFinalized: boolean;
-  getNumTokens: bigint;
-  getCurrentTokens: Address[];
-  getSwapFee: bigint;
-  MAX_FEE: bigint;
-};
-
-export type RefetchPool = ReturnType<typeof useReadPool>["refetch"];
+const abi = abis.CoW.BCoWPool;
 
 export const useReadPool = (address: Address) => {
   const client = usePublicClient();
-  const abi = abis.CoW.BCoWPool;
 
   return useQuery<BCowPool>({
     queryKey: ["BCoWPool", address],
@@ -56,3 +46,14 @@ export const useReadPool = (address: Address) => {
     enabled: !!address,
   });
 };
+
+export type BCowPool = {
+  address: Address;
+  isFinalized: boolean;
+  getNumTokens: bigint;
+  getCurrentTokens: Address[];
+  getSwapFee: bigint;
+  MAX_FEE: bigint;
+};
+
+export type RefetchPool = ReturnType<typeof useReadPool>["refetch"];

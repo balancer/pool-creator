@@ -1,7 +1,7 @@
 import React from "react";
 import { Dispatch, SetStateAction } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { type Token } from "~~/app/cow/_components/InitializePool";
+import { type Token } from "~~/hooks/cow";
 
 type ModalProps = {
   tokenOptions: Token[];

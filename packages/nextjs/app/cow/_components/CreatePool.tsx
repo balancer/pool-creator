@@ -2,6 +2,7 @@
 
 import { Dispatch, SetStateAction, useState } from "react";
 import { TransactionButton } from "~~/components/common";
+// import { useFetchTokenList } from "~~/hooks/cow";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 /**
@@ -10,6 +11,7 @@ import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 export const CreatePool = ({ setCurrentStep }: { setCurrentStep: Dispatch<SetStateAction<number>> }) => {
   const [isCreatingPool, setIsCreatingPool] = useState(false);
   const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
+  // const { data } = useFetchTokenList();
 
   const createPool = async () => {
     try {

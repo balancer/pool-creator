@@ -2,8 +2,8 @@
 
 import { Dispatch, SetStateAction, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { type Token } from "~~/app/cow/_components/InitializePool";
 import { TokenSelectModal } from "~~/components/common";
+import { type Token } from "~~/hooks/cow";
 import { formatToHuman } from "~~/utils/formatToHuman";
 
 export const TokenField = ({

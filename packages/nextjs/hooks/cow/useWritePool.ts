@@ -1,7 +1,7 @@
 import { Address } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { Token } from "~~/app/cow/_components/InitializePool";
 import { abis } from "~~/contracts/abis";
+import { type Token } from "~~/hooks/cow";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
 const POOL_ABI = abis.CoW.BCoWPool;
@@ -48,7 +48,7 @@ export const useWritePool = (pool: Address) => {
       await writeTx(() => walletClient.writeContract(bind), {
         blockConfirmations: 1,
         onBlockConfirmation: () => {
-          console.log("Bound token:", token, "to pool:", pool);
+          console.log("Bound token:", token.symbol, "to pool:", pool);
         },
       });
     } catch (e) {

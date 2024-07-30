@@ -3,18 +3,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { parseUnits } from "viem";
 import { TokenField, TransactionButton } from "~~/components/common/";
-import { useToken, useWritePool } from "~~/hooks/cow";
-import { type BCowPool, RefetchPool } from "~~/hooks/cow/";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import tokenList from "~~/utils/balancer/tokenlist.json";
-
-export type Token = {
-  chainId: number;
-  address: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-};
+import { useReadToken, useWritePool, useWriteToken } from "~~/hooks/cow";
+import { useFetchTokenList } from "~~/hooks/cow";
+import { type BCowPool, RefetchPool, type Token } from "~~/hooks/cow/";
 
 export const InitializePool = ({
   pool,
@@ -35,19 +26,20 @@ export const InitializePool = ({
   const rawAmount1 = parseUnits(amountToken1, token1?.decimals ?? 0);
   const rawAmount2 = parseUnits(amountToken2, token2?.decimals ?? 0);
 
-  const { targetNetwork } = useTargetNetwork();
+  const { data: tokenList } = useFetchTokenList();
   const {
     balance: balance1,
     allowance: allowance1,
     refetchAllowance: refetchAllowance1,
-    approve: approve1,
-  } = useToken(token1?.address, pool.address);
+  } = useReadToken(token1?.address, pool.address);
   const {
     balance: balance2,
     allowance: allowance2,
     refetchAllowance: refetchAllowance2,
-    approve: approve2,
-  } = useToken(token2?.address, pool.address);
+  } = useReadToken(token2?.address, pool.address);
+
+  const { approve: approve1 } = useWriteToken(token1?.address, pool.address);
+  const { approve: approve2 } = useWriteToken(token2?.address, pool.address);
 
   const { bind } = useWritePool(pool.address);
 
@@ -70,10 +62,8 @@ export const InitializePool = ({
     setIsApproving(false);
   };
 
-  // Filter out tokens that are not on the target network
-  const allTokens = tokenList.tokens.filter(t => t.chainId === targetNetwork.id);
   // Filter out tokens that are already selected
-  const selectableTokens = allTokens.filter(token => token !== token1 && token !== token2);
+  const selectableTokens = tokenList?.filter(token => token !== token1 && token !== token2);
   // Must choose tokens and set amounts approve button is enabled
   const isApproveDisabled = rawAmount1 === 0n || token1 === undefined || rawAmount2 === 0n || token2 === undefined;
   // Determine if token allowances are sufficient
@@ -94,23 +84,27 @@ export const InitializePool = ({
 
       <div className="text-xl mb-3">Choose tokens and amounts for the pool</div>
 
-      <TokenField
-        balance={balance1}
-        allowance={allowance1}
-        selectedToken={token1}
-        setToken={setToken1}
-        tokenOptions={selectableTokens}
-        handleAmountChange={e => setAmountToken1(e.target.value)}
-      />
+      {selectableTokens && (
+        <>
+          <TokenField
+            balance={balance1}
+            allowance={allowance1}
+            selectedToken={token1}
+            setToken={setToken1}
+            tokenOptions={selectableTokens}
+            handleAmountChange={e => setAmountToken1(e.target.value)}
+          />
 
-      <TokenField
-        balance={balance2}
-        allowance={allowance2}
-        selectedToken={token2}
-        setToken={setToken2}
-        tokenOptions={selectableTokens}
-        handleAmountChange={e => setAmountToken2(e.target.value)}
-      />
+          <TokenField
+            balance={balance2}
+            allowance={allowance2}
+            selectedToken={token2}
+            setToken={setToken2}
+            tokenOptions={selectableTokens}
+            handleAmountChange={e => setAmountToken2(e.target.value)}
+          />
+        </>
+      )}
 
       {!isSufficientAllowance ? (
         <TransactionButton

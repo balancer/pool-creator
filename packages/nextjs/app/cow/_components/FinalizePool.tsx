@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TransactionButton } from "~~/components/common";
 import { type BCowPool, RefetchPool, useWritePool } from "~~/hooks/cow";
-import { useToken } from "~~/hooks/cow/";
+import { useReadToken } from "~~/hooks/cow/";
 
 export const FinalizePool = ({ pool, refetchPool }: { pool: BCowPool; refetchPool: RefetchPool }) => {
   const [isSettingFee, setIsSettingFee] = useState(false);
@@ -11,8 +11,8 @@ export const FinalizePool = ({ pool, refetchPool }: { pool: BCowPool; refetchPoo
 
   const { setSwapFee, finalize } = useWritePool(pool.address);
 
-  const { name: name1, symbol: symbol1 } = useToken(pool.getCurrentTokens[0]);
-  const { name: name2, symbol: symbol2 } = useToken(pool.getCurrentTokens[1]);
+  const { name: name1, symbol: symbol1 } = useReadToken(pool.getCurrentTokens[0]);
+  const { name: name2, symbol: symbol2 } = useReadToken(pool.getCurrentTokens[1]);
 
   const handleSetSwapFee = async () => {
     try {
