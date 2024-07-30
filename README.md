@@ -1,21 +1,20 @@
-# Buidl A Pool
+# Pool Creator
 
 A frontend tool for creating and initializing various pool types on Balancer
 
 ## CoW AMMs
 
-### Pool Lifecycle
+### Creation Lifecycle
 
 1. Create a pool by calling `newBPool()` at the factory contract
 2. Approve each token to be spent by the pool
-3. Bind each token using 50/50 weight
-   - bind 2 tokens with 1e18 as the denormalized weight for each and that means the pool is 50/50
-4. Set the swap fee with `pool.setSwapFee(fee)`
-5. Initialize the pool to be ready for trading with `finalize` which mints bpt to sender
+3. Bind each token setting the denormalized weight to be 1e18 so that the pool is 50/50
+4. Set the swap fee to be the maximum with `pool.setSwapFee(pool.MAX_FEE)`
+5. Enable normal liquidity operations by calling `pool.finalize` which mints bpt to sender
 
 ### Resources
 
-- [Full Pool Lifecycle Script](https://github.com/balancer/cow-amm/blob/main/script/Script.s.sol#L37)
+- [Pool Creation Script](https://github.com/balancer/cow-amm/blob/main/script/Script.s.sol#L37)
 - [Factory Addresses](https://balancerecosystem.slack.com/archives/C070C8VLSNM/p1722012869691689)
 - [ABIs](https://github.com/balancer/cow-amm-subgraph/tree/main/abis)
 - [Create Pool Tx](https://sepolia.etherscan.io/tx/0x2ae8e9cf4a8e5d9df26140fc265d8c7679386239de3cdaf549be5ab6108b5035)
