@@ -93,7 +93,7 @@ const CoW: NextPage = () => {
                     refetchPool={refetchPool}
                   />
                 )}
-                {pool && currentStep > 3 && <FinalizePool pool={pool} refetchPool={refetchPool} />}
+                {pool && currentStep > 2 && <FinalizePool pool={pool} refetchPool={refetchPool} />}
               </div>
               <StepTracker currentStep={currentStep} />
             </>

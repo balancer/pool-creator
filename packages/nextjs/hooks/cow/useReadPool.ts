@@ -12,8 +12,8 @@ export const useReadPool = (address: Address | undefined) => {
   return useQuery<BCowPool>({
     queryKey: ["BCoWPool", address],
     queryFn: async () => {
-      if (!client) throw new Error("Client not found");
-      if (!address) throw new Error("Address not found");
+      if (!client) throw new Error("Wagmi public client is undefined");
+      if (!address) throw new Error("Pool address is undefined");
 
       const [isFinalized, getNumTokens, getCurrentTokens, getSwapFee, MAX_FEE] = await Promise.all([
         client.readContract({
