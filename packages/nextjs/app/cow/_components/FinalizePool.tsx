@@ -31,6 +31,8 @@ export const FinalizePool = ({ pool, refetchPool }: { pool: BCowPool; refetchPoo
       setIsFinalizing(true);
       await finalize();
       setIsFinalizing(false);
+      localStorage.removeItem("token1");
+      localStorage.removeItem("token2");
       refetchPool();
     } catch (e) {
       console.error("Error finalizing pool", e);
