@@ -2,7 +2,6 @@ import { Address, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { type Token } from "~~/hooks/token";
 
 const POOL_ABI = abis.CoW.BCoWPool;
 const WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
@@ -32,7 +31,7 @@ export const useWritePool = (pool: Address = zeroAddress) => {
     });
   };
 
-  const bind = async (token: Token, rawAmount: bigint) => {
+  const bind = async (token: Address, rawAmount: bigint) => {
     if (!publicClient) throw new Error("No public client found");
     if (!walletClient) throw new Error("No wallet client found");
 
@@ -42,13 +41,13 @@ export const useWritePool = (pool: Address = zeroAddress) => {
         address: pool,
         functionName: "bind",
         account: walletClient.account,
-        args: [token.address, rawAmount, WEIGHT],
+        args: [token, rawAmount, WEIGHT],
       });
 
       await writeTx(() => walletClient.writeContract(bind), {
         blockConfirmations: 1,
         onBlockConfirmation: () => {
-          console.log("Bound token:", token.symbol, "to pool:", pool);
+          console.log("Bound token:", token, "to pool:", pool);
         },
       });
     } catch (e) {

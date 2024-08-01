@@ -17,7 +17,7 @@ export const TokenField = ({
 }: {
   isTokenSelectLocked?: boolean;
   balance: bigint;
-  allowance: bigint;
+  allowance?: bigint;
   tokenOptions?: Token[] | undefined;
   setToken: Dispatch<SetStateAction<Token | undefined>>;
   selectedToken: Token | undefined;
@@ -52,7 +52,7 @@ export const TokenField = ({
             {selectedToken && (
               <div className="ml-1 text-neutral-400 text-sm flex gap-5">
                 <div>Balance: {formatToHuman(balance, selectedToken?.decimals || 0)}</div>
-                <div>Allowance: {formatToHuman(allowance, selectedToken?.decimals || 0)}</div>
+                {allowance ? <div>Allowance: {formatToHuman(allowance, selectedToken?.decimals || 0)}</div> : null}
               </div>
             )}
           </div>
