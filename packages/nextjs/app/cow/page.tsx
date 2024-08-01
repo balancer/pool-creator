@@ -32,44 +32,47 @@ const CoW: NextPage = () => {
           <h1 className="text-4xl font-bold">Create a CoW AMM Pool</h1>
 
           <div className="bg-base-200 p-7 rounded-xl w-[555px] flex flex-grow">
-            <div className="flex flex-col items-center gap-5 w-full">
+            <div className="flex flex-col items-center gap-4 w-full">
               <div>
                 <h5 className="text-2xl font-bold">Configure your pool</h5>
               </div>
 
-              <div className="w-full flex flex-col gap-3">
-                <div className="text-lg ml-2">Select pool tokens:</div>
-                <TokenField
-                  balance={balance1}
-                  selectedToken={token1}
-                  setToken={setToken1}
-                  tokenOptions={selectableTokens}
-                  handleAmountChange={e => setAmountToken1(e.target.value)}
-                />
-                <TokenField
-                  balance={balance2}
-                  selectedToken={token2}
-                  setToken={setToken2}
-                  tokenOptions={selectableTokens}
-                  handleAmountChange={e => setAmountToken2(e.target.value)}
-                />
-              </div>
               <div className="w-full">
-                <div className="text-lg ml-2">Pool name:</div>
+                <div className="ml-1 mb-1">Select pool tokens:</div>
+                <div className="w-full flex flex-col gap-3">
+                  <TokenField
+                    balance={balance1}
+                    selectedToken={token1}
+                    setToken={setToken1}
+                    tokenOptions={selectableTokens}
+                    handleAmountChange={e => setAmountToken1(e.target.value)}
+                  />
+                  <TokenField
+                    balance={balance2}
+                    selectedToken={token2}
+                    setToken={setToken2}
+                    tokenOptions={selectableTokens}
+                    handleAmountChange={e => setAmountToken2(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full flex flex-col gap-1">
+                <label className="ml-1">Pool name:</label>
                 <input
                   type="text"
                   placeholder="Enter pool name"
                   onChange={e => setPoolName(e.target.value)}
-                  className="w-full input input-bordered rounded-xl bg-base-200 p-5 h-16"
+                  className="w-full input input-bordered rounded-xl bg-base-200 px-5 h-[55px] text-lg"
                 />
               </div>
-              <div className="w-full">
-                <div className="text-lg ml-2">Pool symbol:</div>
+              <div className="w-full flex flex-col gap-1">
+                <label className="ml-1">Pool symbol:</label>
                 <input
                   type="text"
                   placeholder="Enter pool symbol"
                   onChange={e => setPoolSymbol(e.target.value)}
-                  className="w-full input input-bordered rounded-xl bg-base-200 p-5 h-16"
+                  className="w-full input input-bordered rounded-xl bg-base-200 p-3 h-[55px] text-lg"
                 />
               </div>
             </div>

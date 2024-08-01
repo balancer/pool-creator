@@ -13,9 +13,7 @@ export const TokenField = ({
   balance,
   allowance,
   handleAmountChange,
-  isTokenSelectLocked,
 }: {
-  isTokenSelectLocked?: boolean;
   balance: bigint;
   allowance?: bigint;
   tokenOptions?: Token[] | undefined;
@@ -33,22 +31,17 @@ export const TokenField = ({
           onChange={handleAmountChange}
           min="0"
           placeholder="0.0"
-          className={`text-right text-2xl w-full input input-bordered rounded-xl bg-base-200 p-5 h-24`}
+          className={`text-right text-2xl w-full input input-bordered rounded-xl bg-base-200 p-5 h-[74px]`}
         />
         <div className="absolute top-0 left-0 ">
-          <div className="p-3">
-            {isTokenSelectLocked ? (
-              <button className="p-3 font-bold bg-base-100 rounded-lg text-lg mb-1 hover:cursor-default min-w-24">
-                {selectedToken && selectedToken.symbol}
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="p-3 font-bold bg-base-100 rounded-lg flex justify-between items-center gap-3 text-lg mb-1"
-              >
-                {selectedToken ? selectedToken.symbol : "Select Token"} <ChevronDownIcon className="w-4 h-4 mt-0.5" />
-              </button>
-            )}
+          <div className="p-2.5">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="py-1.5 px-2 font-bold bg-base-100 rounded-lg flex justify-between items-center gap-3 mb-[2.5px]"
+            >
+              {selectedToken ? selectedToken.symbol : "Select Token"} <ChevronDownIcon className="w-4 h-4 mt-0.5" />
+            </button>
+
             {selectedToken && (
               <div className="ml-1 text-neutral-400 text-sm flex gap-5">
                 <div>Balance: {formatToHuman(balance, selectedToken?.decimals || 0)}</div>
