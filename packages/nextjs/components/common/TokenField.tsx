@@ -3,7 +3,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { TokenSelectModal } from "~~/components/common";
-import { type Token } from "~~/hooks/cow";
+import { type Token } from "~~/hooks/token";
 import { formatToHuman } from "~~/utils/formatToHuman";
 
 export const TokenField = ({
@@ -16,7 +16,7 @@ export const TokenField = ({
 }: {
   balance: bigint;
   allowance: bigint;
-  tokenOptions: Token[];
+  tokenOptions: Token[] | undefined;
   setToken: Dispatch<SetStateAction<Token | undefined>>;
   selectedToken: Token | undefined;
   handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -50,7 +50,7 @@ export const TokenField = ({
           </div>
         </div>
       </div>
-      {isModalOpen && (
+      {isModalOpen && tokenOptions && (
         <TokenSelectModal tokenOptions={tokenOptions} setToken={setToken} setIsModalOpen={setIsModalOpen} />
       )}
     </>

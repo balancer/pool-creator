@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TransactionButton } from "~~/components/common";
 import { type BCowPool, RefetchPool, useWritePool } from "~~/hooks/cow";
-import { useReadToken } from "~~/hooks/cow/";
+import { useReadToken } from "~~/hooks/token/";
 
 export const FinalizePool = ({ pool, refetchPool }: { pool: BCowPool; refetchPool: RefetchPool }) => {
   const [isSettingFee, setIsSettingFee] = useState(false);

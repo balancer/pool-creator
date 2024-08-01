@@ -1,37 +1,31 @@
+import { type Token } from "./types";
 import { useQuery } from "@tanstack/react-query";
 import { sepolia } from "viem/chains";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { chainIdToName } from "~~/utils/constants";
+import { useApiConfig } from "~~/hooks/balancer";
 
-export type Token = {
-  chainId: number;
-  address: string;
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoURI: string;
-};
-
+/**
+ * Fetch list of tokens to display in the token selector modal
+ */
 export const useFetchTokenList = () => {
-  const { targetNetwork } = useTargetNetwork();
+  const { url, chainName } = useApiConfig();
 
-  const chainName = chainIdToName[targetNetwork.id];
-
-  const query = `{
-                  tokenGetTokens(chains:${chainName}) {
-                    chainId
-                    address
-                    name
-                    symbol
-                    decimals
-                    logoURI
-                  }
-                }`;
+  const query = `
+  {
+    tokenGetTokens(chains:${chainName}) {
+      chainId
+      address
+      name
+      symbol
+      decimals
+      logoURI
+    }
+  }
+  `;
 
   return useQuery<Token[]>({
-    queryKey: ["fetchTokenList", targetNetwork.id],
+    queryKey: ["fetchTokenList", chainName],
     queryFn: async () => {
-      const response = await fetch("https://api-v3.balancer.fi/", {
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),
@@ -44,7 +38,7 @@ export const useFetchTokenList = () => {
       }
 
       // Hardcoded token list for sepolia testing
-      if (targetNetwork.id === sepolia.id) {
+      if (chainName === "SEPOLIA") {
         return SEPOLIA_FAUCET_TOKENS;
       } else {
         return json.data.tokenGetTokens;

@@ -1,33 +1,36 @@
+import { type ExistingPool } from "./types";
 import { useQuery } from "@tanstack/react-query";
-
-// import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-// import { chainIdToName } from "~~/utils/constants";
+import { useApiConfig } from "~~/hooks/balancer";
 
 /**
  * Fetch CoW AMMs to see if user is trying to create a duplicate pool
- * i.e. same two tokens, same weight, and same swap fee
+ * with same two tokens, weights, and swap fees
  */
 export const useFetchExistingPools = () => {
-  //   const { targetNetwork } = useTargetNetwork();
-  //   const chainName = chainIdToName[targetNetwork.id];
+  const { url, chainName } = useApiConfig();
 
   const query = `
-                {
-                    poolGetPools (where: {chainIn:[SEPOLIA,MAINNET,GNOSIS], poolTypeIn:COW_AMM}) {
-                        chain
-                        address
-                        type
-                        allTokens {
-                            address
-                        }
-                    }
-                }
-                `;
+  {
+    poolGetPools (where: {chainIn:[${chainName}], poolTypeIn:COW_AMM, tagNotIn: ["BLACK_LISTED"]}) {
+        chain
+        id
+        address
+        type
+        dynamicData {
+          swapFee
+        }
+        allTokens {
+            address
+            weight
+        }
+    }
+  }
+  `;
 
-  return useQuery({
-    queryKey: ["fetchExistingPools"],
+  return useQuery<ExistingPool[]>({
+    queryKey: ["fetchExistingPools", chainName],
     queryFn: async () => {
-      const response = await fetch("https://api-v3.balancer.fi/", {
+      const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query }),

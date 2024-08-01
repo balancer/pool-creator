@@ -3,11 +3,11 @@ import { Address, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
-type UseReadToken = {
+type UseWriteToken = {
   approve: (amount: bigint) => Promise<void>;
 };
 
-export const useWriteToken = (token: Address = zeroAddress, spender: Address): UseReadToken => {
+export const useWriteToken = (token: Address = zeroAddress, spender: Address = zeroAddress): UseWriteToken => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications

@@ -1,3 +1,4 @@
+import { type BCowPool } from "./types";
 import { useQuery } from "@tanstack/react-query";
 import { type Address } from "viem";
 import { usePublicClient } from "wagmi";
@@ -45,15 +46,6 @@ export const useReadPool = (address: Address) => {
     },
     enabled: !!address,
   });
-};
-
-export type BCowPool = {
-  address: Address;
-  isFinalized: boolean;
-  getNumTokens: bigint;
-  getCurrentTokens: Address[];
-  getSwapFee: bigint;
-  MAX_FEE: bigint;
 };
 
 export type RefetchPool = ReturnType<typeof useReadPool>["refetch"];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreatePool, FinalizePool, InitializePool, StepTracker } from "./_components";
+import { FinalizePool, InitializePool, StepTracker } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { useReadPool } from "~~/hooks/cow/";
@@ -60,9 +60,9 @@ const CoW: NextPage = () => {
     // If the user has a pool with 2 tokens binded, but it has not been finalized
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
       if (pool.getSwapFee !== pool.MAX_FEE) {
-        setCurrentStep(4);
+        setCurrentStep(3);
       } else {
-        setCurrentStep(5);
+        setCurrentStep(4);
       }
     }
   }, [pool, address, events, isLoadingEvents, userPools.length, pool?.isFinalized, pool?.getNumTokens]);
@@ -84,8 +84,7 @@ const CoW: NextPage = () => {
           ) : (
             <>
               <div className="bg-base-200 p-7 rounded-xl w-[555px] min-h-[450px] flex flex-grow">
-                {currentStep === 1 && <CreatePool setCurrentStep={setCurrentStep} />}
-                {pool && (currentStep === 2 || currentStep === 3) && (
+                {currentStep < 4 && (
                   <InitializePool pool={pool} setCurrentStep={setCurrentStep} refetchPool={refetchPool} />
                 )}
                 {pool && currentStep > 3 && <FinalizePool pool={pool} refetchPool={refetchPool} />}

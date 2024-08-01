@@ -1,13 +1,13 @@
-import { Address } from "viem";
+import { Address, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
-import { type Token } from "~~/hooks/cow";
 import { useTransactor } from "~~/hooks/scaffold-eth";
+import { type Token } from "~~/hooks/token";
 
 const POOL_ABI = abis.CoW.BCoWPool;
 const WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
 
-export const useWritePool = (pool: Address) => {
+export const useWritePool = (pool: Address = zeroAddress) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
