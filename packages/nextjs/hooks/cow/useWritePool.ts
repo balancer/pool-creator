@@ -1,19 +1,40 @@
-import { Address, zeroAddress } from "viem";
+import { Address, parseEventLogs } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
+import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const POOL_ABI = abis.CoW.BCoWPool;
 const WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
 
-export const useWritePool = (pool: Address = zeroAddress) => {
+// TODO: refactor to using tanstack query
+export const useWritePool = (pool: Address | undefined) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
+  const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
+
+  const createPool = async (): Promise<Address> => {
+    if (!publicClient) throw new Error("No public client");
+    const hash = await bCoWFactory({
+      functionName: "newBPool",
+    });
+    if (!hash) throw new Error("No pool creation transaction hash");
+    const txReceipt = await publicClient.getTransactionReceipt({ hash });
+    const logs = parseEventLogs({
+      abi: abis.CoW.BCoWFactory,
+      logs: txReceipt.logs,
+    });
+    const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
+    console.log("New pool address from txReceipt logs:", newPool);
+
+    return newPool;
+  };
 
   const setSwapFee = async (rawAmount: bigint) => {
-    if (!publicClient) throw new Error("No public client found");
-    if (!walletClient) throw new Error("No wallet client found");
+    if (!pool) throw new Error("Cannot set swap fee without pool address");
+    if (!publicClient) throw new Error("Cannot set swap fee public client");
+    if (!walletClient) throw new Error("Cannot set swap fee wallet client");
 
     const { request: setSwapFee } = await publicClient.simulateContract({
       abi: POOL_ABI,
@@ -32,30 +53,28 @@ export const useWritePool = (pool: Address = zeroAddress) => {
   };
 
   const bind = async (token: Address, rawAmount: bigint) => {
+    if (!pool) throw new Error("Cannot bind token without pool address");
     if (!publicClient) throw new Error("No public client found");
     if (!walletClient) throw new Error("No wallet client found");
 
-    try {
-      const { request: bind } = await publicClient.simulateContract({
-        abi: POOL_ABI,
-        address: pool,
-        functionName: "bind",
-        account: walletClient.account,
-        args: [token, rawAmount, WEIGHT],
-      });
+    const { request: bind } = await publicClient.simulateContract({
+      abi: POOL_ABI,
+      address: pool,
+      functionName: "bind",
+      account: walletClient.account,
+      args: [token, rawAmount, WEIGHT],
+    });
 
-      await writeTx(() => walletClient.writeContract(bind), {
-        blockConfirmations: 1,
-        onBlockConfirmation: () => {
-          console.log("Bound token:", token, "to pool:", pool);
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    await writeTx(() => walletClient.writeContract(bind), {
+      blockConfirmations: 1,
+      onBlockConfirmation: () => {
+        console.log("Bound token:", token, "to pool:", pool);
+      },
+    });
   };
 
   const finalize = async () => {
+    if (!pool) throw new Error("Cannot finalize without pool address");
     if (!publicClient) throw new Error("No public client found!");
     if (!walletClient) throw new Error("No wallet client found!");
 
@@ -74,5 +93,5 @@ export const useWritePool = (pool: Address = zeroAddress) => {
     });
   };
 
-  return { setSwapFee, bind, finalize };
+  return { createPool, bind, setSwapFee, finalize };
 };

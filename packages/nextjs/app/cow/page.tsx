@@ -72,7 +72,7 @@ const CoW: NextPage = () => {
                   type="text"
                   placeholder="Enter pool symbol"
                   onChange={e => setPoolSymbol(e.target.value)}
-                  className="w-full input input-bordered rounded-xl bg-base-200 p-3 h-[55px] text-lg"
+                  className="w-full input input-bordered rounded-xl bg-base-200 px-5 h-[55px] text-lg"
                 />
               </div>
             </div>

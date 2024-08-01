@@ -1,17 +1,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { StepsDisplay } from "./StepsDisplay";
-import { Address, parseEventLogs } from "viem";
+import { Address } from "viem";
 import { useAccount } from "wagmi";
-import { usePublicClient } from "wagmi";
 import { TransactionButton } from "~~/components/common/";
-import { abis } from "~~/contracts/abis";
 import { useFetchExistingPools, useReadPool, useWritePool } from "~~/hooks/cow/";
-import {
-  useScaffoldEventHistory,
-  useScaffoldWatchContractEvent,
-  useScaffoldWriteContract,
-} from "~~/hooks/scaffold-eth";
+import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
 import { useReadToken, useWriteToken } from "~~/hooks/token";
 
 type TokenInput = {
@@ -19,66 +13,46 @@ type TokenInput = {
   address: Address | undefined;
 };
 
-export const CreatePool = ({
-  name,
-  symbol,
-  token1,
-  token2,
-}: {
+interface CreatePoolProps {
   name: string;
   symbol: string;
   token1: TokenInput;
   token2: TokenInput;
-}) => {
+}
+
+export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<string>();
 
+  // TODO: refactor to using tanstack query
   const [isCreatingPool, setIsCreatingPool] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isBinding, setIsBinding] = useState(false);
-  const [isSettingFee, setIsSettingFee] = useState(false);
+  const [isSettingFee, setIsSettingSwapFee] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   const { address } = useAccount();
-  const publicClient = usePublicClient();
 
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
   const { data: existingPools } = useFetchExistingPools();
 
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(token1?.address, pool?.address);
   const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(token2?.address, pool?.address);
-  const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
   const { approve: approve1 } = useWriteToken(token1?.address, pool?.address);
   const { approve: approve2 } = useWriteToken(token2?.address, pool?.address);
-  const { bind, setSwapFee, finalize } = useWritePool(pool?.address);
+  const { createPool, bind, setSwapFee, finalize } = useWritePool(pool?.address);
 
-  const createPool = async () => {
+  const handleCreatePool = async () => {
     console.log("name", name);
     console.log("symbol", symbol);
-    try {
-      setIsCreatingPool(true);
-      const hash = await bCoWFactory({
-        functionName: "newBPool",
-      });
-      setCurrentStep(2);
-      if (publicClient && hash) {
-        const txReceipt = await publicClient.getTransactionReceipt({ hash });
-        const logs = parseEventLogs({
-          abi: abis.CoW.BCoWFactory,
-          logs: txReceipt.logs,
-        });
-        const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
-        console.log("New pool address from txReceipt logs:", newPool);
-        setUserPoolAddress(newPool);
-      }
-      setIsCreatingPool(false);
-    } catch (e) {
-      console.error("Error creating pool", e);
-      setIsCreatingPool(false);
-    }
+    setIsCreatingPool(true);
+    const newPool = await createPool();
+    setUserPoolAddress(newPool);
+    setCurrentStep(2);
+    setIsCreatingPool(false);
   };
 
-  const handleApprovals = async () => {
+  const handleApproveTokens = async () => {
     setIsApproving(true);
     const txs = [];
     if (token1.rawAmount > allowance1) txs.push(approve1(token1.rawAmount));
@@ -99,27 +73,17 @@ export const CreatePool = ({
 
   const handleSetSwapFee = async () => {
     if (!pool) throw new Error("Cannot set swap fee without a pool");
-    try {
-      setIsSettingFee(true);
-      await setSwapFee(pool.MAX_FEE);
-      setIsSettingFee(false);
-      refetchPool();
-    } catch (e) {
-      console.error("Error setting swap fee", e);
-      setIsSettingFee(false);
-    }
+    setIsSettingSwapFee(true);
+    await setSwapFee(pool.MAX_FEE);
+    refetchPool();
+    setIsSettingSwapFee(false);
   };
 
   const handleFinalize = async () => {
-    try {
-      setIsFinalizing(true);
-      await finalize();
-      setIsFinalizing(false);
-      refetchPool();
-    } catch (e) {
-      console.error("Error finalizing pool", e);
-      setIsFinalizing(false);
-    }
+    setIsFinalizing(true);
+    await finalize();
+    refetchPool();
+    setIsFinalizing(false);
   };
 
   const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
@@ -157,19 +121,35 @@ export const CreatePool = ({
     if (userPoolAddress || pool?.isFinalized) {
       setCurrentStep(1);
     }
-    // If the user has created a pool, but it is not finalized and the tokens are not binded
+    // If the user has created a pool, but not finalized and tokens not binded
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
-      setCurrentStep(2);
+      if (allowance1 < token1.rawAmount || allowance2 < token2.rawAmount) {
+        setCurrentStep(2);
+      } else {
+        setCurrentStep(3);
+      }
     }
     // If the user has a pool with 2 tokens binded, but it has not been finalized
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
       if (pool.getSwapFee !== pool.MAX_FEE) {
-        setCurrentStep(3);
-      } else {
         setCurrentStep(4);
+      } else {
+        setCurrentStep(5);
       }
     }
-  }, [pool, address, events, isLoadingEvents, userPoolAddress, pool?.isFinalized, pool?.getNumTokens]);
+  }, [
+    pool,
+    userPoolAddress,
+    address,
+    events,
+    isLoadingEvents,
+    pool?.isFinalized,
+    pool?.getNumTokens,
+    allowance1,
+    allowance2,
+    token1.rawAmount,
+    token2.rawAmount,
+  ]);
 
   // Must choose tokens and set amounts approve button is enabled
   const isApproveDisabled =
@@ -213,14 +193,14 @@ export const CreatePool = ({
             title="Create Pool"
             isPending={isCreatingPool}
             isDisabled={isCreatingPool || !token1.address || !token2.address || existingPool !== undefined}
-            onClick={createPool}
+            onClick={handleCreatePool}
           />
         ) : !isSufficientAllowance ? (
           <TransactionButton
             title="Approve"
             isPending={isApproving}
             isDisabled={isApproveDisabled || isApproving}
-            onClick={handleApprovals}
+            onClick={handleApproveTokens}
           />
         ) : (pool?.getNumTokens || 0) < 2 ? (
           <TransactionButton

@@ -12,7 +12,7 @@ type UseReadToken = {
   decimals: number | undefined;
 };
 
-export const useReadToken = (token: Address | undefined, spender: Address = zeroAddress): UseReadToken => {
+export const useReadToken = (token: Address | undefined, spender?: Address): UseReadToken => {
   const { data: walletClient } = useWalletClient();
   const connectedAddress = walletClient?.account.address || zeroAddress;
 
@@ -45,7 +45,7 @@ export const useReadToken = (token: Address | undefined, spender: Address = zero
     address: token,
     abi: erc20Abi,
     functionName: "allowance",
-    args: [connectedAddress, spender],
+    args: [connectedAddress, spender ?? zeroAddress],
   });
 
   return {
