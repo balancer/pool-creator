@@ -9,12 +9,11 @@ import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks
 
 const CoW: NextPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [userPools, setUserPools] = useState<string[]>([]);
+  const [userPool, setUserPool] = useState<string>();
 
   const { address } = useAccount();
-  const newestPool = userPools[0];
 
-  const { data: pool, isLoading: isPoolLoading, isError: isPoolError, refetch: refetchPool } = useReadPool(newestPool);
+  const { data: pool, isLoading: isPoolLoading, isError: isPoolError, refetch: refetchPool } = useReadPool(userPool);
 
   const {
     data: events,
@@ -35,7 +34,8 @@ const CoW: NextPage = () => {
       logs.forEach(log => {
         const { bPool, caller } = log.args;
         if (bPool && caller == address) {
-          setUserPools(pools => [...pools, bPool]);
+          console.log("useScaffoldWatchContractEvent: LOG_NEW_POOL", bPool, caller);
+          setUserPool(bPool);
         }
       });
     },
@@ -44,13 +44,14 @@ const CoW: NextPage = () => {
   useEffect(() => {
     if (!isLoadingEvents && events) {
       const pools = events.map(e => e.args.bPool).filter((pool): pool is string => pool !== undefined);
-      setUserPools(pools);
+      const mostRecentlyCreated = pools[0];
+      setUserPool(mostRecentlyCreated);
     }
   }, [isLoadingEvents, events]);
 
   useEffect(() => {
     // If the user has no pools or their most recent pool is finalized
-    if (userPools.length === 0 || pool?.isFinalized) {
+    if (userPool || pool?.isFinalized) {
       setCurrentStep(1);
     }
     // If the user has created a pool, but it is not finalized and the tokens are not binded
@@ -65,7 +66,7 @@ const CoW: NextPage = () => {
         setCurrentStep(4);
       }
     }
-  }, [pool, address, events, isLoadingEvents, userPools.length, pool?.isFinalized, pool?.getNumTokens]);
+  }, [pool, address, events, isLoadingEvents, userPool, pool?.isFinalized, pool?.getNumTokens]);
 
   return (
     <div className="flex-grow bg-base-300">
@@ -85,11 +86,15 @@ const CoW: NextPage = () => {
             <>
               <div className="bg-base-200 p-7 rounded-xl w-[555px] min-h-[450px] flex flex-grow">
                 {currentStep < 4 && (
-                  <InitializePool pool={pool} setCurrentStep={setCurrentStep} refetchPool={refetchPool} />
+                  <InitializePool
+                    pool={pool}
+                    setUserPool={setUserPool}
+                    setCurrentStep={setCurrentStep}
+                    refetchPool={refetchPool}
+                  />
                 )}
                 {pool && currentStep > 3 && <FinalizePool pool={pool} refetchPool={refetchPool} />}
               </div>
-
               <StepTracker currentStep={currentStep} />
             </>
           )}

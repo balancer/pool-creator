@@ -2,8 +2,10 @@
 
 import { Dispatch, SetStateAction, useState } from "react";
 import Link from "next/link";
-import { parseUnits } from "viem";
+import { parseEventLogs, parseUnits } from "viem";
+import { usePublicClient } from "wagmi";
 import { TokenField, TransactionButton } from "~~/components/common/";
+import { abis } from "~~/contracts/abis";
 import { type BCowPool, RefetchPool, useFetchExistingPools, useWritePool } from "~~/hooks/cow/";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { type Token, useFetchTokenList, useReadToken, useWriteToken } from "~~/hooks/token";
@@ -11,10 +13,12 @@ import { type Token, useFetchTokenList, useReadToken, useWriteToken } from "~~/h
 export const InitializePool = ({
   pool,
   setCurrentStep,
+  setUserPool,
   refetchPool,
 }: {
   pool: BCowPool | undefined;
   setCurrentStep: Dispatch<SetStateAction<number>>;
+  setUserPool: Dispatch<SetStateAction<string | undefined>>;
   refetchPool: RefetchPool;
 }) => {
   const [token1, setToken1] = useState<Token>();
@@ -44,8 +48,6 @@ export const InitializePool = ({
     return hasOnlyTwoTokens && has5050Weight && hasMaxSwapFee && includesToken1 && includesToken2;
   });
 
-  console.log("existingPool", existingPool);
-
   const {
     balance: balance1,
     allowance: allowance1,
@@ -56,6 +58,7 @@ export const InitializePool = ({
     allowance: allowance2,
     refetchAllowance: refetchAllowance2,
   } = useReadToken(token2?.address, pool?.address);
+  const publicClient = usePublicClient();
 
   const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
   const { approve: approve1 } = useWriteToken(token1?.address, pool?.address);
@@ -65,10 +68,19 @@ export const InitializePool = ({
   const createPool = async () => {
     try {
       setIsCreatingPool(true);
-      await bCoWFactory({
+      const hash = await bCoWFactory({
         functionName: "newBPool",
       });
       setCurrentStep(2);
+      if (publicClient && hash) {
+        const txReceipt = await publicClient.getTransactionReceipt({ hash });
+        const logs = parseEventLogs({
+          abi: abis.CoW.BCoWFactory,
+          logs: txReceipt.logs,
+        });
+        const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
+        setUserPool(newPool);
+      }
       setIsCreatingPool(false);
     } catch (e) {
       console.error("Error creating pool", e);

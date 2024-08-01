@@ -6,13 +6,14 @@ import { abis } from "~~/contracts/abis";
 
 const abi = abis.CoW.BCoWPool;
 
-export const useReadPool = (address: Address) => {
+export const useReadPool = (address: Address | undefined) => {
   const client = usePublicClient();
 
   return useQuery<BCowPool>({
     queryKey: ["BCoWPool", address],
     queryFn: async () => {
       if (!client) throw new Error("Client not found");
+      if (!address) throw new Error("Address not found");
 
       const [isFinalized, getNumTokens, getCurrentTokens, getSwapFee, MAX_FEE] = await Promise.all([
         client.readContract({
