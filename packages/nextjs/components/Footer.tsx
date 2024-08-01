@@ -60,7 +60,7 @@ export const Footer = () => {
             <span>·</span>
             <div className="text-center">
               <a
-                href="https://github.com/MattPereira/scaffold-cow"
+                href="https://github.com/balancer/pool-creator"
                 target="_blank"
                 rel="noreferrer"
                 className="link no-underline hover:underline"

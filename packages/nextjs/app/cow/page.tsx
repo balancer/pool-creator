@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FinalizePool, InitializePool, StepTracker } from "./_components";
+import { CreatePool, FinalizePool, InitializePool, StepTracker } from "./_components";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { useReadPool } from "~~/hooks/cow/";
@@ -34,7 +34,7 @@ const CoW: NextPage = () => {
       logs.forEach(log => {
         const { bPool, caller } = log.args;
         if (bPool && caller == address) {
-          console.log("useScaffoldWatchContractEvent: LOG_NEW_POOL", bPool, caller);
+          console.log("useScaffoldWatchContractEvent: LOG_NEW_POOL", { bPool, caller });
           setUserPool(bPool);
         }
       });
@@ -85,7 +85,8 @@ const CoW: NextPage = () => {
           ) : (
             <>
               <div className="bg-base-200 p-7 rounded-xl w-[555px] min-h-[450px] flex flex-grow">
-                {currentStep < 4 && (
+                {currentStep === 1 && <CreatePool setUserPool={setUserPool} setCurrentStep={setCurrentStep} />}
+                {currentStep === 2 && (
                   <InitializePool
                     pool={pool}
                     setUserPool={setUserPool}

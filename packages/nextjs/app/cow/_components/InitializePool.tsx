@@ -1,19 +1,13 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
-import Link from "next/link";
-import { parseEventLogs, parseUnits } from "viem";
-import { usePublicClient } from "wagmi";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { parseUnits } from "viem";
 import { TokenField, TransactionButton } from "~~/components/common/";
-import { abis } from "~~/contracts/abis";
-import { type BCowPool, RefetchPool, useFetchExistingPools, useWritePool } from "~~/hooks/cow/";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { type BCowPool, RefetchPool, useWritePool } from "~~/hooks/cow/";
 import { type Token, useFetchTokenList, useReadToken, useWriteToken } from "~~/hooks/token";
 
 export const InitializePool = ({
   pool,
-  setCurrentStep,
-  setUserPool,
   refetchPool,
 }: {
   pool: BCowPool | undefined;
@@ -26,7 +20,6 @@ export const InitializePool = ({
   const [amountToken1, setAmountToken1] = useState("");
   const [amountToken2, setAmountToken2] = useState("");
 
-  const [isCreatingPool, setIsCreatingPool] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [isBinding, setIsBinding] = useState(false);
 
@@ -34,20 +27,6 @@ export const InitializePool = ({
   const rawAmount2 = parseUnits(amountToken2, token2?.decimals ?? 0);
 
   const { data: tokenList } = useFetchTokenList();
-  const { data: existingPools } = useFetchExistingPools();
-
-  const existingPool = existingPools?.find(pool => {
-    const poolTokenAddresses = pool.allTokens.map(token => token.address);
-    const hasOnlyTwoTokens = poolTokenAddresses.length === 2;
-    const selectedToken1 = token1?.address.toLowerCase() ?? "";
-    const selectedToken2 = token2?.address.toLowerCase() ?? "";
-    const includesToken1 = poolTokenAddresses.includes(selectedToken1);
-    const includesToken2 = poolTokenAddresses.includes(selectedToken2);
-    const has5050Weight = pool.allTokens.every(token => token.weight === "0.5");
-    const hasMaxSwapFee = pool.dynamicData.swapFee === "0.999999";
-    return hasOnlyTwoTokens && has5050Weight && hasMaxSwapFee && includesToken1 && includesToken2;
-  });
-
   const {
     balance: balance1,
     allowance: allowance1,
@@ -58,35 +37,10 @@ export const InitializePool = ({
     allowance: allowance2,
     refetchAllowance: refetchAllowance2,
   } = useReadToken(token2?.address, pool?.address);
-  const publicClient = usePublicClient();
 
-  const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
   const { approve: approve1 } = useWriteToken(token1?.address, pool?.address);
   const { approve: approve2 } = useWriteToken(token2?.address, pool?.address);
   const { bind } = useWritePool(pool?.address);
-
-  const createPool = async () => {
-    try {
-      setIsCreatingPool(true);
-      const hash = await bCoWFactory({
-        functionName: "newBPool",
-      });
-      setCurrentStep(2);
-      if (publicClient && hash) {
-        const txReceipt = await publicClient.getTransactionReceipt({ hash });
-        const logs = parseEventLogs({
-          abi: abis.CoW.BCoWFactory,
-          logs: txReceipt.logs,
-        });
-        const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
-        setUserPool(newPool);
-      }
-      setIsCreatingPool(false);
-    } catch (e) {
-      console.error("Error creating pool", e);
-      setIsCreatingPool(false);
-    }
-  };
 
   const handleApprovals = async () => {
     setIsApproving(true);
@@ -107,6 +61,19 @@ export const InitializePool = ({
     setIsBinding(false);
   };
 
+  // Load tokens from local storage on mount
+  useEffect(() => {
+    const savedToken1 = localStorage.getItem("token1");
+    const savedToken2 = localStorage.getItem("token2");
+
+    if (savedToken1) {
+      setToken1(JSON.parse(savedToken1));
+    }
+    if (savedToken2) {
+      setToken2(JSON.parse(savedToken2));
+    }
+  }, []);
+
   // Filter out tokens that are already selected
   const selectableTokens = tokenList?.filter(token => token !== token1 && token !== token2);
   // Must choose tokens and set amounts approve button is enabled
@@ -118,24 +85,12 @@ export const InitializePool = ({
   return (
     <div className="flex flex-col justify-center items-center gap-5 w-full">
       <h5 className="text-2xl font-bold">Create a Pool</h5>
-      {existingPool ? (
-        <div className="text-xl text-red-400">
-          A CoW AMM with selected tokens{" "}
-          <Link
-            className="link"
-            rel="noopener noreferrer"
-            target="_blank"
-            href={`https://balancer.fi/pools/${existingPool.chain.toLowerCase()}/cow/${existingPool.address}`}
-          >
-            already exists!
-          </Link>
-        </div>
-      ) : (
-        <div className="text-xl mb-3">Choose tokens and amounts for the pool</div>
-      )}
+
+      <div className="text-xl mb-3">Set amounts, approve pool, and send tokens</div>
 
       <>
         <TokenField
+          isTokenSelectLocked={true}
           balance={balance1}
           allowance={allowance1}
           selectedToken={token1}
@@ -145,6 +100,7 @@ export const InitializePool = ({
         />
 
         <TokenField
+          isTokenSelectLocked={true}
           balance={balance2}
           allowance={allowance2}
           selectedToken={token2}
@@ -154,14 +110,7 @@ export const InitializePool = ({
         />
       </>
 
-      {!pool || pool.isFinalized || existingPool ? (
-        <TransactionButton
-          title="Create Pool"
-          isPending={isCreatingPool}
-          isDisabled={isCreatingPool || !token1 || !token2 || existingPool !== undefined}
-          onClick={createPool}
-        />
-      ) : !isSufficientAllowance ? (
+      {!isSufficientAllowance ? (
         <TransactionButton
           title="Approve"
           isPending={isApproving}
