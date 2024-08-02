@@ -19,6 +19,7 @@ interface ManagePoolCreationProps {
   hasAgreedToWarning: boolean;
   existingPool: ExistingPool | undefined;
   setIsFormDisabled: (isDisabled: boolean) => void;
+  resetForm: () => void;
 }
 
 export const ManagePoolCreation = ({
@@ -29,6 +30,7 @@ export const ManagePoolCreation = ({
   hasAgreedToWarning,
   existingPool,
   setIsFormDisabled,
+  resetForm,
 }: ManagePoolCreationProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
@@ -110,6 +112,7 @@ export const ManagePoolCreation = ({
       setIsFinalizing(true);
       await finalize();
       refetchPool();
+      resetForm();
     } catch (e) {
       console.error("Error finalizing pool", e);
     } finally {
@@ -164,7 +167,7 @@ export const ManagePoolCreation = ({
     <>
       <StepsDisplay currentStep={currentStep} />
 
-      <div className="min-w-96">
+      <div className="min-w-96 px-5">
         {(() => {
           switch (currentStep) {
             case 1:

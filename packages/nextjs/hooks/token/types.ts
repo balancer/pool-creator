@@ -9,7 +9,7 @@ export type Token = {
 
 export type TokenPrice = {
   chain: string;
-  adddress: string;
+  address: string;
   price: number;
   updatedAt: number;
 };

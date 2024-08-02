@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { ManagePoolCreation } from "./_components";
 import type { NextPage } from "next";
@@ -8,9 +9,9 @@ import { Alert } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
 import { useLocalStorage } from "~~/hooks/common";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
-import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
+import { type Token, useFetchTokenList } from "~~/hooks/token";
 
-const CoW: NextPage = () => {
+const CowAmm: NextPage = () => {
   const [token1, setToken1] = useLocalStorage<Token | undefined>("token1", undefined);
   const [token2, setToken2] = useLocalStorage<Token | undefined>("token2", undefined);
   const [amountToken1, setAmountToken1] = useLocalStorage<string>("amountToken1", "");
@@ -23,10 +24,26 @@ const CoW: NextPage = () => {
   const rawAmount1 = parseUnits(amountToken1, token1?.decimals ?? 0);
   const rawAmount2 = parseUnits(amountToken2, token2?.decimals ?? 0);
 
-  const { balance: balance1 } = useReadToken(token1?.address);
-  const { balance: balance2 } = useReadToken(token2?.address);
   const { data: tokenList } = useFetchTokenList();
   const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
+
+  const resetForm = () => {
+    setToken1(undefined);
+    setToken2(undefined);
+    setAmountToken1("");
+    setAmountToken2("");
+    setPoolName("");
+    setPoolSymbol("");
+    setHasAgreedToWarning(false);
+    setIsFormDisabled(false);
+  };
+
+  useEffect(() => {
+    if (token1 && token2) {
+      setPoolName(`Balancer CoW AMM 50 ${token1?.symbol} 50 ${token2?.symbol}`);
+      setPoolSymbol(`BCoW-50${token1?.symbol}-50${token2?.symbol}`);
+    }
+  }, [token1, token2, setPoolName, setPoolSymbol]);
 
   // Filter out tokens that have already been chosen
   const selectableTokens = tokenList?.filter(token => token !== token1 && token !== token2);
@@ -46,19 +63,19 @@ const CoW: NextPage = () => {
                 <div className="w-full flex flex-col gap-3">
                   <TokenField
                     value={amountToken1}
-                    balance={balance1}
                     selectedToken={token1}
                     setToken={setToken1}
                     tokenOptions={selectableTokens}
                     handleAmountChange={e => setAmountToken1(e.target.value)}
+                    isDisabled={isFormDisabled}
                   />
                   <TokenField
                     value={amountToken2}
-                    balance={balance2}
                     selectedToken={token2}
                     setToken={setToken2}
                     tokenOptions={selectableTokens}
                     handleAmountChange={e => setAmountToken2(e.target.value)}
+                    isDisabled={isFormDisabled}
                   />
                 </div>
               </div>
@@ -118,6 +135,7 @@ const CoW: NextPage = () => {
             hasAgreedToWarning={hasAgreedToWarning}
             existingPool={existingPool}
             setIsFormDisabled={setIsFormDisabled}
+            resetForm={resetForm}
           />
         </div>
       </div>
@@ -125,4 +143,4 @@ const CoW: NextPage = () => {
   );
 };
 
-export default CoW;
+export default CowAmm;
