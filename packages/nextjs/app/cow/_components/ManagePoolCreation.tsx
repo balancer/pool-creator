@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Alert } from "./Alert";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
 import { TransactionButton } from "~~/components/common/";
-import { useFetchExistingPools, useReadPool, useWritePool } from "~~/hooks/cow/";
-import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
+import { type ExistingPool, useNewPoolEvents, useReadPool, useWritePool } from "~~/hooks/cow/";
 import { useReadToken, useWriteToken } from "~~/hooks/token";
 
 type TokenInput = {
@@ -14,18 +11,27 @@ type TokenInput = {
   address: Address | undefined;
 };
 
-interface CreatePoolProps {
+interface ManagePoolCreationProps {
   name: string;
   symbol: string;
   token1: TokenInput;
   token2: TokenInput;
+  hasAgreedToWarning: boolean;
+  existingPool: ExistingPool | undefined;
+  setIsFormDisabled: (isDisabled: boolean) => void;
 }
 
-export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) => {
+export const ManagePoolCreation = ({
+  name,
+  symbol,
+  token1,
+  token2,
+  hasAgreedToWarning,
+  existingPool,
+  setIsFormDisabled,
+}: ManagePoolCreationProps) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [hasAgreedToWarning, setHasAgreedToWarning] = useState(false);
-  const [userPoolAddress, setUserPoolAddress] = useState<string>();
-
+  const [userPoolAddress, setUserPoolAddress] = useState<Address>();
   // TODO: refactor to using tanstack query
   const [isCreatingPool, setIsCreatingPool] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -33,23 +39,21 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
   const [isSettingFee, setIsSettingSwapFee] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
 
-  const { address } = useAccount();
-
+  const { address: connectedAddress } = useAccount();
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
-  const { data: existingPools } = useFetchExistingPools();
-
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(token1?.address, pool?.address);
   const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(token2?.address, pool?.address);
   const { approve: approve1 } = useWriteToken(token1?.address, pool?.address);
   const { approve: approve2 } = useWriteToken(token2?.address, pool?.address);
   const { createPool, bind, setSwapFee, finalize } = useWritePool(pool?.address);
+  useNewPoolEvents(connectedAddress, setUserPoolAddress); // listen for user's pool creation events
+
+  const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
 
   const handleCreatePool = async () => {
-    console.log("name", name);
-    console.log("symbol", symbol);
     try {
       setIsCreatingPool(true);
-      const newPool = await createPool();
+      const newPool = await createPool(name, symbol);
       setUserPoolAddress(newPool);
       setCurrentStep(2);
     } catch (e) {
@@ -113,54 +117,28 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     }
   };
 
-  const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
-    contractName: "BCoWFactory",
-    eventName: "LOG_NEW_POOL",
-    fromBlock: 6381641n,
-    watch: true,
-    filters: { caller: address },
-  });
-
-  useScaffoldWatchContractEvent({
-    contractName: "BCoWFactory",
-    eventName: "LOG_NEW_POOL",
-    onLogs: logs => {
-      logs.forEach(log => {
-        const { bPool, caller } = log.args;
-        if (bPool && caller == address) {
-          console.log("useScaffoldWatchContractEvent: LOG_NEW_POOL", { bPool, caller });
-          setUserPoolAddress(bPool);
-        }
-      });
-    },
-  });
-
   useEffect(() => {
-    if (!isLoadingEvents && events) {
-      const pools = events.map(e => e.args.bPool).filter((pool): pool is string => pool !== undefined);
-      const mostRecentlyCreated = pools[0];
-      setUserPoolAddress(mostRecentlyCreated);
+    // Creating the pool sets the name and symbol permanently
+    if (currentStep > 1) {
+      setIsFormDisabled(true);
+    } else {
+      setIsFormDisabled(false);
     }
-  }, [isLoadingEvents, events]);
-
-  const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
-  useEffect(() => {
-    // If the user has no pools or their most recent pool is finalized
+    // If user has no pools or their most recent pool is already finalized
     if (userPoolAddress || pool?.isFinalized) {
       setCurrentStep(1);
     }
-    // If the user has created a pool, but not finalized and tokens not binded
+    // If user has created a pool, but not finalized and tokens not binded
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
       // If user has not approved tokens
-      if (allowance1 >= token1.rawAmount && allowance2 >= token2.rawAmount && validTokenAmounts) {
+      if (token1.rawAmount > allowance1 || token2.rawAmount > allowance2 || !validTokenAmounts) {
         setCurrentStep(2);
       } else {
         setCurrentStep(3);
       }
     }
-    // If the user has a pool with 2 tokens binded, but it has not been finalized
+    // If user has pool with 2 tokens binded, but it has not been finalized
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
-      // If the pool swap fee has not been set to the maximum
       if (pool.getSwapFee !== pool.MAX_FEE) {
         setCurrentStep(4);
       } else {
@@ -170,9 +148,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
   }, [
     pool,
     userPoolAddress,
-    address,
-    events,
-    isLoadingEvents,
+    connectedAddress,
     pool?.isFinalized,
     pool?.getNumTokens,
     allowance1,
@@ -180,60 +156,11 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     token1.rawAmount,
     token2.rawAmount,
     validTokenAmounts,
+    currentStep,
   ]);
-
-  const isApproveDisabled = // If user has not selected tokens or entered amounts
-    token1.rawAmount === 0n || token2.rawAmount === 0n || token1.address === undefined || token2.address === undefined;
-
-  const existingPool = existingPools?.find(pool => {
-    if (!token1.address || !token2.address) return false;
-    const poolTokenAddresses = pool.allTokens.map(token => token.address);
-    const hasOnlyTwoTokens = poolTokenAddresses.length === 2;
-    const selectedToken1 = token1.address.toLowerCase() ?? "";
-    const selectedToken2 = token2.address.toLowerCase() ?? "";
-    const includesToken1 = poolTokenAddresses.includes(selectedToken1);
-    const includesToken2 = poolTokenAddresses.includes(selectedToken2);
-    const has5050Weight = pool.allTokens.every(token => token.weight === "0.5");
-    const hasMaxSwapFee = pool.dynamicData.swapFee === "0.999999";
-    return hasOnlyTwoTokens && has5050Weight && hasMaxSwapFee && includesToken1 && includesToken2;
-  });
 
   return (
     <>
-      {existingPool ? (
-        <Alert bgColor="bg-[#d64e4e2b]" borderColor="border-red-500">
-          A CoW AMM pool with selected tokens already exists. To add liquidity, go to the{" "}
-          <Link
-            className="link"
-            rel="noopener noreferrer"
-            target="_blank"
-            href={`https://balancer.fi/pools/${existingPool.chain.toLowerCase()}/cow/${existingPool.address}`}
-          >
-            Balancer v3 frontend.
-          </Link>
-        </Alert>
-      ) : (
-        <Alert bgColor="bg-[#fb923c40]" borderColor="border-orange-400">
-          <div className="flex gap-2">
-            <div>
-              <div className="form-control">
-                <label className="label cursor-pointer flex gap-4 m-0 p-0">
-                  <input
-                    type="checkbox"
-                    className="checkbox rounded-lg"
-                    onChange={() => setHasAgreedToWarning(!hasAgreedToWarning)}
-                    checked={hasAgreedToWarning}
-                  />
-                  <span className="">
-                    I understand that assets must be added proportionally, or I risk loss of funds via arbitrage.
-                  </span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </Alert>
-      )}
-
       <StepsDisplay currentStep={currentStep} />
 
       <div className="min-w-96">
@@ -246,6 +173,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
                   isPending={isCreatingPool}
                   isDisabled={
                     isCreatingPool ||
+                    // If user has not selected tokens or entered amounts
                     !token1.address ||
                     !token2.address ||
                     !validTokenAmounts ||
@@ -262,7 +190,15 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
                 <TransactionButton
                   title="Approve"
                   isPending={isApproving}
-                  isDisabled={isApproveDisabled || isApproving}
+                  isDisabled={
+                    isApproving ||
+                    // If user has not selected tokens or entered amounts
+                    token1.address === undefined ||
+                    token2.address === undefined ||
+                    token1.rawAmount === 0n ||
+                    token2.rawAmount === 0n ||
+                    !hasAgreedToWarning
+                  }
                   onClick={handleApproveTokens}
                 />
               );
@@ -271,7 +207,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
                 <TransactionButton
                   title="Add Liquidity"
                   isPending={isBinding}
-                  isDisabled={isBinding}
+                  isDisabled={isBinding || !hasAgreedToWarning}
                   onClick={handleBindTokens}
                 />
               );
@@ -281,7 +217,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
                   title="Set Swap Fee"
                   onClick={handleSetSwapFee}
                   isPending={isSettingFee}
-                  isDisabled={isSettingFee}
+                  isDisabled={isSettingFee || !hasAgreedToWarning}
                 />
               );
             case 5:
@@ -290,7 +226,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
                   title="Finalize"
                   onClick={handleFinalize}
                   isPending={isFinalizing}
-                  isDisabled={isFinalizing}
+                  isDisabled={isFinalizing || !hasAgreedToWarning}
                 />
               );
             default:

@@ -7,6 +7,7 @@ import { type Token } from "~~/hooks/token";
 import { formatToHuman } from "~~/utils/formatToHuman";
 
 export const TokenField = ({
+  value,
   tokenOptions,
   setToken,
   selectedToken,
@@ -14,6 +15,7 @@ export const TokenField = ({
   allowance,
   handleAmountChange,
 }: {
+  value: string;
   balance: bigint;
   allowance?: bigint;
   tokenOptions?: Token[] | undefined;
@@ -31,6 +33,7 @@ export const TokenField = ({
           onChange={handleAmountChange}
           min="0"
           placeholder="0.0"
+          value={value}
           className={`text-right text-2xl w-full input input-bordered rounded-xl bg-base-200 p-5 h-[74px]`}
         />
         <div className="absolute top-0 left-0 ">

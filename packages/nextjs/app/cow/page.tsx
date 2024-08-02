@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { CreatePool } from "./_components";
+import Link from "next/link";
+import { ManagePoolCreation } from "./_components";
 import type { NextPage } from "next";
 import { parseUnits } from "viem";
-import { TokenField } from "~~/components/common/";
+import { Alert } from "~~/components/common";
+import { TextField, TokenField } from "~~/components/common/";
+import { useLocalStorage } from "~~/hooks/common";
+import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 
 const CoW: NextPage = () => {
-  const [token1, setToken1] = useState<Token>();
-  const [token2, setToken2] = useState<Token>();
-  const [amountToken1, setAmountToken1] = useState("");
-  const [amountToken2, setAmountToken2] = useState("");
-  const [poolName, setPoolName] = useState("");
-  const [poolSymbol, setPoolSymbol] = useState("");
+  const [token1, setToken1] = useLocalStorage<Token | undefined>("token1", undefined);
+  const [token2, setToken2] = useLocalStorage<Token | undefined>("token2", undefined);
+  const [amountToken1, setAmountToken1] = useLocalStorage<string>("amountToken1", "");
+  const [amountToken2, setAmountToken2] = useLocalStorage<string>("amountToken2", "");
+  const [poolName, setPoolName] = useLocalStorage<string>("poolName", "");
+  const [poolSymbol, setPoolSymbol] = useLocalStorage<string>("poolSymbol", "");
+  const [hasAgreedToWarning, setHasAgreedToWarning] = useLocalStorage("hasAgreedToWarning", false);
+  const [isFormDisabled, setIsFormDisabled] = useLocalStorage("isFormDisabled", false);
 
   const rawAmount1 = parseUnits(amountToken1, token1?.decimals ?? 0);
   const rawAmount2 = parseUnits(amountToken2, token2?.decimals ?? 0);
@@ -21,8 +26,9 @@ const CoW: NextPage = () => {
   const { balance: balance1 } = useReadToken(token1?.address);
   const { balance: balance2 } = useReadToken(token2?.address);
   const { data: tokenList } = useFetchTokenList();
+  const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
 
-  // Filter out tokens that are already selected
+  // Filter out tokens that have already been chosen
   const selectableTokens = tokenList?.filter(token => token !== token1 && token !== token2);
 
   return (
@@ -39,6 +45,7 @@ const CoW: NextPage = () => {
                 <div className="ml-1 mb-1">Select pool tokens:</div>
                 <div className="w-full flex flex-col gap-3">
                   <TokenField
+                    value={amountToken1}
                     balance={balance1}
                     selectedToken={token1}
                     setToken={setToken1}
@@ -46,6 +53,7 @@ const CoW: NextPage = () => {
                     handleAmountChange={e => setAmountToken1(e.target.value)}
                   />
                   <TokenField
+                    value={amountToken2}
                     balance={balance2}
                     selectedToken={token2}
                     setToken={setToken2}
@@ -55,32 +63,61 @@ const CoW: NextPage = () => {
                 </div>
               </div>
 
-              <div className="w-full flex flex-col gap-1">
-                <label className="ml-1">Pool name:</label>
-                <input
-                  type="text"
-                  placeholder="Enter pool name"
-                  onChange={e => setPoolName(e.target.value)}
-                  className="w-full input input-bordered rounded-xl bg-base-200 px-5 h-[55px] text-lg"
-                />
-              </div>
-              <div className="w-full flex flex-col gap-1">
-                <label className="ml-1">Pool symbol:</label>
-                <input
-                  type="text"
-                  placeholder="Enter pool symbol"
-                  onChange={e => setPoolSymbol(e.target.value)}
-                  className="w-full input input-bordered rounded-xl bg-base-200 px-5 h-[55px] text-lg"
-                />
-              </div>
+              <TextField
+                label="Pool name:"
+                placeholder="i.e. Balancer CoW AMM 50 BAL 50 DAI"
+                value={poolName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPoolName(e.target.value)}
+                isDisabled={isFormDisabled}
+              />
+              <TextField
+                label="Pool symbol:"
+                placeholder="i.e. BCoW-50BAL-50DAI"
+                value={poolSymbol}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPoolSymbol(e.target.value)}
+                isDisabled={isFormDisabled}
+              />
             </div>
           </div>
 
-          <CreatePool
+          {existingPool ? (
+            <Alert type="error">
+              A CoW AMM pool with the selected tokens already exists. To add liquidity, go to the{" "}
+              <Link
+                className="link"
+                rel="noopener noreferrer"
+                target="_blank"
+                href={`https://balancer.fi/pools/${existingPool.chain.toLowerCase()}/cow/${existingPool.address}`}
+              >
+                Balancer app
+              </Link>
+            </Alert>
+          ) : (
+            <Alert type="warning">
+              <div className="form-control">
+                <label className="label cursor-pointer flex gap-4 m-0 p-0">
+                  <input
+                    type="checkbox"
+                    className="checkbox rounded-lg"
+                    onChange={() => setHasAgreedToWarning(!hasAgreedToWarning)}
+                    checked={hasAgreedToWarning}
+                  />
+                  <span className="">
+                    I understand that assets must be added proportionally, or I risk loss of funds via arbitrage.
+                  </span>
+                </label>
+              </div>
+            </Alert>
+          )}
+
+          <ManagePoolCreation
             name={poolName}
             symbol={poolSymbol}
             token1={{ rawAmount: rawAmount1, address: token1?.address }}
             token2={{ rawAmount: rawAmount2, address: token2?.address }}
+            hasAgreedToWarning={hasAgreedToWarning}
+            existingPool={existingPool}
+            setIsFormDisabled={setIsFormDisabled}
           />
         </div>
       </div>

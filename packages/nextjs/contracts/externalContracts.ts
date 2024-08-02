@@ -13,25 +13,24 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
  * } as const;
  */
 const externalContracts = {
+  // Ethereum Sepolia
   11155111: {
     BCoWFactory: {
-      address: "0x9F151748595bAA8829d44448Bb3181AD6b995E8e",
+      address: "0x1E3D76AC2BB67a2D7e8395d3A624b30AA9056DF9",
       abi: abis.CoW.BCoWFactory,
     },
-    Faucet: {
-      address: "0x26bfAecAe4D5fa93eE1737ce1Ce7D53F2a0E9b2d",
-      abi: abis.Balancer.Faucet,
-    },
   },
+  // Ethereum Mainnet
   1: {
     BCoWFactory: {
-      address: "0x23fcC2166F991B8946D195de53745E1b804C91B7",
+      address: "0xf76c421bAb7df8548604E60deCCcE50477C10462",
       abi: abis.CoW.BCoWFactory,
     },
   },
+  // Gnosis Mainnet
   100: {
     BCoWFactory: {
-      address: "0x7573B99BC09c11Dc0427fb9c6662bc603E008304",
+      address: "0x703Bd8115E6F21a37BB5Df97f78614ca72Ad7624",
       abi: abis.CoW.BCoWFactory,
     },
   },

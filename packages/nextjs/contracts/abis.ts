@@ -1251,7 +1251,10 @@ export const abis = {
       },
       { inputs: [], name: "logBCoWPool", outputs: [], stateMutability: "nonpayable", type: "function" },
       {
-        inputs: [],
+        inputs: [
+          { internalType: "string", name: "name", type: "string" },
+          { internalType: "string", name: "symbol", type: "string" },
+        ],
         name: "newBPool",
         outputs: [{ internalType: "contract IBPool", name: "bPool", type: "address" }],
         stateMutability: "nonpayable",
@@ -1266,84 +1269,5 @@ export const abis = {
       },
     ],
   },
-  Balancer: {
-    Faucet: [
-      { inputs: [], stateMutability: "nonpayable", type: "constructor" },
-      {
-        inputs: [{ internalType: "address", name: "owner", type: "address" }],
-        name: "OwnableInvalidOwner",
-        type: "error",
-      },
-      {
-        inputs: [{ internalType: "address", name: "account", type: "address" }],
-        name: "OwnableUnauthorizedAccount",
-        type: "error",
-      },
-      {
-        anonymous: false,
-        inputs: [
-          { indexed: true, internalType: "address", name: "previousOwner", type: "address" },
-          { indexed: true, internalType: "address", name: "newOwner", type: "address" },
-        ],
-        name: "OwnershipTransferred",
-        type: "event",
-      },
-      {
-        inputs: [{ internalType: "address", name: "", type: "address" }],
-        name: "amount",
-        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-        stateMutability: "view",
-        type: "function",
-      },
-      {
-        inputs: [{ internalType: "address", name: "token", type: "address" }],
-        name: "drain",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-      {
-        inputs: [{ internalType: "address", name: "token", type: "address" }],
-        name: "drip",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-      {
-        inputs: [
-          { internalType: "address", name: "", type: "address" },
-          { internalType: "address", name: "", type: "address" },
-        ],
-        name: "lastDrip",
-        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-        stateMutability: "view",
-        type: "function",
-      },
-      {
-        inputs: [],
-        name: "owner",
-        outputs: [{ internalType: "address", name: "", type: "address" }],
-        stateMutability: "view",
-        type: "function",
-      },
-      { inputs: [], name: "renounceOwnership", outputs: [], stateMutability: "nonpayable", type: "function" },
-      {
-        inputs: [
-          { internalType: "address", name: "token", type: "address" },
-          { internalType: "uint256", name: "amount_", type: "uint256" },
-        ],
-        name: "setAmount",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-      {
-        inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
-        name: "transferOwnership",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-  },
+  Balancer: {},
 } as const;

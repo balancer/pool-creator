@@ -1,4 +1,5 @@
 export * from "./useReadPool";
 export * from "./useWritePool";
-export * from "./useFetchExistingPools";
+export * from "./useCheckIfPoolExists";
 export * from "./types";
+export * from "./useNewPoolEvents";

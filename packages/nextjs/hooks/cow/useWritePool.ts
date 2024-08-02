@@ -4,8 +4,7 @@ import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
-const POOL_ABI = abis.CoW.BCoWPool;
-const WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
+const DENORMALIZED_WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
 
 // TODO: refactor to using tanstack query
 export const useWritePool = (pool: Address | undefined) => {
@@ -14,10 +13,11 @@ export const useWritePool = (pool: Address | undefined) => {
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
   const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
 
-  const createPool = async (): Promise<Address> => {
+  const createPool = async (name: string, symbol: string): Promise<Address> => {
     if (!publicClient) throw new Error("No public client");
     const hash = await bCoWFactory({
       functionName: "newBPool",
+      args: [name, symbol],
     });
     if (!hash) throw new Error("No pool creation transaction hash");
     const txReceipt = await publicClient.getTransactionReceipt({ hash });
@@ -37,7 +37,7 @@ export const useWritePool = (pool: Address | undefined) => {
     if (!walletClient) throw new Error("Cannot set swap fee wallet client");
 
     const { request: setSwapFee } = await publicClient.simulateContract({
-      abi: POOL_ABI,
+      abi: abis.CoW.BCoWPool,
       address: pool,
       functionName: "setSwapFee",
       account: walletClient.account,
@@ -58,11 +58,11 @@ export const useWritePool = (pool: Address | undefined) => {
     if (!walletClient) throw new Error("No wallet client found");
 
     const { request: bind } = await publicClient.simulateContract({
-      abi: POOL_ABI,
+      abi: abis.CoW.BCoWPool,
       address: pool,
       functionName: "bind",
       account: walletClient.account,
-      args: [token, rawAmount, WEIGHT],
+      args: [token, rawAmount, DENORMALIZED_WEIGHT],
     });
 
     await writeTx(() => walletClient.writeContract(bind), {
@@ -79,7 +79,7 @@ export const useWritePool = (pool: Address | undefined) => {
     if (!walletClient) throw new Error("No wallet client found!");
 
     const { request: finalizePool } = await publicClient.simulateContract({
-      abi: POOL_ABI,
+      abi: abis.CoW.BCoWPool,
       address: pool,
       functionName: "finalize",
       account: walletClient.account,
