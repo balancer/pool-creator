@@ -29,13 +29,11 @@ const CoW: NextPage = () => {
     <div className="flex-grow bg-base-300">
       <div className="max-w-screen-2xl mx-auto">
         <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 gap-7">
-          <h1 className="text-4xl font-bold">Create a CoW AMM Pool</h1>
+          <h1 className="text-2xl md:text-4xl font-bold">Create a CoW AMM Pool</h1>
 
-          <div className="bg-base-200 p-7 rounded-xl w-[555px] flex flex-grow">
+          <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow">
             <div className="flex flex-col items-center gap-4 w-full">
-              <div>
-                <h5 className="text-2xl font-bold">Configure your pool</h5>
-              </div>
+              <h5 className="text-xl md:text-2xl font-bold">Configure your pool</h5>
 
               <div className="w-full">
                 <div className="ml-1 mb-1">Select pool tokens:</div>

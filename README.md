@@ -2,23 +2,26 @@
 
 A frontend tool for creating and initializing various pool types on Balancer
 
-## CoW AMMs
+## Requirements
 
-### Creation Lifecycle
+To run the code locally, the following tools are required:
 
-1. Create a pool by calling `newBPool()` at the factory contract
-2. Approve each token to be spent by the pool
-3. Bind each token setting the denormalized weight to be 1e18 so that the pool is 50/50
-4. Set the swap fee to be the maximum with `pool.setSwapFee(pool.MAX_FEE)`
-5. Enable normal liquidity operations by calling `pool.finalize` which mints bpt to sender
+- [Node (>= v18.17)](https://nodejs.org/en/download/)
+- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
+- [Git](https://git-scm.com/downloads)
 
-### Resources
+## Quickstart
 
-- [Pool Creation Script](https://github.com/balancer/cow-amm/blob/main/script/Script.s.sol#L37)
-- [Factory Addresses](https://balancerecosystem.slack.com/archives/C070C8VLSNM/p1722012869691689)
-- [ABIs](https://github.com/balancer/cow-amm-subgraph/tree/main/abis)
-- [Create Pool Tx](https://sepolia.etherscan.io/tx/0x2ae8e9cf4a8e5d9df26140fc265d8c7679386239de3cdaf549be5ab6108b5035)
-- [Init Pool Txs](https://sepolia.etherscan.io/address/0x60048091401F27117C3DFb8136c1ec550D949B12)
-- [Wonderland source code](https://github.com/defi-wonderland/balancer-v1-amm/)
-- [Balancer SDK addLiquidity test](https://github.com/balancer/b-sdk/blob/7fc1a5d13b1d5408d23a8c4e856d671f40549c11/test/cowAmm/addLiquidity.integration.test.ts)
-- [Balancer v2 Pool Creator demo](https://www.youtube.com/watch?v=eCjQIMHWMNs)
+1. Clone this repo & install dependencies
+
+```
+git clone https://github.com/balancer/pool-creator.git
+cd pool-creator
+yarn install
+```
+
+2. Start the frontend
+
+```
+yarn start
+```

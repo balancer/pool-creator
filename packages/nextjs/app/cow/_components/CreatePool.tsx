@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Alert } from "./Alert";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
@@ -22,6 +23,7 @@ interface CreatePoolProps {
 
 export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [hasAgreedToWarning, setHasAgreedToWarning] = useState(false);
   const [userPoolAddress, setUserPoolAddress] = useState<string>();
 
   // TODO: refactor to using tanstack query
@@ -45,45 +47,70 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
   const handleCreatePool = async () => {
     console.log("name", name);
     console.log("symbol", symbol);
-    setIsCreatingPool(true);
-    const newPool = await createPool();
-    setUserPoolAddress(newPool);
-    setCurrentStep(2);
-    setIsCreatingPool(false);
+    try {
+      setIsCreatingPool(true);
+      const newPool = await createPool();
+      setUserPoolAddress(newPool);
+      setCurrentStep(2);
+    } catch (e) {
+      console.error("Error creating pool", e);
+    } finally {
+      setIsCreatingPool(false);
+    }
   };
 
   const handleApproveTokens = async () => {
-    setIsApproving(true);
-    const txs = [];
-    if (token1.rawAmount > allowance1) txs.push(approve1(token1.rawAmount));
-    if (token2.rawAmount > allowance2) txs.push(approve2(token2.rawAmount));
-    await Promise.all(txs);
-    refetchAllowance1();
-    refetchAllowance2();
-    setIsApproving(false);
+    try {
+      setIsApproving(true);
+      const txs = [];
+      if (token1.rawAmount > allowance1) txs.push(approve1(token1.rawAmount));
+      if (token2.rawAmount > allowance2) txs.push(approve2(token2.rawAmount));
+      await Promise.all(txs);
+      refetchAllowance1();
+      refetchAllowance2();
+    } catch (e) {
+      console.error("Error approving tokens", e);
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   const handleBindTokens = async () => {
     if (!token1.address || !token2.address) throw new Error("Must select tokens before binding");
-    setIsBinding(true);
-    await Promise.all([bind(token1.address, token1.rawAmount), bind(token2.address, token2.rawAmount)]);
-    refetchPool();
-    setIsBinding(false);
+    try {
+      setIsBinding(true);
+      await Promise.all([bind(token1.address, token1.rawAmount), bind(token2.address, token2.rawAmount)]);
+      refetchPool();
+    } catch (e) {
+      console.error("Error approving tokens", e);
+    } finally {
+      setIsBinding(false);
+    }
   };
 
   const handleSetSwapFee = async () => {
     if (!pool) throw new Error("Cannot set swap fee without a pool");
-    setIsSettingSwapFee(true);
-    await setSwapFee(pool.MAX_FEE);
-    refetchPool();
-    setIsSettingSwapFee(false);
+    try {
+      setIsSettingSwapFee(true);
+      await setSwapFee(pool.MAX_FEE);
+      refetchPool();
+    } catch (e) {
+      console.error("Error setting swap fee", e);
+    } finally {
+      setIsSettingSwapFee(false);
+    }
   };
 
   const handleFinalize = async () => {
-    setIsFinalizing(true);
-    await finalize();
-    refetchPool();
-    setIsFinalizing(false);
+    try {
+      setIsFinalizing(true);
+      await finalize();
+      refetchPool();
+    } catch (e) {
+      console.error("Error finalizing pool", e);
+    } finally {
+      setIsFinalizing(false);
+    }
   };
 
   const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
@@ -116,6 +143,10 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     }
   }, [isLoadingEvents, events]);
 
+  const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
+  // Determine if token allowances are sufficient
+  const isSufficientAllowance = allowance1 >= token1.rawAmount && allowance2 >= token2.rawAmount && validTokenAmounts;
+
   useEffect(() => {
     // If the user has no pools or their most recent pool is finalized
     if (userPoolAddress || pool?.isFinalized) {
@@ -123,7 +154,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     }
     // If the user has created a pool, but not finalized and tokens not binded
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
-      if (allowance1 < token1.rawAmount || allowance2 < token2.rawAmount) {
+      if (!isSufficientAllowance) {
         setCurrentStep(2);
       } else {
         setCurrentStep(3);
@@ -131,6 +162,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     }
     // If the user has a pool with 2 tokens binded, but it has not been finalized
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
+      // If the pool swap fee has not been set to the maximum
       if (pool.getSwapFee !== pool.MAX_FEE) {
         setCurrentStep(4);
       } else {
@@ -151,12 +183,8 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     token2.rawAmount,
   ]);
 
-  // Must choose tokens and set amounts approve button is enabled
-  const isApproveDisabled =
-    token1.rawAmount === 0n || token1.address === undefined || token2.rawAmount === 0n || token2.address === undefined;
-  // Determine if token allowances are sufficient
-  const isSufficientAllowance =
-    allowance1 >= token1.rawAmount && allowance2 >= token2.rawAmount && token1.rawAmount > 0n && token2.rawAmount > 0n;
+  const isApproveDisabled = // If user has not selected tokens or entered amounts
+    token1.rawAmount === 0n || token2.rawAmount === 0n || token1.address === undefined || token2.address === undefined;
 
   const existingPool = existingPools?.find(pool => {
     if (!token1.address || !token2.address) return false;
@@ -173,57 +201,103 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
 
   return (
     <>
+      {existingPool ? (
+        <Alert bgColor="bg-[#d64e4e2b]" borderColor="border-red-500">
+          A CoW AMM pool with selected tokens already exists. To add liquidity, go to the{" "}
+          <Link
+            className="link"
+            rel="noopener noreferrer"
+            target="_blank"
+            href={`https://balancer.fi/pools/${existingPool.chain.toLowerCase()}/cow/${existingPool.address}`}
+          >
+            Balancer v3 frontend.
+          </Link>
+        </Alert>
+      ) : (
+        <Alert bgColor="bg-[#fb923c40]" borderColor="border-orange-400">
+          <div className="flex gap-2">
+            <div>
+              <div className="form-control">
+                <label className="label cursor-pointer flex gap-4 m-0 p-0">
+                  <input
+                    type="checkbox"
+                    className="checkbox rounded-lg"
+                    onChange={() => setHasAgreedToWarning(!hasAgreedToWarning)}
+                    checked={hasAgreedToWarning}
+                  />
+                  <span className="">
+                    I understand that assets must be added proportionally, or I risk loss of funds via arbitrage.
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </Alert>
+      )}
+
       <StepsDisplay currentStep={currentStep} />
 
       <div className="min-w-96">
-        {existingPool ? (
-          <div className="text-lg text-red-400">
-            A CoW AMM with selected tokens{" "}
-            <Link
-              className="link"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={`https://balancer.fi/pools/${existingPool.chain.toLowerCase()}/cow/${existingPool.address}`}
-            >
-              already exists!
-            </Link>
-          </div>
-        ) : !userPoolAddress || pool?.isFinalized ? (
-          <TransactionButton
-            title="Create Pool"
-            isPending={isCreatingPool}
-            isDisabled={isCreatingPool || !token1.address || !token2.address || existingPool !== undefined}
-            onClick={handleCreatePool}
-          />
-        ) : !isSufficientAllowance ? (
-          <TransactionButton
-            title="Approve"
-            isPending={isApproving}
-            isDisabled={isApproveDisabled || isApproving}
-            onClick={handleApproveTokens}
-          />
-        ) : (pool?.getNumTokens || 0) < 2 ? (
-          <TransactionButton
-            title="Add Liquidity"
-            isPending={isBinding}
-            isDisabled={isBinding}
-            onClick={handleBindTokens}
-          />
-        ) : pool?.MAX_FEE !== pool?.getSwapFee ? (
-          <TransactionButton
-            title="Set Swap Fee"
-            onClick={handleSetSwapFee}
-            isPending={isSettingFee}
-            isDisabled={isSettingFee}
-          />
-        ) : (
-          <TransactionButton
-            title="Finalize"
-            onClick={handleFinalize}
-            isPending={isFinalizing}
-            isDisabled={isFinalizing}
-          />
-        )}
+        {(() => {
+          switch (currentStep) {
+            case 1:
+              return (
+                <TransactionButton
+                  title="Create Pool"
+                  isPending={isCreatingPool}
+                  isDisabled={
+                    isCreatingPool ||
+                    !token1.address ||
+                    !token2.address ||
+                    !validTokenAmounts ||
+                    !hasAgreedToWarning ||
+                    existingPool !== undefined ||
+                    name === "" ||
+                    symbol === ""
+                  }
+                  onClick={handleCreatePool}
+                />
+              );
+            case 2:
+              return (
+                <TransactionButton
+                  title="Approve"
+                  isPending={isApproving}
+                  isDisabled={isApproveDisabled || isApproving}
+                  onClick={handleApproveTokens}
+                />
+              );
+            case 3:
+              return (
+                <TransactionButton
+                  title="Add Liquidity"
+                  isPending={isBinding}
+                  isDisabled={isBinding}
+                  onClick={handleBindTokens}
+                />
+              );
+            case 4:
+              return (
+                <TransactionButton
+                  title="Set Swap Fee"
+                  onClick={handleSetSwapFee}
+                  isPending={isSettingFee}
+                  isDisabled={isSettingFee}
+                />
+              );
+            case 5:
+              return (
+                <TransactionButton
+                  title="Finalize"
+                  onClick={handleFinalize}
+                  isPending={isFinalizing}
+                  isDisabled={isFinalizing}
+                />
+              );
+            default:
+              return null;
+          }
+        })()}
       </div>
     </>
   );
