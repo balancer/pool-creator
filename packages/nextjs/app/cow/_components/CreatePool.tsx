@@ -144,9 +144,6 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
   }, [isLoadingEvents, events]);
 
   const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
-  // Determine if token allowances are sufficient
-  const isSufficientAllowance = allowance1 >= token1.rawAmount && allowance2 >= token2.rawAmount && validTokenAmounts;
-
   useEffect(() => {
     // If the user has no pools or their most recent pool is finalized
     if (userPoolAddress || pool?.isFinalized) {
@@ -154,7 +151,8 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     }
     // If the user has created a pool, but not finalized and tokens not binded
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
-      if (!isSufficientAllowance) {
+      // If user has not approved tokens
+      if (allowance1 >= token1.rawAmount && allowance2 >= token2.rawAmount && validTokenAmounts) {
         setCurrentStep(2);
       } else {
         setCurrentStep(3);
@@ -181,6 +179,7 @@ export const CreatePool = ({ name, symbol, token1, token2 }: CreatePoolProps) =>
     allowance2,
     token1.rawAmount,
     token2.rawAmount,
+    validTokenAmounts,
   ]);
 
   const isApproveDisabled = // If user has not selected tokens or entered amounts
