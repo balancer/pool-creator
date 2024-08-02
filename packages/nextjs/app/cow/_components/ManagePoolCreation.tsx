@@ -157,6 +157,7 @@ export const ManagePoolCreation = ({
     token2.rawAmount,
     validTokenAmounts,
     currentStep,
+    setIsFormDisabled,
   ]);
 
   return (

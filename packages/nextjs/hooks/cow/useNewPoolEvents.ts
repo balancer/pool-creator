@@ -34,5 +34,5 @@ export const useNewPoolEvents = (
       const mostRecentlyCreated = pools[0];
       setUserPoolAddress(mostRecentlyCreated);
     }
-  }, [isLoadingEvents, events]);
+  }, [isLoadingEvents, events, setUserPoolAddress]);
 };
