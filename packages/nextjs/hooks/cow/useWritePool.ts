@@ -1,8 +1,7 @@
-import { Address, parseEventLogs } from "viem";
+import { Address } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 
 const DENORMALIZED_WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
 
@@ -11,25 +10,6 @@ export const useWritePool = (pool: Address | undefined) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
-  const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
-
-  const createPool = async (name: string, symbol: string): Promise<Address> => {
-    if (!publicClient) throw new Error("No public client");
-    const hash = await bCoWFactory({
-      functionName: "newBPool",
-      args: [name, symbol],
-    });
-    if (!hash) throw new Error("No pool creation transaction hash");
-    const txReceipt = await publicClient.getTransactionReceipt({ hash });
-    const logs = parseEventLogs({
-      abi: abis.CoW.BCoWFactory,
-      logs: txReceipt.logs,
-    });
-    const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
-    console.log("New pool address from txReceipt logs:", newPool);
-
-    return newPool;
-  };
 
   const setSwapFee = async (rawAmount: bigint) => {
     if (!pool) throw new Error("Cannot set swap fee without pool address");
@@ -93,5 +73,5 @@ export const useWritePool = (pool: Address | undefined) => {
     });
   };
 
-  return { createPool, bind, setSwapFee, finalize };
+  return { bind, setSwapFee, finalize };
 };

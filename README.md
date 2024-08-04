@@ -2,6 +2,11 @@
 
 A frontend tool for creating and initializing various pool types on Balancer
 
+### Notes
+
+- Cannot create pools with same token pairs, weight, and swap fee
+  - except on testnets its allowed for convenience
+
 ## Requirements
 
 To run the code locally, the following tools are required:

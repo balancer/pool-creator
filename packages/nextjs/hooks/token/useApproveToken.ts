@@ -1,18 +1,21 @@
 import { erc20Abi } from "@balancer/sdk";
+import { useMutation } from "@tanstack/react-query";
 import { Address } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
-type UseWriteToken = {
-  approve: (amount: bigint) => Promise<void>;
+type ApprovePayload = {
+  token: Address | undefined;
+  spender: Address | undefined;
+  rawAmount: bigint;
 };
 
-export const useWriteToken = (token: Address | undefined, spender: Address | undefined): UseWriteToken => {
+export const useApproveToken = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
 
-  const approve = async (rawAmount: bigint) => {
+  const approve = async ({ token, spender, rawAmount }: ApprovePayload) => {
     if (!token) throw new Error("Cannot approve token without token address");
     if (!spender) throw new Error("Cannot approve token without spender address");
     if (!walletClient) throw new Error("No wallet client found");
@@ -30,7 +33,7 @@ export const useWriteToken = (token: Address | undefined, spender: Address | und
       await writeTx(() => walletClient.writeContract(approveSpenderOnToken), {
         blockConfirmations: 1,
         onBlockConfirmation: () => {
-          console.log("Approved  contract to spend max amount of", token);
+          console.log("Approved  contract to spend", rawAmount, " amount of", token);
         },
       });
     } catch (e) {
@@ -38,5 +41,7 @@ export const useWriteToken = (token: Address | undefined, spender: Address | und
     }
   };
 
-  return { approve };
+  return useMutation({
+    mutationFn: (payload: ApprovePayload) => approve(payload),
+  });
 };

@@ -3,3 +3,4 @@ export * from "./useWritePool";
 export * from "./useCheckIfPoolExists";
 export * from "./types";
 export * from "./useNewPoolEvents";
+export * from "./useCreatePool";

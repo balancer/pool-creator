@@ -9,11 +9,12 @@ export const useNewPoolEvents = (
   const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
     contractName: "BCoWFactory",
     eventName: "LOG_NEW_POOL",
-    fromBlock: 6415186n,
+    fromBlock: 6437600n,
     watch: true,
     filters: { caller: connectedAddress },
   });
 
+  // If event listener sees a new pool event from user
   useScaffoldWatchContractEvent({
     contractName: "BCoWFactory",
     eventName: "LOG_NEW_POOL",

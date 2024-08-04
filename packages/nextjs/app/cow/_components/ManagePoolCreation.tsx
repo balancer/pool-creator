@@ -3,8 +3,8 @@ import { StepsDisplay } from "./StepsDisplay";
 import { Address } from "viem";
 import { useAccount } from "wagmi";
 import { TransactionButton } from "~~/components/common/";
-import { type ExistingPool, useNewPoolEvents, useReadPool, useWritePool } from "~~/hooks/cow/";
-import { useReadToken, useWriteToken } from "~~/hooks/token";
+import { type ExistingPool, useCreatePool, useNewPoolEvents, useReadPool, useWritePool } from "~~/hooks/cow/";
+import { useApproveToken, useReadToken } from "~~/hooks/token";
 
 type TokenInput = {
   rawAmount: bigint;
@@ -34,9 +34,8 @@ export const ManagePoolCreation = ({
 }: ManagePoolCreationProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
+
   // TODO: refactor to using tanstack query
-  const [isCreatingPool, setIsCreatingPool] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
   const [isBinding, setIsBinding] = useState(false);
   const [isSettingFee, setIsSettingSwapFee] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
@@ -45,39 +44,30 @@ export const ManagePoolCreation = ({
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(token1?.address, pool?.address);
   const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(token2?.address, pool?.address);
-  const { approve: approve1 } = useWriteToken(token1?.address, pool?.address);
-  const { approve: approve2 } = useWriteToken(token2?.address, pool?.address);
-  const { createPool, bind, setSwapFee, finalize } = useWritePool(pool?.address);
+  const { bind, setSwapFee, finalize } = useWritePool(pool?.address);
+
+  const { mutate: createPool, isPending: createPoolIsPending } = useCreatePool();
+  const { mutate: approve, isPending: approveIsPending } = useApproveToken();
+
   useNewPoolEvents(connectedAddress, setUserPoolAddress); // listen for user's pool creation events
 
   const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
 
-  const handleCreatePool = async () => {
-    try {
-      setIsCreatingPool(true);
-      const newPool = await createPool(name, symbol);
-      setUserPoolAddress(newPool);
-      setCurrentStep(2);
-    } catch (e) {
-      console.error("Error creating pool", e);
-    } finally {
-      setIsCreatingPool(false);
-    }
-  };
-
   const handleApproveTokens = async () => {
     try {
-      setIsApproving(true);
+      const token1Payload = { token: token1?.address, spender: pool?.address, rawAmount: token1.rawAmount };
+      const token2Payload = { token: token2?.address, spender: pool?.address, rawAmount: token2.rawAmount };
       const txs = [];
-      if (token1.rawAmount > allowance1) txs.push(approve1(token1.rawAmount));
-      if (token2.rawAmount > allowance2) txs.push(approve2(token2.rawAmount));
+      if (token1.rawAmount > allowance1) txs.push(approve(token1Payload));
+      if (token2.rawAmount > allowance2) txs.push(approve(token2Payload));
       await Promise.all(txs);
       refetchAllowance1();
       refetchAllowance2();
+      if (allowance1 >= token1.rawAmount && allowance2 >= token2.rawAmount) {
+        setCurrentStep(3);
+      }
     } catch (e) {
       console.error("Error approving tokens", e);
-    } finally {
-      setIsApproving(false);
     }
   };
 
@@ -122,11 +112,8 @@ export const ManagePoolCreation = ({
 
   useEffect(() => {
     // Creating the pool sets the name and symbol permanently
-    if (currentStep > 1) {
-      setIsFormDisabled(true);
-    } else {
-      setIsFormDisabled(false);
-    }
+    currentStep > 1 ? setIsFormDisabled(true) : setIsFormDisabled(false);
+
     // If user has no pools or their most recent pool is already finalized
     if (userPoolAddress || pool?.isFinalized) {
       setCurrentStep(1);
@@ -174,9 +161,9 @@ export const ManagePoolCreation = ({
               return (
                 <TransactionButton
                   title="Create Pool"
-                  isPending={isCreatingPool}
+                  isPending={createPoolIsPending}
                   isDisabled={
-                    isCreatingPool ||
+                    createPoolIsPending ||
                     // If user has not selected tokens or entered amounts
                     !token1.address ||
                     !token2.address ||
@@ -186,16 +173,26 @@ export const ManagePoolCreation = ({
                     name === "" ||
                     symbol === ""
                   }
-                  onClick={handleCreatePool}
+                  onClick={() =>
+                    createPool(
+                      { name, symbol },
+                      {
+                        onSuccess: newPoolAddress => {
+                          console.log("updating userPoolAddress from useMutations onSuccess!!", newPoolAddress);
+                          setUserPoolAddress(newPoolAddress);
+                        },
+                      },
+                    )
+                  }
                 />
               );
             case 2:
               return (
                 <TransactionButton
                   title="Approve"
-                  isPending={isApproving}
+                  isPending={approveIsPending}
                   isDisabled={
-                    isApproving ||
+                    approveIsPending ||
                     // If user has not selected tokens or entered amounts
                     token1.address === undefined ||
                     token2.address === undefined ||

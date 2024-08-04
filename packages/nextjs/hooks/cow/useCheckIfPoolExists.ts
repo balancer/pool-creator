@@ -63,6 +63,10 @@ export const useCheckIfPoolExists = (token1: Address | undefined, token2: Addres
     return hasOnlyTwoTokens && has5050Weight && hasMaxSwapFee && includesToken1 && includesToken2;
   });
 
+  // Don't prevent pool duplication on testnet since limited number of faucet tokens
+  if (chainName === "SEPOLIA") {
+    return { existingPool: undefined };
+  }
+
   return { existingPool };
-  // return { existingPool: undefined };
 };
