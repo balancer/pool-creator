@@ -59,7 +59,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                         <div>{token.symbol}</div>
                         <div>{token.name.length > 40 ? `${token.name.substring(0, 40)}...` : token.name}</div>
                       </div>
-                      <div>-</div>
+                      {/*<div>-</div>*/}
                     </div>
                   </button>
                 );
