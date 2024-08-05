@@ -4,3 +4,6 @@ export * from "./useCheckIfPoolExists";
 export * from "./types";
 export * from "./useNewPoolEvents";
 export * from "./useCreatePool";
+export * from "./useFinalizePool";
+export * from "./useBindPool";
+export * from "./useSetSwapFee";

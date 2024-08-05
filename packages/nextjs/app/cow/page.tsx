@@ -19,7 +19,8 @@ const CowAmm: NextPage = () => {
   const [poolName, setPoolName] = useLocalStorage<string>("poolName", "");
   const [poolSymbol, setPoolSymbol] = useLocalStorage<string>("poolSymbol", "");
   const [hasAgreedToWarning, setHasAgreedToWarning] = useLocalStorage("hasAgreedToWarning", false);
-  const [isFormDisabled, setIsFormDisabled] = useLocalStorage("isFormDisabled", false);
+  const [isChangeNameDisabled, setIsChangeNameDisabled] = useLocalStorage("isChangeNameDisabled", false);
+  const [isChangeTokensDisabled, setIsChangeTokensDisabled] = useLocalStorage("isChangeTokensDisabled", false);
 
   const rawAmount1 = parseUnits(amountToken1, token1?.decimals ?? 0);
   const rawAmount2 = parseUnits(amountToken2, token2?.decimals ?? 0);
@@ -29,13 +30,23 @@ const CowAmm: NextPage = () => {
 
   const resetForm = () => {
     setToken1(undefined);
+    localStorage.removeItem("token1");
     setToken2(undefined);
+    localStorage.removeItem("token2");
     setAmountToken1("");
+    localStorage.removeItem("amountToken1");
     setAmountToken2("");
+    localStorage.removeItem("amountToken2");
     setPoolName("");
+    localStorage.removeItem("poolName");
     setPoolSymbol("");
+    localStorage.removeItem("poolSymbol");
     setHasAgreedToWarning(false);
-    setIsFormDisabled(false);
+    localStorage.removeItem("hasAgreedToWarning");
+    setIsChangeNameDisabled(false);
+    localStorage.removeItem("isChangeNameDisabled");
+    setIsChangeTokensDisabled(false);
+    localStorage.removeItem("isChangeTokensDisabled");
   };
 
   useEffect(() => {
@@ -67,7 +78,7 @@ const CowAmm: NextPage = () => {
                     setToken={setToken1}
                     tokenOptions={selectableTokens}
                     handleAmountChange={e => setAmountToken1(e.target.value)}
-                    isDisabled={isFormDisabled}
+                    isDisabled={isChangeTokensDisabled}
                   />
                   <TokenField
                     value={amountToken2}
@@ -75,7 +86,7 @@ const CowAmm: NextPage = () => {
                     setToken={setToken2}
                     tokenOptions={selectableTokens}
                     handleAmountChange={e => setAmountToken2(e.target.value)}
-                    isDisabled={isFormDisabled}
+                    isDisabled={isChangeTokensDisabled}
                   />
                 </div>
               </div>
@@ -85,14 +96,14 @@ const CowAmm: NextPage = () => {
                 placeholder="i.e. Balancer CoW AMM 50 BAL 50 DAI"
                 value={poolName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPoolName(e.target.value)}
-                isDisabled={isFormDisabled}
+                isDisabled={isChangeNameDisabled}
               />
               <TextField
                 label="Pool symbol:"
                 placeholder="i.e. BCoW-50BAL-50DAI"
                 value={poolSymbol}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPoolSymbol(e.target.value)}
-                isDisabled={isFormDisabled}
+                isDisabled={isChangeNameDisabled}
               />
             </div>
           </div>
@@ -134,7 +145,8 @@ const CowAmm: NextPage = () => {
             token2={{ rawAmount: rawAmount2, address: token2?.address }}
             hasAgreedToWarning={hasAgreedToWarning}
             existingPool={existingPool}
-            setIsFormDisabled={setIsFormDisabled}
+            setIsChangeNameDisabled={setIsChangeNameDisabled}
+            setIsChangeTokensDisabled={setIsChangeTokensDisabled}
             resetForm={resetForm}
           />
         </div>

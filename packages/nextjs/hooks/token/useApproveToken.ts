@@ -21,24 +21,20 @@ export const useApproveToken = () => {
     if (!walletClient) throw new Error("No wallet client found");
     if (!publicClient) throw new Error("No public client found");
 
-    try {
-      const { request: approveSpenderOnToken } = await publicClient.simulateContract({
-        address: token,
-        abi: erc20Abi,
-        functionName: "approve",
-        account: walletClient.account,
-        args: [spender, rawAmount],
-      });
+    const { request: approveSpenderOnToken } = await publicClient.simulateContract({
+      address: token,
+      abi: erc20Abi,
+      functionName: "approve",
+      account: walletClient.account,
+      args: [spender, rawAmount],
+    });
 
-      await writeTx(() => walletClient.writeContract(approveSpenderOnToken), {
-        blockConfirmations: 1,
-        onBlockConfirmation: () => {
-          console.log("Approved  contract to spend", rawAmount, " amount of", token);
-        },
-      });
-    } catch (e) {
-      console.error(e);
-    }
+    await writeTx(() => walletClient.writeContract(approveSpenderOnToken), {
+      blockConfirmations: 1,
+      onBlockConfirmation: () => {
+        console.log("Approved pool contract to spend amount:", rawAmount, " of token:", token);
+      },
+    });
   };
 
   return useMutation({
