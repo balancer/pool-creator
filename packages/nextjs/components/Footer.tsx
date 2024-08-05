@@ -71,7 +71,7 @@ export const Footer = () => {
             <span>·</span>
             <div className="text-center">
               <a
-                href="https://github.com/defi-wonderland/balancer-v1-amm/"
+                href="https://github.com/balancer/cow-amm"
                 target="_blank"
                 rel="noreferrer"
                 className="link no-underline hover:underline"
