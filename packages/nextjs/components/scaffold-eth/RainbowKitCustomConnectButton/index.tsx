@@ -1,13 +1,16 @@
 "use client";
 
 // @refresh reset
-import { Balance } from "../Balance";
+// import { Balance } from "../Balance";
+import { useRef, useState } from "react";
 import { AddressInfoDropdown } from "./AddressInfoDropdown";
 import { AddressQRCodeModal } from "./AddressQRCodeModal";
+import { NetworkOptions } from "./NetworkOptions";
 import { WrongNetworkDropdown } from "./WrongNetworkDropdown";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Address } from "viem";
 import { useNetworkColor } from "~~/hooks/scaffold-eth";
+import { useOutsideClick } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
 
@@ -15,8 +18,17 @@ import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
  * Custom Wagmi Connect Button (watch balance + custom design)
  */
 export const RainbowKitCustomConnectButton = () => {
+  const [selectingNetwork, setSelectingNetwork] = useState(false);
+  const dropdownRef = useRef<HTMLDetailsElement>(null);
+
   const networkColor = useNetworkColor();
   const { targetNetwork } = useTargetNetwork();
+
+  const closeDropdown = () => {
+    setSelectingNetwork(false);
+    dropdownRef.current?.removeAttribute("open");
+  };
+  useOutsideClick(dropdownRef, closeDropdown);
 
   return (
     <ConnectButton.Custom>
@@ -43,11 +55,28 @@ export const RainbowKitCustomConnectButton = () => {
 
               return (
                 <>
-                  <div className="flex flex-col items-center mr-1">
-                    <Balance address={account.address as Address} className="min-h-0 h-auto" />
-                    <span className="text-xs" style={{ color: networkColor }}>
-                      {chain.name}
-                    </span>
+                  <div className="flex flex-col items-center mx-5">
+                    <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
+                      <summary
+                        onClick={() => setSelectingNetwork(true)}
+                        tabIndex={0}
+                        className="btn btn-secondary rounded-xl text-lg shadow-md dropdown-toggle gap-0 !h-auto"
+                        style={{ color: networkColor }}
+                      >
+                        {/* <button
+                          className="text-lg bg-base-200 px-4 py-1.5 rounded-xl hover:bg-base-100 hover:cursor-pointer"
+                          style={{ color: networkColor }}
+                        > */}
+                        {chain.name}
+                        {/* </button> */}
+                      </summary>
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content menu z-[2] p-2 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1"
+                      >
+                        <NetworkOptions hidden={!selectingNetwork} />
+                      </ul>
+                    </details>
                   </div>
                   <AddressInfoDropdown
                     address={account.address as Address}

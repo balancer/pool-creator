@@ -20,10 +20,10 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "🐮 CoW AMMs",
     href: "/cow",
   },
-  {
-    label: "🐞 Debug Contracts",
-    href: "/debug",
-  },
+  // {
+  //   label: "🐞 Debug Contracts",
+  //   href: "/debug",
+  // },
 ];
 
 export const HeaderMenuLinks = () => {

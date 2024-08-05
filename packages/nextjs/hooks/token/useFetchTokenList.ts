@@ -37,15 +37,18 @@ export const useFetchTokenList = () => {
         throw new Error("Error fetching token list from balancer API");
       }
 
-      // Hardcoded token list for sepolia testing
       if (chainName === "SEPOLIA") {
+        // Only use faucet tokens for sepolia testing
         return SEPOLIA_FAUCET_TOKENS;
       } else {
-        return json.data.tokenGetTokens;
+        // Filter out native assets
+        return json.data.tokenGetTokens.filter((token: Token) => token.address !== NATIVE_ASSET_ADDRESS);
       }
     },
   });
 };
+
+const NATIVE_ASSET_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
 const chainId = sepolia.id;
 const SEPOLIA_FAUCET_TOKENS = [

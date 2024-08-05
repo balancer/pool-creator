@@ -36,10 +36,10 @@ export const SwitchTheme = ({ className }: { className?: string }) => {
       <label
         onClick={handleToggle}
         htmlFor="theme-toggle"
-        className={`mr-2 swap swap-rotate ${!isDarkMode ? "swap-active" : ""}`}
+        className={`btn btn-secondary rounded-xl swap swap-rotate ${!isDarkMode ? "swap-active" : ""}`}
       >
-        <SunIcon className="swap-on h-7 w-7" />
-        <MoonIcon className="swap-off h-7 w-7" />
+        <SunIcon className="swap-on h-6 w-6" />
+        <MoonIcon className="swap-off h-6 w-6" />
       </label>
     </div>
   );
