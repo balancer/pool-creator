@@ -1,4 +1,5 @@
 import React from "react";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 // import Link from "next/link";
 // import { hardhat } from "viem/chains";
@@ -15,8 +16,9 @@ import React from "react";
  */
 export const Footer = () => {
   // const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
-  // const { targetNetwork } = useTargetNetwork();
+  const { targetNetwork } = useTargetNetwork();
   // const isLocalNetwork = targetNetwork.id === hardhat.id;
+  const isSepolia = targetNetwork.id == 11155111;
 
   return (
     <div className="min-h-0 py-5 px-1 lg:mb-0 bg-base-300 border-t-2 border-base-200">
@@ -47,17 +49,21 @@ export const Footer = () => {
       <div className="w-full">
         <ul className="menu menu-horizontal w-full text-xl">
           <div className="flex justify-center items-center gap-4 w-full">
-            <div className="text-center">
-              <a
-                href="https://beta-app-v2-git-sepolia-faucets-balancer.vercel.app/#/sepolia/faucet"
-                target="_blank"
-                rel="noreferrer"
-                className="link no-underline hover:underline"
-              >
-                💦 Faucet
-              </a>
-            </div>
-            <span>·</span>
+            {isSepolia && (
+              <>
+                <div className="text-center">
+                  <a
+                    href="https://beta-app-v2-git-sepolia-faucets-balancer.vercel.app/#/sepolia/faucet"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link no-underline hover:underline"
+                  >
+                    💦 Faucet
+                  </a>
+                </div>
+                <span>·</span>
+              </>
+            )}
             <div className="text-center">
               <a
                 href="https://github.com/balancer/pool-creator"
