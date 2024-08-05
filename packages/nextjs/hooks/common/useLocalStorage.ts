@@ -21,7 +21,9 @@ export const useLocalStorage = <T>(key: string, defaultValue: T) => {
 
   useEffect(() => {
     if (hasMounted) {
-      window.localStorage.setItem(key, JSON.stringify(state));
+      if (state) {
+        window.localStorage.setItem(key, JSON.stringify(state));
+      }
     }
   }, [key, state, hasMounted]);
 

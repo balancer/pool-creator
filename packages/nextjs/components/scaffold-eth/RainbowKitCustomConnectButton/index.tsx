@@ -70,10 +70,7 @@ export const RainbowKitCustomConnectButton = () => {
                         {chain.name}
                         {/* </button> */}
                       </summary>
-                      <ul
-                        tabIndex={0}
-                        className="dropdown-content menu z-[2] p-2 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1"
-                      >
+                      <ul tabIndex={0} className="dropdown-content menu z-[2] p-2 mt-2 bg-base-100 rounded-box gap-1">
                         <NetworkOptions hidden={!selectingNetwork} />
                       </ul>
                     </details>
