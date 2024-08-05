@@ -16,6 +16,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+      <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
       <div className="relative w-[500px]">
         <div className="relative bg-base-300 border border-base-200 rounded-lg">
           <div className="p-4">
