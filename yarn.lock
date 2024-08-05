@@ -2336,6 +2336,7 @@ __metadata:
     react-copy-to-clipboard: ^5.1.0
     react-dom: ^18.2.0
     react-hot-toast: ^2.4.0
+    react-tiny-virtual-list: ^2.2.0
     tailwindcss: ^3.4.3
     type-fest: ^4.6.0
     typescript: 5.5.3
@@ -11813,7 +11814,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.7, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -12090,6 +12091,17 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 7ee8ef3aab74c7ae1d70ff34a27643d11ba1a8d62d072c767827d9ff9a520905223e567002e0bf6c772929d8ea1c781a3ba0cc4a563e92b1e3dc2eaa817ecbe8
+  languageName: node
+  linkType: hard
+
+"react-tiny-virtual-list@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "react-tiny-virtual-list@npm:2.2.0"
+  dependencies:
+    prop-types: ^15.5.7
+  peerDependencies:
+    react: 15.x || 16.x
+  checksum: e89908ab643827f8cda2f3b8dcdb1406c800cfa830ad7a9e76a8f806a5fe07c1a5f33d136967ad177e9e786903667c4053449e1b0143bfb7d7b482f667f8372b
   languageName: node
   linkType: hard
 
