@@ -3,14 +3,7 @@ import Link from "next/link";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address, parseUnits } from "viem";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
-import {
-  useBindPool,
-  useCreatePool,
-  useFinalizePool,
-  useNewPoolEvents,
-  useReadPool,
-  useSetSwapFee,
-} from "~~/hooks/cow/";
+import { useBindPool, useCreatePool, useFinalizePool, useReadPool, useSetSwapFee } from "~~/hooks/cow/";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { PoolCreationState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
