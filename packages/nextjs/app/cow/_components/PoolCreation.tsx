@@ -39,7 +39,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     state.token2.address,
     pool?.address,
   );
-  useNewPoolEvents(setUserPoolAddress); // grab / listen for user's pool creation events to set the target pool address
   const refetchAllowances = () => {
     refetchAllowance1();
     refetchAllowance2();
