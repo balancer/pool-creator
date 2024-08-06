@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address } from "viem";
-import { useAccount } from "wagmi";
-import { TransactionButton } from "~~/components/common/";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Alert, TransactionButton } from "~~/components/common/";
 import {
   type ExistingPool,
   useBindPool,
@@ -44,59 +44,57 @@ export const ManagePoolCreation = ({
 }: ManagePoolCreationProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
-
-  const { address: connectedAddress } = useAccount();
+  console.log("render");
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(token1?.address, pool?.address);
   const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(token2?.address, pool?.address);
-  useNewPoolEvents(connectedAddress, setUserPoolAddress); // listen for user's pool creation events
+  useNewPoolEvents(setUserPoolAddress); // grab / listen for user's pool creation events to set the target pool address
 
-  const { mutate: createPool, isPending: createPoolIsPending } = useCreatePool();
-  const { mutate: approve, isPending: approveIsPending } = useApproveToken();
-  const { mutate: bind, isPending: bindIsPending } = useBindPool(() => refetchPool());
-  const { mutate: setSwapFee, isPending: swapFeeIsPending } = useSetSwapFee();
-  const { mutate: finalizePool, isPending: finalizeIsPending } = useFinalizePool();
-
-  const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
+  const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
+  const {
+    mutate: approve,
+    isPending: isApprovePending,
+    error: approveError,
+  } = useApproveToken(() => {
+    refetchAllowance1();
+    refetchAllowance2();
+  });
+  const { mutate: bind, isPending: isBindPending, error: bindError } = useBindPool();
+  const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
+  const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
 
   const handleCreatePool = () =>
-    createPool(
-      { name, symbol },
-      {
-        onSuccess: newPoolAddress => {
-          setUserPoolAddress(newPoolAddress);
-        },
-      },
-    );
+    createPool({ name, symbol }, { onSuccess: newPoolAddress => setUserPoolAddress(newPoolAddress) });
 
   const handleApproveTokens = async () => {
     const approve1Payload = { token: token1?.address, spender: pool?.address, rawAmount: token1.rawAmount };
     const approve2Payload = { token: token2?.address, spender: pool?.address, rawAmount: token2.rawAmount };
-    if (token1.rawAmount > allowance1) approve(approve1Payload, { onSuccess: () => refetchAllowance1() });
-    if (token2.rawAmount > allowance2) approve(approve2Payload, { onSuccess: () => refetchAllowance2() });
+    if (token1.rawAmount > allowance1) approve(approve1Payload);
+    if (token2.rawAmount > allowance2) approve(approve2Payload);
   };
 
   const handleBindTokens = async () => {
-    if (!token1.address || !token2.address) throw new Error("Must select tokens before binding");
-    const poolTokens = pool?.getCurrentTokens.map(token => token.toLowerCase());
-    if (poolTokens && !poolTokens.includes(token1.address.toLowerCase())) {
-      bind({ pool: pool?.address, token: token1.address, rawAmount: token1.rawAmount });
+    if (!token1.address || !token2.address || !pool) throw new Error("Required value is undefined in handleBindTokens");
+    const poolTokens = pool.getCurrentTokens.map(token => token.toLowerCase());
+    // If not already bound, bind the token1
+    if (!poolTokens.includes(token1.address.toLowerCase())) {
+      bind(
+        { pool: pool.address, token: token1.address, rawAmount: token1.rawAmount },
+        { onSuccess: () => refetchPool() },
+      );
     }
-    if (poolTokens && !poolTokens.includes(token2.address.toLowerCase())) {
-      bind({ pool: pool?.address, token: token2.address, rawAmount: token2.rawAmount });
+    // If not already bound, bind token2
+    if (!poolTokens.includes(token2.address.toLowerCase())) {
+      bind(
+        { pool: pool.address, token: token2.address, rawAmount: token2.rawAmount },
+        { onSuccess: () => refetchPool() },
+      );
     }
   };
 
   const handleSetSwapFee = async () => {
     if (!pool) throw new Error("Pool is undefined in handleSetSwapFee");
-    setSwapFee(
-      { pool: pool.address, rawAmount: pool.MAX_FEE },
-      {
-        onSuccess: () => {
-          refetchPool();
-        },
-      },
-    );
+    setSwapFee({ pool: pool.address, rawAmount: pool.MAX_FEE }, { onSuccess: () => refetchPool() });
   };
 
   const handleFinalize = async () => {
@@ -108,6 +106,8 @@ export const ManagePoolCreation = ({
       },
     });
   };
+
+  const validTokenAmounts = token1.rawAmount > 0n && token2.rawAmount > 0n;
 
   useEffect(() => {
     // Creating the pool sets the name and symbol permanently
@@ -138,7 +138,6 @@ export const ManagePoolCreation = ({
   }, [
     pool,
     userPoolAddress,
-    connectedAddress,
     pool?.isFinalized,
     pool?.getNumTokens,
     allowance1,
@@ -151,6 +150,8 @@ export const ManagePoolCreation = ({
     setIsChangeTokensDisabled,
   ]);
 
+  const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
+
   return (
     <>
       <StepsDisplay currentStep={currentStep} />
@@ -162,9 +163,9 @@ export const ManagePoolCreation = ({
               return (
                 <TransactionButton
                   title="Create Pool"
-                  isPending={createPoolIsPending}
+                  isPending={isCreatePending}
                   isDisabled={
-                    createPoolIsPending ||
+                    isCreatePending ||
                     // If user has not selected tokens or entered amounts
                     !token1.address ||
                     !token2.address ||
@@ -181,9 +182,9 @@ export const ManagePoolCreation = ({
               return (
                 <TransactionButton
                   title="Approve"
-                  isPending={approveIsPending}
+                  isPending={isApprovePending}
                   isDisabled={
-                    approveIsPending ||
+                    isApprovePending ||
                     // If user has not selected tokens or entered amounts
                     token1.address === undefined ||
                     token2.address === undefined ||
@@ -198,8 +199,8 @@ export const ManagePoolCreation = ({
               return (
                 <TransactionButton
                   title="Add Liquidity"
-                  isPending={bindIsPending}
-                  isDisabled={bindIsPending || !hasAgreedToWarning}
+                  isPending={isBindPending}
+                  isDisabled={isBindPending || !hasAgreedToWarning}
                   onClick={handleBindTokens}
                 />
               );
@@ -208,8 +209,8 @@ export const ManagePoolCreation = ({
                 <TransactionButton
                   title="Set Swap Fee"
                   onClick={handleSetSwapFee}
-                  isPending={swapFeeIsPending}
-                  isDisabled={swapFeeIsPending || !hasAgreedToWarning}
+                  isPending={isSetSwapFeePending}
+                  isDisabled={isSetSwapFeePending || !hasAgreedToWarning}
                 />
               );
             case 5:
@@ -217,8 +218,8 @@ export const ManagePoolCreation = ({
                 <TransactionButton
                   title="Finalize"
                   onClick={handleFinalize}
-                  isPending={finalizeIsPending}
-                  isDisabled={finalizeIsPending || !hasAgreedToWarning}
+                  isPending={isFinalizePending}
+                  isDisabled={isFinalizePending || !hasAgreedToWarning}
                 />
               );
             default:
@@ -226,6 +227,14 @@ export const ManagePoolCreation = ({
           }
         })()}
       </div>
+      {txError && (
+        <Alert type="error">
+          <div className="flex items-center gap-2">
+            <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
+            {(txError as { shortMessage?: string }).shortMessage || "An unknown error occurred"}
+          </div>
+        </Alert>
+      )}
     </>
   );
 };

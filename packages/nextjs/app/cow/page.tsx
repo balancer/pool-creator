@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Link from "next/link";
 import { ManagePoolCreation } from "./_components";
 import type { NextPage } from "next";
@@ -9,55 +9,132 @@ import { Alert } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
 import { useLocalStorage } from "~~/hooks/common";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
 
-const CowAmm: NextPage = () => {
-  const [token1, setToken1] = useLocalStorage<Token | undefined>("token1", undefined);
-  const [token2, setToken2] = useLocalStorage<Token | undefined>("token2", undefined);
-  const [amountToken1, setAmountToken1] = useLocalStorage<string>("amountToken1", "");
-  const [amountToken2, setAmountToken2] = useLocalStorage<string>("amountToken2", "");
-  const [poolName, setPoolName] = useLocalStorage<string>("poolName", "");
-  const [poolSymbol, setPoolSymbol] = useLocalStorage<string>("poolSymbol", "");
-  const [hasAgreedToWarning, setHasAgreedToWarning] = useLocalStorage("hasAgreedToWarning", false);
-  const [isChangeNameDisabled, setIsChangeNameDisabled] = useLocalStorage("isChangeNameDisabled", false);
-  const [isChangeTokensDisabled, setIsChangeTokensDisabled] = useLocalStorage("isChangeTokensDisabled", false);
+type TokenWithAmount = Token & { amount: string };
 
-  const rawAmount1 = parseUnits(amountToken1, token1?.decimals ?? 0);
-  const rawAmount2 = parseUnits(amountToken2, token2?.decimals ?? 0);
+type CreatePoolFormData = {
+  token1: TokenWithAmount;
+  token2: TokenWithAmount;
+  name: string;
+  symbol: string;
+  hasAgreedToWarning: boolean;
+  isChangeNameDisabled: boolean;
+  isChangeTokensDisabled: boolean;
+};
+
+const INITIAL_FORM_DATA: CreatePoolFormData = {
+  token1: { amount: "" },
+  token2: { amount: "" },
+  name: "",
+  symbol: "",
+  hasAgreedToWarning: false,
+  isChangeNameDisabled: false,
+  isChangeTokensDisabled: false,
+};
+
+const CowAmm: NextPage = () => {
+  const { targetNetwork } = useTargetNetwork();
+
+  const [formData, setFormData] = useLocalStorage<CreatePoolFormData>(
+    `createPoolFormData-${targetNetwork.id}`,
+    INITIAL_FORM_DATA,
+  );
+
+  const [previousNetworkId, setPreviousNetworkId] = useLocalStorage<string | null>(
+    "previousNetworkId",
+    targetNetwork.id.toString(),
+  );
+
+  const { token1, token2, name, symbol, hasAgreedToWarning, isChangeNameDisabled, isChangeTokensDisabled } = formData;
 
   const { data: tokenList } = useFetchTokenList();
   const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
 
   const resetForm = () => {
-    setToken1(undefined);
-    localStorage.removeItem("token1");
-    setToken2(undefined);
-    localStorage.removeItem("token2");
-    setAmountToken1("");
-    localStorage.removeItem("amountToken1");
-    setAmountToken2("");
-    localStorage.removeItem("amountToken2");
-    setPoolName("");
-    localStorage.removeItem("poolName");
-    setPoolSymbol("");
-    localStorage.removeItem("poolSymbol");
-    setHasAgreedToWarning(false);
-    localStorage.removeItem("hasAgreedToWarning");
-    setIsChangeNameDisabled(false);
-    localStorage.removeItem("isChangeNameDisabled");
-    setIsChangeTokensDisabled(false);
-    localStorage.removeItem("isChangeTokensDisabled");
+    localStorage.removeItem(`createPoolFormData-${targetNetwork.id}`);
+    setFormData(INITIAL_FORM_DATA);
   };
 
+  const handleTokenChange = (tokenKey: "token1" | "token2", tokenData: Token) => {
+    setFormData(prev => ({
+      ...prev,
+      [tokenKey]: {
+        ...prev[tokenKey],
+        ...tokenData,
+        amount: prev[tokenKey].amount,
+      },
+    }));
+  };
+
+  const handleAmountChange = (tokenKey: "token1" | "token2", amount: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [tokenKey]: {
+        ...prev[tokenKey],
+        amount: amount,
+      },
+    }));
+  };
+
+  const handleInputChange = (field: keyof Omit<CreatePoolFormData, "token1" | "token2">, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleHasAgreedToWarning = () => {
+    setFormData(prev => ({
+      ...prev,
+      hasAgreedToWarning: !prev.hasAgreedToWarning,
+    }));
+  };
+
+  const handleSetIsChangeNameDisabled = useCallback(
+    (isDisabled: boolean) => {
+      setFormData(prev => ({
+        ...prev,
+        isChangeNameDisabled: isDisabled,
+      }));
+    },
+    [setFormData],
+  );
+  const handleSetIsChangeTokensDisabled = useCallback(
+    (isDisabled: boolean) => {
+      setFormData(prev => ({
+        ...prev,
+        isChangeTokensDisabled: isDisabled,
+      }));
+    },
+    [setFormData],
+  );
+
   useEffect(() => {
-    if (token1 && token2) {
-      setPoolName(`Balancer CoW AMM 50 ${token1?.symbol} 50 ${token2?.symbol}`);
-      setPoolSymbol(`BCoW-50${token1?.symbol}-50${token2?.symbol}`);
+    if (token1?.symbol && token2?.symbol) {
+      const newName = `Balancer CoW AMM 50 ${token1?.symbol} 50 ${token2?.symbol}`;
+      const newSymbol = `BCoW-50${token1?.symbol}-50${token2?.symbol}`;
+
+      setFormData(prev => ({
+        ...prev,
+        name: newName,
+        symbol: newSymbol,
+      }));
     }
-  }, [token1, token2, setPoolName, setPoolSymbol]);
+  }, [token1, token2, setFormData]);
+
+  useEffect(() => {
+    if (previousNetworkId !== targetNetwork.id.toString()) {
+      resetForm();
+    }
+    setPreviousNetworkId(targetNetwork.id.toString());
+  }, [targetNetwork.id, setPreviousNetworkId, previousNetworkId, resetForm]);
 
   // Filter out tokens that have already been chosen
-  const selectableTokens = tokenList?.filter(token => token !== token1 && token !== token2);
+  const selectableTokens = tokenList?.filter(
+    token => token.address !== token1.address && token.address !== token2.address,
+  );
 
   return (
     <div className="flex-grow bg-base-300">
@@ -73,19 +150,19 @@ const CowAmm: NextPage = () => {
                 <div className="ml-1 mb-1">Select pool tokens:</div>
                 <div className="w-full flex flex-col gap-3">
                   <TokenField
-                    value={amountToken1}
+                    value={token1.amount}
                     selectedToken={token1}
-                    setToken={setToken1}
+                    setToken={token => handleTokenChange("token1", token)}
                     tokenOptions={selectableTokens}
-                    handleAmountChange={e => setAmountToken1(e.target.value)}
+                    handleAmountChange={e => handleAmountChange("token1", e.target.value)}
                     isDisabled={isChangeTokensDisabled}
                   />
                   <TokenField
-                    value={amountToken2}
+                    value={token2.amount}
                     selectedToken={token2}
-                    setToken={setToken2}
+                    setToken={token => handleTokenChange("token2", token)}
                     tokenOptions={selectableTokens}
-                    handleAmountChange={e => setAmountToken2(e.target.value)}
+                    handleAmountChange={e => handleAmountChange("token2", e.target.value)}
                     isDisabled={isChangeTokensDisabled}
                   />
                 </div>
@@ -94,15 +171,15 @@ const CowAmm: NextPage = () => {
               <TextField
                 label="Pool name:"
                 placeholder="i.e. Balancer CoW AMM 50 BAL 50 DAI"
-                value={poolName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPoolName(e.target.value)}
+                value={formData.name}
+                onChange={e => handleInputChange("name", e.target.value)}
                 isDisabled={isChangeNameDisabled}
               />
               <TextField
                 label="Pool symbol:"
                 placeholder="i.e. BCoW-50BAL-50DAI"
-                value={poolSymbol}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPoolSymbol(e.target.value)}
+                value={formData.symbol}
+                onChange={e => handleInputChange("symbol", e.target.value)}
                 isDisabled={isChangeNameDisabled}
               />
             </div>
@@ -127,7 +204,7 @@ const CowAmm: NextPage = () => {
                   <input
                     type="checkbox"
                     className="checkbox rounded-lg"
-                    onChange={() => setHasAgreedToWarning(!hasAgreedToWarning)}
+                    onChange={handleHasAgreedToWarning}
                     checked={hasAgreedToWarning}
                   />
                   <span className="">
@@ -139,14 +216,14 @@ const CowAmm: NextPage = () => {
           )}
 
           <ManagePoolCreation
-            name={poolName}
-            symbol={poolSymbol}
-            token1={{ rawAmount: rawAmount1, address: token1?.address }}
-            token2={{ rawAmount: rawAmount2, address: token2?.address }}
+            name={name}
+            symbol={symbol}
+            token1={{ rawAmount: parseUnits(token1.amount, token1?.decimals ?? 0), address: token1?.address }}
+            token2={{ rawAmount: parseUnits(token2.amount, token2?.decimals ?? 0), address: token2?.address }}
             hasAgreedToWarning={hasAgreedToWarning}
             existingPool={existingPool}
-            setIsChangeNameDisabled={setIsChangeNameDisabled}
-            setIsChangeTokensDisabled={setIsChangeTokensDisabled}
+            setIsChangeNameDisabled={handleSetIsChangeNameDisabled}
+            setIsChangeTokensDisabled={handleSetIsChangeTokensDisabled}
             resetForm={resetForm}
           />
         </div>

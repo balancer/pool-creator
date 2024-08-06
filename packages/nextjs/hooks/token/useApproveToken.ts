@@ -10,7 +10,7 @@ type ApprovePayload = {
   rawAmount: bigint;
 };
 
-export const useApproveToken = () => {
+export const useApproveToken = (refetchAllowances: () => void) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
@@ -33,6 +33,7 @@ export const useApproveToken = () => {
       blockConfirmations: 1,
       onBlockConfirmation: () => {
         console.log("Approved pool contract to spend amount:", rawAmount, " of token:", token);
+        refetchAllowances();
       },
     });
   };

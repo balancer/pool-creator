@@ -5,13 +5,13 @@ import { type Token } from "~~/hooks/token";
 
 type ModalProps = {
   tokenOptions: Token[];
-  setToken: Dispatch<SetStateAction<Token | undefined>>;
+  setToken: (token: Token) => void;
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModalOpen, setToken }) => {
   const [searchText, setSearchText] = useState("");
-  const filteredTokenOptions = tokenOptions.filter(option =>
-    option.symbol.toLowerCase().startsWith(searchText.toLowerCase()),
+  const filteredTokenOptions = tokenOptions.filter(
+    option => option.symbol && option.symbol.toLowerCase().startsWith(searchText.toLowerCase()),
   );
 
   return (
@@ -54,12 +54,20 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                     }}
                     className="flex w-full rounded-lg hover:bg-base-200 p-2 h-[64px] px-4"
                   >
-                    <div className="flex w-full justify-between items-center">
+                    <div className="flex w-full gap-5 items-center">
+                      {token.logoURI === "" ? (
+                        <div className="flex flex-col items-center justify-center w-8 h-8 rounded-full bg-base-100 text-neutral-400">
+                          ?
+                        </div>
+                      ) : (
+                        <img src={token.logoURI} alt={token.symbol} className="w-8 h-8 rounded-full" />
+                      )}
                       <div className="text-start flex-1">
-                        <div>{token.symbol}</div>
-                        <div>{token.name.length > 40 ? `${token.name.substring(0, 40)}...` : token.name}</div>
+                        <div>{token.symbol && token.symbol}</div>
+                        <div>
+                          {token.name && token.name.length > 40 ? `${token.name.substring(0, 40)}...` : token.name}
+                        </div>
                       </div>
-                      {/*<div>-</div>*/}
                     </div>
                   </button>
                 );

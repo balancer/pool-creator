@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { Address } from "viem";
+import { useAccount } from "wagmi";
 import { useScaffoldEventHistory, useScaffoldWatchContractEvent } from "~~/hooks/scaffold-eth";
 
-export const useNewPoolEvents = (
-  connectedAddress: Address | undefined,
-  setUserPoolAddress: Dispatch<SetStateAction<Address | undefined>>,
-) => {
+export const useNewPoolEvents = (setUserPoolAddress: Dispatch<SetStateAction<Address | undefined>>) => {
+  const { address: connectedAddress } = useAccount();
+
   const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
     contractName: "BCoWFactory",
     eventName: "LOG_NEW_POOL",

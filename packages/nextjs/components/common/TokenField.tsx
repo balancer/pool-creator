@@ -1,8 +1,8 @@
 "use client";
 
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { TokenSelectModal } from "~~/components/common";
+import { TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
 import { useFetchTokenPrices, useReadToken } from "~~/hooks/token";
 import { formatToHuman } from "~~/utils/formatToHuman";
@@ -18,7 +18,7 @@ export const TokenField = ({
   isDisabled?: boolean;
   value: string;
   tokenOptions?: Token[] | undefined;
-  setToken: Dispatch<SetStateAction<Token | undefined>>;
+  setToken: (token: Token) => void;
   selectedToken: Token | undefined;
   handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
@@ -28,8 +28,10 @@ export const TokenField = ({
   const { data: tokenPrices, isLoading, isError } = useFetchTokenPrices();
 
   let price;
-  if (tokenPrices && selectedToken) {
-    price = tokenPrices.find(token => token?.address.toLowerCase() === selectedToken?.address.toLowerCase())?.price;
+  if (tokenPrices && selectedToken?.address) {
+    price = tokenPrices.find(
+      token => selectedToken.address && token?.address.toLowerCase() === selectedToken?.address.toLowerCase(),
+    )?.price;
   }
   if (price && price > 0) {
     price = (price * Number(value)).toFixed(2);
@@ -47,16 +49,17 @@ export const TokenField = ({
           min="0"
           placeholder="0.0"
           value={value}
-          className={`pb-5 text-right text-2xl w-full input  rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content h-[72px]`}
+          className={`pb-5 text-right text-2xl w-full input  rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content h-[77px]`}
         />
         <div className="absolute top-0 left-0 ">
           <div className="p-2.5">
             <button
               disabled={isDisabled}
               onClick={() => setIsModalOpen(true)}
-              className="btn btn-secondary btn-sm disabled:text-base-content text-lg font-bold bg-base-100 disabled:bg-base-100 rounded-lg flex justify-between items-center gap-2 mb-[4px]"
+              className="px-3 py-2 bg-secondary shadow-md disabled:text-base-content text-lg font-bold disabled:bg-base-100 rounded-lg flex justify-between items-center gap-2 mb-[1.5px]"
             >
-              {selectedToken ? selectedToken.symbol : "Select Token"}{" "}
+              {selectedToken?.symbol && selectedToken.logoURI !== "" && <TokenImage token={selectedToken} />}
+              {selectedToken?.symbol ? selectedToken.symbol : "Select Token"}{" "}
               {!isDisabled && <ChevronDownIcon className="w-4 h-4 mt-0.5" />}
             </button>
 
