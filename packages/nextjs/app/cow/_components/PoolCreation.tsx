@@ -132,9 +132,9 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
   useEffect(() => {
     // If user has no pools or their most recent pool is already finalized
-    if (!userPoolAddress || pool?.isFinalized) {
-      setCurrentStep(1);
-    }
+    // if (!userPoolAddress || pool?.isFinalized) {
+    //   setCurrentStep(1);
+    // }
     // If user has created a pool, but not finalized and tokens not binded
     if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
       // If user has not approved tokens

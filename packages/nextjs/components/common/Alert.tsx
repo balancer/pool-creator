@@ -14,8 +14,8 @@ export const Alert: React.FC<AlertProps> = ({ children, type }) => {
     bgColor = "bg-[#fb923c40]";
     borderColor = "border-orange-400";
   } else if (type === "success") {
-    bgColor = "bg-green-800";
-    borderColor = "border-green-400";
+    bgColor = "bg-[#15803d33]";
+    borderColor = "border-green-500";
   }
   return (
     <div className={`${bgColor} border ${borderColor} rounded-lg p-3 overflow-auto  w-full sm:w-[555px] `}>
