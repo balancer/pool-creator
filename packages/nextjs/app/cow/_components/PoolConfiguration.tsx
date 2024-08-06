@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { Alert, TransactionButton } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
@@ -9,7 +10,7 @@ import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { type Token, useFetchTokenList } from "~~/hooks/token";
+import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 
 export const PoolConfiguration = () => {
   const { targetNetwork } = useTargetNetwork();
@@ -25,7 +26,14 @@ export const PoolConfiguration = () => {
 
   const { data } = useFetchTokenList();
   const tokenList = data || [];
+  const filteredTokenList = tokenList.filter(
+    token => token.address !== token1?.address && token.address !== token2?.address,
+  );
   const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
+  const { balance: balance1 } = useReadToken(token1?.address);
+  const { balance: balance2 } = useReadToken(token2?.address);
+  const token1RawAmount = parseUnits(token1Amount, token1?.decimals ?? 0);
+  const token2RawAmount = parseUnits(token2Amount, token2?.decimals ?? 0);
 
   const { chain } = useAccount();
 
@@ -52,6 +60,8 @@ export const PoolConfiguration = () => {
     }
   }, [token1, token2]);
 
+  const sufficientBalances = balance1 > token1RawAmount && balance2 > token2RawAmount;
+
   const canProceedToCreate =
     token1 !== null &&
     token2 !== null &&
@@ -59,7 +69,8 @@ export const PoolConfiguration = () => {
     token2Amount !== "" &&
     hasAgreedToWarning &&
     poolName !== "" &&
-    poolSymbol !== "";
+    poolSymbol !== "" &&
+    sufficientBalances;
 
   return (
     <>
@@ -80,7 +91,7 @@ export const PoolConfiguration = () => {
 
                   setToken1(selectedToken);
                 }}
-                tokenOptions={tokenList || []}
+                tokenOptions={filteredTokenList || []}
                 handleAmountChange={e => setToken1Amount(e.target.value)}
               />
               <TokenField
@@ -93,7 +104,7 @@ export const PoolConfiguration = () => {
 
                   setToken2(selectedToken);
                 }}
-                tokenOptions={tokenList || []}
+                tokenOptions={filteredTokenList || []}
                 handleAmountChange={e => setToken2Amount(e.target.value)}
               />
             </div>

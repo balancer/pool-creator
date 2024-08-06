@@ -28,19 +28,25 @@ yarn start
 
 ## Run on Fork
 
-1. Choose `targetFork` network in `scaffold.config.ts`
+1. Add `chains.foundry` as the first item in `scaffoldConfig.targetNetworks`
+
+```
+  targetNetworks: [chains.foundry, chains.sepolia, chains.mainnet, chains.gnosis],
+```
+
+2. Choose `targetFork` network in `scaffold.config.ts`
 
 ```
   targetFork: chains.sepolia,
 ```
 
-2. Start the Fork using a matching RPC_URL
+3. Start the fork using `RPC_URL` that matches chain chosed for `targetFork`
 
 ```
 anvil --fork-url <RPC_URL>
 ```
 
-3. Start the frontend
+4. Start the frontend
 
 ```
 yarn start
