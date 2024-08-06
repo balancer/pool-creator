@@ -2,11 +2,6 @@
 
 A frontend tool for creating and initializing various pool types on Balancer
 
-### Notes
-
-- Cannot create pools with same token pairs, weight, and swap fee
-  - except on testnets its allowed for convenience
-
 ## Requirements
 
 To run the code locally, the following tools are required:
@@ -26,6 +21,26 @@ yarn install
 ```
 
 2. Start the frontend
+
+```
+yarn start
+```
+
+## Run on Fork
+
+1. Choose `targetFork` network in `scaffold.config.ts`
+
+```
+  targetFork: chains.sepolia,
+```
+
+2. Start the Fork using a matching RPC_URL
+
+```
+anvil --fork-url <RPC_URL>
+```
+
+3. Start the frontend
 
 ```
 yarn start

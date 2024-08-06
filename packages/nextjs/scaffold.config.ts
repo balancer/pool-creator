@@ -2,6 +2,7 @@ import * as chains from "viem/chains";
 
 export type ScaffoldConfig = {
   targetNetworks: readonly chains.Chain[];
+  targetFork: chains.Chain;
   pollingInterval: number;
   alchemyApiKey: string;
   walletConnectProjectId: string;
@@ -10,7 +11,10 @@ export type ScaffoldConfig = {
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.sepolia, chains.mainnet, chains.gnosis],
+  targetNetworks: [chains.foundry, chains.sepolia, chains.mainnet, chains.gnosis],
+
+  // If using chains.foundry as your targetNetwork, you must specify a network to fork
+  targetFork: chains.sepolia,
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect if you only target the local network (default is 4000)
