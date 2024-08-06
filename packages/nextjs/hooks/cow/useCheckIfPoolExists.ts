@@ -52,15 +52,15 @@ export const useCheckIfPoolExists = (token1: Address | undefined, token2: Addres
 
   const existingPool = existingPools?.find(pool => {
     if (!token1 || !token2) return false;
+
     const poolTokenAddresses = pool.allTokens.map(token => token.address);
     const hasOnlyTwoTokens = poolTokenAddresses.length === 2;
     const selectedToken1 = token1.toLowerCase() ?? "";
     const selectedToken2 = token2.toLowerCase() ?? "";
     const includesToken1 = poolTokenAddresses.includes(selectedToken1);
     const includesToken2 = poolTokenAddresses.includes(selectedToken2);
-    const has5050Weight = pool.allTokens.every(token => token.weight === "0.5");
-    const hasMaxSwapFee = pool.dynamicData.swapFee === "0.999999";
-    return hasOnlyTwoTokens && has5050Weight && hasMaxSwapFee && includesToken1 && includesToken2;
+
+    return hasOnlyTwoTokens && includesToken1 && includesToken2;
   });
 
   // Don't prevent pool duplication on testnet since limited number of faucet tokens

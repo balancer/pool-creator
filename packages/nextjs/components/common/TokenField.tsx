@@ -19,7 +19,7 @@ export const TokenField = ({
   value: string;
   tokenOptions?: Token[] | undefined;
   setToken: (token: Token) => void;
-  selectedToken: Token | undefined;
+  selectedToken: Token | null;
   handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -14,7 +14,9 @@ export const useLocalStorage = <T>(key: string, defaultValue: T) => {
     if (hasMounted) {
       const savedValue = window.localStorage.getItem(key);
       if (savedValue) {
-        setState(JSON.parse(savedValue));
+        try {
+          setState(JSON.parse(savedValue));
+        }catch {}
       }
     }
   }, [hasMounted, key]);
