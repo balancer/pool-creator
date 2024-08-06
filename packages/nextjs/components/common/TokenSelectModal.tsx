@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { TokenImage } from "~~/components/common/";
 import { type Token } from "~~/hooks/token";
 
 type ModalProps = {
@@ -55,13 +56,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                     className="flex w-full rounded-lg hover:bg-base-200 p-2 h-[64px] px-4"
                   >
                     <div className="flex w-full gap-5 items-center">
-                      {token.logoURI === "" ? (
-                        <div className="flex flex-col items-center justify-center w-8 h-8 rounded-full bg-base-100 text-neutral-400">
-                          ?
-                        </div>
-                      ) : (
-                        <img src={token.logoURI} alt={token.symbol} className="w-8 h-8 rounded-full" />
-                      )}
+                      <TokenImage token={token} />
                       <div className="text-start flex-1">
                         <div>{token.symbol && token.symbol}</div>
                         <div>
