@@ -29,6 +29,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   const [poolFinalized, setPoolFinalized] = useState<boolean>(false);
 
   const { targetNetwork } = useTargetNetwork();
+  const isWrongNetwork = targetNetwork.id !== state.chainId;
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(
     state.token1.address,
@@ -259,6 +260,8 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         </>
       )}
 
+      {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
+
       <div className="min-w-96 px-5">
         {(() => {
           switch (currentStep) {
@@ -267,7 +270,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 <TransactionButton
                   title="Create Pool"
                   isPending={isCreatePending}
-                  isDisabled={isCreatePending}
+                  isDisabled={isCreatePending || isWrongNetwork}
                   onClick={handleCreatePool}
                 />
               );
@@ -276,7 +279,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 <TransactionButton
                   title="Approve"
                   isPending={isApprovePending}
-                  isDisabled={isApprovePending}
+                  isDisabled={isApprovePending || isWrongNetwork}
                   onClick={handleApproveTokens}
                 />
               );
@@ -285,7 +288,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 <TransactionButton
                   title="Add Liquidity"
                   isPending={isBindPending}
-                  isDisabled={isBindPending}
+                  isDisabled={isBindPending || isWrongNetwork}
                   onClick={handleBindTokens}
                 />
               );
@@ -295,7 +298,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   title="Set Swap Fee"
                   onClick={handleSetSwapFee}
                   isPending={isSetSwapFeePending}
-                  isDisabled={isSetSwapFeePending}
+                  isDisabled={isSetSwapFeePending || isWrongNetwork}
                 />
               );
             case 5:
@@ -304,7 +307,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   title="Finalize"
                   onClick={handleFinalize}
                   isPending={isFinalizePending}
-                  isDisabled={isFinalizePending}
+                  isDisabled={isFinalizePending || isWrongNetwork}
                 />
               );
             case 6:
