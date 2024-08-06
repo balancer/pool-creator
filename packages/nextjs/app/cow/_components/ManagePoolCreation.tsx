@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address } from "viem";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { Alert, TransactionButton } from "~~/components/common/";
+// import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { TransactionButton } from "~~/components/common/";
 import {
   type ExistingPool,
   useBindPool,
@@ -12,6 +12,7 @@ import {
   useReadPool,
   useSetSwapFee,
 } from "~~/hooks/cow/";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 
 type TokenInput = {
@@ -44,24 +45,42 @@ export const ManagePoolCreation = ({
 }: ManagePoolCreationProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
-  console.log("render");
+
+  const { targetNetwork } = useTargetNetwork();
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(token1?.address, pool?.address);
   const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(token2?.address, pool?.address);
   useNewPoolEvents(setUserPoolAddress); // grab / listen for user's pool creation events to set the target pool address
+  const refetchAllowances = () => {
+    refetchAllowance1();
+    refetchAllowance2();
+  };
 
-  const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
+  const {
+    mutate: createPool,
+    isPending: isCreatePending,
+    // error: createPoolError,
+  } = useCreatePool();
   const {
     mutate: approve,
     isPending: isApprovePending,
-    error: approveError,
-  } = useApproveToken(() => {
-    refetchAllowance1();
-    refetchAllowance2();
-  });
-  const { mutate: bind, isPending: isBindPending, error: bindError } = useBindPool();
-  const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
-  const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
+    // error: approveError,
+  } = useApproveToken(refetchAllowances);
+  const {
+    mutate: bind,
+    isPending: isBindPending,
+    // error: bindError,
+  } = useBindPool();
+  const {
+    mutate: setSwapFee,
+    isPending: isSetSwapFeePending,
+    // error: setSwapFeeError,
+  } = useSetSwapFee();
+  const {
+    mutate: finalizePool,
+    isPending: isFinalizePending,
+    // error: finalizeError,
+  } = useFinalizePool();
 
   const handleCreatePool = () =>
     createPool({ name, symbol }, { onSuccess: newPoolAddress => setUserPoolAddress(newPoolAddress) });
@@ -115,7 +134,7 @@ export const ManagePoolCreation = ({
     // Binding the tokens sets the tokens permanently
     currentStep > 3 ? setIsChangeTokensDisabled(true) : setIsChangeTokensDisabled(false);
     // If user has no pools or their most recent pool is already finalized
-    if (userPoolAddress || pool?.isFinalized) {
+    if (!userPoolAddress || pool?.isFinalized) {
       setCurrentStep(1);
     }
     // If user has created a pool, but not finalized and tokens not binded
@@ -148,9 +167,10 @@ export const ManagePoolCreation = ({
     currentStep,
     setIsChangeNameDisabled,
     setIsChangeTokensDisabled,
+    targetNetwork,
   ]);
 
-  const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
+  // const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
 
   return (
     <>
@@ -227,14 +247,14 @@ export const ManagePoolCreation = ({
           }
         })()}
       </div>
-      {txError && (
+      {/* {txError && (
         <Alert type="error">
           <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
             {(txError as { shortMessage?: string }).shortMessage || "An unknown error occurred"}
           </div>
         </Alert>
-      )}
+      )} */}
     </>
   );
 };

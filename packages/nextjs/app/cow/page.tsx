@@ -24,7 +24,7 @@ type CreatePoolFormData = {
   isChangeTokensDisabled: boolean;
 };
 
-const INITIAL_FORM_DATA: CreatePoolFormData = {
+const INITIAL_FORM_DATA = {
   token1: { amount: "" },
   token2: { amount: "" },
   name: "",
@@ -36,26 +36,13 @@ const INITIAL_FORM_DATA: CreatePoolFormData = {
 
 const CowAmm: NextPage = () => {
   const { targetNetwork } = useTargetNetwork();
+  const localStorageKey = `CowAmmFormData-${targetNetwork.id}`;
 
-  const [formData, setFormData] = useLocalStorage<CreatePoolFormData>(
-    `createPoolFormData-${targetNetwork.id}`,
-    INITIAL_FORM_DATA,
-  );
-
-  const [previousNetworkId, setPreviousNetworkId] = useLocalStorage<string | null>(
-    "previousNetworkId",
-    targetNetwork.id.toString(),
-  );
-
+  const [formData, setFormData] = useLocalStorage<CreatePoolFormData>(localStorageKey, INITIAL_FORM_DATA);
   const { token1, token2, name, symbol, hasAgreedToWarning, isChangeNameDisabled, isChangeTokensDisabled } = formData;
 
   const { data: tokenList } = useFetchTokenList();
   const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
-
-  const resetForm = () => {
-    localStorage.removeItem(`createPoolFormData-${targetNetwork.id}`);
-    setFormData(INITIAL_FORM_DATA);
-  };
 
   const handleTokenChange = (tokenKey: "token1" | "token2", tokenData: Token) => {
     setFormData(prev => ({
@@ -63,7 +50,6 @@ const CowAmm: NextPage = () => {
       [tokenKey]: {
         ...prev[tokenKey],
         ...tokenData,
-        amount: prev[tokenKey].amount,
       },
     }));
   };
@@ -111,11 +97,16 @@ const CowAmm: NextPage = () => {
     [setFormData],
   );
 
+  const resetForm = () => {
+    localStorage.removeItem(localStorageKey);
+    setFormData(INITIAL_FORM_DATA);
+  };
+
+  // Autofill pool name and symbol based on selected tokens
   useEffect(() => {
     if (token1?.symbol && token2?.symbol) {
       const newName = `Balancer CoW AMM 50 ${token1?.symbol} 50 ${token2?.symbol}`;
       const newSymbol = `BCoW-50${token1?.symbol}-50${token2?.symbol}`;
-
       setFormData(prev => ({
         ...prev,
         name: newName,
@@ -123,13 +114,6 @@ const CowAmm: NextPage = () => {
       }));
     }
   }, [token1, token2, setFormData]);
-
-  useEffect(() => {
-    if (previousNetworkId !== targetNetwork.id.toString()) {
-      resetForm();
-    }
-    setPreviousNetworkId(targetNetwork.id.toString());
-  }, [targetNetwork.id, setPreviousNetworkId, previousNetworkId, resetForm]);
 
   // Filter out tokens that have already been chosen
   const selectableTokens = tokenList?.filter(
