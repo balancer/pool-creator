@@ -36,6 +36,7 @@ export const useApproveToken = (refetchAllowances: () => void) => {
         refetchAllowances();
       },
     });
+    return "success";
   };
 
   return useMutation({

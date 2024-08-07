@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address, parseUnits } from "viem";
@@ -19,7 +19,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   const token2RawAmount = parseUnits(state.token2Amount, state.token2.decimals);
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
-  const [poolFinalized, setPoolFinalized] = useState<boolean>(false);
 
   const { targetNetwork } = useTargetNetwork();
   const isWrongNetwork = targetNetwork.id !== state.chainId;
@@ -43,15 +42,15 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     // error: createPoolError,
   } = useCreatePool();
   const {
-    mutate: approve,
+    mutateAsync: approve,
     isPending: isApprovePending,
     // error: approveError,
   } = useApproveToken(refetchAllowances);
   const {
-    mutate: bind,
+    mutateAsync: bind,
     isPending: isBindPending,
     // error: bindError,
-  } = useBindPool();
+  } = useBindPool(() => refetchPool());
   const {
     mutate: setSwapFee,
     isPending: isSetSwapFeePending,
@@ -63,108 +62,71 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     // error: finalizeError,
   } = useFinalizePool();
 
-  const handleCreatePool = () =>
-    createPool(
-      { name: state.poolName, symbol: state.poolSymbol },
-      { onSuccess: newPoolAddress => setUserPoolAddress(newPoolAddress) },
-    );
+  const handleCreatePool = () => {
+    const payload = { name: state.poolName, symbol: state.poolSymbol };
+    createPool(payload, {
+      onSuccess: newPoolAddress => {
+        setUserPoolAddress(newPoolAddress);
+        setCurrentStep(2);
+      },
+    });
+  };
 
   const handleApproveTokens = async () => {
-    const approve1Payload = {
+    const payload1 = {
       token: state.token1.address,
       spender: pool?.address,
       rawAmount: token1RawAmount,
     };
-    const approve2Payload = {
+    const payload2 = {
       token: state.token2.address,
       spender: pool?.address,
       rawAmount: token2RawAmount,
     };
-
-    if (token1RawAmount > allowance1) approve(approve1Payload);
-    if (token2RawAmount > allowance2) approve(approve2Payload);
+    const txs = [];
+    if (token1RawAmount > allowance1) txs.push(approve(payload1));
+    if (token2RawAmount > allowance2) txs.push(approve(payload2));
+    const results = await Promise.all(txs);
+    if (results.every(result => result === "success")) setCurrentStep(3);
   };
 
   const handleBindTokens = async () => {
     if (!pool) throw new Error("Required value is undefined in handleBindTokens");
+    const payload1 = {
+      pool: pool.address,
+      token: state.token1.address,
+      rawAmount: token1RawAmount,
+    };
+    const payload2 = {
+      pool: pool.address,
+      token: state.token2.address,
+      rawAmount: token2RawAmount,
+    };
     const poolTokens = pool.getCurrentTokens.map(token => token.toLowerCase());
-    // If not already bound, bind the token1
+    const txs = [];
+    // If not already bound, bind the tokens
     if (!poolTokens.includes(state.token1.address.toLowerCase())) {
-      bind(
-        {
-          pool: pool.address,
-          token: state.token1.address,
-          rawAmount: token1RawAmount,
-        },
-        { onSuccess: () => refetchPool() },
-      );
+      txs.push(bind(payload1));
     }
-    // If not already bound, bind token2
     if (!poolTokens.includes(state.token2.address.toLowerCase())) {
-      bind(
-        {
-          pool: pool.address,
-          token: state.token2.address,
-          rawAmount: token2RawAmount,
-        },
-        { onSuccess: () => refetchPool() },
-      );
+      txs.push(bind(payload2));
     }
+    const results = await Promise.all(txs);
+    console.log("results", results);
+    if (results.every(result => result === "success")) setCurrentStep(4);
   };
 
   const handleSetSwapFee = async () => {
     if (!pool) throw new Error("Pool is undefined in handleSetSwapFee");
-    setSwapFee({ pool: pool.address, rawAmount: pool.MAX_FEE }, { onSuccess: () => refetchPool() });
+    setSwapFee({ pool: pool.address, rawAmount: pool.MAX_FEE }, { onSuccess: () => setCurrentStep(5) });
   };
 
   const handleFinalize = async () => {
     if (!pool) throw new Error("Pool is undefined in handleFinalize");
     finalizePool(pool.address, {
-      onSuccess: () => {
-        refetchPool();
-        setPoolFinalized(true);
-        setCurrentStep(6);
-      },
+      onSuccess: () => setCurrentStep(6),
     });
   };
-
-  const validTokenAmounts = token1RawAmount > 0n && token2RawAmount > 0n;
-
-  useEffect(() => {
-    // If user has no pools or their most recent pool is already finalized
-    // if (!userPoolAddress || pool?.isFinalized) {
-    //   setCurrentStep(1);
-    // }
-    // If user has created a pool, but not finalized and tokens not binded
-    if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
-      // If user has not approved tokens
-      if (token1RawAmount > allowance1 || token2RawAmount > allowance2 || !validTokenAmounts) {
-        setCurrentStep(2);
-      } else {
-        setCurrentStep(3);
-      }
-    }
-    // If user has pool with 2 tokens binded, but it has not been finalized
-    if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
-      if (pool.getSwapFee !== pool.MAX_FEE) {
-        setCurrentStep(4);
-      } else {
-        setCurrentStep(5);
-      }
-    }
-  }, [
-    pool,
-    userPoolAddress,
-    pool?.isFinalized,
-    pool?.getNumTokens,
-    allowance1,
-    allowance2,
-    token1RawAmount,
-    token2RawAmount,
-    validTokenAmounts,
-    currentStep,
-    targetNetwork,
-  ]);
 
   // const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
 
@@ -224,7 +186,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       </div>
       <StepsDisplay currentStep={currentStep} />
 
-      {poolFinalized && (
+      {currentStep === 6 && (
         <>
           <Alert type="success">
             You CoW AMM pool was successfully created! To view your pool, go to the{" "}

@@ -62,7 +62,7 @@ export const PoolConfiguration = () => {
   const token1RawAmount = parseUnits(token1Amount, token1?.decimals ?? 0);
   const token2RawAmount = parseUnits(token2Amount, token2?.decimals ?? 0);
 
-  // If token less than 18 decmials, 1e6 is the min amount allowed
+  // If token has less than 18 decmials, 1e6 is the min amount allowed
   const sufficientAmount1 = token1?.decimals && token1.decimals < 18 ? token1RawAmount >= COW_MIN_AMOUNT : true;
   const sufficientAmount2 = token2?.decimals && token2.decimals < 18 ? token2RawAmount >= COW_MIN_AMOUNT : true;
 
