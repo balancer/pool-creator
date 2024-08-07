@@ -2,6 +2,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address, parseUnits } from "viem";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import { useBindPool, useCreatePool, useFinalizePool, useReadPool, useSetSwapFee } from "~~/hooks/cow/";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
@@ -36,31 +37,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     refetchAllowance2();
   };
 
-  const {
-    mutate: createPool,
-    isPending: isCreatePending,
-    // error: createPoolError,
-  } = useCreatePool();
-  const {
-    mutateAsync: approve,
-    isPending: isApprovePending,
-    // error: approveError,
-  } = useApproveToken(refetchAllowances);
-  const {
-    mutateAsync: bind,
-    isPending: isBindPending,
-    // error: bindError,
-  } = useBindPool(() => refetchPool());
-  const {
-    mutate: setSwapFee,
-    isPending: isSetSwapFeePending,
-    // error: setSwapFeeError,
-  } = useSetSwapFee();
-  const {
-    mutate: finalizePool,
-    isPending: isFinalizePending,
-    // error: finalizeError,
-  } = useFinalizePool();
+  const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
+  const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveToken(refetchAllowances);
+  const { mutateAsync: bind, isPending: isBindPending, error: bindError } = useBindPool(() => refetchPool());
+  const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
+  const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
+  const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
 
   const handleCreatePool = () => {
     const payload = { name: state.poolName, symbol: state.poolSymbol };
@@ -73,46 +55,53 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   };
 
   const handleApproveTokens = async () => {
-    const payload1 = {
-      token: state.token1.address,
-      spender: pool?.address,
-      rawAmount: token1RawAmount,
-    };
-    const payload2 = {
-      token: state.token2.address,
-      spender: pool?.address,
-      rawAmount: token2RawAmount,
-    };
+    if (!pool) throw new Error("Pool address is required to approve tokens");
     const txs = [];
-    if (token1RawAmount > allowance1) txs.push(approve(payload1));
-    if (token2RawAmount > allowance2) txs.push(approve(payload2));
+    if (token1RawAmount > allowance1) {
+      txs.push(
+        approve({
+          token: state.token1.address,
+          spender: pool.address,
+          rawAmount: token1RawAmount,
+        }),
+      );
+    }
+    if (token2RawAmount > allowance2)
+      txs.push(
+        approve({
+          token: state.token2.address,
+          spender: pool.address,
+          rawAmount: token2RawAmount,
+        }),
+      );
     const results = await Promise.all(txs);
     if (results.every(result => result === "success")) setCurrentStep(3);
   };
 
   const handleBindTokens = async () => {
     if (!pool) throw new Error("Required value is undefined in handleBindTokens");
-    const payload1 = {
-      pool: pool.address,
-      token: state.token1.address,
-      rawAmount: token1RawAmount,
-    };
-    const payload2 = {
-      pool: pool.address,
-      token: state.token2.address,
-      rawAmount: token2RawAmount,
-    };
     const poolTokens = pool.getCurrentTokens.map(token => token.toLowerCase());
+    // If not already bound, bind the token
     const txs = [];
-    // If not already bound, bind the tokens
     if (!poolTokens.includes(state.token1.address.toLowerCase())) {
-      txs.push(bind(payload1));
+      txs.push(
+        bind({
+          pool: pool.address,
+          token: state.token1.address,
+          rawAmount: token1RawAmount,
+        }),
+      );
     }
     if (!poolTokens.includes(state.token2.address.toLowerCase())) {
-      txs.push(bind(payload2));
+      txs.push(
+        bind({
+          pool: pool.address,
+          token: state.token2.address,
+          rawAmount: token2RawAmount,
+        }),
+      );
     }
     const results = await Promise.all(txs);
-    console.log("results", results);
     if (results.every(result => result === "success")) setCurrentStep(4);
   };
 
@@ -128,8 +117,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     });
   };
 
-  // const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
-
   return (
     <>
       <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow">
@@ -138,50 +125,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           <div className="w-full">
             <div className="ml-1 mb-1">Selected pool tokens:</div>
             <div className="w-full flex flex-col gap-3">
-              <TokenField
-                value={state.token1Amount}
-                selectedToken={state.token1}
-                setToken={() => {
-                  //
-                }}
-                tokenOptions={[]}
-                handleAmountChange={() => {
-                  //
-                }}
-                isDisabled={true}
-              />
-              <TokenField
-                value={state.token2Amount}
-                selectedToken={state.token2}
-                setToken={() => {
-                  //
-                }}
-                tokenOptions={[]}
-                handleAmountChange={() => {
-                  //
-                }}
-                isDisabled={true}
-              />
+              <TokenField value={state.token1Amount} selectedToken={state.token1} isDisabled={true} />
+              <TokenField value={state.token2Amount} selectedToken={state.token2} isDisabled={true} />
             </div>
           </div>
-          <TextField
-            label="Pool name:"
-            placeholder=""
-            value={state.poolName}
-            onChange={() => {
-              //
-            }}
-            isDisabled={true}
-          />
-          <TextField
-            label="Pool symbol:"
-            placeholder=""
-            value={state.poolSymbol}
-            onChange={() => {
-              //
-            }}
-            isDisabled={true}
-          />
+          <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
+          <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
         </div>
       </div>
       <StepsDisplay currentStep={currentStep} />
@@ -278,14 +227,14 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           }
         })()}
       </div>
-      {/* {txError && (
+      {txError && (
         <Alert type="error">
           <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
-            {(txError as { shortMessage?: string }).shortMessage || "An unknown error occurred"}
+            {(txError as { shortMessage?: string }).shortMessage || txError.message}
           </div>
         </Alert>
-      )} */}
+      )}
     </>
   );
 };

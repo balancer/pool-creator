@@ -22,9 +22,9 @@ export const TokenField = ({
   isDisabled?: boolean;
   value: string;
   tokenOptions?: Token[] | undefined;
-  setToken: (token: Token) => void;
+  setToken?: (token: Token) => void;
   selectedToken: Token | null;
-  handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAmountChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: tokenPrices, isLoading, isError } = useFetchTokenPrices();
@@ -48,7 +48,7 @@ export const TokenField = ({
           min="0"
           placeholder="0.0"
           value={value}
-          className={`pb-5 text-right text-2xl w-full input  rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content h-[77px] ${sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) ? "ring-1 ring-red-400" : ""}`}
+          className={`${sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"} h-[77px] pb-5 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content`}
         />
         <div className="absolute top-0 left-0 ">
           <div className="p-2.5">
@@ -63,14 +63,18 @@ export const TokenField = ({
             </button>
 
             {selectedToken && (
-              <div
-                className={`text-neutral-400 flex items-center gap-1 ${amountGreaterThanBalance ? "text-red-400" : ""}`}
-              >
-                <WalletIcon className="h-4 w-4 mt-0.5" /> {formatToHuman(balance, selectedToken?.decimals || 0)}
-                {amountGreaterThanBalance && <div>Insufficient balance</div>}
+              <div className={`flex items-center gap-2 text-neutral-400`}>
+                <div className="flex items-center gap-1">
+                  <WalletIcon className="h-4 w-4 mt-0.5" /> {formatToHuman(balance, selectedToken?.decimals || 0)}
+                </div>
+                {amountGreaterThanBalance && (
+                  <div className="flex items-center gap-1 text-red-400">
+                    <ExclamationTriangleIcon className="w-4 h-4 mt-0.5" /> Insufficient balance
+                  </div>
+                )}
                 {sufficientAmount !== undefined && !sufficientAmount && (
-                  <div className="ml-1 text-red-400 flex items-center gap-1">
-                    <ExclamationTriangleIcon className="w-4 h-4" />
+                  <div className="flex items-center gap-1 text-red-400">
+                    <ExclamationTriangleIcon className="w-4 h-4 mt-0.5" />
                     Minimum amount is {formatUnits(COW_MIN_AMOUNT, selectedToken.decimals)}
                   </div>
                 )}
@@ -82,7 +86,7 @@ export const TokenField = ({
           {isLoading ? <div>...</div> : isError ? <div>price error</div> : <div>${price.toFixed(2)}</div>}
         </div>
       </div>
-      {isModalOpen && tokenOptions && (
+      {isModalOpen && tokenOptions && setToken && (
         <TokenSelectModal tokenOptions={tokenOptions} setToken={setToken} setIsModalOpen={setIsModalOpen} />
       )}
     </>

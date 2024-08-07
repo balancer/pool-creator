@@ -27,7 +27,7 @@ export const PoolConfiguration = () => {
 
   const { data } = useFetchTokenList();
   const tokenList = data || [];
-  const filteredTokenList = tokenList.filter(
+  const availableTokens = tokenList.filter(
     token => token.address !== token1?.address && token.address !== token2?.address,
   );
   const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
@@ -100,7 +100,7 @@ export const PoolConfiguration = () => {
 
                   setToken1(selectedToken);
                 }}
-                tokenOptions={filteredTokenList || []}
+                tokenOptions={availableTokens || []}
                 handleAmountChange={e => setToken1Amount(e.target.value)}
               />
               <TokenField
@@ -114,7 +114,7 @@ export const PoolConfiguration = () => {
 
                   setToken2(selectedToken);
                 }}
-                tokenOptions={filteredTokenList || []}
+                tokenOptions={availableTokens || []}
                 handleAmountChange={e => setToken2Amount(e.target.value)}
               />
             </div>
