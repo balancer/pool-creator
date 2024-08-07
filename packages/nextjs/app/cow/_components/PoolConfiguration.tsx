@@ -65,7 +65,6 @@ export const PoolConfiguration = () => {
   // If token has less than 18 decmials, 1e6 is the min amount allowed
   const sufficientAmount1 = token1?.decimals && token1.decimals < 18 ? token1RawAmount >= COW_MIN_AMOUNT : true;
   const sufficientAmount2 = token2?.decimals && token2.decimals < 18 ? token2RawAmount >= COW_MIN_AMOUNT : true;
-
   const sufficientBalances = balance1 > token1RawAmount && balance2 > token2RawAmount;
 
   const canProceedToCreate =
@@ -91,6 +90,7 @@ export const PoolConfiguration = () => {
             <div className="w-full flex flex-col gap-3">
               <TokenField
                 value={token1Amount}
+                balance={balance1}
                 sufficientAmount={sufficientAmount1}
                 selectedToken={token1}
                 setToken={selectedToken => {
@@ -105,6 +105,7 @@ export const PoolConfiguration = () => {
               />
               <TokenField
                 value={token2Amount}
+                balance={balance2}
                 sufficientAmount={sufficientAmount2}
                 selectedToken={token2}
                 setToken={selectedToken => {

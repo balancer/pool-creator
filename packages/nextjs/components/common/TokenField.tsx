@@ -6,29 +6,32 @@ import { ChevronDownIcon, ExclamationTriangleIcon } from "@heroicons/react/24/ou
 import { WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
-import { useFetchTokenPrices, useReadToken } from "~~/hooks/token";
+import { useFetchTokenPrices } from "~~/hooks/token";
 import { COW_MIN_AMOUNT, formatToHuman } from "~~/utils";
 
-export const TokenField = ({
-  value,
-  tokenOptions,
-  setToken,
-  selectedToken,
-  handleAmountChange,
-  isDisabled,
-  sufficientAmount,
-}: {
+interface TokenFieldProps {
+  value: string;
+  balance?: bigint;
+  selectedToken: Token | null;
   sufficientAmount?: boolean;
   isDisabled?: boolean;
-  value: string;
-  tokenOptions?: Token[] | undefined;
+  tokenOptions?: Token[];
   setToken?: (token: Token) => void;
-  selectedToken: Token | null;
   handleAmountChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export const TokenField: React.FC<TokenFieldProps> = ({
+  value,
+  balance,
+  selectedToken,
+  sufficientAmount,
+  isDisabled,
+  tokenOptions,
+  setToken,
+  handleAmountChange,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: tokenPrices, isLoading, isError } = useFetchTokenPrices();
-  const { balance } = useReadToken(selectedToken?.address);
 
   let price = 0;
   if (tokenPrices && selectedToken?.address) {
@@ -36,7 +39,7 @@ export const TokenField = ({
   }
   if (price > 0) price = price * Number(value);
 
-  const amountGreaterThanBalance = parseUnits(value, selectedToken?.decimals || 0) > balance;
+  const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
 
   return (
     <>
@@ -62,7 +65,7 @@ export const TokenField = ({
               {!isDisabled && <ChevronDownIcon className="w-4 h-4 mt-0.5" />}
             </button>
 
-            {selectedToken && (
+            {selectedToken && balance !== undefined && (
               <div className={`flex items-center gap-2 text-neutral-400`}>
                 <div className="flex items-center gap-1">
                   <WalletIcon className="h-4 w-4 mt-0.5" /> {formatToHuman(balance, selectedToken?.decimals || 0)}
