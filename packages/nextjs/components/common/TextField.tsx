@@ -2,9 +2,9 @@ import React from "react";
 
 interface TextFieldProps {
   label: string;
-  placeholder: string;
+  placeholder?: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isDisabled?: boolean;
 }
 

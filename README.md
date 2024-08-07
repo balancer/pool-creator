@@ -2,11 +2,6 @@
 
 A frontend tool for creating and initializing various pool types on Balancer
 
-### Notes
-
-- Cannot create pools with same token pairs, weight, and swap fee
-  - except on testnets its allowed for convenience
-
 ## Requirements
 
 To run the code locally, the following tools are required:
@@ -26,6 +21,32 @@ yarn install
 ```
 
 2. Start the frontend
+
+```
+yarn start
+```
+
+## Run on Fork
+
+1. Add `chains.foundry` as the first item of `targetNetworks` in the `scaffold.config.ts` file
+
+```
+  targetNetworks: [chains.foundry, chains.sepolia, chains.mainnet, chains.gnosis],
+```
+
+2. Choose a `targetFork` network in `scaffold.config.ts`
+
+```
+  targetFork: chains.sepolia,
+```
+
+3. Start the fork using `RPC_URL` that matches chain chosen for `targetFork`
+
+```
+anvil --fork-url <RPC_URL> --chain-id 31337
+```
+
+4. Start the frontend
 
 ```
 yarn start

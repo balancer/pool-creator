@@ -12,7 +12,7 @@ type BindPayload = {
 
 const DENORMALIZED_WEIGHT = 1000000000000000000n; // bind 2 tokens with 1e18 weight for each to get a 50/50 pool
 
-export const useBindPool = () => {
+export const useBindPool = (refetchPool: () => void) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
@@ -34,8 +34,11 @@ export const useBindPool = () => {
       blockConfirmations: 1,
       onBlockConfirmation: () => {
         console.log("Bound token:", token, "to pool:", pool);
+        refetchPool();
       },
     });
+
+    return "success";
   };
 
   return useMutation({

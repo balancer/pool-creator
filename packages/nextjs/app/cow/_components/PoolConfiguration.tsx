@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { Alert, TransactionButton } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
@@ -9,7 +10,8 @@ import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { type Token, useFetchTokenList } from "~~/hooks/token";
+import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
+import { COW_MIN_AMOUNT } from "~~/utils";
 
 export const PoolConfiguration = () => {
   const { targetNetwork } = useTargetNetwork();
@@ -25,7 +27,12 @@ export const PoolConfiguration = () => {
 
   const { data } = useFetchTokenList();
   const tokenList = data || [];
+  const availableTokens = tokenList.filter(
+    token => token.address !== token1?.address && token.address !== token2?.address,
+  );
   const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
+  const { balance: balance1 } = useReadToken(token1?.address);
+  const { balance: balance2 } = useReadToken(token2?.address);
 
   const { chain } = useAccount();
 
@@ -52,6 +59,14 @@ export const PoolConfiguration = () => {
     }
   }, [token1, token2]);
 
+  const token1RawAmount = parseUnits(token1Amount, token1?.decimals ?? 0);
+  const token2RawAmount = parseUnits(token2Amount, token2?.decimals ?? 0);
+
+  // If token has less than 18 decmials, 1e6 is the min amount allowed
+  const sufficientAmount1 = token1?.decimals && token1.decimals < 18 ? token1RawAmount >= COW_MIN_AMOUNT : true;
+  const sufficientAmount2 = token2?.decimals && token2.decimals < 18 ? token2RawAmount >= COW_MIN_AMOUNT : true;
+  const sufficientBalances = balance1 > token1RawAmount && balance2 > token2RawAmount;
+
   const canProceedToCreate =
     token1 !== null &&
     token2 !== null &&
@@ -59,7 +74,10 @@ export const PoolConfiguration = () => {
     token2Amount !== "" &&
     hasAgreedToWarning &&
     poolName !== "" &&
-    poolSymbol !== "";
+    poolSymbol !== "" &&
+    sufficientBalances &&
+    sufficientAmount1 &&
+    sufficientAmount2;
 
   return (
     <>
@@ -72,6 +90,8 @@ export const PoolConfiguration = () => {
             <div className="w-full flex flex-col gap-3">
               <TokenField
                 value={token1Amount}
+                balance={balance1}
+                sufficientAmount={sufficientAmount1}
                 selectedToken={token1}
                 setToken={selectedToken => {
                   if (token2?.address === selectedToken.address) {
@@ -80,11 +100,13 @@ export const PoolConfiguration = () => {
 
                   setToken1(selectedToken);
                 }}
-                tokenOptions={tokenList || []}
+                tokenOptions={availableTokens || []}
                 handleAmountChange={e => setToken1Amount(e.target.value)}
               />
               <TokenField
                 value={token2Amount}
+                balance={balance2}
+                sufficientAmount={sufficientAmount2}
                 selectedToken={token2}
                 setToken={selectedToken => {
                   if (token1?.address === selectedToken.address) {
@@ -93,7 +115,7 @@ export const PoolConfiguration = () => {
 
                   setToken2(selectedToken);
                 }}
-                tokenOptions={tokenList || []}
+                tokenOptions={availableTokens || []}
                 handleAmountChange={e => setToken2Amount(e.target.value)}
               />
             </div>

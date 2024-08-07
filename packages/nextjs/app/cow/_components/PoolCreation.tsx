@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address, parseUnits } from "viem";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import { useBindPool, useCreatePool, useFinalizePool, useReadPool, useSetSwapFee } from "~~/hooks/cow/";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
@@ -19,7 +20,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   const token2RawAmount = parseUnits(state.token2Amount, state.token2.decimals);
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
-  const [poolFinalized, setPoolFinalized] = useState<boolean>(false);
 
   const { targetNetwork } = useTargetNetwork();
   const isWrongNetwork = targetNetwork.id !== state.chainId;
@@ -37,136 +37,85 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     refetchAllowance2();
   };
 
-  const {
-    mutate: createPool,
-    isPending: isCreatePending,
-    // error: createPoolError,
-  } = useCreatePool();
-  const {
-    mutate: approve,
-    isPending: isApprovePending,
-    // error: approveError,
-  } = useApproveToken(refetchAllowances);
-  const {
-    mutate: bind,
-    isPending: isBindPending,
-    // error: bindError,
-  } = useBindPool();
-  const {
-    mutate: setSwapFee,
-    isPending: isSetSwapFeePending,
-    // error: setSwapFeeError,
-  } = useSetSwapFee();
-  const {
-    mutate: finalizePool,
-    isPending: isFinalizePending,
-    // error: finalizeError,
-  } = useFinalizePool();
+  const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
+  const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveToken(refetchAllowances);
+  const { mutateAsync: bind, isPending: isBindPending, error: bindError } = useBindPool(() => refetchPool());
+  const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
+  const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
+  const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
 
-  const handleCreatePool = () =>
-    createPool(
-      { name: state.poolName, symbol: state.poolSymbol },
-      { onSuccess: newPoolAddress => setUserPoolAddress(newPoolAddress) },
-    );
+  const handleCreatePool = () => {
+    const payload = { name: state.poolName, symbol: state.poolSymbol };
+    createPool(payload, {
+      onSuccess: newPoolAddress => {
+        setUserPoolAddress(newPoolAddress);
+        setCurrentStep(2);
+      },
+    });
+  };
 
   const handleApproveTokens = async () => {
-    const approve1Payload = {
-      token: state.token1.address,
-      spender: pool?.address,
-      rawAmount: token1RawAmount,
-    };
-    const approve2Payload = {
-      token: state.token2.address,
-      spender: pool?.address,
-      rawAmount: token2RawAmount,
-    };
-
-    if (token1RawAmount > allowance1) approve(approve1Payload);
-    if (token2RawAmount > allowance2) approve(approve2Payload);
+    if (!pool) throw new Error("Pool address is required to approve tokens");
+    const txs = [];
+    if (token1RawAmount > allowance1) {
+      txs.push(
+        approve({
+          token: state.token1.address,
+          spender: pool.address,
+          rawAmount: token1RawAmount,
+        }),
+      );
+    }
+    if (token2RawAmount > allowance2)
+      txs.push(
+        approve({
+          token: state.token2.address,
+          spender: pool.address,
+          rawAmount: token2RawAmount,
+        }),
+      );
+    const results = await Promise.all(txs);
+    if (results.every(result => result === "success")) setCurrentStep(3);
   };
 
   const handleBindTokens = async () => {
     if (!pool) throw new Error("Required value is undefined in handleBindTokens");
     const poolTokens = pool.getCurrentTokens.map(token => token.toLowerCase());
-    // If not already bound, bind the token1
+    // If not already bound, bind the token
+    const txs = [];
     if (!poolTokens.includes(state.token1.address.toLowerCase())) {
-      bind(
-        {
+      txs.push(
+        bind({
           pool: pool.address,
           token: state.token1.address,
           rawAmount: token1RawAmount,
-        },
-        { onSuccess: () => refetchPool() },
+        }),
       );
     }
-    // If not already bound, bind token2
     if (!poolTokens.includes(state.token2.address.toLowerCase())) {
-      bind(
-        {
+      txs.push(
+        bind({
           pool: pool.address,
           token: state.token2.address,
           rawAmount: token2RawAmount,
-        },
-        { onSuccess: () => refetchPool() },
+        }),
       );
     }
+    const results = await Promise.all(txs);
+    if (results.every(result => result === "success")) setCurrentStep(4);
   };
 
   const handleSetSwapFee = async () => {
     if (!pool) throw new Error("Pool is undefined in handleSetSwapFee");
-    setSwapFee({ pool: pool.address, rawAmount: pool.MAX_FEE }, { onSuccess: () => refetchPool() });
+    setSwapFee({ pool: pool.address, rawAmount: pool.MAX_FEE }, { onSuccess: () => setCurrentStep(5) });
   };
 
   const handleFinalize = async () => {
     if (!pool) throw new Error("Pool is undefined in handleFinalize");
     finalizePool(pool.address, {
-      onSuccess: () => {
-        refetchPool();
-        setPoolFinalized(true);
-        setCurrentStep(6);
-      },
+      onSuccess: () => setCurrentStep(6),
     });
   };
-
-  const validTokenAmounts = token1RawAmount > 0n && token2RawAmount > 0n;
-
-  useEffect(() => {
-    // If user has no pools or their most recent pool is already finalized
-    if (!userPoolAddress || pool?.isFinalized) {
-      setCurrentStep(1);
-    }
-    // If user has created a pool, but not finalized and tokens not binded
-    if (pool !== undefined && !pool.isFinalized && pool.getNumTokens < 2n) {
-      // If user has not approved tokens
-      if (token1RawAmount > allowance1 || token2RawAmount > allowance2 || !validTokenAmounts) {
-        setCurrentStep(2);
-      } else {
-        setCurrentStep(3);
-      }
-    }
-    // If user has pool with 2 tokens binded, but it has not been finalized
-    if (pool !== undefined && !pool.isFinalized && pool.getNumTokens === 2n) {
-      if (pool.getSwapFee !== pool.MAX_FEE) {
-        setCurrentStep(4);
-      } else {
-        setCurrentStep(5);
-      }
-    }
-  }, [
-    pool,
-    userPoolAddress,
-    pool?.isFinalized,
-    pool?.getNumTokens,
-    allowance1,
-    allowance2,
-    token1RawAmount,
-    token2RawAmount,
-    validTokenAmounts,
-    currentStep,
-    targetNetwork,
-  ]);
-
-  // const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
 
   return (
     <>
@@ -176,55 +125,17 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           <div className="w-full">
             <div className="ml-1 mb-1">Selected pool tokens:</div>
             <div className="w-full flex flex-col gap-3">
-              <TokenField
-                value={state.token1Amount}
-                selectedToken={state.token1}
-                setToken={() => {
-                  //
-                }}
-                tokenOptions={[]}
-                handleAmountChange={() => {
-                  //
-                }}
-                isDisabled={true}
-              />
-              <TokenField
-                value={state.token2Amount}
-                selectedToken={state.token2}
-                setToken={() => {
-                  //
-                }}
-                tokenOptions={[]}
-                handleAmountChange={() => {
-                  //
-                }}
-                isDisabled={true}
-              />
+              <TokenField value={state.token1Amount} selectedToken={state.token1} isDisabled={true} />
+              <TokenField value={state.token2Amount} selectedToken={state.token2} isDisabled={true} />
             </div>
           </div>
-          <TextField
-            label="Pool name:"
-            placeholder=""
-            value={state.poolName}
-            onChange={() => {
-              //
-            }}
-            isDisabled={true}
-          />
-          <TextField
-            label="Pool symbol:"
-            placeholder=""
-            value={state.poolSymbol}
-            onChange={() => {
-              //
-            }}
-            isDisabled={true}
-          />
+          <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
+          <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
         </div>
       </div>
       <StepsDisplay currentStep={currentStep} />
 
-      {poolFinalized && (
+      {currentStep === 6 && (
         <>
           <Alert type="success">
             You CoW AMM pool was successfully created! To view your pool, go to the{" "}
@@ -316,14 +227,14 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           }
         })()}
       </div>
-      {/* {txError && (
+      {txError && (
         <Alert type="error">
           <div className="flex items-center gap-2">
             <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
-            {(txError as { shortMessage?: string }).shortMessage || "An unknown error occurred"}
+            {(txError as { shortMessage?: string }).shortMessage || txError.message}
           </div>
         </Alert>
-      )} */}
+      )}
     </>
   );
 };
