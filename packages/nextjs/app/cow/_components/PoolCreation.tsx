@@ -145,7 +145,9 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         setPersistedState({ ...state, step: 5 });
       }
     }
-  }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount, state, setPersistedState]);
+    if (pool && pool.isFinalized && state.step !== 1) setPersistedState({ ...state, step: 6 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
 
   return (
     <>
