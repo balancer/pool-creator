@@ -196,12 +196,17 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         switch (state.step) {
           case 1:
             return (
-              <TransactionButton
-                title="Create Pool"
-                isPending={isCreatePending}
-                isDisabled={isCreatePending || isWrongNetwork}
-                onClick={handleCreatePool}
-              />
+              <>
+                <TransactionButton
+                  title="Create Pool"
+                  isPending={isCreatePending}
+                  isDisabled={isCreatePending || isWrongNetwork}
+                  onClick={handleCreatePool}
+                />
+                <div className="link flex items-center gap-2" onClick={clearState}>
+                  Back to Configure
+                </div>
+              </>
             );
           case 2:
             return (
