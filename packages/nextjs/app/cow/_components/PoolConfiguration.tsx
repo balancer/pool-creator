@@ -81,7 +81,7 @@ export const PoolConfiguration = () => {
 
   return (
     <>
-      <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow">
+      <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
         <div className="flex flex-col items-center gap-4 w-full">
           <h5 className="text-xl md:text-2xl font-bold">Configure your pool</h5>
 
@@ -97,7 +97,6 @@ export const PoolConfiguration = () => {
                   if (token2?.address === selectedToken.address) {
                     setToken2(null);
                   }
-
                   setToken1(selectedToken);
                 }}
                 tokenOptions={availableTokens || []}
@@ -112,7 +111,6 @@ export const PoolConfiguration = () => {
                   if (token1?.address === selectedToken.address) {
                     setToken1(null);
                   }
-
                   setToken2(selectedToken);
                 }}
                 tokenOptions={availableTokens || []}

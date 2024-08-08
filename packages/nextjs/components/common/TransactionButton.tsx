@@ -16,7 +16,7 @@ export const TransactionButton = ({
     <button
       disabled={isDisabled}
       onClick={onClick}
-      className={`flex flex-col items-center justify-center text-lg w-full rounded-xl h-[50px] font-bold text-neutral-700 ${isDisabled ? "bg-neutral-500" : gradient}`}
+      className={`shadow-lg flex flex-col items-center justify-center text-lg w-full sm:w-80 rounded-xl h-[50px] font-bold text-neutral-700 ${isDisabled ? "bg-neutral-500" : gradient}`}
     >
       {isPending ? <span className="loading loading-bars loading-sm"></span> : title}
     </button>

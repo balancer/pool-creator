@@ -43,7 +43,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
 
   return (
     <>
-      <div className="relative w-full">
+      <div className="relative w-full shadow-md rounded-xl">
         <input
           disabled={isDisabled}
           type="number"

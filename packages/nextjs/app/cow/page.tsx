@@ -11,11 +11,13 @@ const CowAmm: NextPage = () => {
 
   return (
     <div className="flex-grow bg-base-300">
-      <div className="max-w-screen-2xl mx-auto">
-        <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10 gap-7">
-          <h1 className="text-2xl md:text-4xl font-bold">Create a CoW AMM Pool</h1>
-          {!persistedState && <PoolConfiguration />}
-          {persistedState && <PoolCreation state={persistedState} clearState={clearPersistedState} />}
+      <div className="flex justify-center px-5">
+        <div className="w-full sm:w-[555px]">
+          <div className="flex items-center flex-col flex-grow py-10 gap-6">
+            <h1 className="text-2xl md:text-4xl font-bold">Create a CoW AMM Pool</h1>
+            {!persistedState && <PoolConfiguration />}
+            {persistedState && <PoolCreation state={persistedState} clearState={clearPersistedState} />}
+          </div>
         </div>
       </div>
     </div>

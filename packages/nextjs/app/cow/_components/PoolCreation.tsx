@@ -1,14 +1,14 @@
 import { useState } from "react";
-import Link from "next/link";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address, parseUnits } from "viem";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
+import { Alert, ExternalLinkButton, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import { useBindPool, useCreatePool, useFinalizePool, useReadPool, useSetSwapFee } from "~~/hooks/cow/";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { PoolCreationState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
+import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
 
 interface ManagePoolCreationProps {
   state: PoolCreationState;
@@ -119,7 +119,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
   return (
     <>
-      <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow">
+      <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
         <div className="flex flex-col items-center gap-4 w-full">
           <h5 className="text-xl md:text-2xl font-bold">Pool preview</h5>
           <div className="w-full">
@@ -133,100 +133,91 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
         </div>
       </div>
-      <StepsDisplay currentStep={currentStep} />
+      {currentStep < 6 && <StepsDisplay currentStep={currentStep} />}
 
-      {currentStep === 6 && (
+      {pool && currentStep === 6 && (
         <>
+          <div className="bg-base-200 w-full py-4 rounded-xl shadow-md text-center sm:text-lg overflow-hidden">
+            {pool.address}
+          </div>
           <Alert type="success">
-            You CoW AMM pool was successfully created! To view your pool, go to the{" "}
-            <Link
-              className="link"
-              rel="noopener noreferrer"
-              target="_blank"
-              href={getPoolUrl(state.chainId, pool?.address || "")}
-            >
-              Balancer app
-            </Link>
-            . Because of caching, it may take a few minutes for the pool to appear in the UI.
+            You CoW AMM pool was successfully created! Because of caching, it may take a few minutes for the pool to
+            appear in the Balancer app
           </Alert>
 
-          <div className="min-w-96 px-5">
-            <Link
-              className={`flex flex-col items-center justify-center text-lg w-full rounded-xl h-[50px] font-bold text-neutral-700 bg-gradient-to-r from-violet-400 via-orange-100 to-orange-300 hover:from-violet-300 hover:via-orange-100 hover:to-orange-400`}
-              rel="noopener noreferrer"
-              target="_blank"
-              href={getPoolUrl(state.chainId, pool?.address || "")}
-            >
-              View My Pool
-            </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+            <ExternalLinkButton href={getPoolUrl(state.chainId, pool.address)} text="View on Balancer" />
+            <ExternalLinkButton
+              href={getBlockExplorerAddressLink(targetNetwork, pool.address)}
+              text="View on Etherscan"
+            />
           </div>
         </>
       )}
 
       {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
 
-      <div className="min-w-96 px-5">
-        {(() => {
-          switch (currentStep) {
-            case 1:
-              return (
-                <TransactionButton
-                  title="Create Pool"
-                  isPending={isCreatePending}
-                  isDisabled={isCreatePending || isWrongNetwork}
-                  onClick={handleCreatePool}
-                />
-              );
-            case 2:
-              return (
-                <TransactionButton
-                  title="Approve"
-                  isPending={isApprovePending}
-                  isDisabled={isApprovePending || isWrongNetwork}
-                  onClick={handleApproveTokens}
-                />
-              );
-            case 3:
-              return (
-                <TransactionButton
-                  title="Add Liquidity"
-                  isPending={isBindPending}
-                  isDisabled={isBindPending || isWrongNetwork}
-                  onClick={handleBindTokens}
-                />
-              );
-            case 4:
-              return (
-                <TransactionButton
-                  title="Set Swap Fee"
-                  onClick={handleSetSwapFee}
-                  isPending={isSetSwapFeePending}
-                  isDisabled={isSetSwapFeePending || isWrongNetwork}
-                />
-              );
-            case 5:
-              return (
-                <TransactionButton
-                  title="Finalize"
-                  onClick={handleFinalize}
-                  isPending={isFinalizePending}
-                  isDisabled={isFinalizePending || isWrongNetwork}
-                />
-              );
-            case 6:
-              return (
-                <TransactionButton
-                  title="Create another pool"
-                  onClick={clearState}
-                  isPending={false}
-                  isDisabled={false}
-                />
-              );
-            default:
-              return null;
-          }
-        })()}
-      </div>
+      {(() => {
+        switch (currentStep) {
+          case 1:
+            return (
+              <TransactionButton
+                title="Create Pool"
+                isPending={isCreatePending}
+                isDisabled={isCreatePending || isWrongNetwork}
+                onClick={handleCreatePool}
+              />
+            );
+          case 2:
+            return (
+              <TransactionButton
+                title="Approve"
+                isPending={isApprovePending}
+                isDisabled={isApprovePending || isWrongNetwork}
+                onClick={handleApproveTokens}
+              />
+            );
+          case 3:
+            return (
+              <TransactionButton
+                title="Add Liquidity"
+                isPending={isBindPending}
+                isDisabled={isBindPending || isWrongNetwork}
+                onClick={handleBindTokens}
+              />
+            );
+          case 4:
+            return (
+              <TransactionButton
+                title="Set Swap Fee"
+                onClick={handleSetSwapFee}
+                isPending={isSetSwapFeePending}
+                isDisabled={isSetSwapFeePending || isWrongNetwork}
+              />
+            );
+          case 5:
+            return (
+              <TransactionButton
+                title="Finalize"
+                onClick={handleFinalize}
+                isPending={isFinalizePending}
+                isDisabled={isFinalizePending || isWrongNetwork}
+              />
+            );
+          case 6:
+            return (
+              <TransactionButton
+                title="Create Another Pool"
+                onClick={clearState}
+                isPending={false}
+                isDisabled={false}
+              />
+            );
+          default:
+            return null;
+        }
+      })()}
+
       {txError && (
         <Alert type="error">
           <div className="flex items-center gap-2">
