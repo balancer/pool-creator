@@ -9,9 +9,10 @@ export const useFinalizePool = () => {
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
 
-  const finalize = async (pool: Address) => {
+  const finalize = async (pool: Address | undefined) => {
     if (!publicClient) throw new Error("No public client found!");
     if (!walletClient) throw new Error("No wallet client found!");
+    if (!pool) throw new Error("No pool address found!");
 
     const { request: finalizePool } = await publicClient.simulateContract({
       abi: abis.CoW.BCoWPool,
@@ -28,5 +29,5 @@ export const useFinalizePool = () => {
     });
   };
 
-  return useMutation({ mutationFn: (pool: Address) => finalize(pool) });
+  return useMutation({ mutationFn: (pool: Address | undefined) => finalize(pool) });
 };

@@ -17,7 +17,7 @@ export const useApproveToken = (refetchAllowances: () => void) => {
 
   const approve = async ({ token, spender, rawAmount }: ApprovePayload) => {
     if (!token) throw new Error("Cannot approve token without token address");
-    if (!spender) throw new Error("Cannot approve token without spender address");
+    if (!spender) throw new Error("Cannot approve token without spender address (the pool)");
     if (!walletClient) throw new Error("No wallet client found");
     if (!publicClient) throw new Error("No public client found");
 

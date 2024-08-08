@@ -5,7 +5,7 @@ import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
 type BindPayload = {
-  pool: Address;
+  pool: Address | undefined;
   token: Address;
   rawAmount: bigint;
 };

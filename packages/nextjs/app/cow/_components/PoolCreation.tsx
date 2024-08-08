@@ -13,6 +13,7 @@ import {
 } from "~~/hooks/cow/";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { PoolCreationState } from "~~/hooks/cow/usePoolCreationState";
+import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
@@ -25,7 +26,7 @@ interface ManagePoolCreationProps {
 export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => {
   const token1RawAmount = parseUnits(state.token1Amount, state.token1.decimals);
   const token2RawAmount = parseUnits(state.token2Amount, state.token2.decimals);
-  const [currentStep, setCurrentStep] = useState(1);
+
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
 
   useNewPoolEvents(setUserPoolAddress);
@@ -52,24 +53,27 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
   const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
 
+  const setPersistedState = usePoolCreationPersistedState(state => state.setPersistedState);
+
   const handleCreatePool = () => {
-    const payload = { name: state.poolName, symbol: state.poolSymbol };
-    createPool(payload, {
-      onSuccess: newPoolAddress => {
-        setUserPoolAddress(newPoolAddress);
-        setCurrentStep(2);
+    createPool(
+      { name: state.poolName, symbol: state.poolSymbol },
+      {
+        onSuccess: newPoolAddress => {
+          setUserPoolAddress(newPoolAddress);
+          setPersistedState({ ...state, step: 2 });
+        },
       },
-    });
+    );
   };
 
   const handleApproveTokens = async () => {
-    if (!pool) throw new Error("Pool address is required to approve tokens");
     const txs = [];
     if (token1RawAmount > allowance1) {
       txs.push(
         approve({
           token: state.token1.address,
-          spender: pool.address,
+          spender: pool?.address,
           rawAmount: token1RawAmount,
         }),
       );
@@ -78,69 +82,69 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       txs.push(
         approve({
           token: state.token2.address,
-          spender: pool.address,
+          spender: pool?.address,
           rawAmount: token2RawAmount,
         }),
       );
     const results = await Promise.all(txs);
-    if (results.every(result => result === "success")) setCurrentStep(3);
+    if (results.every(result => result === "success")) setPersistedState({ ...state, step: 3 });
   };
 
   const handleBindTokens = async () => {
-    if (!pool) throw new Error("Required value is undefined in handleBindTokens");
-    const poolTokens = pool.currentTokens.map(token => token.toLowerCase());
-    // If not already bound, bind the token
     const txs = [];
-    if (!poolTokens.includes(state.token1.address.toLowerCase())) {
+    // If not already bound, bind the token
+    const poolTokens = pool?.currentTokens.map(token => token.toLowerCase());
+    if (!poolTokens?.includes(state.token1.address.toLowerCase())) {
       txs.push(
         bind({
-          pool: pool.address,
+          pool: pool?.address,
           token: state.token1.address,
           rawAmount: token1RawAmount,
         }),
       );
     }
-    if (!poolTokens.includes(state.token2.address.toLowerCase())) {
+    if (!poolTokens?.includes(state.token2.address.toLowerCase())) {
       txs.push(
         bind({
-          pool: pool.address,
+          pool: pool?.address,
           token: state.token2.address,
           rawAmount: token2RawAmount,
         }),
       );
     }
     const results = await Promise.all(txs);
-    if (results.every(result => result === "success")) setCurrentStep(4);
+    if (results.every(result => result === "success")) setPersistedState({ ...state, step: 4 });
   };
 
   const handleSetSwapFee = async () => {
     if (!pool) throw new Error("Pool is undefined in handleSetSwapFee");
-    setSwapFee({ pool: pool.address, rawAmount: pool.MAX_FEE }, { onSuccess: () => setCurrentStep(5) });
+    setSwapFee(
+      { pool: pool.address, rawAmount: pool.MAX_FEE },
+      { onSuccess: () => setPersistedState({ ...state, step: 5 }) },
+    );
   };
 
   const handleFinalize = async () => {
-    if (!pool) throw new Error("Pool is undefined in handleFinalize");
-    finalizePool(pool.address, {
-      onSuccess: () => setCurrentStep(6),
+    finalizePool(pool?.address, {
+      onSuccess: () => setPersistedState({ ...state, step: 6 }),
     });
   };
 
   useEffect(() => {
     if (pool && pool.numTokens < 2n) {
       if (allowance1 < token1RawAmount || allowance2 < token2RawAmount) {
-        setCurrentStep(2);
+        setPersistedState({ ...state, step: 2 });
       } else {
-        setCurrentStep(3);
+        setPersistedState({ ...state, step: 3 });
       }
     }
     if (pool && pool.numTokens === 2n && !pool.isFinalized) {
       if (pool.swapFee !== pool.MAX_FEE) {
-        setCurrentStep(4);
+        setPersistedState({ ...state, step: 4 });
       } else {
-        setCurrentStep(5);
+        setPersistedState({ ...state, step: 5 });
       }
     }
-    if (pool && pool.isFinalized) setCurrentStep(6);
   }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
 
   return (
@@ -159,9 +163,9 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
         </div>
       </div>
-      {currentStep < 6 && <StepsDisplay currentStep={currentStep} />}
+      {state.step < 6 && <StepsDisplay currentStep={state.step} />}
 
-      {pool && currentStep === 6 && (
+      {pool && state.step === 6 && (
         <>
           <div className="bg-base-100 w-full py-4 rounded-xl shadow-md flex justify-center">
             <div className="font-semibold sm:text-lg overflow-hidden text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-violet-300 via-40% to-orange-400">
@@ -187,7 +191,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
 
       {(() => {
-        switch (currentStep) {
+        switch (state.step) {
           case 1:
             return (
               <TransactionButton

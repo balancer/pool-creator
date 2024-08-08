@@ -51,7 +51,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
           min="0"
           placeholder="0.0"
           value={value}
-          className={`${sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"} h-[77px] pb-5 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content`}
+          className={`${sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"} border-0 h-[77px] pb-5 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content`}
         />
         <div className="absolute top-0 left-0 ">
           <div className="p-2.5">

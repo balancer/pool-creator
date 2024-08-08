@@ -10,6 +10,7 @@ export interface PoolCreationState {
   token2Amount: string;
   poolName: string;
   poolSymbol: string;
+  step: number;
 }
 
 export const usePoolCreationPersistedState = create(
@@ -24,7 +25,7 @@ export const usePoolCreationPersistedState = create(
       clearPersistedState: () => set({ state: null }),
     }),
     {
-      name: "pool-creation-state",
+      name: "cow-pool-creation-state",
       getStorage: () => localStorage,
     },
   ),
