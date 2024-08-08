@@ -176,7 +176,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           </div>
 
           <Alert type="success">
-            You CoW AMM pool was successfully created! Because of caching, it may take a few minutes for the pool to
+            Your CoW AMM pool was successfully created! Because of caching, it may take a few minutes for the pool to
             appear in the Balancer app
           </Alert>
 
