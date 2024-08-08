@@ -141,7 +141,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       }
     }
     if (pool && pool.isFinalized) setCurrentStep(6);
-  }, [pool]);
+  }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
 
   return (
     <>
