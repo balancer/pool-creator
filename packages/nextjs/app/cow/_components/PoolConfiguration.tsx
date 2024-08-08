@@ -6,6 +6,7 @@ import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { Alert, TransactionButton } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
+import { useStore } from "~~/hooks/common";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
@@ -23,7 +24,7 @@ export const PoolConfiguration = () => {
   const [hasAgreedToWarning, setAgreedToWarning] = useState<boolean>(false);
   const [poolName, setPoolName] = useState<string>("");
   const [poolSymbol, setPoolSymbol] = useState<string>("");
-  const setPersistedState = usePoolCreationPersistedState(state => state.setPersistedState);
+  const setPersistedState = useStore(usePoolCreationPersistedState, state => state.setPersistedState);
 
   const { data } = useFetchTokenList();
   const tokenList = data || [];
@@ -167,24 +168,26 @@ export const PoolConfiguration = () => {
       )}
 
       <div className="min-w-96 px-5">
-        <TransactionButton
-          title="Preview"
-          isPending={false}
-          isDisabled={!canProceedToCreate}
-          onClick={() => {
-            setPersistedState({
-              chainId: chain?.id || 0,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              token1: token1!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              token2: token2!,
-              token1Amount,
-              token2Amount,
-              poolName,
-              poolSymbol,
-            });
-          }}
-        />
+        {setPersistedState && (
+          <TransactionButton
+            title="Preview"
+            isPending={false}
+            isDisabled={!canProceedToCreate}
+            onClick={() => {
+              setPersistedState({
+                chainId: chain?.id || 0,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                token1: token1!,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                token2: token2!,
+                token1Amount,
+                token2Amount,
+                poolName,
+                poolSymbol,
+              });
+            }}
+          />
+        )}
       </div>
     </>
   );

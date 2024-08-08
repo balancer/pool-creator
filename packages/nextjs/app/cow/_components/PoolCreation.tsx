@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StepsDisplay } from "./StepsDisplay";
 import { Address, parseUnits } from "viem";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Alert, ExternalLinkButton, TextField, TokenField, TransactionButton } from "~~/components/common/";
-import { useBindPool, useCreatePool, useFinalizePool, useReadPool, useSetSwapFee } from "~~/hooks/cow/";
+import {
+  useBindPool,
+  useCreatePool,
+  useFinalizePool,
+  useNewPoolEvents,
+  useReadPool,
+  useSetSwapFee,
+} from "~~/hooks/cow/";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { PoolCreationState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -21,6 +28,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   const [currentStep, setCurrentStep] = useState(1);
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
 
+  useNewPoolEvents(setUserPoolAddress);
   const { targetNetwork } = useTargetNetwork();
   const isWrongNetwork = targetNetwork.id !== state.chainId;
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
@@ -80,7 +88,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
   const handleBindTokens = async () => {
     if (!pool) throw new Error("Required value is undefined in handleBindTokens");
-    const poolTokens = pool.getCurrentTokens.map(token => token.toLowerCase());
+    const poolTokens = pool.currentTokens.map(token => token.toLowerCase());
     // If not already bound, bind the token
     const txs = [];
     if (!poolTokens.includes(state.token1.address.toLowerCase())) {
@@ -117,6 +125,24 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     });
   };
 
+  useEffect(() => {
+    if (pool && pool.numTokens < 2n) {
+      if (allowance1 < token1RawAmount || allowance2 < token2RawAmount) {
+        setCurrentStep(2);
+      } else {
+        setCurrentStep(3);
+      }
+    }
+    if (pool && pool.numTokens === 2n && !pool.isFinalized) {
+      if (pool.swapFee !== pool.MAX_FEE) {
+        setCurrentStep(4);
+      } else {
+        setCurrentStep(5);
+      }
+    }
+    if (pool && pool.isFinalized) setCurrentStep(6);
+  }, [pool]);
+
   return (
     <>
       <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
@@ -137,9 +163,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
       {pool && currentStep === 6 && (
         <>
-          <div className="bg-base-200 w-full py-4 rounded-xl shadow-md text-center sm:text-lg overflow-hidden">
-            {pool.address}
+          <div className="bg-base-100 w-full py-4 rounded-xl shadow-md flex justify-center">
+            <div className="font-semibold sm:text-lg overflow-hidden text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-violet-300 via-40% to-orange-400">
+              {pool.address}
+            </div>
           </div>
+
           <Alert type="success">
             You CoW AMM pool was successfully created! Because of caching, it may take a few minutes for the pool to
             appear in the Balancer app
