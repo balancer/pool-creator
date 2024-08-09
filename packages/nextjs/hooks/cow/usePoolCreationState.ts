@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { Token } from "~~/hooks/token";
 
 export interface PoolCreationState {
@@ -9,14 +10,23 @@ export interface PoolCreationState {
   token2Amount: string;
   poolName: string;
   poolSymbol: string;
+  step: number;
 }
 
-export const usePoolCreationPersistedState = create<{
-  state: PoolCreationState | null;
-  setPersistedState: (state: PoolCreationState) => void;
-  clearPersistedState: () => void;
-}>(set => ({
-  state: null,
-  setPersistedState: (state: PoolCreationState) => set({ state }),
-  clearPersistedState: () => set({ state: null }),
-}));
+export const usePoolCreationPersistedState = create(
+  persist<{
+    state: PoolCreationState | null;
+    setPersistedState: (state: PoolCreationState) => void;
+    clearPersistedState: () => void;
+  }>(
+    set => ({
+      state: null,
+      setPersistedState: (state: PoolCreationState) => set({ state }),
+      clearPersistedState: () => set({ state: null }),
+    }),
+    {
+      name: "cow-pool-creation-state",
+      getStorage: () => localStorage,
+    },
+  ),
+);

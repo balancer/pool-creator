@@ -15,7 +15,7 @@ export const useReadPool = (address: Address | undefined) => {
       if (!client) throw new Error("Wagmi public client is undefined");
       if (!address) throw new Error("Pool address is undefined");
 
-      const [isFinalized, getNumTokens, getCurrentTokens, getSwapFee, MAX_FEE] = await Promise.all([
+      const [isFinalized, numTokens, currentTokens, swapFee, MAX_FEE] = await Promise.all([
         client.readContract({
           abi,
           address,
@@ -43,7 +43,7 @@ export const useReadPool = (address: Address | undefined) => {
         }),
       ]);
 
-      return { address, isFinalized, getNumTokens, getCurrentTokens, getSwapFee, MAX_FEE };
+      return { address, isFinalized, numTokens, currentTokens, swapFee, MAX_FEE };
     },
     enabled: !!address,
   });

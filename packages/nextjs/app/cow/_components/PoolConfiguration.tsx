@@ -182,6 +182,7 @@ export const PoolConfiguration = () => {
               token2Amount,
               poolName,
               poolSymbol,
+              step: 1,
             });
           }}
         />

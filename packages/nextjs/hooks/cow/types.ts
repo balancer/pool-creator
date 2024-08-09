@@ -3,9 +3,9 @@ import { type Address } from "viem";
 export type BCowPool = {
   address: Address;
   isFinalized: boolean;
-  getNumTokens: bigint;
-  getCurrentTokens: Address[];
-  getSwapFee: bigint;
+  numTokens: bigint;
+  currentTokens: Address[];
+  swapFee: bigint;
   MAX_FEE: bigint;
 };
 
