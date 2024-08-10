@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
@@ -136,14 +137,16 @@ export const PoolConfiguration = () => {
 
       {existingPool ? (
         <Alert type="error">
-          A CoW AMM pool with the selected tokens already exists. To add liquidity, go to the{" "}
+          A CoW AMM pool with the selected tokens already exists! To add liquidity, go to the{" "}
           <Link
-            className="link"
+            className="link inline-block"
             rel="noopener noreferrer"
             target="_blank"
             href={getPoolUrl(currentChainId, existingPool.address)}
           >
-            Balancer app
+            <div className="flex gap-1 items-center">
+              Balancer app <ArrowTopRightOnSquareIcon className="w-4 h-4 mt-0.5" />
+            </div>
           </Link>
         </Alert>
       ) : (
