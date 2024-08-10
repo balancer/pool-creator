@@ -51,7 +51,10 @@ export const TokenField: React.FC<TokenFieldProps> = ({
           min="0"
           placeholder="0.0"
           value={value}
-          className={`${sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"} border-0 h-[77px] pb-5 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content`}
+          className={`border-0 h-[77px] pb-5 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
+            ${
+              sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"
+            } `}
         />
         <div className="absolute top-0 left-0 ">
           <div className="p-2.5">
@@ -65,7 +68,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
               {!isDisabled && <ChevronDownIcon className="w-4 h-4 mt-0.5" />}
             </button>
 
-            {selectedToken && balance !== undefined && (
+            {selectedToken && balance !== undefined ? (
               <div className={`flex items-center gap-2 text-neutral-400`}>
                 <div className="flex items-center gap-1">
                   <WalletIcon className="h-4 w-4 mt-0.5" /> {formatToHuman(balance, selectedToken?.decimals || 0)}
@@ -82,6 +85,8 @@ export const TokenField: React.FC<TokenFieldProps> = ({
                   </div>
                 )}
               </div>
+            ) : (
+              <div className="text-neutral-400 ml-1">{selectedToken?.name}</div>
             )}
           </div>
         </div>

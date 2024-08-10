@@ -21,23 +21,24 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
       <div className="relative w-[500px]">
         <div className="relative bg-base-300 border border-base-200 rounded-lg">
           <div className="p-4 mb-2">
-            <XMarkIcon
-              className="absolute top-4 right-4 w-7 h-7 hover:cursor-pointer"
-              onClick={() => setIsModalOpen(false)}
-            />
+            <div className="flex items-center justify-between mb-5">
+              <h5 className="ml-3 font-bold text-xl mb-0">Select a Token:</h5>
 
-            <h5 className="font-bold text-xl mb-3">Select Token</h5>
+              <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
+            </div>
+
             <input
               type="text"
               placeholder="Search by symbol..."
               value={searchText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
-              className="w-full input input-bordered rounded-xl bg-base-200 disabled:bg-base-300 px-5 h-[52px] text-lg"
+              className="w-full input rounded-xl bg-base-200 disabled:bg-base-200 px-5 h-[52px] text-lg"
             />
           </div>
+
           <div>
             <VirtualList
-              className="flex flex-col gap-0 border-t border-neutral-500"
+              className="flex flex-col gap-0"
               width="100%"
               height={500}
               itemCount={filteredTokenOptions.length}

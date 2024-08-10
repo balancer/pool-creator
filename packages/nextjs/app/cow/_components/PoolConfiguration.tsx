@@ -82,7 +82,7 @@ export const PoolConfiguration = () => {
   return (
     <>
       <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
-        <div className="flex flex-col items-center gap-4 w-full">
+        <div className="flex flex-col items-center gap-3 w-full">
           <h5 className="text-xl md:text-2xl font-bold">Configure your pool</h5>
 
           <div className="w-full">
@@ -147,7 +147,7 @@ export const PoolConfiguration = () => {
           </Link>
         </Alert>
       ) : (
-        <Alert type="warning">
+        <Alert type="warning" showIcon={false}>
           <div className="form-control">
             <label className="label cursor-pointer flex gap-4 m-0 p-0">
               <input

@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
-import { StepsDisplay } from "./StepsDisplay";
+import { PoolResetModal, StepsDisplay } from "./";
 import { Address, parseUnits } from "viem";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Alert, ExternalLinkButton, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import {
+  type PoolCreationState,
+  getPoolUrl,
   useBindPool,
   useCreatePool,
   useFinalizePool,
   useNewPoolEvents,
+  usePoolCreationPersistedState,
   useReadPool,
   useSetSwapFee,
 } from "~~/hooks/cow/";
-import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
-import { PoolCreationState } from "~~/hooks/cow/usePoolCreationState";
-import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
@@ -28,6 +28,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   const token2RawAmount = parseUnits(state.token2Amount, state.token2.decimals);
 
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   useNewPoolEvents(setUserPoolAddress);
   const { targetNetwork } = useTargetNetwork();
@@ -131,6 +132,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
   };
 
   useEffect(() => {
+    if (state.step === 1) return;
     if (pool && pool.numTokens < 2n) {
       if (allowance1 < token1RawAmount || allowance2 < token2RawAmount) {
         setPersistedState({ ...state, step: 2 });
@@ -145,15 +147,16 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         setPersistedState({ ...state, step: 5 });
       }
     }
-    if (pool && pool.isFinalized && state.step !== 1) setPersistedState({ ...state, step: 6 });
+    if (pool && pool.isFinalized) setPersistedState({ ...state, step: 6 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
 
   return (
     <>
       <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
-        <div className="flex flex-col items-center gap-4 w-full">
-          <h5 className="text-xl md:text-2xl font-bold">Pool preview</h5>
+        <div className="flex flex-col items-center gap-3 w-full">
+          <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
+
           <div className="w-full">
             <div className="ml-1 mb-1">Selected pool tokens:</div>
             <div className="w-full flex flex-col gap-3">
@@ -168,17 +171,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       {state.step < 6 && <StepsDisplay currentStep={state.step} />}
 
       {pool && state.step === 6 && (
-        <>
-          <div className="bg-base-100 w-full py-4 rounded-xl shadow-md flex justify-center">
-            <div className="font-semibold sm:text-lg overflow-hidden text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-violet-300 via-40% to-orange-400">
-              {pool.address}
-            </div>
-          </div>
+        <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5">
+          <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
 
-          <Alert type="success">
-            Your CoW AMM pool was successfully created! Because of caching, it may take a few minutes for the pool to
-            appear in the Balancer app
-          </Alert>
+          <div className="text-center">
+            <div className=" sm:text-xl overflow-hidden ">{pool.address}</div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
             <ExternalLinkButton href={getPoolUrl(state.chainId, pool.address)} text="View on Balancer" />
@@ -187,10 +185,21 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
               text="View on Etherscan"
             />
           </div>
-        </>
+
+          <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
+        </div>
       )}
 
       {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
+
+      {txError && (
+        <Alert type="error">
+          <div className="flex items-center gap-2">
+            <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
+            {(txError as { shortMessage?: string }).shortMessage || txError.message}
+          </div>
+        </Alert>
+      )}
 
       {(() => {
         switch (state.step) {
@@ -203,9 +212,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   isDisabled={isCreatePending || isWrongNetwork}
                   onClick={handleCreatePool}
                 />
-                <div className="link flex items-center gap-2" onClick={clearState}>
-                  Back to Configure
-                </div>
               </>
             );
           case 2:
@@ -258,14 +264,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         }
       })()}
 
-      {txError && (
-        <Alert type="error">
-          <div className="flex items-center gap-2">
-            <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
-            {(txError as { shortMessage?: string }).shortMessage || txError.message}
-          </div>
-        </Alert>
+      {state.step < 6 && (
+        <div className=" link flex items-center gap-2" onClick={() => setIsResetModalOpen(true)}>
+          Start Over
+        </div>
       )}
+      {isResetModalOpen && <PoolResetModal setIsModalOpen={setIsResetModalOpen} clearState={() => clearState()} />}
     </>
   );
 };
