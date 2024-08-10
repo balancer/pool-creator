@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { PoolResetModal, StepsDisplay } from "./";
 import { Address, parseUnits } from "viem";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Alert, ExternalLinkButton, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import {
   type PoolCreationState,
@@ -195,8 +194,8 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       {txError && (
         <Alert type="error">
           <div className="flex items-center gap-2">
-            <ExclamationTriangleIcon className="w-5 h-5" /> Error:{" "}
-            {(txError as { shortMessage?: string }).shortMessage || txError.message}
+            {" "}
+            Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
           </div>
         </Alert>
       )}
