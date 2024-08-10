@@ -61,7 +61,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
             <button
               disabled={isDisabled}
               onClick={() => setIsModalOpen(true)}
-              className="px-3 py-1.5 bg-secondary shadow-md disabled:text-base-content text-lg font-bold disabled:bg-base-100 rounded-lg flex justify-between items-center gap-2 mb-[1px]"
+              className="px-3 py-1.5 bg-secondary shadow-md disabled:text-base-content text-lg font-bold disabled:bg-base-200 rounded-lg flex justify-between items-center gap-2 mb-[1px]"
             >
               {selectedToken && selectedToken.logoURI !== "" && <TokenImage token={selectedToken} />}
               {selectedToken?.symbol ? selectedToken.symbol : "Select Token"}{" "}
