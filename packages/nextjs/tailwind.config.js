@@ -23,7 +23,7 @@ module.exports = {
           "base-content": "rgb(45, 55, 72)",
           info: "#1d4ed8",
           success: "#15803d",
-          warning: "#c2410c",
+          warning: "#b45309",
           error: "#b91c1c",
 
           "--rounded-btn": "9999rem",
@@ -55,7 +55,7 @@ module.exports = {
           "base-content": "rgb(229, 211, 190)",
           info: "#60a5fa",
           success: "#4ade80",
-          warning: "#fdba74",
+          warning: "#fcd34d",
           error: "#fca5a5",
 
           "--rounded-btn": "9999rem",

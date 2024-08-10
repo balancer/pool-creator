@@ -173,7 +173,10 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
       {pool && state.step === 6 && (
         <>
-          <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
+          <div className="w-full flex flex-col gap-3">
+            <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
+            <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
+          </div>
 
           <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5">
             <div className="text-center">
@@ -185,7 +188,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
               {etherscanURL && <ExternalLinkButton href={etherscanURL} text="View on Etherscan" />}
             </div>
           </div>
-          <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
         </>
       )}
 

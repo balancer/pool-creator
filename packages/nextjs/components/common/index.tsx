@@ -5,3 +5,4 @@ export * from "./Alert";
 export * from "./TextField";
 export * from "./TokenImage";
 export * from "./ExternalLinkButton";
+export * from "./TokenToolTip";
