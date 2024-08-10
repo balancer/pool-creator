@@ -150,6 +150,8 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
 
+  const etherscanURL = pool && getBlockExplorerAddressLink(targetNetwork, pool.address);
+
   return (
     <>
       <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
@@ -170,23 +172,21 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       {state.step < 6 && <StepsDisplay currentStep={state.step} />}
 
       {pool && state.step === 6 && (
-        <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5">
+        <>
           <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
 
-          <div className="text-center">
-            <div className=" sm:text-xl overflow-hidden ">{pool.address}</div>
-          </div>
+          <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5">
+            <div className="text-center">
+              <div className=" sm:text-xl overflow-hidden ">{pool.address}</div>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-            <ExternalLinkButton href={getPoolUrl(state.chainId, pool.address)} text="View on Balancer" />
-            <ExternalLinkButton
-              href={getBlockExplorerAddressLink(targetNetwork, pool.address)}
-              text="View on Etherscan"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              <ExternalLinkButton href={getPoolUrl(state.chainId, pool.address)} text="View on Balancer" />
+              {etherscanURL && <ExternalLinkButton href={etherscanURL} text="View on Etherscan" />}
+            </div>
           </div>
-
           <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
-        </div>
+        </>
       )}
 
       {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
@@ -268,7 +268,13 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           Start Over
         </div>
       )}
-      {isResetModalOpen && <PoolResetModal setIsModalOpen={setIsResetModalOpen} clearState={() => clearState()} />}
+      {isResetModalOpen && (
+        <PoolResetModal
+          setIsModalOpen={setIsResetModalOpen}
+          etherscanURL={pool && !pool.isFinalized ? etherscanURL : undefined}
+          clearState={() => clearState()}
+        />
+      )}
     </>
   );
 };

@@ -22,7 +22,7 @@ module.exports = {
           "base-300": "#EBE8E0", // bg color
           "base-content": "rgb(45, 55, 72)",
           info: "#1d4ed8",
-          success: "#4d7c0f",
+          success: "#15803d",
           warning: "#c2410c",
           error: "#b91c1c",
 
@@ -54,7 +54,7 @@ module.exports = {
           "base-300": "rgb(56, 62, 71)", // bg color
           "base-content": "rgb(229, 211, 190)",
           info: "#60a5fa",
-          success: "#a3e635",
+          success: "#4ade80",
           warning: "#fdba74",
           error: "#fca5a5",
 
@@ -88,9 +88,9 @@ module.exports = {
       colors: {
         "custom-beige-start": "#e5d3be",
         "custom-beige-end": "#e6c6a0",
-        "error-tint": "#d64e4e2b",
-        "warning-tint": "#fb923c40",
-        "success-tint": "#4d7c0f50",
+        "error-tint": "#ef444433",
+        "warning-tint": "#f59e0b33",
+        "success-tint": "#22c55e33",
       },
     },
   },
