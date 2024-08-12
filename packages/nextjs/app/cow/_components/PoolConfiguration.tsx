@@ -72,8 +72,8 @@ export const PoolConfiguration = () => {
   const canProceedToCreate =
     token1 !== null &&
     token2 !== null &&
-    token1Amount !== "" &&
-    token2Amount !== "" &&
+    token1RawAmount > 0n &&
+    token2RawAmount > 0n &&
     hasAgreedToWarning &&
     poolName.trim() !== "" &&
     poolSymbol.trim() !== "" &&

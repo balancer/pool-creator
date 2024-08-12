@@ -44,7 +44,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!setTokenAmount) return;
     const inputValue = e.target.value.trim();
-    if (Number(inputValue) > 0) {
+    if (Number(inputValue) >= 0) {
       setTokenAmount(inputValue);
     } else {
       setTokenAmount("");
