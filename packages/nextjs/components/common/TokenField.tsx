@@ -51,7 +51,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
           min="0"
           placeholder="0.0"
           value={value}
-          className={`border-0 h-[77px] pb-5 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
+          className={`border-0 h-[77px] pb-4 px-4 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
             ${
               sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"
             } `}
@@ -61,7 +61,11 @@ export const TokenField: React.FC<TokenFieldProps> = ({
             <button
               disabled={isDisabled}
               onClick={() => setIsModalOpen(true)}
-              className="px-3 py-1.5 bg-base-100 shadow-md disabled:text-base-content text-lg font-bold disabled:bg-base-100 rounded-lg flex justify-between items-center gap-2 mb-[1px]"
+              className={`${
+                selectedToken
+                  ? "bg-base-100"
+                  : "text-neutral-700 bg-gradient-to-b from-custom-beige-start to-custom-beige-end to-100%"
+              } px-3 py-1.5 shadow-md disabled:text-base-content text-lg font-bold disabled:bg-base-100 rounded-lg flex justify-between items-center gap-2 mb-[1px]`}
             >
               {selectedToken && <TokenImage size="sm" token={selectedToken} />}
               {selectedToken?.symbol ? selectedToken.symbol : "Select Token"}{" "}
@@ -90,7 +94,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
             )}
           </div>
         </div>
-        <div className="absolute bottom-2 right-5 text-neutral-400">
+        <div className="absolute bottom-1 right-5 text-neutral-400">
           {isLoading ? <div>...</div> : isError ? <div>price error</div> : <div>${price.toFixed(2)}</div>}
         </div>
       </div>
