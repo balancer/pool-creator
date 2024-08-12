@@ -75,8 +75,8 @@ export const PoolConfiguration = () => {
     token1Amount !== "" &&
     token2Amount !== "" &&
     hasAgreedToWarning &&
-    poolName !== "" &&
-    poolSymbol !== "" &&
+    poolName.trim() !== "" &&
+    poolSymbol.trim() !== "" &&
     sufficientBalance1 &&
     sufficientBalance2 &&
     sufficientAmount1 &&
@@ -185,8 +185,8 @@ export const PoolConfiguration = () => {
               token2: token2!,
               token1Amount,
               token2Amount,
-              poolName,
-              poolSymbol,
+              poolName: poolName.trim(),
+              poolSymbol: poolSymbol.trim(),
               step: 1,
             });
           }}
