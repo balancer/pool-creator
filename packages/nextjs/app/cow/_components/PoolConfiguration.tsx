@@ -66,7 +66,8 @@ export const PoolConfiguration = () => {
   // If token has less than 18 decmials, 1e6 is the min amount allowed
   const sufficientAmount1 = token1?.decimals && token1.decimals < 18 ? token1RawAmount >= COW_MIN_AMOUNT : true;
   const sufficientAmount2 = token2?.decimals && token2.decimals < 18 ? token2RawAmount >= COW_MIN_AMOUNT : true;
-  const sufficientBalances = balance1 > token1RawAmount && balance2 > token2RawAmount;
+  const sufficientBalance1 = balance1 >= token1RawAmount;
+  const sufficientBalance2 = balance2 >= token2RawAmount;
 
   const canProceedToCreate =
     token1 !== null &&
@@ -76,7 +77,8 @@ export const PoolConfiguration = () => {
     hasAgreedToWarning &&
     poolName !== "" &&
     poolSymbol !== "" &&
-    sufficientBalances &&
+    sufficientBalance1 &&
+    sufficientBalance2 &&
     sufficientAmount1 &&
     sufficientAmount2;
 
@@ -100,8 +102,8 @@ export const PoolConfiguration = () => {
                   }
                   setToken1(selectedToken);
                 }}
+                setTokenAmount={setToken1Amount}
                 tokenOptions={availableTokens || []}
-                handleAmountChange={e => setToken1Amount(e.target.value)}
               />
               <TokenField
                 value={token2Amount}
@@ -114,8 +116,8 @@ export const PoolConfiguration = () => {
                   }
                   setToken2(selectedToken);
                 }}
+                setTokenAmount={setToken2Amount}
                 tokenOptions={availableTokens || []}
-                handleAmountChange={e => setToken2Amount(e.target.value)}
               />
             </div>
           </div>

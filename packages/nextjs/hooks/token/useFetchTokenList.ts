@@ -37,12 +37,14 @@ export const useFetchTokenList = () => {
         throw new Error("Error fetching token list from balancer API");
       }
 
+      const tokenList = json.data.tokenGetTokens.filter((token: Token) => token.address !== NATIVE_ASSET_ADDRESS);
+
       if (chainName === "SEPOLIA") {
-        // Only use faucet tokens for sepolia testing
-        return SEPOLIA_FAUCET_TOKENS;
+        // Add faucet tokens for sepolia testing
+        return [...SEPOLIA_FAUCET_TOKENS, ...tokenList];
       } else {
         // Filter out native assets
-        return json.data.tokenGetTokens.filter((token: Token) => token.address !== NATIVE_ASSET_ADDRESS);
+        return tokenList;
       }
     },
   });

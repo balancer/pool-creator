@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token } from "~~/hooks/token";
 
 type ModalProps = {
@@ -10,9 +11,13 @@ type ModalProps = {
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModalOpen, setToken }) => {
+  const { targetNetwork } = useTargetNetwork();
   const [searchText, setSearchText] = useState("");
   const filteredTokenOptions = tokenOptions.filter(
-    option => option.symbol && option.symbol.toLowerCase().startsWith(searchText.toLowerCase()),
+    option =>
+      (option.symbol && option.symbol.toLowerCase().startsWith(searchText.toLowerCase())) ||
+      (option.address && option.address.toLowerCase().includes(searchText.toLowerCase())) ||
+      (option.name && option.name.toLowerCase().includes(searchText.toLowerCase())),
   );
 
   return (
@@ -22,17 +27,17 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
         <div className="relative bg-base-300 border border-base-200 rounded-lg">
           <div className="p-4 mb-2">
             <div className="flex items-center justify-between mb-5">
-              <h5 className="ml-3 font-bold text-xl mb-0">Select a Token:</h5>
+              <h5 className="ml-3 font-bold text-xl mb-0">Select a Token: {targetNetwork.name}</h5>
 
               <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
             </div>
 
             <input
               type="text"
-              placeholder="Search by symbol..."
+              placeholder="Search by name, symbol, or address..."
               value={searchText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
-              className="w-full input rounded-xl bg-base-200 disabled:bg-base-200 px-5 h-[52px] text-lg"
+              className="w-full shadow-md input rounded-xl bg-base-200 disabled:bg-base-200 px-5 h-[52px] text-lg"
             />
           </div>
 

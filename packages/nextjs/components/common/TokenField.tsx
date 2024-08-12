@@ -17,7 +17,7 @@ interface TokenFieldProps {
   isDisabled?: boolean;
   tokenOptions?: Token[];
   setToken?: (token: Token) => void;
-  handleAmountChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setTokenAmount?: (amount: string) => void;
 }
 
 export const TokenField: React.FC<TokenFieldProps> = ({
@@ -28,7 +28,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
   isDisabled,
   tokenOptions,
   setToken,
-  handleAmountChange,
+  setTokenAmount,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: tokenPrices, isLoading, isError } = useFetchTokenPrices();
@@ -41,6 +41,18 @@ export const TokenField: React.FC<TokenFieldProps> = ({
 
   const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!setTokenAmount) return;
+    const inputValue = e.target.value.trim();
+    if (Number(inputValue) > 0) {
+      setTokenAmount(inputValue);
+    } else {
+      setTokenAmount("");
+    }
+  };
+
+  const setAmountToMax = () =>
+    setTokenAmount && setTokenAmount(formatUnits(balance || 0n, selectedToken?.decimals || 0));
   return (
     <>
       <div className="relative w-full shadow-md rounded-xl">
@@ -74,7 +86,10 @@ export const TokenField: React.FC<TokenFieldProps> = ({
 
             {selectedToken && balance !== undefined ? (
               <div className={`flex items-center gap-2 text-neutral-400`}>
-                <div className="flex items-center gap-1">
+                <div
+                  onClick={setAmountToMax}
+                  className="flex items-center gap-1 hover:text-accent hover:cursor-pointer"
+                >
                   <WalletIcon className="h-4 w-4 mt-0.5" /> {formatToHuman(balance, selectedToken?.decimals || 0)}
                 </div>
                 {amountGreaterThanBalance && (
