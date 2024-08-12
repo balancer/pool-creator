@@ -14,7 +14,7 @@ export const ExternalLinkButton = ({ href, text }: { href: string; text: string 
         href={href}
       >
         {text}
-        <ArrowTopRightOnSquareIcon className="w-4 h-4 mb-0.5" />
+        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
       </Link>
     </div>
   );

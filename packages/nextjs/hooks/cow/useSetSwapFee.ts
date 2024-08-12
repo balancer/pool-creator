@@ -5,8 +5,8 @@ import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 
 type SetSwapFeePayload = {
-  pool: Address;
-  rawAmount: bigint;
+  pool: Address | undefined;
+  rawAmount: bigint | undefined;
 };
 
 export const useSetSwapFee = () => {
@@ -17,6 +17,8 @@ export const useSetSwapFee = () => {
   const setSwapFee = async ({ pool, rawAmount }: SetSwapFeePayload) => {
     if (!publicClient) throw new Error("Cannot set swap fee public client");
     if (!walletClient) throw new Error("Cannot set swap fee wallet client");
+    if (!pool) throw new Error("Cannot set swap fee without pool address");
+    if (!rawAmount) throw new Error("Cannot set swap fee without swap fee amount");
 
     const { request: setSwapFee } = await publicClient.simulateContract({
       abi: abis.CoW.BCoWPool,

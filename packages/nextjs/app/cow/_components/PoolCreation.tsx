@@ -5,7 +5,7 @@ import { Alert, ExternalLinkButton, TextField, TokenField, TransactionButton } f
 import {
   type PoolCreationState,
   getPoolUrl,
-  useBindPool,
+  useBindToken,
   useCreatePool,
   useFinalizePool,
   useNewPoolEvents,
@@ -41,112 +41,39 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     state.token2.address,
     pool?.address,
   );
-  const refetchAllowances = () => {
-    refetchAllowance1();
-    refetchAllowance2();
-  };
 
   const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
-  const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveToken(refetchAllowances);
-  const { mutateAsync: bind, isPending: isBindPending, error: bindError } = useBindPool(() => refetchPool());
+  const { mutate: approve1, isPending: isApprove1Pending, error: approve1Error } = useApproveToken();
+  const { mutate: approve2, isPending: isApprove2Pending, error: approve2Error } = useApproveToken();
+  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken();
+  const { mutate: bind2, isPending: isBind2Pending, error: bind2Error } = useBindToken();
   const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
   const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
-  const txError = createPoolError || approveError || bindError || setSwapFeeError || finalizeError;
+  const txError =
+    createPoolError || approve1Error || approve2Error || bind1Error || bind2Error || setSwapFeeError || finalizeError;
 
   const setPersistedState = usePoolCreationPersistedState(state => state.setPersistedState);
 
-  const handleCreatePool = () => {
-    createPool(
-      { name: state.poolName, symbol: state.poolSymbol },
-      {
-        onSuccess: newPoolAddress => {
-          setUserPoolAddress(newPoolAddress);
-          setPersistedState({ ...state, step: 2 });
-        },
-      },
-    );
-  };
-
-  const handleApproveTokens = async () => {
-    const txs = [];
-    if (token1RawAmount > allowance1) {
-      txs.push(
-        approve({
-          token: state.token1.address,
-          spender: pool?.address,
-          rawAmount: token1RawAmount,
-        }),
-      );
-    }
-    if (token2RawAmount > allowance2)
-      txs.push(
-        approve({
-          token: state.token2.address,
-          spender: pool?.address,
-          rawAmount: token2RawAmount,
-        }),
-      );
-    const results = await Promise.all(txs);
-    if (results.every(result => result === "success")) setPersistedState({ ...state, step: 3 });
-  };
-
-  const handleBindTokens = async () => {
-    const txs = [];
-    // If not already bound, bind the token
-    const poolTokens = pool?.currentTokens.map(token => token.toLowerCase());
-    if (!poolTokens?.includes(state.token1.address.toLowerCase())) {
-      txs.push(
-        bind({
-          pool: pool?.address,
-          token: state.token1.address,
-          rawAmount: token1RawAmount,
-        }),
-      );
-    }
-    if (!poolTokens?.includes(state.token2.address.toLowerCase())) {
-      txs.push(
-        bind({
-          pool: pool?.address,
-          token: state.token2.address,
-          rawAmount: token2RawAmount,
-        }),
-      );
-    }
-    const results = await Promise.all(txs);
-    if (results.every(result => result === "success")) setPersistedState({ ...state, step: 4 });
-  };
-
-  const handleSetSwapFee = async () => {
-    if (!pool) throw new Error("Pool is undefined in handleSetSwapFee");
-    setSwapFee(
-      { pool: pool.address, rawAmount: pool.MAX_FEE },
-      { onSuccess: () => setPersistedState({ ...state, step: 5 }) },
-    );
-  };
-
-  const handleFinalize = async () => {
-    finalizePool(pool?.address, {
-      onSuccess: () => setPersistedState({ ...state, step: 6 }),
-    });
-  };
-
   useEffect(() => {
     if (state.step === 1) return;
-    if (pool && pool.numTokens < 2n) {
-      if (allowance1 < token1RawAmount || allowance2 < token2RawAmount) {
+    if (pool && pool.numTokens === 0n) {
+      if (allowance1 < token1RawAmount) {
         setPersistedState({ ...state, step: 2 });
-      } else {
+      } else if (allowance2 < token2RawAmount) {
         setPersistedState({ ...state, step: 3 });
+      } else if (allowance1 >= token1RawAmount && allowance2 >= token2RawAmount) {
+        setPersistedState({ ...state, step: 4 });
       }
     }
+    if (pool && pool.numTokens === 1n) setPersistedState({ ...state, step: 5 });
     if (pool && pool.numTokens === 2n && !pool.isFinalized) {
       if (pool.swapFee !== pool.MAX_FEE) {
-        setPersistedState({ ...state, step: 4 });
+        setPersistedState({ ...state, step: 6 });
       } else {
-        setPersistedState({ ...state, step: 5 });
+        setPersistedState({ ...state, step: 7 });
       }
     }
-    if (pool && pool.isFinalized) setPersistedState({ ...state, step: 6 });
+    if (pool && pool.isFinalized) setPersistedState({ ...state, step: 8 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
 
@@ -154,24 +81,28 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
   return (
     <>
-      <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
-        <div className="flex flex-col items-center gap-3 w-full">
-          <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
+      <div className="flex flex-wrap justify-center gap-5 md:relative">
+        <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-lg md:w-[555px]">
+          <div className="flex flex-col items-center gap-3 w-full">
+            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
 
-          <div className="w-full">
-            <div className="ml-1 mb-1">Selected pool tokens:</div>
-            <div className="w-full flex flex-col gap-3">
-              <TokenField value={state.token1Amount} selectedToken={state.token1} isDisabled={true} />
-              <TokenField value={state.token2Amount} selectedToken={state.token2} isDisabled={true} />
+            <div className="w-full">
+              <div className="ml-1 mb-1">Selected pool tokens:</div>
+              <div className="w-full flex flex-col gap-3">
+                <TokenField value={state.token1Amount} selectedToken={state.token1} isDisabled={true} />
+                <TokenField value={state.token2Amount} selectedToken={state.token2} isDisabled={true} />
+              </div>
             </div>
+            <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
+            <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
           </div>
-          <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
-          <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
+        </div>
+        <div className="flex md:absolute md:top-0 md:-right-[215px]">
+          <StepsDisplay state={state} />
         </div>
       </div>
-      {state.step < 6 && <StepsDisplay currentStep={state.step} />}
 
-      {pool && state.step === 6 && (
+      {pool && state.step === 8 && (
         <>
           <div className="w-full flex flex-col gap-3">
             <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
@@ -211,47 +142,132 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   title="Create Pool"
                   isPending={isCreatePending}
                   isDisabled={isCreatePending || isWrongNetwork}
-                  onClick={handleCreatePool}
+                  onClick={() => {
+                    createPool(
+                      { name: state.poolName, symbol: state.poolSymbol },
+                      {
+                        onSuccess: newPoolAddress => {
+                          setUserPoolAddress(newPoolAddress);
+                          setPersistedState({ ...state, step: 2 });
+                        },
+                      },
+                    );
+                  }}
                 />
               </>
             );
           case 2:
             return (
               <TransactionButton
-                title="Approve"
-                isPending={isApprovePending}
-                isDisabled={isApprovePending || isWrongNetwork}
-                onClick={handleApproveTokens}
+                title={`Approve ${state.token1.symbol}`}
+                isPending={isApprove1Pending}
+                isDisabled={isApprove1Pending || isWrongNetwork}
+                onClick={() => {
+                  approve1(
+                    { token: state.token1.address, spender: pool?.address, rawAmount: token1RawAmount },
+                    {
+                      onSuccess: () => {
+                        refetchAllowance1();
+                        if (allowance1 >= token1RawAmount) setPersistedState({ ...state, step: 3 });
+                      },
+                    },
+                  );
+                }}
               />
             );
           case 3:
             return (
               <TransactionButton
-                title="Add Liquidity"
-                isPending={isBindPending}
-                isDisabled={isBindPending || isWrongNetwork}
-                onClick={handleBindTokens}
+                title={`Approve ${state.token2.symbol}`}
+                isPending={isApprove2Pending}
+                isDisabled={isApprove2Pending || isWrongNetwork}
+                onClick={() => {
+                  approve2(
+                    { token: state.token2.address, spender: pool?.address, rawAmount: token2RawAmount },
+                    {
+                      onSuccess: () => {
+                        refetchAllowance2();
+                        if (allowance2 >= token2RawAmount) setPersistedState({ ...state, step: 4 });
+                      },
+                    },
+                  );
+                }}
               />
             );
           case 4:
             return (
               <TransactionButton
-                title="Set Swap Fee"
-                onClick={handleSetSwapFee}
-                isPending={isSetSwapFeePending}
-                isDisabled={isSetSwapFeePending || isWrongNetwork}
+                title={`Add ${state.token1.symbol}`}
+                isPending={isBind1Pending}
+                isDisabled={isBind1Pending || isWrongNetwork}
+                onClick={() => {
+                  bind1(
+                    {
+                      pool: pool?.address,
+                      token: state.token1.address,
+                      rawAmount: token1RawAmount,
+                    },
+                    {
+                      onSuccess: () => {
+                        refetchPool();
+                        setPersistedState({ ...state, step: 5 });
+                      },
+                    },
+                  );
+                }}
               />
             );
           case 5:
             return (
               <TransactionButton
-                title="Finalize"
-                onClick={handleFinalize}
-                isPending={isFinalizePending}
-                isDisabled={isFinalizePending || isWrongNetwork}
+                title={`Add ${state.token2.symbol}`}
+                isPending={isBind2Pending}
+                isDisabled={isBind2Pending || isWrongNetwork}
+                onClick={() => {
+                  bind2(
+                    {
+                      pool: pool?.address,
+                      token: state.token2.address,
+                      rawAmount: token2RawAmount,
+                    },
+                    {
+                      onSuccess: () => {
+                        refetchPool();
+                        setPersistedState({ ...state, step: 6 });
+                      },
+                    },
+                  );
+                }}
               />
             );
           case 6:
+            return (
+              <TransactionButton
+                title="Set Swap Fee"
+                isPending={isSetSwapFeePending}
+                isDisabled={isSetSwapFeePending || isWrongNetwork}
+                onClick={() => {
+                  setSwapFee(
+                    { pool: pool?.address, rawAmount: pool?.MAX_FEE },
+                    { onSuccess: () => setPersistedState({ ...state, step: 7 }) },
+                  );
+                }}
+              />
+            );
+          case 7:
+            return (
+              <TransactionButton
+                title="Finalize"
+                isPending={isFinalizePending}
+                isDisabled={isFinalizePending || isWrongNetwork}
+                onClick={() => {
+                  finalizePool(pool?.address, {
+                    onSuccess: () => setPersistedState({ ...state, step: 8 }),
+                  });
+                }}
+              />
+            );
+          case 8:
             return (
               <TransactionButton
                 title="Create Another Pool"
@@ -265,7 +281,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         }
       })()}
 
-      {state.step < 6 && (
+      {state.step < 8 && (
         <div className=" link flex items-center gap-2" onClick={() => setIsResetModalOpen(true)}>
           Start Over
         </div>

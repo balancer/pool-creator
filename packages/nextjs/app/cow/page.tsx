@@ -19,7 +19,7 @@ const CowAmm: NextPage = () => {
   return (
     <div className="flex-grow bg-base-300">
       <div className="flex justify-center px-5">
-        <div className="w-full sm:w-[555px]">
+        <div className="w-full md:w-[555px]">
           <div className="flex items-center flex-col flex-grow py-10 gap-6">
             <h1 className="text-2xl md:text-4xl font-bold">Create a CoW AMM Pool</h1>
             {!isMounted ? (
@@ -44,7 +44,7 @@ const CowLoadingSkeleton = () => {
       <div className="w-full h-[496px]">
         <div className="animate-pulse bg-base-200 rounded-xl w-full h-full"></div>
       </div>
-      <div className="w-full h-[104px]">
+      <div className="w-full sm:w-[325px] h-[50px]">
         <div className="animate-pulse bg-base-200 rounded-xl w-full h-full"></div>
       </div>
     </>
