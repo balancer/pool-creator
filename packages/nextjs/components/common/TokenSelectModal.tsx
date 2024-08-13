@@ -24,7 +24,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
       <div className="relative w-[500px]">
-        <div className="relative bg-base-300 border border-base-200 rounded-lg">
+        <div className="relative bg-base-200 border border-base-200 rounded-lg">
           <div className="p-4 mb-2">
             <div className="flex items-center justify-between mb-5">
               <h5 className="ml-3 font-bold text-xl mb-0">Select a Token: {targetNetwork.name}</h5>
@@ -37,7 +37,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
               placeholder="Search by name, symbol, or address..."
               value={searchText}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
-              className="w-full shadow-md input rounded-xl bg-base-200 disabled:bg-base-200 px-5 h-[52px] text-lg"
+              className="w-full shadow-inner input rounded-xl bg-base-300 disabled:bg-base-300 px-5 h-[52px] text-lg"
             />
           </div>
 

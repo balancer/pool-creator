@@ -204,7 +204,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 case 6:
                   return (
                     <>
-                      <Alert type="info">All CoW AMMs must set the swap fee to the maximum</Alert>
                       <TransactionButton
                         title="Set Swap Fee"
                         isPending={isSetSwapFeePending}
@@ -259,6 +258,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         </div>
       </div>
 
+      {state.step === 6 && <Alert type="info">All CoW AMMs must set the swap fee to the maximum</Alert>}
       {/* <StepInfoAlerts state={state} /> */}
 
       {state.step === 8 && (

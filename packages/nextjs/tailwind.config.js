@@ -13,7 +13,7 @@ module.exports = {
           "primary-content": "#ffffff",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
-          accent: "#a78bfa",
+          accent: "#10b981",
           "accent-content": "#ffffff",
           neutral: "#d4d4d4",
           "neutral-content": "rgb(45, 55, 72)",
@@ -22,7 +22,7 @@ module.exports = {
           "base-300": "#EBE8E0", // bg color
           "base-content": "rgb(45, 55, 72)",
           info: "#0e7490",
-          success: "#15803d",
+          success: "#047857",
           warning: "#b45309",
           error: "#b91c1c",
 
@@ -45,8 +45,8 @@ module.exports = {
           "primary-content": "#0f172a",
           secondary: "rgb(70, 77, 88)",
           "secondary-content": "rgb(229, 211, 190)",
-          accent: "#a78bfa",
-          "accent-content": "#ffffff",
+          accent: "#34d399",
+          "accent-content": "rgb(45, 55, 72)",
           neutral: "rgb(229, 211, 190)",
           "neutral-content": "rgb(70, 77, 88)",
           "base-100": "rgb(70, 77, 88)",
@@ -54,7 +54,7 @@ module.exports = {
           "base-300": "rgb(56, 62, 71)", // bg color
           "base-content": "rgb(229, 211, 190)",
           info: "#67e8f9",
-          success: "#4ade80",
+          success: "#34d399",
           warning: "#fcd34d",
           error: "#fca5a5",
 
@@ -91,7 +91,7 @@ module.exports = {
         "custom-beige-end": "#e6c6a0",
         "error-tint": "#ef444433",
         "warning-tint": "#f59e0b33",
-        "success-tint": "#22c55e33",
+        "success-tint": "#10b98133",
         "info-tint": "#06b6d433",
       },
     },
