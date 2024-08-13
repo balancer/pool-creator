@@ -2,16 +2,17 @@ import { useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { getAddress } from "viem";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
-import { Alert, ExternalLinkButton } from "~~/components/common/";
+import { Alert, ExternalLinkButton, TransactionButton } from "~~/components/common/";
 import { getPoolUrl } from "~~/hooks/cow";
 
-interface FinishDisplayProps {
+interface PoolCreatedProps {
   etherscanURL: string | undefined;
   poolAddress: string | undefined;
   chainId: number;
+  clearState: () => void;
 }
 
-export const FinishDisplay = ({ etherscanURL, poolAddress, chainId }: FinishDisplayProps) => {
+export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: PoolCreatedProps) => {
   const [addressCopied, setAddressCopied] = useState(false);
 
   if (!poolAddress) return null;
@@ -21,11 +22,10 @@ export const FinishDisplay = ({ etherscanURL, poolAddress, chainId }: FinishDisp
   return (
     <>
       <div className="w-full flex flex-col gap-3">
-        <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
         <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
       </div>
 
-      <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5 shadow-xl">
+      <div className="bg-base-200 w-full p-6 rounded-xl flex flex-col gap-7 shadow-xl">
         <div className="flex justify-center items-center gap-2">
           <div className=" sm:text-lg overflow-hidden">{poolAddress}</div>
           <div>
@@ -61,6 +61,7 @@ export const FinishDisplay = ({ etherscanURL, poolAddress, chainId }: FinishDisp
           <ExternalLinkButton href={getPoolUrl(chainId, poolAddress)} text="View on Balancer" />
           {etherscanURL && <ExternalLinkButton href={etherscanURL} text="View on Etherscan" />}
         </div>
+        <TransactionButton title="Create Another Pool" onClick={clearState} isPending={false} isDisabled={false} />
       </div>
     </>
   );

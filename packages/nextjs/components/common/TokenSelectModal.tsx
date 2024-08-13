@@ -3,6 +3,7 @@ import VirtualList from "react-tiny-virtual-list";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { useNetworkColor } from "~~/hooks/scaffold-eth";
 import { type Token } from "~~/hooks/token";
 
 type ModalProps = {
@@ -12,6 +13,8 @@ type ModalProps = {
 };
 export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModalOpen, setToken }) => {
   const { targetNetwork } = useTargetNetwork();
+  const networkColor = useNetworkColor();
+
   const [searchText, setSearchText] = useState("");
   const filteredTokenOptions = tokenOptions.filter(
     option =>
@@ -27,7 +30,9 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
         <div className="relative bg-base-200 border border-base-200 rounded-lg">
           <div className="p-4 mb-2">
             <div className="flex items-center justify-between mb-5">
-              <h5 className="ml-3 font-bold text-xl mb-0">Select a Token: {targetNetwork.name}</h5>
+              <h5 className="ml-3 font-bold text-xl mb-0">
+                Select a Token: <span style={{ color: networkColor }}>{targetNetwork.name}</span>
+              </h5>
 
               <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
             </div>

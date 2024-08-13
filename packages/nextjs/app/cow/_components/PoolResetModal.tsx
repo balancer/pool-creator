@@ -25,7 +25,7 @@ export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: Poo
             <Link
               target="_blank"
               rel="noreferrer"
-              href="https://discord.com/channels/638460494168064021/638465986839707660"
+              href="https://discord.com/channels/638460494168064021/1246145461123809292"
             >
               <span className="link">discord</span> <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block" />
             </Link>

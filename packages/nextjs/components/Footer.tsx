@@ -21,7 +21,7 @@ export const Footer = () => {
   const isSepolia = targetNetwork.id == 11155111;
 
   return (
-    <div className="min-h-0 py-5 px-1 lg:mb-0 bg-base-300 border-t-2 border-base-200">
+    <div className="min-h-0 py-5 px-1 lg:mb-0 bg-base-300 border-t border-base-200">
       {/* <div>
         <div className="fixed flex justify-between items-center w-full z-10 p-4 bottom-0 left-0 pointer-events-none">
           <div className="flex flex-col md:flex-row gap-2 pointer-events-auto">
@@ -58,7 +58,7 @@ export const Footer = () => {
                     rel="noreferrer"
                     className="link no-underline hover:underline"
                   >
-                    💦 Faucet
+                    Faucet
                   </a>
                 </div>
                 <span>·</span>
@@ -71,7 +71,7 @@ export const Footer = () => {
                 rel="noreferrer"
                 className="link no-underline hover:underline"
               >
-                🧑‍💻 Github
+                Github
               </a>
             </div>
             <span>·</span>
@@ -82,7 +82,7 @@ export const Footer = () => {
                 rel="noreferrer"
                 className="link no-underline hover:underline"
               >
-                📜 Contracts
+                Contracts
               </a>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FinishDisplay, PoolResetModal, StepsDisplay } from "./";
+import { PoolCreated, PoolResetModal, StepsDisplay } from "./";
 import { Address, parseUnits } from "viem";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import {
@@ -239,14 +239,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                     />
                   );
                 case 8:
-                  return (
-                    <TransactionButton
-                      title="Create Another Pool"
-                      onClick={clearState}
-                      isPending={false}
-                      isDisabled={false}
-                    />
-                  );
+                  return <Alert type="success">Your CoW AMM pool was successfully created!</Alert>;
                 default:
                   return null;
               }
@@ -258,11 +251,14 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         </div>
       </div>
 
-      {state.step === 6 && <Alert type="info">All CoW AMMs must set the swap fee to the maximum</Alert>}
-      {/* <StepInfoAlerts state={state} /> */}
-
+      {state.step === 6 && <Alert type="info">All CoW AMMs must set the swap fee to the maximum of 99.99%</Alert>}
       {state.step === 8 && (
-        <FinishDisplay etherscanURL={etherscanURL} poolAddress={pool?.address} chainId={state.chainId} />
+        <PoolCreated
+          clearState={clearState}
+          etherscanURL={etherscanURL}
+          poolAddress={pool?.address}
+          chainId={state.chainId}
+        />
       )}
 
       {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
