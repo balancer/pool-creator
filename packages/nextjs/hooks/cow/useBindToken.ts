@@ -32,8 +32,7 @@ export const useBindToken = () => {
 
     await writeTx(() => walletClient.writeContract(bind), {
       blockConfirmations: 1,
-      onBlockConfirmation: txReceipt => {
-        if (txReceipt.status !== "success") throw new Error("Bind token transaction reverted");
+      onBlockConfirmation: () => {
         console.log("Bound token:", token, "to pool:", pool);
       },
     });

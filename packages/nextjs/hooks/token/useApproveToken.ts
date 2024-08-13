@@ -31,8 +31,7 @@ export const useApproveToken = () => {
 
     await writeTx(() => walletClient.writeContract(approveSpenderOnToken), {
       blockConfirmations: 1,
-      onBlockConfirmation: txReceipt => {
-        if (txReceipt.status !== "success") throw new Error("Approve token transaction reverted");
+      onBlockConfirmation: () => {
         console.log("Approved pool contract to spend amount:", rawAmount, " of token:", token);
       },
     });
