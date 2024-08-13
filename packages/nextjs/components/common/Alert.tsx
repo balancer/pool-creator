@@ -1,7 +1,12 @@
-import { CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 
 interface AlertProps {
-  type: "error" | "warning" | "success"; // `type` is required
+  type: "error" | "warning" | "success" | "info"; // `type` is required
   showIcon?: boolean;
   children?: React.ReactNode; // `children` can be optional
 }
@@ -13,6 +18,7 @@ const alertTypeMap = {
     icon: <ExclamationTriangleIcon className="w-6 h-6" />,
   },
   success: { styles: "bg-success-tint border-success text-success", icon: <CheckCircleIcon className="w-6 h-6" /> },
+  info: { styles: "bg-info-tint border-info text-info", icon: <InformationCircleIcon className="w-6 h-6" /> },
 };
 
 export const Alert: React.FC<AlertProps> = ({ children, type, showIcon = true }) => {

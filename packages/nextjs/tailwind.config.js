@@ -9,7 +9,7 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#a78bfa",
+          primary: "#ffffff",
           "primary-content": "#ffffff",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
@@ -21,7 +21,7 @@ module.exports = {
           "base-200": "rgb(245, 243, 239)",
           "base-300": "#EBE8E0", // bg color
           "base-content": "rgb(45, 55, 72)",
-          info: "#1d4ed8",
+          info: "#0e7490",
           success: "#15803d",
           warning: "#b45309",
           error: "#b91c1c",
@@ -53,7 +53,7 @@ module.exports = {
           "base-200": "rgb(63, 70, 80)",
           "base-300": "rgb(56, 62, 71)", // bg color
           "base-content": "rgb(229, 211, 190)",
-          info: "#60a5fa",
+          info: "#67e8f9",
           success: "#4ade80",
           warning: "#fcd34d",
           error: "#fca5a5",
@@ -91,6 +91,7 @@ module.exports = {
         "error-tint": "#ef444433",
         "warning-tint": "#f59e0b33",
         "success-tint": "#22c55e33",
+        "info-tint": "#06b6d433",
       },
     },
   },

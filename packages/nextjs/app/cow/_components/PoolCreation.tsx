@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { PoolResetModal, StepsDisplay } from "./";
+import { FinishDisplay, PoolResetModal, StepsDisplay } from "./";
 import { Address, parseUnits } from "viem";
-import { Alert, ExternalLinkButton, TextField, TokenField, TransactionButton } from "~~/components/common/";
+import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import {
   type PoolCreationState,
-  getPoolUrl,
   useBindToken,
   useCreatePool,
   useFinalizePool,
@@ -102,24 +101,8 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         </div>
       </div>
 
-      {pool && state.step === 8 && (
-        <>
-          <div className="w-full flex flex-col gap-3">
-            <Alert type="success">Your CoW AMM pool was successfully created!</Alert>
-            <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
-          </div>
-
-          <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5">
-            <div className="text-center">
-              <div className=" sm:text-xl overflow-hidden ">{pool.address}</div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-              <ExternalLinkButton href={getPoolUrl(state.chainId, pool.address)} text="View on Balancer" />
-              {etherscanURL && <ExternalLinkButton href={etherscanURL} text="View on Etherscan" />}
-            </div>
-          </div>
-        </>
+      {state.step === 8 && (
+        <FinishDisplay etherscanURL={etherscanURL} poolAddress={pool?.address} chainId={state.chainId} />
       )}
 
       {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
@@ -138,6 +121,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           case 1:
             return (
               <>
+                <Alert type="info">Deploy a pool contract using the official CoW factory</Alert>
                 <TransactionButton
                   title="Create Pool"
                   isPending={isCreatePending}
@@ -158,114 +142,133 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
             );
           case 2:
             return (
-              <TransactionButton
-                title={`Approve ${state.token1.symbol}`}
-                isPending={isApprove1Pending}
-                isDisabled={isApprove1Pending || isWrongNetwork}
-                onClick={() => {
-                  approve1(
-                    { token: state.token1.address, spender: pool?.address, rawAmount: token1RawAmount },
-                    {
-                      onSuccess: () => {
-                        refetchAllowance1();
-                        if (allowance1 >= token1RawAmount) setPersistedState({ ...state, step: 3 });
+              <>
+                <Alert type="info">Approve the pool to spend your {state.token1.symbol} tokens</Alert>
+                <TransactionButton
+                  title={`Approve ${state.token1.symbol}`}
+                  isPending={isApprove1Pending}
+                  isDisabled={isApprove1Pending || isWrongNetwork}
+                  onClick={() => {
+                    approve1(
+                      { token: state.token1.address, spender: pool?.address, rawAmount: token1RawAmount },
+                      {
+                        onSuccess: () => {
+                          refetchAllowance1();
+                          if (allowance1 >= token1RawAmount) setPersistedState({ ...state, step: 3 });
+                        },
                       },
-                    },
-                  );
-                }}
-              />
+                    );
+                  }}
+                />
+              </>
             );
           case 3:
             return (
-              <TransactionButton
-                title={`Approve ${state.token2.symbol}`}
-                isPending={isApprove2Pending}
-                isDisabled={isApprove2Pending || isWrongNetwork}
-                onClick={() => {
-                  approve2(
-                    { token: state.token2.address, spender: pool?.address, rawAmount: token2RawAmount },
-                    {
-                      onSuccess: () => {
-                        refetchAllowance2();
-                        if (allowance2 >= token2RawAmount) setPersistedState({ ...state, step: 4 });
+              <>
+                <Alert type="info">Approve the pool to spend your {state.token2.symbol} tokens</Alert>
+                <TransactionButton
+                  title={`Approve ${state.token2.symbol}`}
+                  isPending={isApprove2Pending}
+                  isDisabled={isApprove2Pending || isWrongNetwork}
+                  onClick={() => {
+                    approve2(
+                      { token: state.token2.address, spender: pool?.address, rawAmount: token2RawAmount },
+                      {
+                        onSuccess: () => {
+                          refetchAllowance2();
+                          if (allowance2 >= token2RawAmount) setPersistedState({ ...state, step: 4 });
+                        },
                       },
-                    },
-                  );
-                }}
-              />
+                    );
+                  }}
+                />
+              </>
             );
+
           case 4:
             return (
-              <TransactionButton
-                title={`Add ${state.token1.symbol}`}
-                isPending={isBind1Pending}
-                isDisabled={isBind1Pending || isWrongNetwork}
-                onClick={() => {
-                  bind1(
-                    {
-                      pool: pool?.address,
-                      token: state.token1.address,
-                      rawAmount: token1RawAmount,
-                    },
-                    {
-                      onSuccess: () => {
-                        refetchPool();
-                        setPersistedState({ ...state, step: 5 });
+              <>
+                <Alert type="info">Send your {state.token1.symbol} tokens to the pool</Alert>
+                <TransactionButton
+                  title={`Add ${state.token1.symbol}`}
+                  isPending={isBind1Pending}
+                  isDisabled={isBind1Pending || isWrongNetwork}
+                  onClick={() => {
+                    bind1(
+                      {
+                        pool: pool?.address,
+                        token: state.token1.address,
+                        rawAmount: token1RawAmount,
                       },
-                    },
-                  );
-                }}
-              />
+                      {
+                        onSuccess: () => {
+                          refetchPool();
+                          setPersistedState({ ...state, step: 5 });
+                        },
+                      },
+                    );
+                  }}
+                />
+              </>
             );
           case 5:
             return (
-              <TransactionButton
-                title={`Add ${state.token2.symbol}`}
-                isPending={isBind2Pending}
-                isDisabled={isBind2Pending || isWrongNetwork}
-                onClick={() => {
-                  bind2(
-                    {
-                      pool: pool?.address,
-                      token: state.token2.address,
-                      rawAmount: token2RawAmount,
-                    },
-                    {
-                      onSuccess: () => {
-                        refetchPool();
-                        setPersistedState({ ...state, step: 6 });
+              <>
+                <Alert type="info">Send your {state.token2.symbol} tokens to the pool</Alert>
+                <TransactionButton
+                  title={`Add ${state.token2.symbol}`}
+                  isPending={isBind2Pending}
+                  isDisabled={isBind2Pending || isWrongNetwork}
+                  onClick={() => {
+                    bind2(
+                      {
+                        pool: pool?.address,
+                        token: state.token2.address,
+                        rawAmount: token2RawAmount,
                       },
-                    },
-                  );
-                }}
-              />
+                      {
+                        onSuccess: () => {
+                          refetchPool();
+                          setPersistedState({ ...state, step: 6 });
+                        },
+                      },
+                    );
+                  }}
+                />
+              </>
             );
           case 6:
             return (
-              <TransactionButton
-                title="Set Swap Fee"
-                isPending={isSetSwapFeePending}
-                isDisabled={isSetSwapFeePending || isWrongNetwork}
-                onClick={() => {
-                  setSwapFee(
-                    { pool: pool?.address, rawAmount: pool?.MAX_FEE },
-                    { onSuccess: () => setPersistedState({ ...state, step: 7 }) },
-                  );
-                }}
-              />
+              <>
+                <Alert type="info">All CoW AMMs must set the swap fee to the maximum</Alert>
+                <TransactionButton
+                  title="Set Swap Fee"
+                  isPending={isSetSwapFeePending}
+                  isDisabled={isSetSwapFeePending || isWrongNetwork}
+                  onClick={() => {
+                    setSwapFee(
+                      { pool: pool?.address, rawAmount: pool?.MAX_FEE },
+                      { onSuccess: () => setPersistedState({ ...state, step: 7 }) },
+                    );
+                  }}
+                />
+              </>
             );
           case 7:
             return (
-              <TransactionButton
-                title="Finalize"
-                isPending={isFinalizePending}
-                isDisabled={isFinalizePending || isWrongNetwork}
-                onClick={() => {
-                  finalizePool(pool?.address, {
-                    onSuccess: () => setPersistedState({ ...state, step: 8 }),
-                  });
-                }}
-              />
+              <>
+                <Alert type="info">The final step which enables normal liquidity operations</Alert>
+                <TransactionButton
+                  title="Finalize"
+                  isPending={isFinalizePending}
+                  isDisabled={isFinalizePending || isWrongNetwork}
+                  onClick={() => {
+                    finalizePool(pool?.address, {
+                      onSuccess: () => setPersistedState({ ...state, step: 8 }),
+                    });
+                  }}
+                />
+              </>
             );
           case 8:
             return (
