@@ -84,8 +84,8 @@ export const PoolConfiguration = () => {
 
   return (
     <>
-      <div className="bg-base-200 p-7 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-lg">
-        <div className="flex flex-col items-center gap-3 w-full">
+      <div className="bg-base-200 p-5 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-xl">
+        <div className="flex flex-col items-center gap-5 w-full">
           <h5 className="text-xl md:text-2xl font-bold">Configure your pool</h5>
 
           <div className="w-full">
@@ -134,6 +134,26 @@ export const PoolConfiguration = () => {
             value={poolSymbol}
             onChange={e => setPoolSymbol(e.target.value)}
           />
+
+          <TransactionButton
+            title="Preview"
+            isPending={false}
+            isDisabled={!canProceedToCreate}
+            onClick={() => {
+              setPersistedState({
+                chainId: chain?.id || 0,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                token1: token1!,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                token2: token2!,
+                token1Amount,
+                token2Amount,
+                poolName: poolName.trim(),
+                poolSymbol: poolSymbol.trim(),
+                step: 1,
+              });
+            }}
+          />
         </div>
       </div>
 
@@ -170,28 +190,6 @@ export const PoolConfiguration = () => {
           </div>
         </Alert>
       )}
-
-      <div className="min-w-96 px-5">
-        <TransactionButton
-          title="Preview"
-          isPending={false}
-          isDisabled={!canProceedToCreate}
-          onClick={() => {
-            setPersistedState({
-              chainId: chain?.id || 0,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              token1: token1!,
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              token2: token2!,
-              token1Amount,
-              token2Amount,
-              poolName: poolName.trim(),
-              poolSymbol: poolSymbol.trim(),
-              step: 1,
-            });
-          }}
-        />
-      </div>
     </>
   );
 };

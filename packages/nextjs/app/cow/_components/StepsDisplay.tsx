@@ -10,7 +10,7 @@ export const StepsDisplay = ({ state }: { state: any }) => {
   ];
 
   return (
-    <div className="bg-base-200 px-5 pt-7 rounded-xl shadow-md">
+    <div className="bg-base-200 px-5 pt-7 rounded-xl shadow-xl">
       <h5 className="text-xl font-bold text-center">Steps</h5>
       <ul className="steps steps-vertical">
         {steps.map(step => (

@@ -25,7 +25,7 @@ export const FinishDisplay = ({ etherscanURL, poolAddress, chainId }: FinishDisp
         <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
       </div>
 
-      <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5">
+      <div className="bg-base-200 w-full p-5 rounded-xl flex flex-col gap-5 shadow-xl">
         <div className="flex justify-center items-center gap-2">
           <div className=" sm:text-lg overflow-hidden">{poolAddress}</div>
           <div>

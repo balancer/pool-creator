@@ -55,7 +55,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
     setTokenAmount && setTokenAmount(formatUnits(balance || 0n, selectedToken?.decimals || 0));
   return (
     <>
-      <div className="relative w-full shadow-md rounded-xl">
+      <div className="relative w-full rounded-xl">
         <input
           disabled={isDisabled}
           type="number"
@@ -63,7 +63,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
           min="0"
           placeholder="0.0"
           value={value}
-          className={`border-0 h-[77px] pb-4 px-4 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
+          className={`shadow-inner border-0 h-[77px] pb-4 px-4 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
             ${
               sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"
             } `}
