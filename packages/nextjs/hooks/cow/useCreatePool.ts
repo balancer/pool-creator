@@ -21,6 +21,7 @@ export const useCreatePool = () => {
     });
     if (!hash) throw new Error("No pool creation transaction hash");
     const txReceipt = await publicClient.getTransactionReceipt({ hash });
+    if (txReceipt.status !== "success") throw new Error("Pool creation transaction reverted");
     const logs = parseEventLogs({
       abi: abis.CoW.BCoWFactory,
       logs: txReceipt.logs,

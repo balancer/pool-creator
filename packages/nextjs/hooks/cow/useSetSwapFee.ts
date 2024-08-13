@@ -30,7 +30,8 @@ export const useSetSwapFee = () => {
 
     await writeTx(() => walletClient.writeContract(setSwapFee), {
       blockConfirmations: 1,
-      onBlockConfirmation: () => {
+      onBlockConfirmation: txReciept => {
+        if (txReciept.status !== "success") throw new Error("Set swap fee transaction reverted");
         console.log("Set swap fee to", rawAmount, "for pool:", pool);
       },
     });

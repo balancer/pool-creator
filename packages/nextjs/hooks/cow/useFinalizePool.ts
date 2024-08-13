@@ -23,7 +23,8 @@ export const useFinalizePool = () => {
 
     await writeTx(() => walletClient.writeContract(finalizePool), {
       blockConfirmations: 1,
-      onBlockConfirmation: () => {
+      onBlockConfirmation: txReciept => {
+        if (txReciept.status !== "success") throw new Error("Finalize pool transaction reverted");
         console.log("Successfully finalized pool:", pool);
       },
     });

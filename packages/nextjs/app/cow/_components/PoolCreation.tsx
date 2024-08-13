@@ -248,7 +248,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   onClick={() => {
                     setSwapFee(
                       { pool: pool?.address, rawAmount: pool?.MAX_FEE },
-                      { onSuccess: () => setPersistedState({ ...state, step: 7 }) },
+                      {
+                        onSuccess: () => {
+                          refetchPool();
+                          setPersistedState({ ...state, step: 7 });
+                        },
+                      },
                     );
                   }}
                 />
@@ -264,7 +269,10 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   isDisabled={isFinalizePending || isWrongNetwork}
                   onClick={() => {
                     finalizePool(pool?.address, {
-                      onSuccess: () => setPersistedState({ ...state, step: 8 }),
+                      onSuccess: () => {
+                        refetchPool();
+                        setPersistedState({ ...state, step: 8 });
+                      },
                     });
                   }}
                 />
