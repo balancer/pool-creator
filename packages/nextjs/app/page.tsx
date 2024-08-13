@@ -22,7 +22,7 @@ const Home: NextPage = () => {
           <div className="flex justify-center">
             {PAGES.map(item => (
               <Link
-                className="relative bg-base-200 hover:scale-105 hover:bg-base-100 text-2xl text-center p-8 rounded-3xl"
+                className="shadow-inner relative bg-base-200 hover:scale-105 text-2xl text-center p-8 rounded-3xl"
                 key={item.href}
                 href={item.href}
                 passHref

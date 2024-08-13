@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FinishDisplay, PoolResetModal, StepInfoAlerts, StepsDisplay } from "./";
+import { FinishDisplay, PoolResetModal, StepsDisplay } from "./";
 import { Address, parseUnits } from "viem";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import {
@@ -203,22 +203,25 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                   );
                 case 6:
                   return (
-                    <TransactionButton
-                      title="Set Swap Fee"
-                      isPending={isSetSwapFeePending}
-                      isDisabled={isSetSwapFeePending || isWrongNetwork}
-                      onClick={() => {
-                        setSwapFee(
-                          { pool: pool?.address, rawAmount: pool?.MAX_FEE },
-                          {
-                            onSuccess: () => {
-                              refetchPool();
-                              setPersistedState({ ...state, step: 7 });
+                    <>
+                      <Alert type="info">All CoW AMMs must set the swap fee to the maximum</Alert>
+                      <TransactionButton
+                        title="Set Swap Fee"
+                        isPending={isSetSwapFeePending}
+                        isDisabled={isSetSwapFeePending || isWrongNetwork}
+                        onClick={() => {
+                          setSwapFee(
+                            { pool: pool?.address, rawAmount: pool?.MAX_FEE },
+                            {
+                              onSuccess: () => {
+                                refetchPool();
+                                setPersistedState({ ...state, step: 7 });
+                              },
                             },
-                          },
-                        );
-                      }}
-                    />
+                          );
+                        }}
+                      />
+                    </>
                   );
                 case 7:
                   return (
@@ -251,12 +254,12 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
             })()}
           </div>
         </div>
-        <div className="flex md:absolute md:top-0 md:-right-[215px]">
+        <div className="flex md:absolute md:top-0 md:-right-[225px]">
           <StepsDisplay state={state} />
         </div>
       </div>
 
-      <StepInfoAlerts state={state} />
+      {/* <StepInfoAlerts state={state} /> */}
 
       {state.step === 8 && (
         <FinishDisplay etherscanURL={etherscanURL} poolAddress={pool?.address} chainId={state.chainId} />
