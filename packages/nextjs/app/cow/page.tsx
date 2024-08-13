@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PoolCreation } from "./_components";
+import { PoolConfiguration, PoolCreation } from "./_components";
 import type { NextPage } from "next";
-import { PoolConfiguration } from "~~/app/cow/_components/PoolConfiguration";
+import { CowAMM } from "~~/components/assets/CowAMM";
 import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 
 const CowAmm: NextPage = () => {
@@ -21,7 +21,7 @@ const CowAmm: NextPage = () => {
       <div className="flex justify-center px-5">
         <div className="w-full md:w-[555px]">
           <div className="flex items-center flex-col flex-grow py-14 gap-6">
-            <h1 className="text-2xl md:text-4xl font-bold">Create a CoW AMM</h1>
+            <CowAMM width="333" />
             {!isMounted ? (
               <CowLoadingSkeleton />
             ) : !persistedState ? (

@@ -6,18 +6,23 @@ import { usePathname } from "next/navigation";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { SwitchTheme } from "~~/components/SwitchTheme";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
+import { CowLogo } from "~~/components/assets/CowLogo";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
 type HeaderMenuLink = {
-  label: string;
+  label: React.ReactNode;
   href: string;
   icon?: React.ReactNode;
 };
 
 export const menuLinks: HeaderMenuLink[] = [
   {
-    label: "🐮 CoW AMMs",
+    label: (
+      <div className="flex gap-2">
+        <CowLogo width="25" /> CoW AMMs
+      </div>
+    ),
     href: "/cow",
   },
   // {
