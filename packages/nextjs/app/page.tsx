@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { NextPage } from "next";
+import { CowLogo } from "~~/components/assets/CowLogo";
 
 const PAGES = [
   {
-    emoji: "🐮",
+    emoji: <CowLogo />,
     title: "CoW AMMs",
     href: "/cow",
     description: "Deploy pools with 2 tokens and 50/50 weight distribution",
@@ -15,9 +16,8 @@ const Home: NextPage = () => {
     <div className="flex-grow bg-base-300">
       <div className="max-w-screen-2xl mx-auto">
         <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10">
-          <h1 className="text-6xl font-bold my-5">Pool Creator</h1>
-
-          <p className="text-2xl mb-14">
+          <h1 className="text-5xl md:text-6xl font-bold my-5">Pool Creator</h1>
+          <p className="text-xl md:text-2xl mb-14 text-center">
             Create and initialize a variety of liquidity pool types with Balancer protocol
           </p>
 
@@ -29,8 +29,10 @@ const Home: NextPage = () => {
                 href={item.href}
                 passHref
               >
-                <div className="text-8xl my-7">{item.emoji}</div>
-                <h3 className="text-4xl font-bold mb-5">{item.title}</h3>
+                <h3 className="text-3xl md:text-4xl font-bold mb-5">{item.title}</h3>
+                <div className="flex justify-center my-7">
+                  <div className="w-1/2">{item.emoji}</div>
+                </div>
                 <p className="text-xl mb-0">{item.description}</p>
               </Link>
             ))}
