@@ -17,7 +17,9 @@ export const StepsDisplay = ({ state }: { state: any }) => {
           <li
             key={step.number}
             data-content={state.step > step.number ? "✓" : step.number}
-            className={`step ${state.step > step.number && "step-accent"}`}
+            className={`step ${state.step > step.number && "step-accent"} ${
+              state.step == step.number && "step-primary"
+            }`}
           >
             {step.label}
           </li>

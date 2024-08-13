@@ -21,13 +21,10 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
 
   return (
     <>
-      <div className="w-full flex flex-col gap-3">
-        <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
-      </div>
-
-      <div className="bg-base-200 w-full p-6 rounded-xl flex flex-col gap-7 shadow-xl">
+      <div className="bg-base-200 w-full p-6 rounded-xl flex flex-col gap-6 shadow-xl justify-center items-center">
+        <h5 className="text-2xl font-bold">View your pool</h5>
         <div className="flex justify-center items-center gap-2">
-          <div className=" sm:text-lg overflow-hidden">{poolAddress}</div>
+          <div className="text-sm sm:text-lg">{poolAddress}</div>
           <div>
             {addressCopied ? (
               <div className="!rounded-xl flex">
@@ -61,6 +58,9 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
           <ExternalLinkButton href={getPoolUrl(chainId, poolAddress)} text="View on Balancer" />
           {etherscanURL && <ExternalLinkButton href={etherscanURL} text="View on Etherscan" />}
         </div>
+        <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
+      </div>
+      <div className="w-80">
         <TransactionButton title="Create Another Pool" onClick={clearState} isPending={false} isDisabled={false} />
       </div>
     </>

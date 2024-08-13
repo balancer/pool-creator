@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { PoolCreated, PoolResetModal, StepsDisplay } from "./";
 import { Address, parseUnits } from "viem";
+import { useSwitchChain } from "wagmi";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
+import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
   useBindToken,
@@ -30,6 +32,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
   useNewPoolEvents(setUserPoolAddress);
   const { targetNetwork } = useTargetNetwork();
+  const { switchChain } = useSwitchChain();
   const isWrongNetwork = targetNetwork.id !== state.chainId;
   const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(
@@ -80,11 +83,10 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
 
   return (
     <>
-      <div className="flex flex-wrap justify-center gap-5 md:relative">
+      <div className="flex flex-wrap justify-center gap-5 lg:relative">
         <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-xl md:w-[555px]">
           <div className="flex flex-col items-center gap-5 w-full">
             <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
-
             <div className="w-full">
               <div className="ml-1 mb-1">Selected pool tokens:</div>
               <div className="w-full flex flex-col gap-3">
@@ -94,7 +96,6 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
             </div>
             <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
             <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
-
             {(() => {
               switch (state.step) {
                 case 1:
@@ -246,7 +247,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
             })()}
           </div>
         </div>
-        <div className="flex md:absolute md:top-0 md:-right-[225px]">
+        <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
           <StepsDisplay state={state} />
         </div>
       </div>
@@ -261,7 +262,15 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         />
       )}
 
-      {isWrongNetwork && <Alert type="error">You&apos;re connected to the wrong network</Alert>}
+      {isWrongNetwork && (
+        <Alert type="error">
+          You&apos;re connected to the wrong network, switch to{" "}
+          <span onClick={() => switchChain?.({ chainId: state.chainId })} className="link">
+            {CHAIN_NAMES[state.chainId]}
+          </span>{" "}
+          to finish creating your pool, or start over.
+        </Alert>
+      )}
 
       {txError && (
         <Alert type="error">

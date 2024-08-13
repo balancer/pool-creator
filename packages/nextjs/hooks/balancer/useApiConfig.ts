@@ -11,14 +11,14 @@ export const useApiConfig = () => {
     currentChainId = scaffoldConfig.targetFork.id;
   }
 
-  const chainName = chainIdToName[currentChainId];
+  const chainName = CHAIN_NAMES[currentChainId];
 
   const url = currentChainId === sepolia.id ? "https://test-api-v3.balancer.fi/" : "https://api-v3.balancer.fi/";
 
   return { url, chainName };
 };
 
-const chainIdToName: { [key: number]: string } = {
+export const CHAIN_NAMES: { [key: number]: string } = {
   1: "MAINNET",
   100: "GNOSIS",
   11155111: "SEPOLIA",

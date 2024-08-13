@@ -10,7 +10,7 @@ module.exports = {
       {
         light: {
           primary: "#ffffff",
-          "primary-content": "#ffffff",
+          "primary-content": "rgb(45, 55, 72)",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
           accent: "#10b981",
