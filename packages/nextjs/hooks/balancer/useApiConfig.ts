@@ -22,4 +22,5 @@ export const CHAIN_NAMES: { [key: number]: string } = {
   1: "MAINNET",
   100: "GNOSIS",
   11155111: "SEPOLIA",
+  42161: "ARBITRUM",
 };
