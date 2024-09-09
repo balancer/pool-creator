@@ -17,6 +17,7 @@ import {
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
+import { getPerTokenWeights } from "~~/utils/token-weights";
 
 interface ManagePoolCreationProps {
   state: PoolCreationState;
@@ -26,6 +27,7 @@ interface ManagePoolCreationProps {
 export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => {
   const token1RawAmount = parseUnits(state.token1Amount, state.token1.decimals);
   const token2RawAmount = parseUnits(state.token2Amount, state.token2.decimals);
+  const { token1Weight, token2Weight } = getPerTokenWeights(state.tokenWeights);
 
   const [userPoolAddress, setUserPoolAddress] = useState<Address>();
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
@@ -43,12 +45,11 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
     state.token2.address,
     pool?.address,
   );
-
   const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
   const { mutate: approve1, isPending: isApprove1Pending, error: approve1Error } = useApproveToken();
   const { mutate: approve2, isPending: isApprove2Pending, error: approve2Error } = useApproveToken();
-  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken();
-  const { mutate: bind2, isPending: isBind2Pending, error: bind2Error } = useBindToken();
+  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken(state.tokenWeights, true);
+  const { mutate: bind2, isPending: isBind2Pending, error: bind2Error } = useBindToken(state.tokenWeights, false);
   const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
   const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
   const txError =
@@ -90,8 +91,18 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
             <div className="w-full">
               <div className="ml-1 mb-1">Selected pool tokens:</div>
               <div className="w-full flex flex-col gap-3">
-                <TokenField value={state.token1Amount} selectedToken={state.token1} isDisabled={true} />
-                <TokenField value={state.token2Amount} selectedToken={state.token2} isDisabled={true} />
+                <TokenField
+                  value={state.token1Amount}
+                  selectedToken={state.token1}
+                  isDisabled={true}
+                  tokenWeight={token1Weight}
+                />
+                <TokenField
+                  value={state.token2Amount}
+                  selectedToken={state.token2}
+                  isDisabled={true}
+                  tokenWeight={token2Weight}
+                />
               </div>
             </div>
             <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
