@@ -1,6 +1,6 @@
 -include .env
 
-fork: fork-sepolia fork-mainnet fork-gnosis
+fork: fork-sepolia fork-mainnet fork-gnosis fork-arbitrum
 
 fork-%:
 	@echo "Forking the $* network..."
