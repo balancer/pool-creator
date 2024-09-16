@@ -1,10 +1,10 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
+import { isAddress } from "viem";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { useNetworkColor } from "~~/hooks/scaffold-eth";
-import { type Token } from "~~/hooks/token";
+import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { type Token, useReadToken } from "~~/hooks/token";
 
 type ModalProps = {
   tokenOptions: Token[];
@@ -16,12 +16,38 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
   const networkColor = useNetworkColor();
 
   const [searchText, setSearchText] = useState("");
-  const filteredTokenOptions = tokenOptions.filter(
-    option =>
-      (option.symbol && option.symbol.toLowerCase().startsWith(searchText.toLowerCase())) ||
-      (option.address && option.address.toLowerCase().includes(searchText.toLowerCase())) ||
-      (option.name && option.name.toLowerCase().includes(searchText.toLowerCase())),
-  );
+  const [customTokenAddress, setCustomTokenAddress] = useState<string | undefined>();
+  const { name, symbol, decimals } = useReadToken(customTokenAddress);
+
+  const filteredTokenOptions = useMemo(() => {
+    return tokenOptions.filter(
+      option =>
+        (option.symbol && option.symbol.toLowerCase().startsWith(searchText.toLowerCase())) ||
+        (option.address && option.address.toLowerCase().includes(searchText.toLowerCase())) ||
+        (option.name && option.name.toLowerCase().includes(searchText.toLowerCase())),
+    );
+  }, [tokenOptions, searchText]);
+
+  const customToken = useMemo(() => {
+    if (customTokenAddress && name && symbol && decimals) {
+      return {
+        address: customTokenAddress,
+        name,
+        symbol,
+        logoURI: "",
+        decimals,
+        chainId: targetNetwork.id,
+      };
+    }
+  }, [customTokenAddress, name, symbol, decimals, targetNetwork.id]);
+
+  useEffect(() => {
+    if (filteredTokenOptions.length === 0 && isAddress(searchText)) {
+      setCustomTokenAddress(searchText);
+    }
+  }, [searchText, filteredTokenOptions]);
+
+  const tokenList = customToken ? [customToken] : filteredTokenOptions;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
@@ -51,10 +77,10 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
               className="flex flex-col gap-0"
               width="100%"
               height={500}
-              itemCount={filteredTokenOptions.length}
+              itemCount={tokenList.length}
               itemSize={64}
               renderItem={({ index, style }) => {
-                const token = filteredTokenOptions[index];
+                const token = tokenList[index];
 
                 return (
                   <button
