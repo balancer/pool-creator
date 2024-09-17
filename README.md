@@ -43,13 +43,13 @@ ARBITRUM_RPC_URL=
   targetNetworks: [chains.foundry, chains.sepolia, chains.mainnet, chains.gnosis],
 ```
 
-2. Set a `targetFork` network in `scaffold.config.ts`
+3. Set a `targetFork` network in `scaffold.config.ts`
 
 ```
   targetFork: chains.sepolia,
 ```
 
-1. Start the fork using the same network as `targetFork`
+4. Start the fork using the same network as `targetFork`
 
 ```
 make fork-sepolia
@@ -58,7 +58,7 @@ make fork-gnosis
 make fork-arbitrum
 ```
 
-4. Start the frontend
+5. Start the frontend
 
 ```
 yarn start
