@@ -109,9 +109,11 @@ export const TokenField: React.FC<TokenFieldProps> = ({
             )}
           </div>
         </div>
-        <div className="absolute bottom-1 right-5 text-neutral-400">
-          {isLoading ? <div>...</div> : isError ? <div>price error</div> : <div>${price.toFixed(2)}</div>}
-        </div>
+        {price !== 0 ? (
+          <div className="absolute bottom-1 right-5 text-neutral-400">
+            {isLoading ? <div>...</div> : isError ? <div>price error</div> : <div>${price.toFixed(2)}</div>}
+          </div>
+        ) : null}
       </div>
       {isModalOpen && tokenOptions && setToken && (
         <TokenSelectModal tokenOptions={tokenOptions} setToken={setToken} setIsModalOpen={setIsModalOpen} />

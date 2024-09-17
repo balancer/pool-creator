@@ -16,7 +16,8 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
   const [exoticTokenAddress, setExoticTokenAddress] = useState<string | undefined>();
   const [showTokenWarning, setShowTokenWarning] = useState(false);
 
-  const { name, symbol, decimals } = useReadToken(exoticTokenAddress);
+  const { name, symbol, decimals, isLoadingName, isLoadingDecimals, isLoadingSymbol } =
+    useReadToken(exoticTokenAddress);
 
   const { targetNetwork } = useTargetNetwork();
   const networkColor = useNetworkColor();
@@ -51,6 +52,8 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
 
   const tokenList = exoticToken ? [exoticToken] : filteredTokenOptions;
 
+  const isLoadingExoticToken = isLoadingName || isLoadingDecimals || isLoadingSymbol;
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-10">
@@ -63,7 +66,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                   Select a Token: <span style={{ color: networkColor }}>{targetNetwork.name}</span>
                 </h5>
 
-                <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
+                <XMarkIcon className="w-6 h-6 hover:cursor-pointer" onClick={() => setIsModalOpen(false)} />
               </div>
 
               <input
@@ -74,9 +77,11 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                 className="w-full shadow-inner input rounded-xl bg-base-300 disabled:bg-base-300 px-5 h-[52px] text-lg"
               />
             </div>
-            {tokenList.length === 0 && (
-              <div className="p-4 text-center text-lg text-error">No results found for {searchText}</div>
-            )}
+            {isLoadingExoticToken ? (
+              <div className="w-full text-lg text-center">Fetching token details...</div>
+            ) : tokenList.length === 0 ? (
+              <div className="text-center text-lg text-error">No results found for {searchText}</div>
+            ) : null}
 
             <div>
               <VirtualList
