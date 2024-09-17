@@ -19,19 +19,19 @@ export const useReadToken = (token: Address | undefined, spender?: Address): Use
   const { data: walletClient } = useWalletClient();
   const connectedAddress = walletClient?.account.address || zeroAddress;
 
-  const { data: name, isPending: isLoadingName } = useReadContract({
+  const { data: name, isLoading: isLoadingName } = useReadContract({
     address: token,
     abi: erc20Abi,
     functionName: "name",
   });
 
-  const { data: symbol, isPending: isLoadingSymbol } = useReadContract({
+  const { data: symbol, isLoading: isLoadingSymbol } = useReadContract({
     address: token,
     abi: erc20Abi,
     functionName: "symbol",
   });
 
-  const { data: decimals, isPending: isLoadingDecimals } = useReadContract({
+  const { data: decimals, isLoading: isLoadingDecimals } = useReadContract({
     address: token,
     abi: erc20Abi,
     functionName: "decimals",

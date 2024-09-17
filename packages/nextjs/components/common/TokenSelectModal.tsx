@@ -48,10 +48,12 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
     if (filteredTokenOptions.length === 0 && isAddress(searchText)) {
       setExoticTokenAddress(searchText);
     }
+    if (!isAddress(searchText)) {
+      setExoticTokenAddress(undefined);
+    }
   }, [searchText, filteredTokenOptions]);
 
   const tokenList = exoticToken ? [exoticToken] : filteredTokenOptions;
-
   const isLoadingExoticToken = isLoadingName || isLoadingDecimals || isLoadingSymbol;
 
   return (
