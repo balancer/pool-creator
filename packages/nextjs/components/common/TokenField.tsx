@@ -18,6 +18,7 @@ interface TokenFieldProps {
   tokenOptions?: Token[];
   setToken?: (token: Token) => void;
   setTokenAmount?: (amount: string) => void;
+  tokenWeight: string;
 }
 
 export const TokenField: React.FC<TokenFieldProps> = ({
@@ -29,6 +30,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
   tokenOptions,
   setToken,
   setTokenAmount,
+  tokenWeight,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: tokenPrices, isLoading, isError } = useFetchTokenPrices();
@@ -80,7 +82,9 @@ export const TokenField: React.FC<TokenFieldProps> = ({
               } px-3 py-1.5 shadow-md disabled:text-base-content text-lg font-bold disabled:bg-base-100 rounded-lg flex justify-between items-center gap-2 mb-[1px]`}
             >
               {selectedToken && <TokenImage size="sm" token={selectedToken} />}
-              {selectedToken?.symbol ? selectedToken.symbol : "Select Token"}{" "}
+              {selectedToken?.symbol
+                ? `${selectedToken.symbol} ${tokenWeight}%`
+                : `Select ${tokenWeight !== "50" ? `${tokenWeight}% ` : ""}Token`}{" "}
               {!isDisabled && <ChevronDownIcon className="w-4 h-4 mt-0.5" />}
             </button>
 

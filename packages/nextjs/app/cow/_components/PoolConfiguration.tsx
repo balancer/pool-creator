@@ -7,12 +7,14 @@ import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
+import { ButtonTabs } from "~~/components/common/ButtonTabs";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { COW_MIN_AMOUNT } from "~~/utils";
+import { SupportedTokenWeight, TokenWeightSelectItems, getPerTokenWeights } from "~~/utils/token-weights";
 
 export const PoolConfiguration = () => {
   const { targetNetwork } = useTargetNetwork();
@@ -25,6 +27,8 @@ export const PoolConfiguration = () => {
   const [poolName, setPoolName] = useState<string>("");
   const [poolSymbol, setPoolSymbol] = useState<string>("");
   const setPersistedState = usePoolCreationPersistedState(state => state.setPersistedState);
+  const [tokenWeights, setTokenWeights] = useState<SupportedTokenWeight>("5050");
+  const { token1Weight, token2Weight } = getPerTokenWeights(tokenWeights);
 
   const { data } = useFetchTokenList();
   const tokenList = data || [];
@@ -52,13 +56,14 @@ export const PoolConfiguration = () => {
   // Autofill pool name and symbol based on selected tokens
   useEffect(() => {
     if (token1 !== null && token2 !== null) {
-      setPoolName(`Balancer CoW AMM 50 ${token1.symbol} 50 ${token2.symbol}`);
-      setPoolSymbol(`BCoW-50${token1.symbol}-50${token2.symbol}`);
+      setPoolName(`Balancer CoW AMM ${token1Weight} ${token1.symbol} ${token2Weight} ${token2.symbol}`);
+      setPoolSymbol(`BCoW-${token1Weight}${token1.symbol}-${token2Weight}${token2.symbol}`);
     } else {
       setPoolName("");
       setPoolSymbol("");
     }
-  }, [token1, token2]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token1, token2, tokenWeights]);
 
   const token1RawAmount = parseUnits(token1Amount, token1?.decimals ?? 0);
   const token2RawAmount = parseUnits(token2Amount, token2?.decimals ?? 0);
@@ -89,6 +94,11 @@ export const PoolConfiguration = () => {
           <h5 className="text-xl md:text-2xl font-bold">Configure your pool</h5>
 
           <div className="w-full">
+            <div className="ml-1 mb-1">Select token weights:</div>
+            <ButtonTabs items={TokenWeightSelectItems} selectedId={tokenWeights} onSelect={setTokenWeights} />
+          </div>
+
+          <div className="w-full">
             <div className="ml-1 mb-1">Select pool tokens:</div>
             <div className="w-full flex flex-col gap-3">
               <TokenField
@@ -104,6 +114,7 @@ export const PoolConfiguration = () => {
                 }}
                 setTokenAmount={setToken1Amount}
                 tokenOptions={availableTokens || []}
+                tokenWeight={token1Weight}
               />
               <TokenField
                 value={token2Amount}
@@ -118,19 +129,20 @@ export const PoolConfiguration = () => {
                 }}
                 setTokenAmount={setToken2Amount}
                 tokenOptions={availableTokens || []}
+                tokenWeight={token2Weight}
               />
             </div>
           </div>
 
           <TextField
             label="Pool name:"
-            placeholder="i.e. Balancer CoW AMM 50 BAL 50 DAI"
+            placeholder={`i.e. Balancer CoW AMM ${token1Weight} BAL ${token2Weight} DAI`}
             value={poolName}
             onChange={e => setPoolName(e.target.value)}
           />
           <TextField
             label="Pool symbol:"
-            placeholder="i.e. BCoW-50BAL-50DAI"
+            placeholder={`i.e. BCoW-${token1Weight}BAL-${token2Weight}DAI`}
             value={poolSymbol}
             onChange={e => setPoolSymbol(e.target.value)}
           />
@@ -151,6 +163,7 @@ export const PoolConfiguration = () => {
                 poolName: poolName.trim(),
                 poolSymbol: poolSymbol.trim(),
                 step: 1,
+                tokenWeights,
               });
             }}
           />
@@ -184,7 +197,7 @@ export const PoolConfiguration = () => {
                 checked={hasAgreedToWarning}
               />
               <span className="">
-                I understand that assets must be added proportionally, or I risk loss of funds via arbitrage.
+                I understand that assets must be added proportional to the selected token weights.
               </span>
             </label>
           </div>

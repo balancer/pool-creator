@@ -11,6 +11,7 @@ export interface PoolCreationState {
   poolName: string;
   poolSymbol: string;
   step: number;
+  tokenWeights: "5050" | "8020";
 }
 
 export const usePoolCreationPersistedState = create(

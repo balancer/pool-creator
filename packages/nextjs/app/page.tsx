@@ -7,7 +7,7 @@ const PAGES = [
     emoji: <CowLogo />,
     title: "CoW AMMs",
     href: "/cow",
-    description: "Deploy pools with 2 tokens and 50/50 weight distribution",
+    description: "Deploy a CoW AMM pool",
   },
 ];
 
