@@ -3,7 +3,7 @@ import { Address } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { getDenormalizedTokenWeight, SupportedTokenWeight } from "~~/utils/token-weights";
+import { SupportedTokenWeight, getDenormalizedTokenWeight } from "~~/utils/token-weights";
 
 type BindPayload = {
   pool: Address | undefined;

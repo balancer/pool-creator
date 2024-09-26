@@ -7,14 +7,14 @@ import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
 import { TextField, TokenField } from "~~/components/common/";
+import { ButtonTabs } from "~~/components/common/ButtonTabs";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
 import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { COW_MIN_AMOUNT } from "~~/utils";
-import { ButtonTabs } from "~~/components/common/ButtonTabs";
-import { getPerTokenWeights, SupportedTokenWeight, TokenWeightSelectItems } from "~~/utils/token-weights";
+import { SupportedTokenWeight, TokenWeightSelectItems, getPerTokenWeights } from "~~/utils/token-weights";
 
 export const PoolConfiguration = () => {
   const { targetNetwork } = useTargetNetwork();

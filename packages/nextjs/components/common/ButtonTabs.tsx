@@ -22,7 +22,9 @@ export const ButtonTabs: React.FC<Props> = ({ items, selectedId, onSelect }) => 
               return (
                 <button
                   key={id}
-                  className={`text-neutral-700 bg-gradient-to-b from-custom-beige-start to-custom-beige-end to-100% flex-1 py-3 font-medium text-lg front-bold ${isSelected ? "" : "opacity-50 hover:opacity-90"}`}
+                  className={`text-neutral-700 bg-gradient-to-b from-custom-beige-start to-custom-beige-end to-100% flex-1 py-3 font-medium text-lg front-bold ${
+                    isSelected ? "" : "opacity-50 hover:opacity-90"
+                  }`}
                   onClick={() => {
                     if (selectedId !== id) {
                       onSelect(id);
