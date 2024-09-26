@@ -62,6 +62,7 @@ export const PoolConfiguration = () => {
       setPoolName("");
       setPoolSymbol("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token1, token2, tokenWeights]);
 
   const token1RawAmount = parseUnits(token1Amount, token1?.decimals ?? 0);
