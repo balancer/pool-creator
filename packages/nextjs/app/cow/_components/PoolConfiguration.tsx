@@ -35,7 +35,12 @@ export const PoolConfiguration = () => {
   const availableTokens = tokenList.filter(
     token => token.address !== token1?.address && token.address !== token2?.address,
   );
-  const { existingPool } = useCheckIfPoolExists(token1?.address, token2?.address);
+
+  const proposedPoolTokenMap = new Map<string, string>();
+  if (token1?.address) proposedPoolTokenMap.set(token1.address.toLowerCase(), token1Weight);
+  if (token2?.address) proposedPoolTokenMap.set(token2.address.toLowerCase(), token2Weight);
+
+  const { existingPool } = useCheckIfPoolExists(proposedPoolTokenMap);
   const { balance: balance1 } = useReadToken(token1?.address);
   const { balance: balance2 } = useReadToken(token2?.address);
 
