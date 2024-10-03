@@ -14,12 +14,10 @@ export type ExistingPool = {
   id: Address;
   address: Address;
   type: "string";
-  allTokens: [
-    {
-      address: Address;
-      weight: string;
-    },
-  ];
+  allTokens: {
+    address: Address;
+    weight: string;
+  }[];
   dynamicData: {
     swapFee: string;
   };

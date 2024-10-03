@@ -1,13 +1,12 @@
 import { type ExistingPool } from "./types";
 import { useQuery } from "@tanstack/react-query";
-import { Address } from "viem";
 import { useApiConfig } from "~~/hooks/balancer";
 
 /**
  * Fetch CoW AMMs to see if user is trying to create a duplicate pool
- * with same two tokens, weights, and swap fees
+ * with same two tokens and weights
  */
-export const useCheckIfPoolExists = (token1: Address | undefined, token2: Address | undefined) => {
+export const useCheckIfPoolExists = (proposedPoolTokenMap: Map<string, string>) => {
   const { url, chainName } = useApiConfig();
 
   const query = `
@@ -28,11 +27,7 @@ export const useCheckIfPoolExists = (token1: Address | undefined, token2: Addres
   }
   `;
 
-  const {
-    data: existingPools,
-    // isLoading,
-    // isError,
-  } = useQuery<ExistingPool[]>({
+  const { data: existingPools } = useQuery<ExistingPool[]>({
     queryKey: ["existingPools", chainName],
     queryFn: async () => {
       const response = await fetch(url, {
@@ -50,17 +45,22 @@ export const useCheckIfPoolExists = (token1: Address | undefined, token2: Addres
     },
   });
 
-  const existingPool = existingPools?.find(pool => {
-    if (!token1 || !token2) return false;
+  const existingPool = existingPools?.find(existingPool => {
+    if (proposedPoolTokenMap.size !== existingPool.allTokens.length) return false;
 
-    const poolTokenAddresses = pool.allTokens.map(token => token.address);
-    const hasOnlyTwoTokens = poolTokenAddresses.length === 2;
-    const selectedToken1 = token1.toLowerCase() ?? "";
-    const selectedToken2 = token2.toLowerCase() ?? "";
-    const includesToken1 = poolTokenAddresses.includes(selectedToken1);
-    const includesToken2 = poolTokenAddresses.includes(selectedToken2);
+    const existingPoolTokens = existingPool.allTokens;
 
-    return hasOnlyTwoTokens && includesToken1 && includesToken2;
+    // Check if existing pool has all the same tokens with the same weights as potential new pool
+    return existingPoolTokens.every(existingToken => {
+      const existingPoolTokenWeight = normalizeWeight(existingToken.weight);
+      const existingPoolTokenAddress = existingToken.address.toLowerCase();
+      const proposedPoolTokenWeight = proposedPoolTokenMap.get(existingPoolTokenAddress);
+
+      // If proposed pool token map doesnt include token from existing pool, it's not an exact match
+      if (proposedPoolTokenWeight === undefined) return false;
+
+      return existingPoolTokenWeight === proposedPoolTokenWeight;
+    });
   });
 
   // Don't prevent pool duplication on testnet since limited number of faucet tokens
@@ -70,3 +70,14 @@ export const useCheckIfPoolExists = (token1: Address | undefined, token2: Addres
 
   return { existingPool };
 };
+
+/**
+ * API returns weights like "0.5" but we are using "50" for this pool creation UI codebase
+ * "0.5" -> "50"
+ * "0.8" -> "80"
+ * "0.2" -> "20"
+ */
+function normalizeWeight(weight: string): string {
+  const numWeight = parseFloat(weight);
+  return numWeight < 1 ? (numWeight * 100).toString() : weight;
+}
