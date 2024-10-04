@@ -9,7 +9,7 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#ffffff",
+          primary: "#fafafa",
           "primary-content": "rgb(45, 55, 72)",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
