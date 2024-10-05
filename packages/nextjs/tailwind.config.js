@@ -9,11 +9,11 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#fafafa",
+          primary: "#d1d5db",
           "primary-content": "rgb(45, 55, 72)",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
-          accent: "#10b981",
+          accent: "#9f95f0",
           "accent-content": "#ffffff",
           neutral: "#d4d4d4",
           "neutral-content": "rgb(45, 55, 72)",
@@ -41,11 +41,11 @@ module.exports = {
       },
       {
         dark: {
-          primary: "#ffffffff",
-          "primary-content": "#0f172a",
+          primary: "#9ca3af",
+          "primary-content": "#fff",
           secondary: "rgb(70, 77, 88)",
           "secondary-content": "rgb(229, 211, 190)",
-          accent: "#34d399",
+          accent: "#9f95f0",
           "accent-content": "rgb(45, 55, 72)",
           neutral: "rgb(229, 211, 190)",
           "neutral-content": "rgb(70, 77, 88)",

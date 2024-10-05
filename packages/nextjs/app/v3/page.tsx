@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PoolConfiguration, PoolSummary } from "./_components";
+import { PoolType, TokenConfig } from "./types";
 import type { NextPage } from "next";
 
 /**
@@ -9,15 +10,22 @@ import type { NextPage } from "next";
  * Feed details to PoolCreation & PoolSummary components
  */
 const V3Pool: NextPage = () => {
-  const [poolType, setPoolType] = useState<string | undefined>(undefined);
+  const [poolType, setPoolType] = useState<PoolType>();
+  const [poolTokens, setPoolTokens] = useState<TokenConfig[]>([]);
+
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
         <div className="flex flex-col justify-center gap-5 w-full">
           <h1 className="text-5xl font-bold mb-7 text-center">Balancer v3</h1>
           <div className="flex gap-5 w-full justify-center">
-            <PoolConfiguration poolType={poolType} setPoolType={setPoolType} />
-            <PoolSummary poolType={poolType} />
+            <PoolConfiguration
+              poolType={poolType}
+              setPoolType={setPoolType}
+              poolTokens={poolTokens}
+              setPoolTokens={setPoolTokens}
+            />
+            <PoolSummary poolType={poolType} poolTokens={poolTokens} />
           </div>
         </div>
       </div>

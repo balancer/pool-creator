@@ -1,20 +1,22 @@
 import React from "react";
-import { bgPrimaryGradient, bgPrimaryGradientHover } from "~~/utils";
+import { PoolType } from "../types";
 
 export const ChoosePoolType = ({
   poolType,
   setPoolType,
 }: {
-  poolType: string | undefined;
-  setPoolType: (type: string) => void;
+  poolType: PoolType;
+  setPoolType: (type: PoolType) => void;
 }) => {
   return (
     <>
-      <div className="mb-5">Choose a pool type:</div>
+      <div className="mb-5 text-lg font-bold">Choose a pool type:</div>
       <button
         className={`${
-          poolType === "Weighted" ? bgPrimaryGradient + " text-neutral-700" : "bg-base-300"
-        } ${bgPrimaryGradientHover} hover:text-neutral-700 font-bold shadow-inner py-5 w-full rounded-xl`}
+          poolType === "Weighted"
+            ? "bg-accent text-white" + ""
+            : "shadow-md bg-white text-neutral-700 hover:bg-accent hover:text-white"
+        } font-bold py-5 w-full rounded-xl`}
         onClick={() => setPoolType("Weighted")}
       >
         Weighted
