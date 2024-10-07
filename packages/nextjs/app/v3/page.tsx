@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { PoolConfiguration, PoolSummary } from "./_components";
-import { PoolType, TokenConfig } from "./types";
+import { PoolType, TokenConfig, TokenType } from "./types";
 import type { NextPage } from "next";
+import { parseUnits, zeroAddress } from "viem";
 
 /**
  * Keep all the pool creation state in this parent component
@@ -11,7 +12,26 @@ import type { NextPage } from "next";
  */
 const V3Pool: NextPage = () => {
   const [poolType, setPoolType] = useState<PoolType>();
-  const [poolTokens, setPoolTokens] = useState<TokenConfig[]>([]);
+  const [poolTokens, setPoolTokens] = useState<TokenConfig[]>([
+    {
+      address: undefined,
+      rateProvider: zeroAddress,
+      paysYieldFees: false,
+      tokenType: TokenType.STANDARD,
+      weight: parseUnits("50", 16),
+      symbol: undefined,
+      logoURI: undefined,
+    },
+    {
+      address: undefined,
+      rateProvider: zeroAddress,
+      paysYieldFees: false,
+      tokenType: TokenType.STANDARD,
+      weight: parseUnits("50", 16),
+      symbol: undefined,
+      logoURI: undefined,
+    },
+  ]);
 
   return (
     <div className="flex justify-center">

@@ -33,7 +33,7 @@ export function PoolConfiguration({
         <div className="font-bold text-2xl mb-7">Pool Configuration</div>
         <div className="relative grid grid-cols-4 text-center text-xl rounded-xl">
           <div className={`absolute inset-x-0 top-0 bottom-0 ${bgBeigeGradient} opacity-50 rounded-xl shadow-lg`}></div>
-          {TABS.map(tab => (
+          {TABS.map((tab, idx) => (
             <div
               key={tab}
               className={`relative z-10 rounded-xl hover:cursor-pointer text-neutral-700 flex-1 py-3 text-lg ${
@@ -41,7 +41,7 @@ export function PoolConfiguration({
               }`}
               onClick={() => setSelectedTab(tab)}
             >
-              {tab}
+              {idx + 1}. {tab}
             </div>
           ))}
         </div>

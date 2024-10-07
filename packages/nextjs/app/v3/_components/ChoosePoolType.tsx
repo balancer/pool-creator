@@ -15,7 +15,7 @@ export const ChoosePoolType = ({
         className={`${
           poolType === "Weighted"
             ? "bg-accent text-white" + ""
-            : "shadow-md bg-white text-neutral-700 hover:bg-accent hover:text-white"
+            : "shadow-md bg-base-300  hover:bg-accent hover:text-white"
         } font-bold py-5 w-full rounded-xl`}
         onClick={() => setPoolType("Weighted")}
       >

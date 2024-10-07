@@ -2,18 +2,17 @@ import { Address } from "viem";
 
 export type PoolType = "Weighted" | "Stable" | undefined;
 
-export type TokenConfig = TokenDetails & {
-  address: Address;
+export type TokenConfig = TokenInfo & {
+  address: Address | undefined;
   rateProvider: Address;
   paysYieldFees: boolean;
   tokenType: TokenType;
-  weight?: bigint;
+  weight: bigint;
 };
 
-export type TokenDetails = {
-  symbol: string;
-  decimals: number;
-  logoURI: string;
+export type TokenInfo = {
+  symbol: string | undefined;
+  logoURI: string | undefined;
 };
 
 export enum TokenType {

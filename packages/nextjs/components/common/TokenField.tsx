@@ -18,7 +18,7 @@ interface TokenFieldProps {
   tokenOptions?: Token[];
   setToken?: (token: Token) => void;
   setTokenAmount?: (amount: string) => void;
-  tokenWeight: string;
+  tokenWeight?: string;
 }
 
 export const TokenField: React.FC<TokenFieldProps> = ({
@@ -83,8 +83,8 @@ export const TokenField: React.FC<TokenFieldProps> = ({
             >
               {selectedToken && <TokenImage size="sm" token={selectedToken} />}
               {selectedToken?.symbol
-                ? `${selectedToken.symbol} ${tokenWeight}%`
-                : `Select ${tokenWeight !== "50" ? `${tokenWeight}% ` : ""}Token`}{" "}
+                ? `${selectedToken.symbol}${tokenWeight !== undefined ? ` ${tokenWeight}%` : ""}`
+                : `Select${tokenWeight !== undefined ? ` ${tokenWeight}%` : ""} Token`}{" "}
               {!isDisabled && <ChevronDownIcon className="w-4 h-4 mt-0.5" />}
             </button>
 

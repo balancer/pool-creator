@@ -9,7 +9,7 @@ export function PoolSummary({ poolType, poolTokens }: { poolType: PoolType; pool
 
       <div className="text-lg">
         <div className="flex justify-between mb-3">
-          <div className="font-bold">Type: </div>
+          <div className="font-bold">1. Type: </div>
           <div className={`h-7 w-7 rounded-full ${poolType === "Weighted" ? "" : ""}`}>
             {!poolType ? <QuestionMarkCircleIcon className="w-7 h-7" /> : <CheckCircleIcon className="w-7 h-7" />}
           </div>
@@ -19,7 +19,7 @@ export function PoolSummary({ poolType, poolTokens }: { poolType: PoolType; pool
       <hr className="border-base-content opacity-30 my-5" />
       <div className="text-lg">
         <div className="flex justify-between mb-3">
-          <div className="font-bold">Tokens: </div>
+          <div className="font-bold">2. Tokens: </div>
           <div className={`h-7 w-7 rounded-full ${poolType === "Weighted" ? "" : ""}`}>
             {poolTokens.length === 0 ? (
               <QuestionMarkCircleIcon className="w-7 h-7" />
@@ -28,7 +28,17 @@ export function PoolSummary({ poolType, poolTokens }: { poolType: PoolType; pool
             )}
           </div>
         </div>
-        <div>{poolTokens.length == 0 ? <i>No tokens selected</i> : <div>replace me</div>}</div>
+        <div>
+          {poolTokens.every(token => token.address === undefined) ? (
+            <i>No tokens selected</i>
+          ) : (
+            <div>
+              {poolTokens.map((poolToken, index) => (
+                <div key={index}>{poolToken?.address}</div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <hr className="border-base-content opacity-30 my-5" />
     </div>
