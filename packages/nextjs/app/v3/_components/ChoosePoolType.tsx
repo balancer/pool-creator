@@ -10,7 +10,7 @@ export const ChoosePoolType = ({
 }) => {
   return (
     <>
-      <div className="mb-5 text-lg font-bold">Choose a pool type:</div>
+      <div className="mb-5 text-lg font-bold">Choose pool type:</div>
       <button
         className={`${
           poolType === "Weighted"

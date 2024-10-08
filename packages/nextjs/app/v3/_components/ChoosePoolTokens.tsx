@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
+import { initialTokenConfig } from "../page";
 import { TokenConfig } from "../types";
 import { ChoosePoolToken } from "./ChoosePoolToken";
+import { parseUnits } from "viem";
 import { PlusIcon } from "@heroicons/react/24/outline";
 
 export function ChoosePoolTokens({
@@ -10,23 +12,22 @@ export function ChoosePoolTokens({
   poolTokens: TokenConfig[];
   setPoolTokens: (tokens: TokenConfig[]) => void;
 }) {
-  const [tokenCount, setTokenCount] = useState(2);
-
   function handleAddToken() {
-    setTokenCount(prevCount => prevCount + 1);
-    setPoolTokens([...poolTokens, {} as TokenConfig]);
+    const updatedTokenCount = poolTokens.length + 1;
+    const updatedWeight = parseUnits((100 / updatedTokenCount).toString(), 16);
+    const updatedPoolTokens = poolTokens.map(token => ({ ...token, weight: updatedWeight }));
+    updatedPoolTokens.push({ ...initialTokenConfig, weight: updatedWeight });
+    setPoolTokens(updatedPoolTokens);
   }
-
-  console.log("poolTokens", poolTokens);
 
   return (
     <div>
-      <div className="font-bold text-lg mb-5">Choose Pool Tokens:</div>
-      <div className="flex flex-col gap-5">
-        {Array.from({ length: tokenCount }).map((_, index) => (
+      <div className="font-bold text-lg mb-3">Choose pool tokens:</div>
+      <div className="flex flex-col gap-10">
+        {Array.from({ length: poolTokens.length }).map((_, index) => (
           <ChoosePoolToken key={index} index={index} setPoolTokens={setPoolTokens} poolTokens={poolTokens} />
         ))}
-        {tokenCount < 8 && (
+        {poolTokens.length < 8 && (
           <div className="flex justify-end">
             <button
               onClick={handleAddToken}
