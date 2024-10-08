@@ -23,7 +23,8 @@ export const initialTokenConfig: TokenConfig = {
 const V3Pool: NextPage = () => {
   const [poolType, setPoolType] = useState<PoolType>();
   const [poolTokens, setPoolTokens] = useState<TokenConfig[]>([initialTokenConfig, initialTokenConfig]);
-
+  const [poolName, setPoolName] = useState<string>("");
+  const [poolSymbol, setPoolSymbol] = useState<string>("");
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
@@ -35,6 +36,10 @@ const V3Pool: NextPage = () => {
               setPoolType={setPoolType}
               poolTokens={poolTokens}
               setPoolTokens={setPoolTokens}
+              poolName={poolName}
+              setPoolName={setPoolName}
+              poolSymbol={poolSymbol}
+              setPoolSymbol={setPoolSymbol}
             />
             <PoolSummary poolType={poolType} poolTokens={poolTokens} />
           </div>

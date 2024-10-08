@@ -18,7 +18,7 @@ export const TextField: React.FC<TextFieldProps> = ({ label, placeholder, value,
         value={value}
         onChange={onChange}
         disabled={isDisabled}
-        className="shadow-inner border-0 rounded-xl w-full input bg-base-300 disabled:text-base-content disabled:bg-base-300 px-5 h-[55px] text-lg"
+        className="shadow-inner border-0 rounded-xl w-full input bg-base-300 disabled:text-base-content disabled:bg-base-300 px-5 text-lg"
       />
     </div>
   );

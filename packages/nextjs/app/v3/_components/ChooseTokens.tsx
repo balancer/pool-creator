@@ -1,11 +1,10 @@
 import React from "react";
 import { initialTokenConfig } from "../page";
 import { TokenConfig } from "../types";
-import { ChoosePoolToken } from "./ChoosePoolToken";
+import { ChooseToken } from "./ChooseToken";
 import { parseUnits } from "viem";
-import { PlusIcon } from "@heroicons/react/24/outline";
 
-export function ChoosePoolTokens({
+export function ChooseTokens({
   poolTokens,
   setPoolTokens,
 }: {
@@ -22,18 +21,14 @@ export function ChoosePoolTokens({
 
   return (
     <div>
-      <div className="font-bold text-lg mb-3">Choose pool tokens:</div>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-5">
         {Array.from({ length: poolTokens.length }).map((_, index) => (
-          <ChoosePoolToken key={index} index={index} setPoolTokens={setPoolTokens} poolTokens={poolTokens} />
+          <ChooseToken key={index} index={index} setPoolTokens={setPoolTokens} poolTokens={poolTokens} />
         ))}
         {poolTokens.length < 8 && (
           <div className="flex justify-end">
-            <button
-              onClick={handleAddToken}
-              className="btn bg-base-300 border-none text-primary-content w-[100px] rounded-xl"
-            >
-              <PlusIcon className="w-5 h-5" />
+            <button onClick={handleAddToken} className="btn btn-primary border-none mt-5 w-48 rounded-xl text-lg flex">
+              Add Token
             </button>
           </div>
         )}

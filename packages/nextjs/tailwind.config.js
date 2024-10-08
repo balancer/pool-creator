@@ -9,8 +9,8 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#d1d5db",
-          "primary-content": "rgb(45, 55, 72)",
+          primary: "rgb(45, 55, 72)",
+          "primary-content": "#ffffff",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
           accent: "#9f95f0",
@@ -41,8 +41,8 @@ module.exports = {
       },
       {
         dark: {
-          primary: "#9ca3af",
-          "primary-content": "#fff",
+          primary: "rgb(251, 250, 249)",
+          "primary-content": "rgb(70, 77, 88)",
           secondary: "rgb(70, 77, 88)",
           "secondary-content": "rgb(229, 211, 190)",
           accent: "#9f95f0",

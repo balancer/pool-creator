@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { TokenConfig, TokenType } from "../types";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
-import { TokenField, TokenSelectModal } from "~~/components/common";
+import { Checkbox, RadioInput, TextField, TokenField, TokenSelectModal } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 
 // TODO: figure out how to hold onto state for this component
 // it currently resets when moving between pool configuration tabs
-export function ChoosePoolToken({
+export function ChooseToken({
   poolTokens,
   setPoolTokens,
   index,
@@ -80,7 +80,7 @@ export function ChoosePoolToken({
       <div className="flex gap-3 w-full">
         <div className="relative w-full max-w-[80px] flex flex-col">
           <label className="label">
-            <span className="label-text">Weight</span>
+            <span className="label-text text-lg">Weight</span>
           </label>
           <input
             type="number"
@@ -94,7 +94,7 @@ export function ChoosePoolToken({
         </div>
         <div className="flex-grow">
           <label className="label">
-            <span className="label-text">Token</span>
+            <span className="label-text text-lg">Token</span>
           </label>
           <TokenField
             value={tokenAmount}
@@ -107,57 +107,33 @@ export function ChoosePoolToken({
         </div>
         <div className="flex flex-col text-xl">
           <label className="label">
-            <span className="label-text">Type</span>
+            <span className="label-text text-lg">Type</span>
           </label>
-          <div className="form-control">
-            <label className="label cursor-pointer">
-              <input
-                type="checkbox"
-                checked={poolTokens[index].tokenType === TokenType.STANDARD}
-                onChange={() => handleTokenType(TokenType.STANDARD)}
-                className="checkbox mr-2 rounded-md text-xl"
-              />
-              <span className="label-text">Standard</span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label cursor-pointer">
-              <input
-                type="checkbox"
-                checked={poolTokens[index].tokenType === TokenType.WITH_RATE}
-                onChange={() => handleTokenType(TokenType.WITH_RATE)}
-                className="checkbox mr-2 rounded-md"
-              />
-              <span className="label-text">With Rate</span>
-            </label>
-          </div>
+          <RadioInput
+            name={`token-type-${index}`}
+            label="Standard"
+            checked={poolTokens[index].tokenType === TokenType.STANDARD}
+            onChange={() => handleTokenType(TokenType.STANDARD)}
+          />
+          <RadioInput
+            name={`token-type-${index}`}
+            label="With Rate"
+            checked={poolTokens[index].tokenType === TokenType.WITH_RATE}
+            onChange={() => handleTokenType(TokenType.WITH_RATE)}
+          />
         </div>
       </div>
       {poolTokens[index].tokenType === TokenType.WITH_RATE && (
         <div className="flex items-end gap-3">
-          <div className="flex flex-col flex-grow">
-            <label className="label">
-              <span className="label-text">Rate Provider</span>
-            </label>
-            <input
-              type="text"
+          <div className="flex-grow mt-2">
+            <TextField
+              label="Rate Provider"
               placeholder="Enter rate provider address"
-              className="bg-base-300 rounded-xl shadow-inner border-0 text-lg input flex-grow"
               value={poolTokens[index].rateProvider !== zeroAddress ? poolTokens[index].rateProvider : ""}
               onChange={e => handleRateProvider(e.target.value)}
             />
           </div>
-          <div className="form-control mb-1">
-            <label className="label cursor-pointer">
-              <input
-                type="checkbox"
-                checked={poolTokens[index].paysYieldFees}
-                onChange={handlePaysYieldFees}
-                className="checkbox mr-2 rounded-md"
-              />
-              <span className="label-text">Pays Yield Fees</span>
-            </label>
-          </div>
+          <Checkbox label="Pays Yield Fees" checked={poolTokens[index].paysYieldFees} onChange={handlePaysYieldFees} />
         </div>
       )}
 

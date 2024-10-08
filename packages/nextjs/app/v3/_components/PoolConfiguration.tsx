@@ -1,37 +1,54 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { PoolType, TokenConfig } from "../types";
-import { ChoosePoolInfo, ChoosePoolParams, ChoosePoolTokens, ChoosePoolType } from "./";
+import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
 type TabType = (typeof TABS)[number];
 
-function getAdjacentTabs(currentTab: TabType): { prev: TabType | null; next: TabType | null } {
-  const currentIndex = TABS.indexOf(currentTab);
-  return {
-    prev: currentIndex > 0 ? TABS[currentIndex - 1] : null,
-    next: currentIndex < TABS.length - 1 ? TABS[currentIndex + 1] : null,
-  };
-}
-
 export function PoolConfiguration({
   poolType,
   setPoolType,
   poolTokens,
   setPoolTokens,
+  poolName,
+  setPoolName,
+  poolSymbol,
+  setPoolSymbol,
 }: {
   poolType: PoolType;
   setPoolType: Dispatch<SetStateAction<PoolType>>;
   poolTokens: TokenConfig[];
   setPoolTokens: Dispatch<SetStateAction<TokenConfig[]>>;
+  poolName: string;
+  setPoolName: Dispatch<SetStateAction<string>>;
+  poolSymbol: string;
+  setPoolSymbol: Dispatch<SetStateAction<string>>;
 }) {
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
+  const TAB_CONTENT: Record<TabType, JSX.Element> = {
+    Type: <ChooseType poolType={poolType} setPoolType={setPoolType} />,
+    Tokens: <ChooseTokens poolTokens={poolTokens} setPoolTokens={setPoolTokens} />,
+    Parameters: <ChooseParameters />,
+    Info: (
+      <ChooseInfo poolName={poolName} setPoolName={setPoolName} poolSymbol={poolSymbol} setPoolSymbol={setPoolSymbol} />
+    ),
+  };
+
   function handleTabChange(direction: "prev" | "next") {
     if (direction === "prev" && prev) setSelectedTab(prev);
     if (direction === "next" && next) setSelectedTab(next);
+  }
+
+  function getAdjacentTabs(currentTab: TabType): { prev: TabType | null; next: TabType | null } {
+    const currentIndex = TABS.indexOf(currentTab);
+    return {
+      prev: currentIndex > 0 ? TABS[currentIndex - 1] : null,
+      next: currentIndex < TABS.length - 1 ? TABS[currentIndex + 1] : null,
+    };
   }
 
   function isNextDisabled() {
@@ -60,12 +77,7 @@ export function PoolConfiguration({
             </div>
           ))}
         </div>
-        <div className="py-7 min-h-[500px] text-lg">
-          {selectedTab === "Type" && <ChoosePoolType poolType={poolType} setPoolType={setPoolType} />}
-          {selectedTab === "Tokens" && <ChoosePoolTokens poolTokens={poolTokens} setPoolTokens={setPoolTokens} />}
-          {selectedTab === "Parameters" && <ChoosePoolParams />}
-          {selectedTab === "Info" && <ChoosePoolInfo />}
-        </div>
+        <div className="py-7 min-h-[500px] text-lg flex flex-col justify-center">{TAB_CONTENT[selectedTab]}</div>
         <div className="grid grid-cols-2 gap-7">
           <button
             onClick={() => handleTabChange("prev")}
