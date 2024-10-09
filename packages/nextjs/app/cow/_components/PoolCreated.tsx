@@ -21,6 +21,7 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
   const checkSumAddress = getAddress(poolAddress);
 
   const domainName = extractDomain(etherscanURL || "");
+  const blockExplorerName = domainName.split(".")[0];
 
   return (
     <>
@@ -59,7 +60,9 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <ExternalLinkButton href={getPoolUrl(chainId, poolAddress)} text="View on Balancer" />
-          {etherscanURL && domainName !== "" && <ExternalLinkButton href={etherscanURL} text={`${domainName}`} />}
+          {etherscanURL && domainName !== "" && (
+            <ExternalLinkButton href={etherscanURL} text={`View on ${blockExplorerName}`} />
+          )}
         </div>
         <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
       </div>
