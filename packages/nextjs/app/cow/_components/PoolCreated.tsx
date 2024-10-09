@@ -4,6 +4,7 @@ import { getAddress } from "viem";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { Alert, ExternalLinkButton, TransactionButton } from "~~/components/common/";
 import { getPoolUrl } from "~~/hooks/cow";
+import { extractDomain } from "~~/utils/helpers";
 
 interface PoolCreatedProps {
   etherscanURL: string | undefined;
@@ -18,6 +19,9 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
   if (!poolAddress) return null;
 
   const checkSumAddress = getAddress(poolAddress);
+
+  const domainName = extractDomain(etherscanURL || "");
+  const blockExplorerName = domainName.split(".")[0];
 
   return (
     <>
@@ -56,7 +60,9 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
           <ExternalLinkButton href={getPoolUrl(chainId, poolAddress)} text="View on Balancer" />
-          {etherscanURL && <ExternalLinkButton href={etherscanURL} text="View on Etherscan" />}
+          {etherscanURL && domainName !== "" && (
+            <ExternalLinkButton href={etherscanURL} text={`View on ${blockExplorerName}`} />
+          )}
         </div>
         <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
       </div>
