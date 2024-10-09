@@ -34,9 +34,20 @@ export const RPC_CHAIN_NAMES: Record<number, string> = {
 };
 
 export const getAlchemyHttpUrl = (chainId: number) => {
-  return RPC_CHAIN_NAMES[chainId]
+  return scaffoldConfig.alchemyApiKey && RPC_CHAIN_NAMES[chainId]
     ? `https://${RPC_CHAIN_NAMES[chainId]}.g.alchemy.com/v2/${scaffoldConfig.alchemyApiKey}`
     : undefined;
+};
+
+export const RPC_FALLBACKS: Record<number, string> = {
+  [chains.mainnet.id]: "https://eth.llamarpc.com",
+  [chains.arbitrum.id]: "https://arbitrum.llamarpc.com",
+  [chains.gnosis.id]: "https://gnosis.drpc.org",
+  [chains.sepolia.id]: "https://sepolia.gateway.tenderly.co",
+};
+
+export const getRpcFallbackUrl = (chainId: number) => {
+  return RPC_FALLBACKS[chainId];
 };
 
 export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
