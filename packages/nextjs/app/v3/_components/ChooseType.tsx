@@ -8,7 +8,7 @@ export const ChooseType = () => {
   const { type, setType } = usePoolStore();
 
   return (
-    <div className="flex flex-col gap-5 px-10">
+    <div className="flex flex-col flex-grow justify-center h-full gap-5 px-10">
       {POOL_TYPES.map(poolType => (
         <button
           key={poolType}

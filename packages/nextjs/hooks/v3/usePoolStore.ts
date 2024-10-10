@@ -3,22 +3,22 @@ import { Address, parseUnits, zeroAddress } from "viem";
 import { create } from "zustand";
 import { PoolType, TokenConfig, TokenType } from "~~/hooks/v3/types";
 
-interface PoolState {
+interface PoolStore {
   type: PoolType | undefined;
-  tokens: TokenConfig[];
+  tokenConfigs: TokenConfig[];
   name: string;
   symbol: string;
-  swapFeePercentage: bigint | undefined;
+  swapFeePercentage: string;
   swapFeeManager: Address | undefined;
   pauseManager: Address | undefined;
   poolHooksContract: Address | undefined;
   disableUnbalancedLiquidity: boolean;
   donationsEnabled: boolean;
   setType: (type: PoolType | undefined) => void;
-  setTokenConfigs: (tokens: TokenConfig[]) => void;
+  setTokenConfigs: (tokenConfigs: TokenConfig[]) => void;
   setName: (name: string) => void;
   setSymbol: (symbol: string) => void;
-  setSwapFeePercentage: (swapFeePercentage: bigint) => void;
+  setSwapFeePercentage: (swapFeePercentage: string) => void;
   setSwapFeeManager: (swapFeeManager: Address) => void;
   setPauseManager: (pauseManager: Address) => void;
   setPoolHooksContract: (poolHooksContract: Address) => void;
@@ -32,17 +32,17 @@ export const initialTokenConfig: TokenConfig = {
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
   weight: parseUnits("50", 16), // only used for weighted pools
-  symbol: undefined,
-  logoURI: undefined,
+  tokenInfo: null, // only used for UI purposes
 };
 
-export const usePoolStore = create<PoolState>(set => ({
+// Stores all the data that will be used for pool creation
+export const usePoolStore = create<PoolStore>(set => ({
   name: "",
   symbol: "",
   type: undefined,
-  tokens: [initialTokenConfig, initialTokenConfig],
+  tokenConfigs: [initialTokenConfig, initialTokenConfig],
   amplificationParameter: undefined, // only used for stable pools
-  swapFeePercentage: undefined,
+  swapFeePercentage: "", // store as human readable % to be converted later
   swapFeeManager: undefined,
   poolHooksContract: undefined,
   pauseManager: undefined,
@@ -51,7 +51,7 @@ export const usePoolStore = create<PoolState>(set => ({
   setName: name => set({ name }),
   setSymbol: symbol => set({ symbol }),
   setType: type => set({ type }),
-  setTokenConfigs: tokens => set({ tokens }),
+  setTokenConfigs: tokenConfigs => set({ tokenConfigs }),
   setSwapFeePercentage: swapFeePercentage => set({ swapFeePercentage }),
   setPauseManager: pauseManager => set({ pauseManager }),
   setPoolHooksContract: poolHooksContract => set({ poolHooksContract }),

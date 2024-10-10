@@ -4,13 +4,13 @@ import { useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { usePoolStore } from "~~/hooks/v3";
-import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
+import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
 type TabType = (typeof TABS)[number];
 
 export function PoolConfiguration() {
-  const { type, tokens } = usePoolStore();
+  const { type, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } = usePoolStore();
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
@@ -34,11 +34,17 @@ export function PoolConfiguration() {
     };
   }
 
+  const isTypeValid = type !== undefined;
+  const isTokensValid = tokenConfigs.every(token => token.address);
+  const isParametersValid = !!swapFeePercentage && !!swapFeeManager && !!pauseManager;
+  const isInfoValid = !!name && !!symbol;
+  const isAllValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
+
   function isNextDisabled() {
-    if (selectedTab === "Type") return !type;
-    if (selectedTab === "Tokens") return tokens.some(token => token.address === undefined);
-    if (selectedTab === "Parameters") return true;
-    if (selectedTab === "Info") return true;
+    if (selectedTab === "Type") return !isTypeValid;
+    if (selectedTab === "Tokens") return !isTokensValid;
+    if (selectedTab === "Parameters") return !isParametersValid;
+    if (selectedTab === "Info") return !isInfoValid;
     return false;
   }
 
@@ -60,7 +66,7 @@ export function PoolConfiguration() {
             </div>
           ))}
         </div>
-        <div className="py-7 min-h-[500px] text-lg flex flex-col justify-center">{TAB_CONTENT[selectedTab]}</div>
+        <div className="py-10 min-h-[500px] flex flex-col">{TAB_CONTENT[selectedTab]}</div>
         <div className="grid grid-cols-2 gap-7">
           <button
             onClick={() => handleTabChange("prev")}
@@ -72,16 +78,22 @@ export function PoolConfiguration() {
             <ArrowLeftIcon className="w-5 h-5" />
             Previous
           </button>
-          <button
-            onClick={() => handleTabChange("next")}
-            disabled={isNextDisabled()}
-            className={`btn ${bgBeigeGradient} text-neutral-700 text-lg border-none rounded-xl ${
-              isNextDisabled() ? "invisible" : ""
-            }`}
-          >
-            Next
-            <ArrowRightIcon className="w-5 h-5" />
-          </button>
+          {isAllValid && selectedTab === "Info" ? (
+            <button className={`btn ${bgPrimaryGradient} border-none rounded-xl text-neutral-700 text-lg`}>
+              Create Pool
+            </button>
+          ) : (
+            <button
+              onClick={() => handleTabChange("next")}
+              disabled={isNextDisabled()}
+              className={`btn ${bgBeigeGradient} text-neutral-700 text-lg border-none rounded-xl ${
+                isNextDisabled() ? "invisible" : ""
+              }`}
+            >
+              Next
+              <ArrowRightIcon className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
     </div>

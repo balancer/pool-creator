@@ -1,13 +1,15 @@
 import { Address } from "viem";
+import { type Token } from "~~/hooks/token";
 
 export type PoolType = "Weighted" | "Stable" | undefined;
 
-export type TokenConfig = TokenInfo & {
+export type TokenConfig = {
   address: Address | undefined;
   rateProvider: Address;
   paysYieldFees: boolean;
   tokenType: TokenType;
   weight: bigint;
+  tokenInfo: Token | null;
 };
 
 export type TokenInfo = {

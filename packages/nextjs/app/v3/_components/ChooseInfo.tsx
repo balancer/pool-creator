@@ -6,7 +6,7 @@ export const ChooseInfo = () => {
   const { name, setName, symbol, setSymbol } = usePoolStore();
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="grid grid-cols-2 gap-4">
       <TextField label="Pool name" placeholder="Enter pool name" value={name} onChange={e => setName(e.target.value)} />
       <TextField
         label="Pool symbol"
