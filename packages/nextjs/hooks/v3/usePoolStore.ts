@@ -1,10 +1,13 @@
 import { useEffect } from "react";
+import { PoolType } from "@balancer/sdk";
 import { Address, parseUnits, zeroAddress } from "viem";
 import { create } from "zustand";
-import { PoolType, TokenConfig, TokenType } from "~~/hooks/v3/types";
+import { TokenConfig, TokenType } from "~~/hooks/v3/types";
+
+export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted;
 
 interface PoolStore {
-  type: PoolType | undefined;
+  poolType: AllowedPoolTypes | undefined;
   tokenConfigs: TokenConfig[];
   name: string;
   symbol: string;
@@ -13,8 +16,9 @@ interface PoolStore {
   pauseManager: Address | undefined;
   poolHooksContract: Address | undefined;
   disableUnbalancedLiquidity: boolean;
-  donationsEnabled: boolean;
-  setType: (type: PoolType | undefined) => void;
+  enableDonation: boolean;
+  amplificationParameter: string;
+  setPoolType: (poolType: AllowedPoolTypes | undefined) => void;
   setTokenConfigs: (tokenConfigs: TokenConfig[]) => void;
   setName: (name: string) => void;
   setSymbol: (symbol: string) => void;
@@ -22,8 +26,9 @@ interface PoolStore {
   setSwapFeeManager: (swapFeeManager: Address) => void;
   setPauseManager: (pauseManager: Address) => void;
   setPoolHooksContract: (poolHooksContract: Address) => void;
-  setDonationsEnabled: (donationsEnabled: boolean) => void;
+  setEnableDonation: (enableDonation: boolean) => void;
   setDisableUnbalancedLiquidity: (disableUnbalancedLiquidity: boolean) => void;
+  setAmplificationParameter: (amplificationParameter: string) => void;
 }
 
 export const initialTokenConfig: TokenConfig = {
@@ -39,25 +44,26 @@ export const initialTokenConfig: TokenConfig = {
 export const usePoolStore = create<PoolStore>(set => ({
   name: "",
   symbol: "",
-  type: undefined,
+  poolType: undefined,
   tokenConfigs: [initialTokenConfig, initialTokenConfig],
-  amplificationParameter: undefined, // only used for stable pools
+  amplificationParameter: "", // only used for stable pools
   swapFeePercentage: "", // store as human readable % to be converted later
   swapFeeManager: undefined,
   poolHooksContract: undefined,
   pauseManager: undefined,
-  donationsEnabled: false,
+  enableDonation: false,
   disableUnbalancedLiquidity: false,
   setName: name => set({ name }),
   setSymbol: symbol => set({ symbol }),
-  setType: type => set({ type }),
+  setPoolType: poolType => set({ poolType }),
   setTokenConfigs: tokenConfigs => set({ tokenConfigs }),
   setSwapFeePercentage: swapFeePercentage => set({ swapFeePercentage }),
+  setAmplificationParameter: amplificationParameter => set({ amplificationParameter }),
   setPauseManager: pauseManager => set({ pauseManager }),
   setPoolHooksContract: poolHooksContract => set({ poolHooksContract }),
   setSwapFeeManager: swapFeeManager => set({ swapFeeManager }),
   setDisableUnbalancedLiquidity: disableUnbalancedLiquidity => set({ disableUnbalancedLiquidity }),
-  setDonationsEnabled: donationsEnabled => set({ donationsEnabled }),
+  setEnableDonation: enableDonation => set({ enableDonation }),
 }));
 
 export function usePoolStoreDebug() {

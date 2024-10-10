@@ -10,7 +10,7 @@ const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
 type TabType = (typeof TABS)[number];
 
 export function PoolConfiguration() {
-  const { type, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } = usePoolStore();
+  const { poolType, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } = usePoolStore();
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
@@ -34,7 +34,7 @@ export function PoolConfiguration() {
     };
   }
 
-  const isTypeValid = type !== undefined;
+  const isTypeValid = poolType !== undefined;
   const isTokensValid = tokenConfigs.every(token => token.address);
   const isParametersValid = !!swapFeePercentage && !!swapFeeManager && !!pauseManager;
   const isInfoValid = !!name && !!symbol;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TokenType } from "../../../hooks/v3/types";
+import { PoolType } from "@balancer/sdk";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
 import { Checkbox, RadioInput, TextField, TokenField, TokenSelectModal } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
@@ -8,7 +9,7 @@ import { usePoolStore } from "~~/hooks/v3";
 // TODO: figure out how to hold onto state for this component
 // it currently resets when moving between pool configuration tabs
 export function ChooseToken({ index }: { index: number }) {
-  const { tokenConfigs, setTokenConfigs } = usePoolStore();
+  const { tokenConfigs, setTokenConfigs, poolType } = usePoolStore();
   const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo } = tokenConfigs[index];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,21 +72,23 @@ export function ChooseToken({ index }: { index: number }) {
   return (
     <div>
       <div className="flex gap-3 w-full">
-        <div className="w-full max-w-[80px] flex flex-col">
-          {index === 0 && (
-            <label className="label">
-              <span className="label-text text-lg">Weight</span>
-            </label>
-          )}
-          <input
-            type="number"
-            min="0"
-            max="99"
-            value={Number(formatUnits(weight, 16)).toFixed(0)}
-            onChange={e => setTokenWeight(Number(e.target.value))}
-            className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl h-full w-full"
-          />
-        </div>
+        {poolType === PoolType.Weighted && (
+          <div className="w-full max-w-[80px] flex flex-col">
+            {index === 0 && (
+              <label className="label">
+                <span className="label-text text-lg">Weight</span>
+              </label>
+            )}
+            <input
+              type="number"
+              min="0"
+              max="99"
+              value={Number(formatUnits(weight, 16)).toFixed(0)}
+              onChange={e => setTokenWeight(Number(e.target.value))}
+              className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl h-full w-full"
+            />
+          </div>
+        )}
         <div className="flex-grow">
           {index === 0 && (
             <label className="label">

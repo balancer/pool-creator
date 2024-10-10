@@ -7,14 +7,14 @@ import { abbreviateAddress } from "~~/utils/helpers";
 
 export function PoolSummary() {
   const {
-    type,
+    poolType,
     tokenConfigs,
     swapFeePercentage,
     swapFeeManager,
     pauseManager,
     poolHooksContract,
     disableUnbalancedLiquidity,
-    donationsEnabled,
+    enableDonation,
     name,
     symbol,
   } = usePoolStore();
@@ -23,7 +23,7 @@ export function PoolSummary() {
     <div className="bg-base-200 w-full max-w-[400px] rounded-xl p-7 shadow-lg">
       <div className="font-bold text-2xl mb-7">Pool Summary</div>
 
-      <SummarySection title="Type" isValid={type !== undefined} content={`${type} Pool`} />
+      <SummarySection title="Type" isValid={poolType !== undefined} content={`${poolType} Pool`} />
       <hr className="border-base-content opacity-30 my-5" />
       <SummarySection
         title="Tokens"
@@ -69,7 +69,7 @@ export function PoolSummary() {
             </div>
             <div className="flex justify-between">
               <div className="">Donations Enabled</div>
-              <div>{donationsEnabled ? "true" : "false"}</div>
+              <div>{enableDonation ? "true" : "false"}</div>
             </div>
           </div>
         }
