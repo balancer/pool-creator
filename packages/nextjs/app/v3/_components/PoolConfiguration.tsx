@@ -1,41 +1,24 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { PoolType, TokenConfig } from "../types";
+"use client";
+
+import { useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { usePoolStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
 type TabType = (typeof TABS)[number];
 
-export function PoolConfiguration({
-  poolType,
-  setPoolType,
-  poolTokens,
-  setPoolTokens,
-  poolName,
-  setPoolName,
-  poolSymbol,
-  setPoolSymbol,
-}: {
-  poolType: PoolType;
-  setPoolType: Dispatch<SetStateAction<PoolType>>;
-  poolTokens: TokenConfig[];
-  setPoolTokens: Dispatch<SetStateAction<TokenConfig[]>>;
-  poolName: string;
-  setPoolName: Dispatch<SetStateAction<string>>;
-  poolSymbol: string;
-  setPoolSymbol: Dispatch<SetStateAction<string>>;
-}) {
+export function PoolConfiguration() {
+  const { type, tokens } = usePoolStore();
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
-    Type: <ChooseType poolType={poolType} setPoolType={setPoolType} />,
-    Tokens: <ChooseTokens poolTokens={poolTokens} setPoolTokens={setPoolTokens} />,
+    Type: <ChooseType />,
+    Tokens: <ChooseTokens />,
     Parameters: <ChooseParameters />,
-    Info: (
-      <ChooseInfo poolName={poolName} setPoolName={setPoolName} poolSymbol={poolSymbol} setPoolSymbol={setPoolSymbol} />
-    ),
+    Info: <ChooseInfo />,
   };
 
   function handleTabChange(direction: "prev" | "next") {
@@ -52,8 +35,8 @@ export function PoolConfiguration({
   }
 
   function isNextDisabled() {
-    if (selectedTab === "Type") return !poolType;
-    if (selectedTab === "Tokens") return poolTokens.some(token => token.address === undefined);
+    if (selectedTab === "Type") return !type;
+    if (selectedTab === "Tokens") return tokens.some(token => token.address === undefined);
     if (selectedTab === "Parameters") return true;
     if (selectedTab === "Info") return true;
     return false;

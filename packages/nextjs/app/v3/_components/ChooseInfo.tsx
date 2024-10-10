@@ -1,30 +1,18 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { TextField } from "~~/components/common";
+import { usePoolStore } from "~~/hooks/v3";
 
-export const ChooseInfo = ({
-  poolName,
-  setPoolName,
-  poolSymbol,
-  setPoolSymbol,
-}: {
-  poolName: string;
-  setPoolName: Dispatch<SetStateAction<string>>;
-  poolSymbol: string;
-  setPoolSymbol: Dispatch<SetStateAction<string>>;
-}) => {
+export const ChooseInfo = () => {
+  const { name, setName, symbol, setSymbol } = usePoolStore();
+
   return (
     <div className="flex flex-col gap-5">
-      <TextField
-        label="Pool name"
-        placeholder="Enter pool name"
-        value={poolName}
-        onChange={e => setPoolName(e.target.value)}
-      />
+      <TextField label="Pool name" placeholder="Enter pool name" value={name} onChange={e => setName(e.target.value)} />
       <TextField
         label="Pool symbol"
         placeholder="Enter pool symbol"
-        value={poolSymbol}
-        onChange={e => setPoolSymbol(e.target.value)}
+        value={symbol}
+        onChange={e => setSymbol(e.target.value)}
       />
     </div>
   );
