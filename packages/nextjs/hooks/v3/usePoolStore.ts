@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
+import { TokenType } from "@balancer/sdk";
 import { Address, parseUnits, zeroAddress } from "viem";
 import { create } from "zustand";
-import { TokenConfig, TokenType } from "~~/hooks/v3/types";
+import { TokenConfig } from "~~/hooks/v3/types";
 
 export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted;
 
@@ -12,9 +13,9 @@ interface PoolStore {
   name: string;
   symbol: string;
   swapFeePercentage: string;
-  swapFeeManager: Address | undefined;
-  pauseManager: Address | undefined;
-  poolHooksContract: Address | undefined;
+  swapFeeManager: Address;
+  pauseManager: Address;
+  poolHooksContract: Address;
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
@@ -32,7 +33,7 @@ interface PoolStore {
 }
 
 export const initialTokenConfig: TokenConfig = {
-  address: undefined,
+  address: "",
   rateProvider: zeroAddress,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
@@ -48,9 +49,9 @@ export const usePoolStore = create<PoolStore>(set => ({
   tokenConfigs: [initialTokenConfig, initialTokenConfig],
   amplificationParameter: "", // only used for stable pools
   swapFeePercentage: "", // store as human readable % to be converted later
-  swapFeeManager: undefined,
-  poolHooksContract: undefined,
-  pauseManager: undefined,
+  swapFeeManager: "",
+  poolHooksContract: "",
+  pauseManager: "",
   enableDonation: false,
   disableUnbalancedLiquidity: false,
   setName: name => set({ name }),

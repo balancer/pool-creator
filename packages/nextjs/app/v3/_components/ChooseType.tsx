@@ -15,7 +15,7 @@ export const ChooseType = () => {
           key={type}
           className={`${
             type === poolType ? `bg-accent text-white` : `shadow-md bg-primary`
-          } font-bold py-5 w-full rounded-xl text-primary-content`}
+          } font-bold py-5 w-full rounded-xl text-lg text-primary-content`}
           onClick={() => setPoolType(type)}
         >
           {type}

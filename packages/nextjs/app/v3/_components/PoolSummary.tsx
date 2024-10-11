@@ -23,7 +23,12 @@ export function PoolSummary() {
     <div className="bg-base-200 w-full max-w-[400px] rounded-xl p-7 shadow-lg">
       <div className="font-bold text-2xl mb-7">Pool Summary</div>
 
-      <SummarySection title="Type" isValid={poolType !== undefined} content={`${poolType} Pool`} />
+      <SummarySection
+        title="Type"
+        isValid={poolType !== undefined}
+        isEmpty={poolType === undefined}
+        content={`${poolType} Pool`}
+      />
       <hr className="border-base-content opacity-30 my-5" />
       <SummarySection
         title="Tokens"

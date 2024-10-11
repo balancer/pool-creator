@@ -1,10 +1,16 @@
 import React from "react";
 import { ChooseToken } from "./ChooseToken";
+import { PoolType } from "@balancer/sdk";
 import { parseUnits } from "viem";
 import { initialTokenConfig, usePoolStore } from "~~/hooks/v3";
 
+const MAX_TOKENS = {
+  [PoolType.Weighted]: 8,
+  [PoolType.Stable]: 5,
+};
+
 export function ChooseTokens() {
-  const { tokenConfigs, setTokenConfigs } = usePoolStore();
+  const { tokenConfigs, setTokenConfigs, poolType } = usePoolStore();
 
   function handleAddToken() {
     const updatedTokenCount = tokenConfigs.length + 1;
@@ -20,7 +26,7 @@ export function ChooseTokens() {
         {Array.from({ length: tokenConfigs.length }).map((_, index) => (
           <ChooseToken key={index} index={index} />
         ))}
-        {tokenConfigs.length < 8 && (
+        {poolType && tokenConfigs.length < MAX_TOKENS[poolType] && (
           <div className="flex justify-end">
             <button onClick={handleAddToken} className="btn btn-primary border-none mt-5 w-40 rounded-xl text-lg flex">
               Add Token

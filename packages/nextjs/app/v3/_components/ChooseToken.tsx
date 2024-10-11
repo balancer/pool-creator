@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TokenType } from "../../../hooks/v3/types";
+import { TokenType } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
 import { formatUnits, parseUnits, zeroAddress } from "viem";
 import { Checkbox, RadioInput, TextField, TokenField, TokenSelectModal } from "~~/components/common";
@@ -119,12 +119,12 @@ export function ChooseToken({ index }: { index: number }) {
           <RadioInput
             name={`token-type-${index}`}
             label="With Rate"
-            checked={tokenType === TokenType.WITH_RATE}
-            onChange={() => handleTokenType(TokenType.WITH_RATE)}
+            checked={tokenType === TokenType.TOKEN_WITH_RATE}
+            onChange={() => handleTokenType(TokenType.TOKEN_WITH_RATE)}
           />
         </div>
       </div>
-      {tokenType === TokenType.WITH_RATE && (
+      {tokenType === TokenType.TOKEN_WITH_RATE && (
         <div className="flex items-end gap-3">
           <div className="flex-grow mt-2">
             <TextField

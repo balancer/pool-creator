@@ -3,16 +3,20 @@
 import { useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { TransactionButton } from "~~/components/common";
 import { usePoolStore } from "~~/hooks/v3";
-import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
+import { useCreatePool } from "~~/hooks/v3";
+import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
 type TabType = (typeof TABS)[number];
 
 export function PoolConfiguration() {
-  const { poolType, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } = usePoolStore();
+  const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
+  console.log("createPoolError", createPoolError);
+  const { poolType, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } = usePoolStore();
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
     Type: <ChooseType />,
@@ -79,9 +83,12 @@ export function PoolConfiguration() {
             Previous
           </button>
           {isAllValid && selectedTab === "Info" ? (
-            <button className={`btn ${bgPrimaryGradient} border-none rounded-xl text-neutral-700 text-lg`}>
-              Create Pool
-            </button>
+            <TransactionButton
+              onClick={() => createPool()}
+              title="Create Pool"
+              isDisabled={!isAllValid}
+              isPending={isCreatePoolPending}
+            />
           ) : (
             <button
               onClick={() => handleTabChange("next")}
