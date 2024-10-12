@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { TokenType } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
-import { formatUnits, parseUnits, zeroAddress } from "viem";
+import { zeroAddress } from "viem";
 import { Checkbox, RadioInput, TextField, TokenField, TokenSelectModal } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { usePoolStore } from "~~/hooks/v3";
+import { usePoolCreationStore } from "~~/hooks/v3";
 
 // TODO: figure out how to hold onto state for this component
 // it currently resets when moving between pool configuration tabs
 export function ChooseToken({ index }: { index: number }) {
-  const { tokenConfigs, setTokenConfigs, poolType } = usePoolStore();
-  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo } = tokenConfigs[index];
+  const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
+  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount } = tokenConfigs[index];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [tokenAmount, setTokenAmount] = useState<string>("");
   const [tokenWeight, setTokenWeight] = useState<number>(50);
 
   const { balance } = useReadToken(tokenInfo?.address);
@@ -29,6 +28,12 @@ export function ChooseToken({ index }: { index: number }) {
     tokenConfig.paysYieldFees = false;
     tokenConfig.tokenInfo = { ...tokenInfo };
     updatedTokenConfigs[index] = tokenConfig;
+    setTokenConfigs(updatedTokenConfigs);
+  };
+
+  const handleTokenAmount = (amount: string) => {
+    const updatedTokenConfigs = [...tokenConfigs];
+    updatedTokenConfigs[index].amount = amount;
     setTokenConfigs(updatedTokenConfigs);
   };
 
@@ -59,9 +64,9 @@ export function ChooseToken({ index }: { index: number }) {
 
     const updatedTokenConfigs = tokenConfigs.map((token, i) => {
       if (i === index) {
-        return { ...token, weight: parseUnits(newWeight.toString(), 16) };
+        return { ...token, weight: newWeight };
       } else {
-        return { ...token, weight: parseUnits(evenWeight.toString(), 16) };
+        return { ...token, weight: evenWeight };
       }
     });
 
@@ -81,9 +86,9 @@ export function ChooseToken({ index }: { index: number }) {
             )}
             <input
               type="number"
-              min="0"
+              min="1"
               max="99"
-              value={Number(formatUnits(weight, 16)).toFixed(0)}
+              value={weight}
               onChange={e => setTokenWeight(Number(e.target.value))}
               className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl h-full w-full"
             />
@@ -96,10 +101,10 @@ export function ChooseToken({ index }: { index: number }) {
             </label>
           )}
           <TokenField
-            value={tokenAmount}
+            value={amount}
             selectedToken={tokenInfo}
             setToken={handleTokenSelection}
-            setTokenAmount={setTokenAmount}
+            setTokenAmount={handleTokenAmount}
             tokenOptions={tokenOptions}
             balance={balance}
           />

@@ -2,21 +2,22 @@
 
 import { useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
+import { PoolCreationModal } from "./PoolCreationModal";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
-import { usePoolStore } from "~~/hooks/v3";
-import { useCreatePool } from "~~/hooks/v3";
+import { usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
 type TabType = (typeof TABS)[number];
 
 export function PoolConfiguration() {
-  const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
+  const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
-  console.log("createPoolError", createPoolError);
-  const { poolType, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } = usePoolStore();
+
+  const { poolType, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } =
+    usePoolCreationStore();
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
     Type: <ChooseType />,
@@ -53,56 +54,61 @@ export function PoolConfiguration() {
   }
 
   return (
-    <div className="w-full max-w-[700px]">
-      <div className="bg-base-200 rounded-xl p-7 shadow-lg">
-        <div className="font-bold text-2xl mb-7">Pool Configuration</div>
-        <div className="relative grid grid-cols-4 text-center text-xl rounded-xl">
-          <div className={`absolute inset-x-0 top-0 bottom-0 ${bgBeigeGradient} opacity-60 rounded-xl shadow-lg`}></div>
-          {TABS.map((tab, idx) => (
+    <>
+      <div className="w-full max-w-[700px]">
+        <div className="bg-base-200 rounded-xl p-7 shadow-lg">
+          <div className="font-bold text-2xl mb-7">Pool Configuration</div>
+          <div className="relative grid grid-cols-4 text-center text-xl rounded-xl">
             <div
-              key={tab}
-              className={`relative z-10 rounded-xl ${bgBeigeGradientHover} hover:opacity-80 hover:font-bold hover:cursor-pointer text-neutral-700 flex-1 py-3 text-lg ${
-                selectedTab === tab ? bgBeigeGradient + " font-bold" : ""
-              }`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {idx + 1}. {tab}
-            </div>
-          ))}
-        </div>
-        <div className="py-10 min-h-[500px] flex flex-col">{TAB_CONTENT[selectedTab]}</div>
-        <div className="grid grid-cols-2 gap-7">
-          <button
-            onClick={() => handleTabChange("prev")}
-            disabled={!prev}
-            className={`btn ${bgBeigeGradient} text-neutral-700 text-lg border-none rounded-xl ${
-              !prev ? "invisible" : ""
-            }`}
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            Previous
-          </button>
-          {isAllValid && selectedTab === "Info" ? (
-            <TransactionButton
-              onClick={() => createPool()}
-              title="Create Pool"
-              isDisabled={!isAllValid}
-              isPending={isCreatePoolPending}
-            />
-          ) : (
+              className={`absolute inset-x-0 top-0 bottom-0 ${bgBeigeGradient} opacity-60 rounded-xl shadow-lg`}
+            ></div>
+            {TABS.map((tab, idx) => (
+              <div
+                key={tab}
+                className={`relative z-10 rounded-xl ${bgBeigeGradientHover} hover:opacity-80 hover:font-bold hover:cursor-pointer text-neutral-700 flex-1 py-3 text-lg ${
+                  selectedTab === tab ? bgBeigeGradient + " font-bold" : ""
+                }`}
+                onClick={() => setSelectedTab(tab)}
+              >
+                {idx + 1}. {tab}
+              </div>
+            ))}
+          </div>
+          <div className="py-10 min-h-[500px] flex flex-col">{TAB_CONTENT[selectedTab]}</div>
+          <div className="grid grid-cols-2 gap-7">
             <button
-              onClick={() => handleTabChange("next")}
-              disabled={isNextDisabled()}
+              onClick={() => handleTabChange("prev")}
+              disabled={!prev}
               className={`btn ${bgBeigeGradient} text-neutral-700 text-lg border-none rounded-xl ${
-                isNextDisabled() ? "invisible" : ""
+                !prev ? "invisible" : ""
               }`}
             >
-              Next
-              <ArrowRightIcon className="w-5 h-5" />
+              <ArrowLeftIcon className="w-5 h-5" />
+              Previous
             </button>
-          )}
+            {isAllValid && selectedTab === "Info" ? (
+              <TransactionButton
+                onClick={() => setIsPoolCreationModalOpen(true)}
+                title="Preview Pool"
+                isDisabled={false}
+                isPending={false}
+              />
+            ) : (
+              <button
+                onClick={() => handleTabChange("next")}
+                disabled={isNextDisabled()}
+                className={`btn ${bgBeigeGradient} text-neutral-700 text-lg border-none rounded-xl ${
+                  isNextDisabled() ? "invisible" : ""
+                }`}
+              >
+                Next
+                <ArrowRightIcon className="w-5 h-5" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      {isPoolCreationModalOpen && <PoolCreationModal setIsModalOpen={setIsPoolCreationModalOpen} />}
+    </>
   );
 }

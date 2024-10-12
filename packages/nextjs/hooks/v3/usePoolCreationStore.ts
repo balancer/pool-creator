@@ -1,13 +1,24 @@
 import { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
-import { Address, parseUnits, zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
-import { TokenConfig } from "~~/hooks/v3/types";
+import { type Token } from "~~/hooks/token";
 
 export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted;
 
+export type TokenConfig = {
+  address: Address;
+  rateProvider: Address;
+  paysYieldFees: boolean;
+  tokenType: TokenType;
+  weight: number;
+  tokenInfo: Token | null;
+  amount: string; // human readable
+};
+
 interface PoolStore {
+  step: number;
   poolType: AllowedPoolTypes | undefined;
   tokenConfigs: TokenConfig[];
   name: string;
@@ -30,6 +41,7 @@ interface PoolStore {
   setEnableDonation: (enableDonation: boolean) => void;
   setDisableUnbalancedLiquidity: (disableUnbalancedLiquidity: boolean) => void;
   setAmplificationParameter: (amplificationParameter: string) => void;
+  setStep: (step: number) => void;
 }
 
 export const initialTokenConfig: TokenConfig = {
@@ -37,12 +49,13 @@ export const initialTokenConfig: TokenConfig = {
   rateProvider: zeroAddress,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
-  weight: parseUnits("50", 16), // only used for weighted pools
-  tokenInfo: null, // only used for UI purposes
+  weight: 50, // only used for weighted pools
+  tokenInfo: null, // Details including image, symbol, decimals, etc.
+  amount: "",
 };
 
-// Stores all the data that will be used for pool creation
-export const usePoolStore = create<PoolStore>(set => ({
+export const initialPoolCreationState = {
+  step: 1,
   name: "",
   symbol: "",
   poolType: undefined,
@@ -50,25 +63,31 @@ export const usePoolStore = create<PoolStore>(set => ({
   amplificationParameter: "", // only used for stable pools
   swapFeePercentage: "", // store as human readable % to be converted later
   swapFeeManager: "",
-  poolHooksContract: "",
   pauseManager: "",
-  enableDonation: false,
+  poolHooksContract: "",
   disableUnbalancedLiquidity: false,
+  enableDonation: false,
+};
+
+// Stores all the data that will be used for pool creation
+export const usePoolCreationStore = create<PoolStore>(set => ({
+  ...initialPoolCreationState,
+  setStep: step => set({ step }),
   setName: name => set({ name }),
   setSymbol: symbol => set({ symbol }),
   setPoolType: poolType => set({ poolType }),
   setTokenConfigs: tokenConfigs => set({ tokenConfigs }),
-  setSwapFeePercentage: swapFeePercentage => set({ swapFeePercentage }),
   setAmplificationParameter: amplificationParameter => set({ amplificationParameter }),
+  setSwapFeePercentage: swapFeePercentage => set({ swapFeePercentage }),
+  setSwapFeeManager: swapFeeManager => set({ swapFeeManager }),
   setPauseManager: pauseManager => set({ pauseManager }),
   setPoolHooksContract: poolHooksContract => set({ poolHooksContract }),
-  setSwapFeeManager: swapFeeManager => set({ swapFeeManager }),
   setDisableUnbalancedLiquidity: disableUnbalancedLiquidity => set({ disableUnbalancedLiquidity }),
   setEnableDonation: enableDonation => set({ enableDonation }),
 }));
 
 export function usePoolStoreDebug() {
-  const poolState = usePoolStore();
+  const poolState = usePoolCreationStore();
 
   useEffect(() => {
     console.log("Pool Store State:", poolState);

@@ -1,6 +1,6 @@
 "use client";
 
-import { PoolConfiguration, PoolSummary } from "./_components";
+import { PoolConfiguration, PoolDetails } from "./_components";
 import type { NextPage } from "next";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { usePoolStoreDebug } from "~~/hooks/v3";
@@ -18,7 +18,10 @@ const BalancerV3: NextPage = () => {
           </div>
           <div className="flex gap-5 w-full justify-center">
             <PoolConfiguration />
-            <PoolSummary />
+            <div className="bg-base-200 w-full max-w-[400px] rounded-xl shadow-lg p-5">
+              <div className="font-bold text-2xl mb-3">Pool Preview</div>
+              <PoolDetails isPreview={true} />
+            </div>
           </div>
         </div>
       </div>

@@ -1,12 +1,12 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
-import { usePoolStore } from "~~/hooks/v3";
-import { AllowedPoolTypes } from "~~/hooks/v3/usePoolStore";
+import { usePoolCreationStore } from "~~/hooks/v3";
+import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
 const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable];
 
 export const ChooseType = () => {
-  const { poolType, setPoolType } = usePoolStore();
+  const { poolType, setPoolType } = usePoolCreationStore();
 
   return (
     <div className="flex flex-col flex-grow justify-center h-full gap-5 px-10">

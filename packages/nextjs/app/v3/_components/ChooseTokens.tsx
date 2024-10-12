@@ -1,8 +1,7 @@
 import React from "react";
 import { ChooseToken } from "./ChooseToken";
 import { PoolType } from "@balancer/sdk";
-import { parseUnits } from "viem";
-import { initialTokenConfig, usePoolStore } from "~~/hooks/v3";
+import { initialTokenConfig, usePoolCreationStore } from "~~/hooks/v3";
 
 const MAX_TOKENS = {
   [PoolType.Weighted]: 8,
@@ -10,11 +9,11 @@ const MAX_TOKENS = {
 };
 
 export function ChooseTokens() {
-  const { tokenConfigs, setTokenConfigs, poolType } = usePoolStore();
+  const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
 
   function handleAddToken() {
     const updatedTokenCount = tokenConfigs.length + 1;
-    const updatedWeight = parseUnits((100 / updatedTokenCount).toString(), 16);
+    const updatedWeight = 100 / updatedTokenCount;
     const updatedPoolTokens = tokenConfigs.map(token => ({ ...token, weight: updatedWeight }));
     updatedPoolTokens.push({ ...initialTokenConfig, weight: updatedWeight });
     setTokenConfigs(updatedPoolTokens);

@@ -1,7 +1,7 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
 import { Checkbox, NumberInput, TextField } from "~~/components/common";
-import { usePoolStore } from "~~/hooks/v3";
+import { usePoolCreationStore } from "~~/hooks/v3";
 
 export const ChooseParameters = () => {
   const {
@@ -20,7 +20,7 @@ export const ChooseParameters = () => {
     setPoolHooksContract,
     setEnableDonation,
     setDisableUnbalancedLiquidity,
-  } = usePoolStore();
+  } = usePoolCreationStore();
 
   return (
     <div className="flex flex-col gap-4">

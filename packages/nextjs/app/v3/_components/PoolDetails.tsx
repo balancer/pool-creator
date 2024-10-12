@@ -1,11 +1,12 @@
 "use client";
 
+import { PoolType } from "@balancer/sdk";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { usePoolStore } from "~~/hooks/v3";
+import { usePoolCreationStore } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
 
-export function PoolSummary() {
+export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const {
     poolType,
     tokenConfigs,
@@ -17,37 +18,40 @@ export function PoolSummary() {
     enableDonation,
     name,
     symbol,
-  } = usePoolStore();
+  } = usePoolCreationStore();
 
   return (
-    <div className="bg-base-200 w-full max-w-[400px] rounded-xl p-7 shadow-lg">
-      <div className="font-bold text-2xl mb-7">Pool Summary</div>
-
-      <SummarySection
+    <div className="flex flex-col gap-3">
+      <DetailSection
         title="Type"
+        isPreview={isPreview}
         isValid={poolType !== undefined}
         isEmpty={poolType === undefined}
         content={`${poolType} Pool`}
       />
-      <hr className="border-base-content opacity-30 my-5" />
-      <SummarySection
+      <DetailSection
         title="Tokens"
-        isValid={tokenConfigs.every(token => token.address !== undefined)}
-        isEmpty={tokenConfigs.every(token => token.address === undefined)}
+        isPreview={isPreview}
+        isValid={tokenConfigs.every(token => token.address !== "")}
+        isEmpty={tokenConfigs.every(token => token.address === "")}
         content={
           <div className="flex flex-col gap-2">
             {tokenConfigs.map((token, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="bg-base-300 w-7 h-7 rounded-full"></div>
-                <div className="font-bold">{token?.tokenInfo?.symbol}</div>
+              <div key={index} className="flex justify-between">
+                <div className="flex items-center gap-2">
+                  {poolType === PoolType.Weighted && <div>{token.weight}%</div>}
+                  <div className="bg-base-300 w-7 h-7 rounded-full"></div>
+                  <div className="font-bold">{token?.tokenInfo?.symbol}</div>
+                </div>
+                <div>{token.amount}</div>
               </div>
             ))}
           </div>
         }
       />
-      <hr className="border-base-content opacity-30 my-5" />
-      <SummarySection
+      <DetailSection
         title="Parameters"
+        isPreview={isPreview}
         isValid={!!(swapFeePercentage && swapFeeManager && pauseManager)}
         isEmpty={!swapFeePercentage && !swapFeeManager && !pauseManager}
         content={
@@ -79,16 +83,16 @@ export function PoolSummary() {
           </div>
         }
       />
-      <hr className="border-base-content opacity-30 my-5" />
-      <SummarySection
+      <DetailSection
         title="Info"
+        isPreview={isPreview}
         isValid={!!(name && symbol)}
         isEmpty={!name && !symbol}
         content={
           <div>
             <div className="flex justify-between">
               <div>Name</div>
-              <div>{name}</div>
+              <div>{name.length > 24 ? `${name.slice(0, 24)}...` : name}</div>
             </div>
             <div className="flex justify-between">
               <div>Symbol</div>
@@ -101,22 +105,25 @@ export function PoolSummary() {
   );
 }
 
-interface SummarySectionProps {
+interface DetailSectionProps {
   title: string;
   isValid: boolean | undefined;
   isEmpty?: boolean;
+  isPreview?: boolean;
   content: React.ReactNode;
 }
 
-function SummarySection({ title, isValid, isEmpty, content }: SummarySectionProps) {
+function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSectionProps) {
   return (
     <>
-      <div className="text-lg">
-        <div className="flex justify-between mb-3">
+      <div className="text-lg bg-base-100 p-4 rounded-xl">
+        <div className="flex justify-between mb-2">
           <div className="font-bold">{title}: </div>
-          <div className="h-7 w-7 rounded-full">
-            {isValid ? <CheckCircleIcon className="w-7 h-7" /> : <QuestionMarkCircleIcon className="w-7 h-7" />}
-          </div>
+          {isPreview && (
+            <div className="h-7 w-7 rounded-full">
+              {isValid ? <CheckCircleIcon className="w-7 h-7" /> : <QuestionMarkCircleIcon className="w-7 h-7" />}
+            </div>
+          )}
         </div>
         {isEmpty ? <i>No {title.toLowerCase()} selected</i> : <div>{content}</div>}
       </div>

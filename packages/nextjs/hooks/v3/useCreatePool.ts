@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { usePoolStore } from "~~/hooks/v3";
+import { usePoolCreationStore } from "~~/hooks/v3";
 
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
@@ -27,7 +27,7 @@ export const useCreatePool = () => {
     enableDonation,
     disableUnbalancedLiquidity,
     amplificationParameter,
-  } = usePoolStore();
+  } = usePoolCreationStore();
 
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
@@ -50,10 +50,10 @@ export const useCreatePool = () => {
         poolType: PoolType.Weighted,
         tokens: tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees }) => ({
           address,
-          weight,
           rateProvider,
           tokenType,
           paysYieldFees,
+          weight: parseUnits(weight.toString(), 16),
         })),
       } as CreatePoolV3WeightedInput;
     } else {
