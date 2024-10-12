@@ -19,6 +19,7 @@ export type TokenConfig = {
 
 interface PoolStore {
   step: number;
+  poolAddress: Address | undefined;
   poolType: AllowedPoolTypes | undefined;
   tokenConfigs: TokenConfig[];
   name: string;
@@ -30,6 +31,8 @@ interface PoolStore {
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
+  setStep: (step: number) => void;
+  setPoolAddress: (poolAddress: Address) => void;
   setPoolType: (poolType: AllowedPoolTypes | undefined) => void;
   setTokenConfigs: (tokenConfigs: TokenConfig[]) => void;
   setName: (name: string) => void;
@@ -41,7 +44,6 @@ interface PoolStore {
   setEnableDonation: (enableDonation: boolean) => void;
   setDisableUnbalancedLiquidity: (disableUnbalancedLiquidity: boolean) => void;
   setAmplificationParameter: (amplificationParameter: string) => void;
-  setStep: (step: number) => void;
 }
 
 export const initialTokenConfig: TokenConfig = {
@@ -56,6 +58,7 @@ export const initialTokenConfig: TokenConfig = {
 
 export const initialPoolCreationState = {
   step: 1,
+  poolAddress: undefined, // set after pool deployment
   name: "",
   symbol: "",
   poolType: undefined,
@@ -72,6 +75,7 @@ export const initialPoolCreationState = {
 // Stores all the data that will be used for pool creation
 export const usePoolCreationStore = create<PoolStore>(set => ({
   ...initialPoolCreationState,
+  setPoolAddress: poolAddress => set({ poolAddress }),
   setStep: step => set({ step }),
   setName: name => set({ name }),
   setSymbol: symbol => set({ symbol }),

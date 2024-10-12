@@ -1,12 +1,11 @@
-import { PERMIT2 } from "@balancer/sdk";
+import { BALANCER_ROUTER, PERMIT2 } from "@balancer/sdk";
 import { parseUnits } from "viem";
 import { StepsDisplay } from "~~/app/cow/_components";
 import { PoolDetails } from "~~/app/v3/_components";
 import { Alert, TransactionButton } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { useApproveToken } from "~~/hooks/token";
-import { useCreatePool } from "~~/hooks/v3";
-import { type TokenConfig, usePoolCreationStore } from "~~/hooks/v3/usePoolCreationStore";
+import { useApproveOnPermit2, useApproveToken } from "~~/hooks/token";
+import { type TokenConfig, useCreatePool, useInitializePool, usePoolCreationStore } from "~~/hooks/v3/";
 
 interface PoolCreationModalProps {
   setIsModalOpen: (isOpen: boolean) => void;
@@ -14,10 +13,12 @@ interface PoolCreationModalProps {
 
 export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
-  const { step, setStep, tokenConfigs } = usePoolCreationStore();
-
-  const targetNetwork = useTargetNetwork();
-  console.log(targetNetwork);
+  const {
+    mutate: initializePool,
+    isPending: isInitializePoolPending,
+    error: initializePoolError,
+  } = useInitializePool();
+  const { step, setStep, tokenConfigs, poolAddress } = usePoolCreationStore();
 
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => ({
     number: idx + 2,
@@ -28,6 +29,8 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     number: idx + approveOnTokenSteps.length + 2,
     label: `Permit ${token?.tokenInfo?.symbol}`,
   }));
+
+  const poolCreationError = createPoolError || initializePoolError;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">
@@ -51,20 +54,32 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
             />
           ) : step > 1 && step <= approveOnTokenSteps.length + 1 ? (
             <ApproveButtons tokens={tokenConfigs} />
-          ) : (
+          ) : step > approveOnTokenSteps.length + 1 &&
+            step <= approveOnPermit2Steps.length + approveOnTokenSteps.length + 1 ? (
+            <PermitButtons tokens={tokenConfigs} numberOfTokenApprovals={approveOnTokenSteps.length} />
+          ) : step === approveOnPermit2Steps.length + approveOnTokenSteps.length + 1 ? (
             <TransactionButton
-              onClick={() => console.log("you must permit the tokens before initialization!")}
-              title="Permit Tokens"
-              isDisabled={isCreatePoolPending}
-              isPending={isCreatePoolPending}
+              onClick={() =>
+                initializePool(undefined, {
+                  onSuccess: () => {
+                    setStep(step + 1);
+                    console.log("Pool initialization successful!");
+                  },
+                })
+              }
+              title="Initialize Pool"
+              isDisabled={isInitializePoolPending}
+              isPending={isInitializePoolPending}
             />
+          ) : (
+            <Alert type="success">Pool initialized: {poolAddress}</Alert>
           )}
         </div>
-        {createPoolError && (
+        {poolCreationError && (
           <Alert type="error">
             <div className="flex items-center gap-2">
               {" "}
-              Error: {(createPoolError as { shortMessage?: string }).shortMessage || createPoolError.message}
+              Error: {(poolCreationError as { shortMessage?: string }).shortMessage || poolCreationError.message}
             </div>
           </Alert>
         )}
@@ -91,16 +106,17 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
 const ApproveButtons = ({ tokens }: { tokens: TokenConfig[] }) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, setStep } = usePoolCreationStore();
-  const token = tokens[step - 2];
-
   const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveToken();
+
+  const token = tokens[step - 2]; // step value starts at 2 so start from index 0
+  const rawAmount = parseUnits(token.amount, token?.tokenInfo?.decimals ?? 18);
 
   const handleApprove = async () => {
     await approve(
       {
         token: token.address,
         spender: PERMIT2[targetNetwork.id],
-        rawAmount: parseUnits(token.amount, token?.tokenInfo?.decimals ?? 18),
+        rawAmount,
       },
       {
         onSuccess: () => {
@@ -114,6 +130,43 @@ const ApproveButtons = ({ tokens }: { tokens: TokenConfig[] }) => {
     <div>
       <TransactionButton
         title={`Approve ${token?.tokenInfo?.symbol}`}
+        isDisabled={isApprovePending}
+        isPending={isApprovePending}
+        onClick={handleApprove}
+      />
+      <div className="max-w-[500px] mt-4">{approveError && <Alert type="error">{approveError.message}</Alert>}</div>
+    </div>
+  );
+};
+
+const PermitButtons = ({
+  tokens,
+  numberOfTokenApprovals,
+}: {
+  tokens: TokenConfig[];
+  numberOfTokenApprovals: number;
+}) => {
+  const { targetNetwork } = useTargetNetwork();
+  const { step, setStep } = usePoolCreationStore();
+  const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveOnPermit2();
+
+  const token = tokens[step - 2 - numberOfTokenApprovals]; // :(
+
+  const handleApprove = async () => {
+    await approve(
+      { token: token.address, spender: BALANCER_ROUTER[targetNetwork.id] },
+      {
+        onSuccess: () => {
+          setStep(step + 1);
+        },
+      },
+    );
+  };
+
+  return (
+    <div>
+      <TransactionButton
+        title={`Permit ${token?.tokenInfo?.symbol}`}
         isDisabled={isApprovePending}
         isPending={isApprovePending}
         onClick={handleApprove}

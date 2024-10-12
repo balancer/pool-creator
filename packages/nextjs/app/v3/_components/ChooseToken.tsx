@@ -133,7 +133,7 @@ export function ChooseToken({ index }: { index: number }) {
         <div className="flex items-end gap-3">
           <div className="flex-grow mt-2">
             <TextField
-              label={`${tokenInfo?.symbol} Rate Provider`}
+              label={`Rate Provider for ${tokenInfo?.symbol}`}
               placeholder="Enter rate provider address"
               value={rateProvider !== zeroAddress ? rateProvider : ""}
               onChange={e => handleRateProvider(e.target.value)}

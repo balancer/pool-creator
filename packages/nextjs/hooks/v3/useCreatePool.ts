@@ -4,12 +4,19 @@ import {
   CreatePoolV3StableInput,
   CreatePoolV3WeightedInput,
   PoolType,
+  stablePoolFactoryAbi_V3,
+  weightedPoolFactoryAbi_V3,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { parseUnits, zeroAddress } from "viem";
+import { parseEventLogs, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { usePoolCreationStore } from "~~/hooks/v3";
+
+const poolFactoryAbi = {
+  [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
+  [PoolType.Stable]: stablePoolFactoryAbi_V3,
+};
 
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
@@ -27,6 +34,7 @@ export const useCreatePool = () => {
     enableDonation,
     disableUnbalancedLiquidity,
     amplificationParameter,
+    setPoolAddress,
   } = usePoolCreationStore();
 
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
@@ -80,7 +88,7 @@ export const useCreatePool = () => {
     const input = createPoolInput(poolType);
     const call = createPool.buildCall(input);
 
-    await writeTx(
+    const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
@@ -94,6 +102,19 @@ export const useCreatePool = () => {
         },
       },
     );
+
+    if (!hash) throw new Error("No pool creation transaction hash");
+    const txReceipt = await publicClient.getTransactionReceipt({ hash });
+    const logs = parseEventLogs({
+      abi: poolFactoryAbi[poolType],
+      logs: txReceipt.logs,
+    });
+    if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
+      const newPool = logs[0].args.pool;
+      setPoolAddress(newPool);
+    } else {
+      throw new Error("Expected pool address not found in event logs");
+    }
   }
 
   return useMutation({ mutationFn: () => createPool() });
