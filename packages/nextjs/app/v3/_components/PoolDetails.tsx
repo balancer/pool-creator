@@ -1,8 +1,9 @@
 "use client";
 
-import { PoolType } from "@balancer/sdk";
+import { PoolType, TokenType } from "@balancer/sdk";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { TokenImage } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
 
@@ -18,6 +19,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     enableDonation,
     name,
     symbol,
+    amplificationParameter,
   } = usePoolCreationStore();
 
   return (
@@ -37,13 +39,17 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         content={
           <div className="flex flex-col gap-2">
             {tokenConfigs.map((token, index) => (
-              <div key={index} className="flex justify-between">
-                <div className="flex items-center gap-2">
-                  {poolType === PoolType.Weighted && <div>{token.weight}%</div>}
-                  <div className="bg-base-300 w-7 h-7 rounded-full"></div>
-                  <div className="font-bold">{token?.tokenInfo?.symbol}</div>
+              <div key={index}>
+                <div className="flex justify-between">
+                  <div className="flex items-center gap-2">
+                    {poolType === PoolType.Weighted && <div>{token.weight}%</div>}
+                    {token?.tokenInfo && <TokenImage size="sm" token={token.tokenInfo} />}
+                    <div className="font-bold">{token?.tokenInfo?.symbol}</div>
+                    <i>{token.tokenType === TokenType.STANDARD ? "Standard" : "With Rate"}</i>
+                  </div>
+                  <div>{token.amount}</div>
                 </div>
-                <div>{token.amount}</div>
+                {token.tokenType === TokenType.TOKEN_WITH_RATE && <div>{abbreviateAddress(token.rateProvider)}</div>}
               </div>
             ))}
           </div>
@@ -60,6 +66,12 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <div className="">Swap Fee %</div>
               <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
             </div>
+            {poolType === PoolType.Stable && (
+              <div className="flex justify-between">
+                <div className="">Amplification Parameter</div>
+                <div>{amplificationParameter ? amplificationParameter : "-"}</div>
+              </div>
+            )}
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>{swapFeeManager ? abbreviateAddress(swapFeeManager) : "-"}</div>
@@ -92,7 +104,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           <div>
             <div className="flex justify-between">
               <div>Name</div>
-              <div>{name.length > 24 ? `${name.slice(0, 24)}...` : name}</div>
+              <div>{name.length > 24 ? `${name.slice(0, 28)}...` : name}</div>
             </div>
             <div className="flex justify-between">
               <div>Symbol</div>
@@ -116,12 +128,16 @@ interface DetailSectionProps {
 function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSectionProps) {
   return (
     <>
-      <div className="text-lg bg-base-100 p-4 rounded-xl">
+      <div className="bg-base-100 p-4 rounded-xl">
         <div className="flex justify-between mb-2">
           <div className="font-bold">{title}: </div>
           {isPreview && (
             <div className="h-7 w-7 rounded-full">
-              {isValid ? <CheckCircleIcon className="w-7 h-7" /> : <QuestionMarkCircleIcon className="w-7 h-7" />}
+              {isValid ? (
+                <CheckCircleIcon className="w-7 h-7 text-success" />
+              ) : (
+                <QuestionMarkCircleIcon className="w-7 h-7" />
+              )}
             </div>
           )}
         </div>

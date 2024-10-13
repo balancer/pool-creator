@@ -26,13 +26,18 @@ export const useInitializePool = () => {
     const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 
     const initPool = new InitPool();
-    const input: InitPoolInput = {
-      amountsIn: tokenConfigs.map(token => ({
+
+    const amountsIn = tokenConfigs
+      .map(token => ({
         address: token.address as `0x${string}`,
         rawAmount: parseUnits(token.amount, token.tokenInfo?.decimals || 18),
         decimals: token.tokenInfo?.decimals || 18,
-      })),
-      minBptAmountOut: parseUnits("1", 18), // TODO: what should this be?
+      }))
+      .sort((a, b) => a.address.localeCompare(b.address));
+
+    const input: InitPoolInput = {
+      amountsIn,
+      minBptAmountOut: parseUnits("0", 18), // TODO: what should this be?
       chainId,
     };
 

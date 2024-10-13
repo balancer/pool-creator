@@ -2,22 +2,20 @@ import React, { useEffect, useState } from "react";
 import { TokenType } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { Checkbox, RadioInput, TextField, TokenField, TokenSelectModal } from "~~/components/common";
+import { Checkbox, RadioInput, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
-// TODO: figure out how to hold onto state for this component
-// it currently resets when moving between pool configuration tabs
 export function ChooseToken({ index }: { index: number }) {
-  const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
-  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount } = tokenConfigs[index];
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [tokenWeight, setTokenWeight] = useState<number>(50);
 
+  const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
+  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount } = tokenConfigs[index];
   const { balance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
-  const tokenOptions = data || [];
+
+  const tokenList = data || [];
+  const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
   const handleTokenSelection = (tokenInfo: Token) => {
     const updatedTokenConfigs = [...tokenConfigs];
@@ -40,6 +38,10 @@ export function ChooseToken({ index }: { index: number }) {
   const handleTokenType = (tokenType: TokenType) => {
     const updatedTokenConfigs = [...tokenConfigs];
     updatedTokenConfigs[index].tokenType = tokenType;
+    if (tokenType === TokenType.STANDARD) {
+      updatedTokenConfigs[index].rateProvider = zeroAddress;
+      updatedTokenConfigs[index].paysYieldFees = false;
+    }
     setTokenConfigs(updatedTokenConfigs);
   };
 
@@ -105,7 +107,7 @@ export function ChooseToken({ index }: { index: number }) {
             selectedToken={tokenInfo}
             setToken={handleTokenSelection}
             setTokenAmount={handleTokenAmount}
-            tokenOptions={tokenOptions}
+            tokenOptions={remainingTokens}
             balance={balance}
           />
         </div>
@@ -141,10 +143,6 @@ export function ChooseToken({ index }: { index: number }) {
           </div>
           <Checkbox label="Pays Yield Fees" checked={paysYieldFees} onChange={handlePaysYieldFees} />
         </div>
-      )}
-
-      {isModalOpen && tokenOptions && (
-        <TokenSelectModal tokenOptions={tokenOptions} setToken={handleTokenSelection} setIsModalOpen={setIsModalOpen} />
       )}
     </div>
   );

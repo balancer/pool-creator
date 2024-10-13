@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { PoolCreationModal } from "./PoolCreationModal";
+import { PoolType } from "@balancer/sdk";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
@@ -16,8 +17,16 @@ export function PoolConfiguration() {
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
-  const { poolType, tokenConfigs, swapFeePercentage, swapFeeManager, pauseManager, name, symbol } =
-    usePoolCreationStore();
+  const {
+    poolType,
+    tokenConfigs,
+    swapFeePercentage,
+    swapFeeManager,
+    pauseManager,
+    name,
+    symbol,
+    amplificationParameter,
+  } = usePoolCreationStore();
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
     Type: <ChooseType />,
@@ -25,6 +34,24 @@ export function PoolConfiguration() {
     Parameters: <ChooseParameters />,
     Info: <ChooseInfo />,
   };
+
+  const isTypeValid = poolType !== undefined;
+  const isTokensValid = tokenConfigs.every(token => token.address && token.amount);
+  const isParametersValid =
+    !!swapFeePercentage &&
+    !!swapFeeManager &&
+    !!pauseManager &&
+    (poolType !== PoolType.Stable || (poolType === PoolType.Stable && !!amplificationParameter));
+  const isInfoValid = !!name && !!symbol;
+  const isPoolInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
+
+  function isNextDisabled() {
+    if (selectedTab === "Type") return !isTypeValid;
+    if (selectedTab === "Tokens") return !isTokensValid;
+    if (selectedTab === "Parameters") return !isParametersValid;
+    if (selectedTab === "Info") return !isInfoValid;
+    return false;
+  }
 
   function handleTabChange(direction: "prev" | "next") {
     if (direction === "prev" && prev) setSelectedTab(prev);
@@ -37,20 +64,6 @@ export function PoolConfiguration() {
       prev: currentIndex > 0 ? TABS[currentIndex - 1] : null,
       next: currentIndex < TABS.length - 1 ? TABS[currentIndex + 1] : null,
     };
-  }
-
-  const isTypeValid = poolType !== undefined;
-  const isTokensValid = tokenConfigs.every(token => token.address);
-  const isParametersValid = !!swapFeePercentage && !!swapFeeManager && !!pauseManager;
-  const isInfoValid = !!name && !!symbol;
-  const isAllValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
-
-  function isNextDisabled() {
-    if (selectedTab === "Type") return !isTypeValid;
-    if (selectedTab === "Tokens") return !isTokensValid;
-    if (selectedTab === "Parameters") return !isParametersValid;
-    if (selectedTab === "Info") return !isInfoValid;
-    return false;
   }
 
   return (
@@ -86,14 +99,14 @@ export function PoolConfiguration() {
               <ArrowLeftIcon className="w-5 h-5" />
               Previous
             </button>
-            {isAllValid && selectedTab === "Info" ? (
+            {isPoolInputValid && selectedTab === "Info" ? (
               <TransactionButton
                 onClick={() => setIsPoolCreationModalOpen(true)}
                 title="Preview Pool"
                 isDisabled={false}
                 isPending={false}
               />
-            ) : (
+            ) : selectedTab !== "Info" ? (
               <button
                 onClick={() => handleTabChange("next")}
                 disabled={isNextDisabled()}
@@ -104,7 +117,7 @@ export function PoolConfiguration() {
                 Next
                 <ArrowRightIcon className="w-5 h-5" />
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

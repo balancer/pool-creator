@@ -57,7 +57,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
           ) : step > approveOnTokenSteps.length + 1 &&
             step <= approveOnPermit2Steps.length + approveOnTokenSteps.length + 1 ? (
             <PermitButtons tokens={tokenConfigs} numberOfTokenApprovals={approveOnTokenSteps.length} />
-          ) : step === approveOnPermit2Steps.length + approveOnTokenSteps.length + 1 ? (
+          ) : step === approveOnPermit2Steps.length + approveOnTokenSteps.length + 2 ? (
             <TransactionButton
               onClick={() =>
                 initializePool(undefined, {
@@ -78,7 +78,6 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
         {poolCreationError && (
           <Alert type="error">
             <div className="flex items-center gap-2">
-              {" "}
               Error: {(poolCreationError as { shortMessage?: string }).shortMessage || poolCreationError.message}
             </div>
           </Alert>
@@ -134,7 +133,11 @@ const ApproveButtons = ({ tokens }: { tokens: TokenConfig[] }) => {
         isPending={isApprovePending}
         onClick={handleApprove}
       />
-      <div className="max-w-[500px] mt-4">{approveError && <Alert type="error">{approveError.message}</Alert>}</div>
+      {approveError && (
+        <div className="max-w-[500px] mt-4">
+          <Alert type="error">{approveError.message}</Alert>
+        </div>
+      )}
     </div>
   );
 };
@@ -171,7 +174,11 @@ const PermitButtons = ({
         isPending={isApprovePending}
         onClick={handleApprove}
       />
-      <div className="max-w-[500px] mt-4">{approveError && <Alert type="error">{approveError.message}</Alert>}</div>
+      {approveError && (
+        <div className="max-w-[500px] mt-4">
+          <Alert type="error">{approveError.message}</Alert>
+        </div>
+      )}
     </div>
   );
 };

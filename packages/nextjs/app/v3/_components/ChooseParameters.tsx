@@ -22,6 +22,26 @@ export const ChooseParameters = () => {
     setDisableUnbalancedLiquidity,
   } = usePoolCreationStore();
 
+  const handleSwapFeePercentageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.trim();
+    if (inputValue === "" || inputValue === "0") {
+      setSwapFeePercentage(inputValue);
+      return;
+    }
+    const value = Math.min(Math.max(0, Number(inputValue) || 0), 10);
+    setSwapFeePercentage(value.toString());
+  };
+
+  const handleAmplificationParameterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.trim();
+    if (inputValue === "" || inputValue === "1") {
+      setAmplificationParameter(inputValue);
+      return;
+    }
+    const value = Math.min(Math.max(1, Number(inputValue) || 1), 5000);
+    setAmplificationParameter(value.toString());
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
@@ -29,7 +49,7 @@ export const ChooseParameters = () => {
           label="Swap fee ( 0.001% - 10% )"
           placeholder="Enter swap fee %"
           value={swapFeePercentage}
-          onChange={e => setSwapFeePercentage(e.target.value)}
+          onChange={handleSwapFeePercentageChange}
           min={0}
           max={10}
           step={0.001}
@@ -39,7 +59,7 @@ export const ChooseParameters = () => {
             label="Amplification Parameter ( 1 - 5000 )"
             placeholder="Enter Amplification Parameter"
             value={amplificationParameter}
-            onChange={e => setAmplificationParameter(e.target.value)}
+            onChange={handleAmplificationParameterChange}
             min={1}
             max={5000}
             step={1}
@@ -60,7 +80,7 @@ export const ChooseParameters = () => {
       />
       <TextField
         label="Pool hooks contract"
-        placeholder="Enter address (optional)"
+        placeholder="Enter address ( optional )"
         value={poolHooksContract}
         onChange={e => setPoolHooksContract(e.target.value)}
       />
