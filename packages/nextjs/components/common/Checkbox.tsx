@@ -8,10 +8,10 @@ interface CheckboxProps {
 
 export const Checkbox = ({ label, checked, onChange }: CheckboxProps) => {
   return (
-    <div className="form-control flex flex-row gap-3">
-      <label className="label cursor-pointer p-1">
-        <input type="checkbox" checked={checked} onChange={onChange} className="checkbox mr-2 rounded-md" />
+    <div className="form-control">
+      <label className="cursor-pointer flex items-center">
         <span className="label-text text-lg">{label}</span>
+        <input type="checkbox" checked={checked} onChange={onChange} className="checkbox ml-2 rounded-md" />
       </label>
     </div>
   );

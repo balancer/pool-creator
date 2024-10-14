@@ -1,7 +1,7 @@
 import React from "react";
 
 interface TextFieldProps {
-  label: string;
+  label?: string;
   placeholder?: string;
   value: string | undefined;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -11,7 +11,7 @@ interface TextFieldProps {
 export const TextField: React.FC<TextFieldProps> = ({ label, placeholder, value, onChange, isDisabled }) => {
   return (
     <div className="w-full flex flex-col gap-1">
-      <label className="ml-1">{label}</label>
+      {label && <label className="ml-1 font-bold">{label}</label>}
       <input
         type="text"
         placeholder={placeholder}

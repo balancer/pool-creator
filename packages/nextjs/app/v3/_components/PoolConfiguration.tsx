@@ -9,7 +9,7 @@ import { TransactionButton } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
-const TABS = ["Type", "Tokens", "Parameters", "Info"] as const;
+const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 type TabType = (typeof TABS)[number];
 
 export function PoolConfiguration() {
@@ -17,31 +17,19 @@ export function PoolConfiguration() {
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
-  const {
-    poolType,
-    tokenConfigs,
-    swapFeePercentage,
-    swapFeeManager,
-    pauseManager,
-    name,
-    symbol,
-    amplificationParameter,
-  } = usePoolCreationStore();
+  const { poolType, tokenConfigs, swapFeePercentage, name, symbol, amplificationParameter } = usePoolCreationStore();
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
     Type: <ChooseType />,
     Tokens: <ChooseTokens />,
     Parameters: <ChooseParameters />,
-    Info: <ChooseInfo />,
+    Information: <ChooseInfo />,
   };
 
   const isTypeValid = poolType !== undefined;
   const isTokensValid = tokenConfigs.every(token => token.address && token.amount);
   const isParametersValid =
-    !!swapFeePercentage &&
-    !!swapFeeManager &&
-    !!pauseManager &&
-    (poolType !== PoolType.Stable || (poolType === PoolType.Stable && !!amplificationParameter));
+    !!swapFeePercentage && (poolType !== PoolType.Stable || (poolType === PoolType.Stable && !!amplificationParameter));
   const isInfoValid = !!name && !!symbol;
   const isPoolInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
 
@@ -49,7 +37,7 @@ export function PoolConfiguration() {
     if (selectedTab === "Type") return !isTypeValid;
     if (selectedTab === "Tokens") return !isTokensValid;
     if (selectedTab === "Parameters") return !isParametersValid;
-    if (selectedTab === "Info") return !isInfoValid;
+    if (selectedTab === "Information") return !isInfoValid;
     return false;
   }
 
@@ -99,14 +87,14 @@ export function PoolConfiguration() {
               <ArrowLeftIcon className="w-5 h-5" />
               Previous
             </button>
-            {isPoolInputValid && selectedTab === "Info" ? (
+            {isPoolInputValid && selectedTab === "Information" ? (
               <TransactionButton
                 onClick={() => setIsPoolCreationModalOpen(true)}
                 title="Preview Pool"
                 isDisabled={false}
                 isPending={false}
               />
-            ) : selectedTab !== "Info" ? (
+            ) : selectedTab !== "Information" ? (
               <button
                 onClick={() => handleTabChange("next")}
                 disabled={isNextDisabled()}

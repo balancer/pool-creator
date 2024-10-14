@@ -19,6 +19,8 @@ export type TokenConfig = {
 
 interface PoolStore {
   step: number;
+  isDelegatingManagement: boolean;
+  isUsingHooks: boolean;
   poolAddress: Address | undefined;
   poolType: AllowedPoolTypes | undefined;
   tokenConfigs: TokenConfig[];
@@ -32,6 +34,8 @@ interface PoolStore {
   enableDonation: boolean;
   amplificationParameter: string;
   setStep: (step: number) => void;
+  setIsDelegatingManagement: (isDelegatingManagement: boolean) => void;
+  setIsUsingHooks: (isUsingHooks: boolean) => void;
   setPoolAddress: (poolAddress: Address) => void;
   setPoolType: (poolType: AllowedPoolTypes | undefined) => void;
   setTokenConfigs: (tokenConfigs: TokenConfig[]) => void;
@@ -58,6 +62,8 @@ export const initialTokenConfig: TokenConfig = {
 
 export const initialPoolCreationState = {
   step: 1,
+  isDelegatingManagement: true,
+  isUsingHooks: false,
   poolAddress: undefined, // set after pool deployment
   name: "",
   symbol: "",
@@ -75,6 +81,8 @@ export const initialPoolCreationState = {
 // Stores all the data that will be used for pool creation
 export const usePoolCreationStore = create<PoolStore>(set => ({
   ...initialPoolCreationState,
+  setIsDelegatingManagement: isDelegatingManagement => set({ isDelegatingManagement }),
+  setIsUsingHooks: isUsingHooks => set({ isUsingHooks }),
   setPoolAddress: poolAddress => set({ poolAddress }),
   setStep: step => set({ step }),
   setName: name => set({ name }),

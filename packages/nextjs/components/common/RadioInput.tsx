@@ -9,8 +9,8 @@ interface RadioInputProps {
 
 export function RadioInput({ name, checked, onChange, label }: RadioInputProps) {
   return (
-    <div className="form-control">
-      <label className="label cursor-pointer flex flex-row gap-2">
+    <div className="">
+      <label className="label cursor-pointer justify-start gap-2">
         <input
           type="radio"
           name={name}
@@ -18,7 +18,7 @@ export function RadioInput({ name, checked, onChange, label }: RadioInputProps) 
           checked={checked}
           onChange={onChange}
         />
-        <span className="label-text">{label}</span>
+        <span className="text-lg">{label}</span>
       </label>
     </div>
   );

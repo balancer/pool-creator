@@ -34,7 +34,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
       <DetailSection
         title="Tokens"
         isPreview={isPreview}
-        isValid={tokenConfigs.every(token => token.address !== "")}
+        isValid={tokenConfigs.every(token => token.address !== "" && token.amount !== "")}
         isEmpty={tokenConfigs.every(token => token.address === "")}
         content={
           <div className="flex flex-col gap-2">
@@ -45,7 +45,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {poolType === PoolType.Weighted && <div>{token.weight}%</div>}
                     {token?.tokenInfo && <TokenImage size="sm" token={token.tokenInfo} />}
                     <div className="font-bold">{token?.tokenInfo?.symbol}</div>
-                    <i>{token.tokenType === TokenType.STANDARD ? "Standard" : "With Rate"}</i>
+                    <i>{token.tokenType === TokenType.STANDARD ? "Standard" : "With Rate Provider"}</i>
                   </div>
                   <div>{token.amount}</div>
                 </div>
@@ -58,8 +58,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
       <DetailSection
         title="Parameters"
         isPreview={isPreview}
-        isValid={!!(swapFeePercentage && swapFeeManager && pauseManager)}
-        isEmpty={!swapFeePercentage && !swapFeeManager && !pauseManager}
+        isValid={!!swapFeePercentage}
+        isEmpty={false}
         content={
           <div>
             <div className="flex justify-between">
@@ -74,11 +74,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             )}
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
-              <div>{swapFeeManager ? abbreviateAddress(swapFeeManager) : "-"}</div>
+              <div>{swapFeeManager ? abbreviateAddress(swapFeeManager) : "Balancer"}</div>
             </div>
             <div className="flex justify-between">
               <div className="">Pause Manager</div>
-              <div>{pauseManager ? abbreviateAddress(pauseManager) : "-"}</div>
+              <div>{pauseManager ? abbreviateAddress(pauseManager) : "Balancer"}</div>
             </div>
             <div className="flex justify-between">
               <div className="">Pool Hooks Contract</div>
@@ -96,20 +96,14 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         }
       />
       <DetailSection
-        title="Info"
+        title="Information"
         isPreview={isPreview}
         isValid={!!(name && symbol)}
         isEmpty={!name && !symbol}
         content={
           <div>
-            <div className="flex justify-between">
-              <div>Name</div>
-              <div>{name.length > 24 ? `${name.slice(0, 28)}...` : name}</div>
-            </div>
-            <div className="flex justify-between">
-              <div>Symbol</div>
-              <div>{symbol}</div>
-            </div>
+            <div>{name.length > 40 ? `${name.slice(0, 40)}...` : name}</div>
+            <div>{symbol}</div>
           </div>
         }
       />

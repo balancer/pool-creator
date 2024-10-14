@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { TokenType } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { Checkbox, RadioInput, TextField, TokenField } from "~~/components/common";
+import { InformationCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
@@ -10,7 +11,7 @@ export function ChooseToken({ index }: { index: number }) {
   const [tokenWeight, setTokenWeight] = useState<number>(50);
 
   const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
-  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount } = tokenConfigs[index];
+  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount, address } = tokenConfigs[index];
   const { balance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
 
@@ -35,13 +36,18 @@ export function ChooseToken({ index }: { index: number }) {
     setTokenConfigs(updatedTokenConfigs);
   };
 
-  const handleTokenType = (tokenType: TokenType) => {
+  const handleTokenType = () => {
     const updatedTokenConfigs = [...tokenConfigs];
-    updatedTokenConfigs[index].tokenType = tokenType;
-    if (tokenType === TokenType.STANDARD) {
-      updatedTokenConfigs[index].rateProvider = zeroAddress;
-      updatedTokenConfigs[index].paysYieldFees = false;
+    const tokenConfig = updatedTokenConfigs[index];
+    if (tokenConfig.tokenType === TokenType.STANDARD) {
+      tokenConfig.tokenType = TokenType.TOKEN_WITH_RATE;
+      tokenConfig.rateProvider = "";
+    } else {
+      tokenConfig.tokenType = TokenType.STANDARD;
+      tokenConfig.rateProvider = zeroAddress;
+      tokenConfig.paysYieldFees = false;
     }
+
     setTokenConfigs(updatedTokenConfigs);
   };
 
@@ -55,6 +61,14 @@ export function ChooseToken({ index }: { index: number }) {
     const updatedTokenConfigs = [...tokenConfigs];
     updatedTokenConfigs[index].paysYieldFees = !updatedTokenConfigs[index].paysYieldFees;
     setTokenConfigs(updatedTokenConfigs);
+  };
+
+  const handleRemoveToken = () => {
+    if (tokenConfigs.length > 2) {
+      const updatedTokenConfigs = [...tokenConfigs];
+      updatedTokenConfigs.splice(index, 1);
+      setTokenConfigs(updatedTokenConfigs);
+    }
   };
 
   // When user changes one of the token weights, update the others to sum to 100
@@ -77,71 +91,68 @@ export function ChooseToken({ index }: { index: number }) {
   }, [tokenWeight]);
 
   return (
-    <div>
-      <div className="flex gap-3 w-full">
+    <div className="bg-base-100 p-4 rounded-xl">
+      <div className="flex gap-3 w-full items-center">
         {poolType === PoolType.Weighted && (
-          <div className="w-full max-w-[80px] flex flex-col">
-            {index === 0 && (
-              <label className="label">
-                <span className="label-text text-lg">Weight</span>
-              </label>
-            )}
+          <div className="w-full max-w-[80px] h-full flex flex-col">
             <input
               type="number"
               min="1"
               max="99"
               value={weight}
               onChange={e => setTokenWeight(Number(e.target.value))}
-              className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl h-full w-full"
+              className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
             />
           </div>
         )}
         <div className="flex-grow">
-          {index === 0 && (
-            <label className="label">
-              <span className="label-text text-lg">Token</span>
-            </label>
-          )}
-          <TokenField
-            value={amount}
-            selectedToken={tokenInfo}
-            setToken={handleTokenSelection}
-            setTokenAmount={handleTokenAmount}
-            tokenOptions={remainingTokens}
-            balance={balance}
-          />
+          <div>
+            <div className="flex gap-3 items-center">
+              <TokenField
+                value={amount}
+                selectedToken={tokenInfo}
+                setToken={handleTokenSelection}
+                setTokenAmount={handleTokenAmount}
+                tokenOptions={remainingTokens}
+                balance={balance}
+              />
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col text-xl">
-          {index === 0 && (
-            <label className="label">
-              <span className="label-text text-lg">Type</span>
-            </label>
-          )}
-          <RadioInput
-            name={`token-type-${index}`}
-            label="Standard"
-            checked={tokenType === TokenType.STANDARD}
-            onChange={() => handleTokenType(TokenType.STANDARD)}
-          />
-          <RadioInput
-            name={`token-type-${index}`}
-            label="With Rate"
-            checked={tokenType === TokenType.TOKEN_WITH_RATE}
-            onChange={() => handleTokenType(TokenType.TOKEN_WITH_RATE)}
-          />
+        <div className="cursor-pointer" onClick={handleRemoveToken}>
+          <TrashIcon className="w-5 h-5" />
         </div>
       </div>
+
+      {address && (
+        <div className="flex gap-1 items-center mt-2">
+          <InformationCircleIcon className="w-5 h-5" />
+          <Checkbox
+            label={`Does ${tokenInfo?.symbol} require a rate provider?`}
+            checked={tokenType === TokenType.TOKEN_WITH_RATE}
+            onChange={handleTokenType}
+          />
+        </div>
+      )}
+
       {tokenType === TokenType.TOKEN_WITH_RATE && (
-        <div className="flex items-end gap-3">
-          <div className="flex-grow mt-2">
+        <div>
+          <div className="my-1">
             <TextField
-              label={`Rate Provider for ${tokenInfo?.symbol}`}
               placeholder="Enter rate provider address"
               value={rateProvider !== zeroAddress ? rateProvider : ""}
               onChange={e => handleRateProvider(e.target.value)}
             />
           </div>
-          <Checkbox label="Pays Yield Fees" checked={paysYieldFees} onChange={handlePaysYieldFees} />
+
+          <div className="flex gap-1 items-center">
+            <InformationCircleIcon className="w-5 h-5" />
+            <Checkbox
+              label={`Should yield fees be charged on ${tokenInfo?.symbol}?`}
+              checked={paysYieldFees}
+              onChange={handlePaysYieldFees}
+            />
+          </div>
         </div>
       )}
     </div>

@@ -18,7 +18,7 @@ const BalancerV3: NextPage = () => {
           </div>
           <div className="flex gap-5 w-full justify-center">
             <PoolConfiguration />
-            <div className="bg-base-200 w-full max-w-[400px] rounded-xl shadow-lg p-5">
+            <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
               <div className="font-bold text-2xl mb-3">Pool Preview</div>
               <PoolDetails isPreview={true} />
             </div>

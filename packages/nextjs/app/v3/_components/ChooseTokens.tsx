@@ -5,7 +5,7 @@ import { initialTokenConfig, usePoolCreationStore } from "~~/hooks/v3";
 
 const MAX_TOKENS = {
   [PoolType.Weighted]: 8,
-  [PoolType.Stable]: 5,
+  [PoolType.Stable]: 4, // because Daniel said to "for the moment, even though it theoretically supports more"
 };
 
 export function ChooseTokens() {
@@ -21,6 +21,8 @@ export function ChooseTokens() {
 
   return (
     <div>
+      <div className="text-lg font-bold mb-3">Choose up to {poolType ? MAX_TOKENS[poolType] : 0} tokens:</div>
+
       <div className="flex flex-col gap-7">
         {Array.from({ length: tokenConfigs.length }).map((_, index) => (
           <ChooseToken key={index} index={index} />
