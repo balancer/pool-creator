@@ -3,10 +3,9 @@
 import { useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { PoolCreationModal } from "./PoolCreationModal";
-import { PoolType } from "@balancer/sdk";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { useValidatePoolCreationInput } from "~~/hooks/v3";
 import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
@@ -17,7 +16,8 @@ export function PoolConfiguration() {
   const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
 
-  const { poolType, tokenConfigs, swapFeePercentage, name, symbol, amplificationParameter } = usePoolCreationStore();
+  const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid } =
+    useValidatePoolCreationInput();
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
     Type: <ChooseType />,
@@ -25,13 +25,6 @@ export function PoolConfiguration() {
     Parameters: <ChooseParameters />,
     Information: <ChooseInfo />,
   };
-
-  const isTypeValid = poolType !== undefined;
-  const isTokensValid = tokenConfigs.every(token => token.address && token.amount);
-  const isParametersValid =
-    !!swapFeePercentage && (poolType !== PoolType.Stable || (poolType === PoolType.Stable && !!amplificationParameter));
-  const isInfoValid = !!name && !!symbol;
-  const isPoolInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
 
   function isNextDisabled() {
     if (selectedTab === "Type") return !isTypeValid;
@@ -87,7 +80,7 @@ export function PoolConfiguration() {
               <ArrowLeftIcon className="w-5 h-5" />
               Previous
             </button>
-            {isPoolInputValid && selectedTab === "Information" ? (
+            {isPoolCreationInputValid && selectedTab === "Information" ? (
               <TransactionButton
                 onClick={() => setIsPoolCreationModalOpen(true)}
                 title="Preview Pool"

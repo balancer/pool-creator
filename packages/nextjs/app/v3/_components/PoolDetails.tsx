@@ -4,7 +4,7 @@ import { PoolType, TokenType } from "@balancer/sdk";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { TokenImage } from "~~/components/common";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
@@ -22,19 +22,21 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     amplificationParameter,
   } = usePoolCreationStore();
 
+  const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
+
   return (
     <div className="flex flex-col gap-3">
       <DetailSection
         title="Type"
         isPreview={isPreview}
-        isValid={poolType !== undefined}
+        isValid={isTypeValid}
         isEmpty={poolType === undefined}
         content={`${poolType} Pool`}
       />
       <DetailSection
         title="Tokens"
         isPreview={isPreview}
-        isValid={tokenConfigs.every(token => token.address !== "" && token.amount !== "")}
+        isValid={isTokensValid}
         isEmpty={tokenConfigs.every(token => token.address === "")}
         content={
           <div className="flex flex-col gap-2">
@@ -58,7 +60,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
       <DetailSection
         title="Parameters"
         isPreview={isPreview}
-        isValid={!!swapFeePercentage}
+        isValid={isParametersValid}
         isEmpty={false}
         content={
           <div>
@@ -98,7 +100,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
       <DetailSection
         title="Information"
         isPreview={isPreview}
-        isValid={!!(name && symbol)}
+        isValid={isInfoValid}
         isEmpty={!name && !symbol}
         content={
           <div>

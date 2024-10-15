@@ -42,6 +42,7 @@ export function ChooseToken({ index }: { index: number }) {
     if (tokenConfig.tokenType === TokenType.STANDARD) {
       tokenConfig.tokenType = TokenType.TOKEN_WITH_RATE;
       tokenConfig.rateProvider = "";
+      tokenConfig.paysYieldFees = true;
     } else {
       tokenConfig.tokenType = TokenType.STANDARD;
       tokenConfig.rateProvider = zeroAddress;

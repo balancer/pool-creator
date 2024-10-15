@@ -135,7 +135,11 @@ export const ChooseParameters = () => {
           name="pool-management"
           label="Delegate swap and pause management to the Balancer DAO"
           checked={isDelegatingManagement}
-          onChange={() => setIsDelegatingManagement(true)}
+          onChange={() => {
+            setIsDelegatingManagement(true);
+            setSwapFeeManager("");
+            setPauseManager("");
+          }}
         />
         <RadioInput
           name="pool-management"
@@ -167,7 +171,12 @@ export const ChooseParameters = () => {
           name="pool-hooks"
           label="I do not want this pool to use any hooks"
           checked={!isUsingHooks}
-          onChange={() => setIsUsingHooks(false)}
+          onChange={() => {
+            setIsUsingHooks(false);
+            setPoolHooksContract("");
+            setDisableUnbalancedLiquidity(false);
+            setEnableDonation(false);
+          }}
         />
         <RadioInput
           name="pool-hooks"
