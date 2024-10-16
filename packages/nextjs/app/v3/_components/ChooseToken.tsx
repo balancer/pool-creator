@@ -10,7 +10,7 @@ import { usePoolCreationStore } from "~~/hooks/v3";
 export function ChooseToken({ index }: { index: number }) {
   const [tokenWeight, setTokenWeight] = useState<number>(50);
 
-  const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
+  const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
   const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount, address } = tokenConfigs[index];
   const { balance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
@@ -19,56 +19,40 @@ export function ChooseToken({ index }: { index: number }) {
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
   const handleTokenSelection = (tokenInfo: Token) => {
-    const updatedTokenConfigs = [...tokenConfigs];
-    const tokenConfig = updatedTokenConfigs[index];
-    tokenConfig.address = tokenInfo.address;
-    tokenConfig.tokenType = TokenType.STANDARD;
-    tokenConfig.rateProvider = zeroAddress;
-    tokenConfig.paysYieldFees = false;
-    tokenConfig.tokenInfo = { ...tokenInfo };
-    updatedTokenConfigs[index] = tokenConfig;
-    setTokenConfigs(updatedTokenConfigs);
+    updateTokenConfig(index, {
+      address: tokenInfo.address,
+      tokenType: TokenType.STANDARD,
+      rateProvider: zeroAddress,
+      paysYieldFees: false,
+      tokenInfo: { ...tokenInfo },
+    });
   };
 
   const handleTokenAmount = (amount: string) => {
-    const updatedTokenConfigs = [...tokenConfigs];
-    updatedTokenConfigs[index].amount = amount;
-    setTokenConfigs(updatedTokenConfigs);
+    updateTokenConfig(index, { amount });
   };
 
   const handleTokenType = () => {
-    const updatedTokenConfigs = [...tokenConfigs];
-    const tokenConfig = updatedTokenConfigs[index];
-    if (tokenConfig.tokenType === TokenType.STANDARD) {
-      tokenConfig.tokenType = TokenType.TOKEN_WITH_RATE;
-      tokenConfig.rateProvider = "";
-      tokenConfig.paysYieldFees = true;
+    if (tokenConfigs[index].tokenType === TokenType.STANDARD) {
+      updateTokenConfig(index, { tokenType: TokenType.TOKEN_WITH_RATE, rateProvider: "", paysYieldFees: true });
     } else {
-      tokenConfig.tokenType = TokenType.STANDARD;
-      tokenConfig.rateProvider = zeroAddress;
-      tokenConfig.paysYieldFees = false;
+      updateTokenConfig(index, { tokenType: TokenType.STANDARD, rateProvider: zeroAddress, paysYieldFees: false });
     }
-
-    setTokenConfigs(updatedTokenConfigs);
   };
 
   const handleRateProvider = (rateProvider: string) => {
-    const updatedTokenConfigs = [...tokenConfigs];
-    updatedTokenConfigs[index].rateProvider = rateProvider;
-    setTokenConfigs(updatedTokenConfigs);
+    updateTokenConfig(index, { rateProvider });
   };
 
   const handlePaysYieldFees = () => {
-    const updatedTokenConfigs = [...tokenConfigs];
-    updatedTokenConfigs[index].paysYieldFees = !updatedTokenConfigs[index].paysYieldFees;
-    setTokenConfigs(updatedTokenConfigs);
+    updateTokenConfig(index, { paysYieldFees: !paysYieldFees });
   };
 
   const handleRemoveToken = () => {
     if (tokenConfigs.length > 2) {
       const updatedTokenConfigs = [...tokenConfigs];
       updatedTokenConfigs.splice(index, 1);
-      setTokenConfigs(updatedTokenConfigs);
+      updatePool({ tokenConfigs: updatedTokenConfigs });
     }
   };
 
@@ -87,7 +71,7 @@ export function ChooseToken({ index }: { index: number }) {
       }
     });
 
-    setTokenConfigs(updatedTokenConfigs);
+    updatePool({ tokenConfigs: updatedTokenConfigs });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tokenWeight]);
 

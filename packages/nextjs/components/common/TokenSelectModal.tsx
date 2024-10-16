@@ -82,7 +82,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
             {isLoadingExoticToken ? (
               <div className="w-full text-lg text-center">Fetching token details...</div>
             ) : tokenList.length === 0 ? (
-              <div className="text-center text-lg text-error">No results found for {searchText}</div>
+              <div className="text-center text-lg">No results found for {searchText}</div>
             ) : null}
 
             <div>

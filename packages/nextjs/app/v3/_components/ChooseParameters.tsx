@@ -18,34 +18,25 @@ export const ChooseParameters = () => {
     enableDonation,
     disableUnbalancedLiquidity,
     isDelegatingManagement,
-    setSwapFeePercentage,
-    setIsUsingHooks,
-    setAmplificationParameter,
-    setSwapFeeManager,
-    setPauseManager,
-    setPoolHooksContract,
-    setEnableDonation,
-    setDisableUnbalancedLiquidity,
-    setIsDelegatingManagement,
+    updatePool,
   } = usePoolCreationStore();
 
   const handleNumberInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    setter: (value: string) => void,
+    field: "swapFeePercentage" | "amplificationParameter",
     min: number,
     max: number,
   ) => {
     const value = e.target.value;
-    const numberValue = Number(e.target.value);
+    const numberValue = Number(value);
 
-    if (numberValue < 0) {
-      setter(min.toString());
-      return;
+    if (numberValue < min) {
+      updatePool({ [field]: min.toString() });
     } else if (numberValue > max) {
-      setter(max.toString());
-      return;
+      updatePool({ [field]: max.toString() });
+    } else {
+      updatePool({ [field]: value });
     }
-    setter(value.toString());
   };
 
   return (
@@ -56,19 +47,19 @@ export const ChooseParameters = () => {
         <div className="flex gap-2">
           <div
             className={` ${swapFeePercentage === "0.1" ? "border-2 border-base-content" : ""} ${swapFeeButtonStyles} `}
-            onClick={() => setSwapFeePercentage("0.1")}
+            onClick={() => updatePool({ swapFeePercentage: "0.1" })}
           >
             0.1%
           </div>
           <div
             className={` ${swapFeePercentage === "0.3" ? "border-2 border-base-content" : ""} ${swapFeeButtonStyles} `}
-            onClick={() => setSwapFeePercentage("0.3")}
+            onClick={() => updatePool({ swapFeePercentage: "0.3" })}
           >
             0.3%
           </div>
           <div
             className={` ${swapFeePercentage === "1" ? "border-2 border-base-content" : ""} ${swapFeeButtonStyles} `}
-            onClick={() => setSwapFeePercentage("1")}
+            onClick={() => updatePool({ swapFeePercentage: "1" })}
           >
             1%
           </div>
@@ -76,7 +67,7 @@ export const ChooseParameters = () => {
             <NumberInput
               placeholder=".001 - 10"
               value={swapFeePercentage}
-              onChange={e => handleNumberInputChange(e, setSwapFeePercentage, 0.001, 10)}
+              onChange={e => handleNumberInputChange(e, "swapFeePercentage", 0.001, 10)}
               min={0.001}
               max={10}
               step={0.001}
@@ -95,7 +86,7 @@ export const ChooseParameters = () => {
               className={` ${
                 amplificationParameter === "1" ? "border-2 border-base-content" : ""
               } ${swapFeeButtonStyles} `}
-              onClick={() => setAmplificationParameter("1")}
+              onClick={() => updatePool({ amplificationParameter: "1" })}
             >
               1
             </div>
@@ -103,7 +94,7 @@ export const ChooseParameters = () => {
               className={` ${
                 amplificationParameter === "69" ? "border-2 border-base-content" : ""
               } ${swapFeeButtonStyles} `}
-              onClick={() => setAmplificationParameter("69")}
+              onClick={() => updatePool({ amplificationParameter: "69" })}
             >
               69
             </div>
@@ -111,7 +102,7 @@ export const ChooseParameters = () => {
               className={` ${
                 amplificationParameter === "420" ? "border-2 border-base-content" : ""
               } ${swapFeeButtonStyles} `}
-              onClick={() => setAmplificationParameter("420")}
+              onClick={() => updatePool({ amplificationParameter: "420" })}
             >
               420
             </div>
@@ -119,7 +110,7 @@ export const ChooseParameters = () => {
               <NumberInput
                 placeholder="1 - 5000"
                 value={amplificationParameter}
-                onChange={e => handleNumberInputChange(e, setAmplificationParameter, 1, 5000)}
+                onChange={e => handleNumberInputChange(e, "amplificationParameter", 1, 5000)}
                 min={1}
                 max={5000}
                 step={1}
@@ -136,16 +127,14 @@ export const ChooseParameters = () => {
           label="Delegate swap and pause management to the Balancer DAO"
           checked={isDelegatingManagement}
           onChange={() => {
-            setIsDelegatingManagement(true);
-            setSwapFeeManager("");
-            setPauseManager("");
+            updatePool({ isDelegatingManagement: true, swapFeeManager: "", pauseManager: "" });
           }}
         />
         <RadioInput
           name="pool-management"
           label="Choose a swap fee and pause manager"
           checked={!isDelegatingManagement}
-          onChange={() => setIsDelegatingManagement(false)}
+          onChange={() => updatePool({ isDelegatingManagement: false })}
         />
         {!isDelegatingManagement && (
           <div className="flex gap-4 mt-3">
@@ -153,13 +142,13 @@ export const ChooseParameters = () => {
               label="Swap fee manager"
               placeholder="Enter address"
               value={swapFeeManager}
-              onChange={e => setSwapFeeManager(e.target.value)}
+              onChange={e => updatePool({ swapFeeManager: e.target.value })}
             />
             <TextField
               label="Pause manager"
               placeholder="Enter address"
               value={pauseManager}
-              onChange={e => setPauseManager(e.target.value)}
+              onChange={e => updatePool({ pauseManager: e.target.value })}
             />
           </div>
         )}
@@ -172,17 +161,19 @@ export const ChooseParameters = () => {
           label="I do not want this pool to use any hooks"
           checked={!isUsingHooks}
           onChange={() => {
-            setIsUsingHooks(false);
-            setPoolHooksContract("");
-            setDisableUnbalancedLiquidity(false);
-            setEnableDonation(false);
+            updatePool({
+              isUsingHooks: false,
+              poolHooksContract: "",
+              disableUnbalancedLiquidity: false,
+              enableDonation: false,
+            });
           }}
         />
         <RadioInput
           name="pool-hooks"
           label="I want this pool to use a hooks contract"
           checked={isUsingHooks}
-          onChange={() => setIsUsingHooks(true)}
+          onChange={() => updatePool({ isUsingHooks: true })}
         />
         {isUsingHooks && (
           <div className="mt-3">
@@ -190,18 +181,18 @@ export const ChooseParameters = () => {
               label="Contract address"
               placeholder="Enter pool hooks contract address"
               value={poolHooksContract}
-              onChange={e => setPoolHooksContract(e.target.value)}
+              onChange={e => updatePool({ poolHooksContract: e.target.value })}
             />
             <div className="mt-2 flex flex-col gap-2">
               <Checkbox
-                label="Does this pool allow unbalanced liquidity operations?"
-                checked={!disableUnbalancedLiquidity}
-                onChange={() => setDisableUnbalancedLiquidity(!disableUnbalancedLiquidity)}
+                label="Should this pool disable unbalanced liquidity operations?"
+                checked={disableUnbalancedLiquidity}
+                onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
               />
               <Checkbox
                 label="Should this pool accept donations?"
                 checked={enableDonation}
-                onChange={() => setEnableDonation(!enableDonation)}
+                onChange={() => updatePool({ enableDonation: !enableDonation })}
               />
             </div>
           </div>

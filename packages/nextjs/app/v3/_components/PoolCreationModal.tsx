@@ -18,7 +18,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     isPending: isInitializePoolPending,
     error: initializePoolError,
   } = useInitializePool();
-  const { step, setStep, tokenConfigs, poolAddress } = usePoolCreationStore();
+  const { step, tokenConfigs, poolAddress, updatePool } = usePoolCreationStore();
 
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => ({
     number: idx + 2,
@@ -44,7 +44,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
               onClick={() =>
                 createPool(undefined, {
                   onSuccess: () => {
-                    setStep(step + 1);
+                    updatePool({ step: step + 1 });
                   },
                 })
               }
@@ -62,7 +62,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
               onClick={() =>
                 initializePool(undefined, {
                   onSuccess: () => {
-                    setStep(step + 1);
+                    updatePool({ step: step + 1 });
                     console.log("Pool initialization successful!");
                   },
                 })
@@ -104,7 +104,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
  */
 const ApproveButtons = ({ tokens }: { tokens: TokenConfig[] }) => {
   const { targetNetwork } = useTargetNetwork();
-  const { step, setStep } = usePoolCreationStore();
+  const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveToken();
 
   const token = tokens[step - 2]; // step value starts at 2 so start from index 0
@@ -119,7 +119,7 @@ const ApproveButtons = ({ tokens }: { tokens: TokenConfig[] }) => {
       },
       {
         onSuccess: () => {
-          setStep(step + 1);
+          updatePool({ step: step + 1 });
         },
       },
     );
@@ -150,7 +150,7 @@ const PermitButtons = ({
   numberOfTokenApprovals: number;
 }) => {
   const { targetNetwork } = useTargetNetwork();
-  const { step, setStep } = usePoolCreationStore();
+  const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveOnPermit2();
 
   const token = tokens[step - 2 - numberOfTokenApprovals]; // :(
@@ -160,7 +160,7 @@ const PermitButtons = ({
       { token: token.address, spender: BALANCER_ROUTER[targetNetwork.id] },
       {
         onSuccess: () => {
-          setStep(step + 1);
+          updatePool({ step: step + 1 });
         },
       },
     );

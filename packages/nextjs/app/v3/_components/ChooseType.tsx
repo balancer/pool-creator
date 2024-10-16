@@ -14,7 +14,7 @@ const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
 };
 
 export function ChooseType() {
-  const { poolType, setPoolType } = usePoolCreationStore();
+  const { poolType, updatePool } = usePoolCreationStore();
 
   return (
     <div className="flex flex-col flex-grow justify-center h-full gap-5">
@@ -24,7 +24,7 @@ export function ChooseType() {
           className={`${
             type === poolType ? `${bgBeigeGradient} text-neutral-700` : `bg-base-100`
           } hover:scale-105 p-7 w-full rounded-xl  text-lg text shadow-lg`}
-          onClick={() => setPoolType(type)}
+          onClick={() => updatePool({ poolType: type })}
         >
           <div className="flex flex-col items-start">
             <div className="font-bold text-xl text-center w-full mb-2">{type}</div>

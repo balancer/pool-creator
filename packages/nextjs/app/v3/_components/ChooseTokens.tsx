@@ -9,14 +9,14 @@ const MAX_TOKENS = {
 };
 
 export function ChooseTokens() {
-  const { tokenConfigs, setTokenConfigs, poolType } = usePoolCreationStore();
+  const { tokenConfigs, poolType, updatePool } = usePoolCreationStore();
 
   function handleAddToken() {
     const updatedTokenCount = tokenConfigs.length + 1;
     const updatedWeight = 100 / updatedTokenCount;
     const updatedPoolTokens = tokenConfigs.map(token => ({ ...token, weight: updatedWeight }));
     updatedPoolTokens.push({ ...initialTokenConfig, weight: updatedWeight });
-    setTokenConfigs(updatedPoolTokens);
+    updatePool({ tokenConfigs: updatedPoolTokens });
   }
 
   return (

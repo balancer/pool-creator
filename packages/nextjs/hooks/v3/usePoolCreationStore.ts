@@ -17,7 +17,7 @@ export type TokenConfig = {
   amount: string; // human readable
 };
 
-interface PoolStore {
+export interface PoolCreationStore {
   step: number;
   isDelegatingManagement: boolean;
   isUsingHooks: boolean;
@@ -33,21 +33,8 @@ interface PoolStore {
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
-  setStep: (step: number) => void;
-  setIsDelegatingManagement: (isDelegatingManagement: boolean) => void;
-  setIsUsingHooks: (isUsingHooks: boolean) => void;
-  setPoolAddress: (poolAddress: Address) => void;
-  setPoolType: (poolType: AllowedPoolTypes | undefined) => void;
-  setTokenConfigs: (tokenConfigs: TokenConfig[]) => void;
-  setName: (name: string) => void;
-  setSymbol: (symbol: string) => void;
-  setSwapFeePercentage: (swapFeePercentage: string) => void;
-  setSwapFeeManager: (swapFeeManager: Address) => void;
-  setPauseManager: (pauseManager: Address) => void;
-  setPoolHooksContract: (poolHooksContract: Address) => void;
-  setEnableDonation: (enableDonation: boolean) => void;
-  setDisableUnbalancedLiquidity: (disableUnbalancedLiquidity: boolean) => void;
-  setAmplificationParameter: (amplificationParameter: string) => void;
+  updatePool: (updates: Partial<PoolCreationStore>) => void;
+  updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
 }
 
 export const initialTokenConfig: TokenConfig = {
@@ -79,23 +66,15 @@ export const initialPoolCreationState = {
 };
 
 // Stores all the data that will be used for pool creation
-export const usePoolCreationStore = create<PoolStore>(set => ({
+export const usePoolCreationStore = create<PoolCreationStore>(set => ({
   ...initialPoolCreationState,
-  setIsDelegatingManagement: isDelegatingManagement => set({ isDelegatingManagement }),
-  setIsUsingHooks: isUsingHooks => set({ isUsingHooks }),
-  setPoolAddress: poolAddress => set({ poolAddress }),
-  setStep: step => set({ step }),
-  setName: name => set({ name }),
-  setSymbol: symbol => set({ symbol }),
-  setPoolType: poolType => set({ poolType }),
-  setTokenConfigs: tokenConfigs => set({ tokenConfigs }),
-  setAmplificationParameter: amplificationParameter => set({ amplificationParameter }),
-  setSwapFeePercentage: swapFeePercentage => set({ swapFeePercentage }),
-  setSwapFeeManager: swapFeeManager => set({ swapFeeManager }),
-  setPauseManager: pauseManager => set({ pauseManager }),
-  setPoolHooksContract: poolHooksContract => set({ poolHooksContract }),
-  setDisableUnbalancedLiquidity: disableUnbalancedLiquidity => set({ disableUnbalancedLiquidity }),
-  setEnableDonation: enableDonation => set({ enableDonation }),
+  updatePool: (updates: Partial<PoolCreationStore>) => set(state => ({ ...state, ...updates })),
+  updateTokenConfig: (index: number, updates: Partial<TokenConfig>) =>
+    set(state => {
+      const newTokenConfigs = [...state.tokenConfigs];
+      newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
+      return { ...state, tokenConfigs: newTokenConfigs };
+    }),
 }));
 
 export function usePoolStoreDebug() {

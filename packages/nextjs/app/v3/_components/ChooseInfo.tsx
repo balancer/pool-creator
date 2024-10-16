@@ -13,14 +13,13 @@ function buildPoolSymbol(tokenConfigs: TokenConfig[]): string {
 }
 
 export const ChooseInfo = () => {
-  const { name, setName, symbol, setSymbol, tokenConfigs, poolType } = usePoolCreationStore();
+  const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
 
   useEffect(() => {
     if (poolType) {
-      setName(buildPoolName(poolType, tokenConfigs));
-      setSymbol(buildPoolSymbol(tokenConfigs));
+      updatePool({ name: buildPoolName(poolType, tokenConfigs), symbol: buildPoolSymbol(tokenConfigs) });
     }
-  }, [tokenConfigs, poolType, setName, setSymbol]);
+  }, [tokenConfigs, poolType, updatePool]);
 
   return (
     <div>
@@ -29,7 +28,7 @@ export const ChooseInfo = () => {
           label="Pool name"
           placeholder="Enter pool name"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={e => updatePool({ name: e.target.value })}
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -37,7 +36,7 @@ export const ChooseInfo = () => {
           label="Pool symbol"
           placeholder="Enter pool symbol"
           value={symbol}
-          onChange={e => setSymbol(e.target.value)}
+          onChange={e => updatePool({ symbol: e.target.value })}
         />
       </div>
     </div>

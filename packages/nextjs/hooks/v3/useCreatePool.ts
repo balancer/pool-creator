@@ -18,6 +18,9 @@ const poolFactoryAbi = {
   [PoolType.Stable]: stablePoolFactoryAbi_V3,
 };
 
+const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
+const TOKEN_WEIGHT_DECIMALS = 16;
+
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -34,7 +37,7 @@ export const useCreatePool = () => {
     enableDonation,
     disableUnbalancedLiquidity,
     amplificationParameter,
-    setPoolAddress,
+    updatePool,
   } = usePoolCreationStore();
 
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
@@ -44,7 +47,7 @@ export const useCreatePool = () => {
       protocolVersion: 3,
       name,
       symbol,
-      swapFeePercentage: parseUnits(swapFeePercentage, 16),
+      swapFeePercentage: parseUnits(swapFeePercentage, SWAP_FEE_PERCENTAGE_DECIMALS),
       swapFeeManager: swapFeeManager === "" ? zeroAddress : swapFeeManager,
       pauseManager: pauseManager === "" ? zeroAddress : pauseManager,
       poolHooksContract: poolHooksContract === "" ? zeroAddress : poolHooksContract,
@@ -52,31 +55,20 @@ export const useCreatePool = () => {
       disableUnbalancedLiquidity,
     };
 
-    if (poolType === PoolType.Weighted) {
-      return {
-        ...baseInput,
-        poolType: PoolType.Weighted,
-        tokens: tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees }) => ({
-          address,
-          rateProvider,
-          tokenType,
-          paysYieldFees,
-          weight: parseUnits(weight.toString(), 16),
-        })),
-      } as CreatePoolV3WeightedInput;
-    } else {
-      return {
-        ...baseInput,
-        poolType: PoolType.Stable,
-        amplificationParameter: BigInt(amplificationParameter),
-        tokens: tokenConfigs.map(({ address, rateProvider, tokenType, paysYieldFees }) => ({
-          address,
-          rateProvider,
-          tokenType,
-          paysYieldFees,
-        })),
-      } as CreatePoolV3StableInput;
-    }
+    const tokens = tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees }) => ({
+      address,
+      rateProvider,
+      tokenType,
+      paysYieldFees,
+      ...(poolType === PoolType.Weighted && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
+    }));
+
+    return {
+      ...baseInput,
+      poolType,
+      tokens,
+      ...(poolType === PoolType.Stable && { amplificationParameter: BigInt(amplificationParameter) }),
+    } as CreatePoolV3StableInput | CreatePoolV3WeightedInput;
   }
 
   async function createPool() {
@@ -111,7 +103,7 @@ export const useCreatePool = () => {
     });
     if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
       const newPool = logs[0].args.pool;
-      setPoolAddress(newPool);
+      updatePool({ poolAddress: newPool });
     } else {
       throw new Error("Expected pool address not found in event logs");
     }
