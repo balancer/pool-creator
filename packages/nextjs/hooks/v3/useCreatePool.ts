@@ -107,6 +107,8 @@ export const useCreatePool = () => {
     } else {
       throw new Error("Expected pool address not found in event logs");
     }
+
+    return hash;
   }
 
   return useMutation({ mutationFn: () => createPool() });

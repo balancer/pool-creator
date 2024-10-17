@@ -12,7 +12,7 @@ export const useInitializePool = () => {
   const chainId = publicClient?.chain.id;
   const rpcUrl = publicClient?.chain.rpcUrls.default.http[0];
   const protocolVersion = 3;
-  const { poolAddress, poolType, tokenConfigs } = usePoolCreationStore();
+  const { poolAddress, poolType, tokenConfigs, updatePool, step } = usePoolCreationStore();
 
   async function initializePool() {
     if (!poolAddress) throw new Error("Pool address missing");
@@ -37,13 +37,13 @@ export const useInitializePool = () => {
 
     const input: InitPoolInput = {
       amountsIn,
-      minBptAmountOut: parseUnits("0", 18), // TODO: what should this be?
+      minBptAmountOut: 0n,
       chainId,
     };
 
     const call = initPool.buildCall(input, poolState);
 
-    await writeTx(
+    const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
@@ -54,9 +54,12 @@ export const useInitializePool = () => {
         blockConfirmations: 1,
         onBlockConfirmation: () => {
           console.log("Successfully initialized pool!", poolAddress);
+          updatePool({ step: step + 1 });
         },
       },
     );
+    if (!hash) throw new Error("No pool initialization transaction hash");
+    return hash;
   }
 
   return useMutation({ mutationFn: () => initializePool() });

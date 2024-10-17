@@ -33,8 +33,11 @@ export interface PoolCreationStore {
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
+  createPoolTxHash: string | undefined;
+  initPoolTxHash: string | undefined;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
+  clearPoolStore: () => void;
 }
 
 export const initialTokenConfig: TokenConfig = {
@@ -63,6 +66,8 @@ export const initialPoolCreationState = {
   poolHooksContract: "",
   disableUnbalancedLiquidity: false,
   enableDonation: false,
+  createPoolTxHash: undefined,
+  initPoolTxHash: undefined,
 };
 
 // Stores all the data that will be used for pool creation
@@ -75,6 +80,7 @@ export const usePoolCreationStore = create<PoolCreationStore>(set => ({
       newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
       return { ...state, tokenConfigs: newTokenConfigs };
     }),
+  clearPoolStore: () => set(initialPoolCreationState),
 }));
 
 export function usePoolStoreDebug() {
