@@ -1,6 +1,8 @@
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+
 interface StepsDisplayProps {
   currentStepNumber: number;
-  steps: { number: number; label: string }[];
+  steps: { number: number; label: string; blockExplorerUrl?: string }[];
 }
 
 export function StepsDisplay({ currentStepNumber, steps }: StepsDisplayProps) {
@@ -16,7 +18,14 @@ export function StepsDisplay({ currentStepNumber, steps }: StepsDisplayProps) {
               currentStepNumber == step.number && "step-primary"
             }`}
           >
-            {step.label}
+            <div className="flex items-center gap-2">
+              {step.label}
+              {step.blockExplorerUrl && (
+                <a href={step.blockExplorerUrl} target="_blank" rel="noopener noreferrer">
+                  <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                </a>
+              )}
+            </div>
           </li>
         ))}
       </ul>

@@ -1,16 +1,21 @@
-import { BALANCER_ROUTER, PERMIT2 } from "@balancer/sdk";
-import { parseUnits } from "viem";
+import { ApproveButtonManager, PermitButtonManager } from "./";
+import { sepolia } from "viem/chains";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { StepsDisplay } from "~~/app/cow/_components";
 import { PoolDetails } from "~~/app/v3/_components";
 import { Alert, TransactionButton } from "~~/components/common";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { useApproveOnPermit2, useApproveToken, useReadToken } from "~~/hooks/token";
-import { type TokenConfig, useCreatePool, useInitializePool, usePoolCreationStore } from "~~/hooks/v3/";
+import { useCreatePool, useInitializePool, usePoolCreationStore } from "~~/hooks/v3/";
+import { bgBeigeGradient } from "~~/utils";
+import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
 interface PoolCreationModalProps {
   setIsModalOpen: (isOpen: boolean) => void;
 }
 
+/**
+ * TODO: replace sepolia hardcoded chainId by adding chainId to zustand store
+ * TODO: Figure out forcing pool creation on chain that tokens are selected?
+ */
 export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   const { mutateAsync: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const {
@@ -18,9 +23,18 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     isPending: isInitializePoolPending,
     error: initializePoolError,
   } = useInitializePool();
-  const { step, tokenConfigs, poolAddress, updatePool } = usePoolCreationStore();
+  const { step, tokenConfigs, updatePool, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
+
+  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
+  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
 
   const numberOfTokens = tokenConfigs.length;
+
+  const firstStep = {
+    number: 1,
+    label: "Deploy Pool",
+    blockExplorerUrl: poolDeploymentUrl,
+  };
 
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => ({
     number: idx + 2,
@@ -31,6 +45,12 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     number: idx + numberOfTokens + 2,
     label: `Permit ${token?.tokenInfo?.symbol}`,
   }));
+
+  const lastStep = {
+    number: approveOnPermit2Steps.length + approveOnTokenSteps.length + 2,
+    label: "Initialize Pool",
+    blockExplorerUrl: poolInitializationUrl,
+  };
 
   const poolCreationError = createPoolError || initializePoolError;
 
@@ -55,10 +75,10 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
               isPending={isCreatePoolPending}
             />
           ) : step > 1 && step <= approveOnTokenSteps.length + 1 ? (
-            <ApproveButtons tokens={tokenConfigs} />
+            <ApproveButtonManager tokens={tokenConfigs} />
           ) : step > approveOnTokenSteps.length + 1 &&
             step <= approveOnPermit2Steps.length + approveOnTokenSteps.length + 1 ? (
-            <PermitButtons tokens={tokenConfigs} numberOfTokens={numberOfTokens} />
+            <PermitButtonManager tokens={tokenConfigs} numberOfTokens={numberOfTokens} />
           ) : step === approveOnPermit2Steps.length + approveOnTokenSteps.length + 2 ? (
             <TransactionButton
               onClick={async () => {
@@ -74,7 +94,20 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
               isPending={isInitializePoolPending}
             />
           ) : (
-            <Alert type="success">Pool initialized: {poolAddress}</Alert>
+            <div className="grid grid-cols-2 gap-3">
+              <a href={poolDeploymentUrl} target="_blank" rel="noopener noreferrer" className="">
+                <button className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} text-neutral-700`}>
+                  <div>View creation</div>
+                  <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
+                </button>
+              </a>
+              <a href={poolInitializationUrl} target="_blank" rel="noopener noreferrer" className="">
+                <button className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} text-neutral-700`}>
+                  <div>View initialization</div>
+                  <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
+                </button>
+              </a>
+            </div>
           )}
         </div>
         {poolCreationError && (
@@ -89,94 +122,9 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
       <div className="relative z-10">
         <StepsDisplay
           currentStepNumber={step}
-          steps={[
-            { number: 1, label: "Deploy Pool" },
-            ...approveOnTokenSteps,
-            ...approveOnPermit2Steps,
-            { number: approveOnPermit2Steps.length + approveOnTokenSteps.length + 2, label: "Initialize Pool" },
-          ]}
+          steps={[firstStep, ...approveOnTokenSteps, ...approveOnPermit2Steps, lastStep]}
         />
       </div>
     </div>
   );
 }
-
-/**
- * TODO: write logic to determine which tokens still need approval based on allowances
- */
-const ApproveButtons = ({ tokens }: { tokens: TokenConfig[] }) => {
-  const { targetNetwork } = useTargetNetwork();
-  const { step, updatePool } = usePoolCreationStore();
-  const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveToken();
-
-  const token = tokens[step - 2]; // step value starts at 2 so start from index 0
-  const rawAmount = parseUnits(token.amount, token?.tokenInfo?.decimals ?? 18);
-  const spender = PERMIT2[targetNetwork.id];
-  const { refetchAllowance } = useReadToken(token.address, spender);
-
-  const handleApprove = async () => {
-    await approve(
-      { token: token.address, spender, rawAmount },
-      {
-        onSuccess: async () => {
-          const { data: allowance } = await refetchAllowance();
-          if (allowance && allowance >= rawAmount) {
-            updatePool({ step: step + 1 });
-          }
-        },
-      },
-    );
-  };
-
-  return (
-    <div>
-      <TransactionButton
-        title={`Approve ${token?.tokenInfo?.symbol}`}
-        isDisabled={isApprovePending}
-        isPending={isApprovePending}
-        onClick={handleApprove}
-      />
-      {approveError && (
-        <div className="max-w-[500px] mt-4">
-          <Alert type="error">{approveError.message}</Alert>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const PermitButtons = ({ tokens, numberOfTokens }: { tokens: TokenConfig[]; numberOfTokens: number }) => {
-  const { targetNetwork } = useTargetNetwork();
-  const { step, updatePool } = usePoolCreationStore();
-  const { mutateAsync: approve, isPending: isApprovePending, error: approveError } = useApproveOnPermit2();
-
-  const token = tokens[step - 2 - numberOfTokens]; // :(
-  const spender = BALANCER_ROUTER[targetNetwork.id];
-
-  const handleApprove = async () => {
-    await approve(
-      { token: token.address, spender },
-      {
-        onSuccess: () => {
-          updatePool({ step: step + 1 });
-        },
-      },
-    );
-  };
-
-  return (
-    <div>
-      <TransactionButton
-        title={`Permit ${token?.tokenInfo?.symbol}`}
-        isDisabled={isApprovePending}
-        isPending={isApprovePending}
-        onClick={handleApprove}
-      />
-      {approveError && (
-        <div className="max-w-[500px] mt-4">
-          <Alert type="error">{approveError.message}</Alert>
-        </div>
-      )}
-    </div>
-  );
-};
