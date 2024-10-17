@@ -48,7 +48,7 @@ export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: Poo
           </button>
           <button
             onClick={clearState}
-            className="text-error bg-error-tint px-5 py-3 border border-error rounded-xl w-24"
+            className="bg-error text-neutral-800 px-5 py-3 border border-error rounded-xl w-24"
           >
             Reset
           </button>
