@@ -54,11 +54,11 @@ export const useInitializePool = () => {
         blockConfirmations: 1,
         onBlockConfirmation: () => {
           console.log("Successfully initialized pool!", poolAddress);
-          updatePool({ step: step + 1 });
         },
       },
     );
     if (!hash) throw new Error("No pool initialization transaction hash");
+    updatePool({ step: step + 1, initPoolTxHash: hash });
     return hash;
   }
 

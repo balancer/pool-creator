@@ -103,7 +103,7 @@ export const useCreatePool = () => {
     });
     if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
       const newPool = logs[0].args.pool;
-      updatePool({ poolAddress: newPool });
+      updatePool({ poolAddress: newPool, createPoolTxHash: hash, step: 2 });
     } else {
       throw new Error("Expected pool address not found in event logs");
     }

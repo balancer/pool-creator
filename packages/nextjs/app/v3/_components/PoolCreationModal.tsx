@@ -17,13 +17,13 @@ interface PoolCreationModalProps {
  * TODO: Figure out forcing pool creation on chain that tokens are selected?
  */
 export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
-  const { mutateAsync: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
+  const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const {
-    mutateAsync: initializePool,
+    mutate: initializePool,
     isPending: isInitializePoolPending,
     error: initializePoolError,
   } = useInitializePool();
-  const { step, tokenConfigs, updatePool, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
+  const { step, tokenConfigs, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
 
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
   const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
@@ -56,20 +56,20 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">
-      <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
+      <div
+        className="absolute w-full h-full"
+        onClick={() => {
+          if (isCreatePoolPending || isInitializePoolPending || step > 1) return;
+          setIsModalOpen(false);
+        }}
+      />
       <div className="flex flex-col gap-5 relative z-10">
         <div className="bg-base-300 rounded-lg min-w-[500px] p-5 flex flex-col gap-5">
           <div className="font-bold text-2xl">Pool Creation</div>
           <PoolDetails />
           {step === 1 ? (
             <TransactionButton
-              onClick={async () => {
-                await createPool(undefined, {
-                  onSuccess: txHash => {
-                    updatePool({ step: 2, createPoolTxHash: txHash });
-                  },
-                });
-              }}
+              onClick={createPool}
               title="Deploy Pool"
               isDisabled={isCreatePoolPending}
               isPending={isCreatePoolPending}
@@ -81,14 +81,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
             <PermitButtonManager tokens={tokenConfigs} numberOfTokens={numberOfTokens} />
           ) : step === approveOnPermit2Steps.length + approveOnTokenSteps.length + 2 ? (
             <TransactionButton
-              onClick={async () => {
-                await initializePool(undefined, {
-                  onSuccess: txHash => {
-                    console.log("initalize onSuccess fired!");
-                    updatePool({ step: step + 1, initPoolTxHash: txHash });
-                  },
-                });
-              }}
+              onClick={initializePool}
               title="Initialize Pool"
               isDisabled={isInitializePoolPending}
               isPending={isInitializePoolPending}
