@@ -23,15 +23,15 @@ export const ChooseInfo = () => {
 
   return (
     <div>
-      <div className="mb-5">
+      <div className="text-xl mb-5">Choose pool information:</div>
+      <div className="mb-5 flex flex-col gap-4 px-5">
         <TextField
           label="Pool name"
           placeholder="Enter pool name"
           value={name}
           onChange={e => updatePool({ name: e.target.value })}
         />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
+
         <TextField
           label="Pool symbol"
           placeholder="Enter pool symbol"

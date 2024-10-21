@@ -21,7 +21,7 @@ export function ChooseTokens() {
 
   return (
     <div>
-      <div className="text-lg font-bold mb-3">Choose up to {poolType ? MAX_TOKENS[poolType] : 0} tokens:</div>
+      <div className="text-xl mb-5">Choose up to {poolType ? MAX_TOKENS[poolType] : 0} tokens:</div>
 
       <div className="flex flex-col gap-7">
         {Array.from({ length: tokenConfigs.length }).map((_, index) => (

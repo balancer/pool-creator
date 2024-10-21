@@ -8,6 +8,6 @@ export const extractDomain = (url: string): string => {
 };
 
 export const abbreviateAddress = (address: string | undefined): string => {
-  if (!address) return "";
-  return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  if (!address) return "???";
+  return `${address.slice(0, 5)}...${address.slice(-4)}`;
 };

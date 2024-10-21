@@ -17,21 +17,25 @@ export function ChooseType() {
   const { poolType, updatePool } = usePoolCreationStore();
 
   return (
-    <div className="flex flex-col flex-grow justify-center h-full gap-5">
-      {POOL_TYPES.map(type => (
-        <button
-          key={type}
-          className={`${
-            type === poolType ? `${bgBeigeGradient} text-neutral-700` : `bg-base-100`
-          } hover:scale-105 p-7 w-full rounded-xl  text-lg text shadow-lg`}
-          onClick={() => updatePool({ poolType: type })}
-        >
-          <div className="flex flex-col items-start">
-            <div className="font-bold text-xl text-center w-full mb-2">{type}</div>
-            <div className="text-start">{POOL_TYPE_DESCRIPTIONS[type]}</div>
-          </div>
-        </button>
-      ))}
+    <div>
+      <div className="flex flex-col flex-grow justify-center h-full gap-5 px-7">
+        <div className="text-xl">Choose a Pool Type:</div>
+
+        {POOL_TYPES.map(type => (
+          <button
+            key={type}
+            className={`${
+              type === poolType ? `${bgBeigeGradient} text-neutral-700` : `bg-base-300`
+            } hover:scale-105 p-7 w-full rounded-xl  text-lg text shadow-inner`}
+            onClick={() => updatePool({ poolType: type })}
+          >
+            <div className="flex flex-col items-start">
+              <div className="font-bold text-xl text-center w-full mb-2">{type}</div>
+              <div className="text-start">{POOL_TYPE_DESCRIPTIONS[type]}</div>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

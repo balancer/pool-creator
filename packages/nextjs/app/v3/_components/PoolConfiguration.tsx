@@ -6,7 +6,7 @@ import { PoolCreationModal } from "./PoolCreationModal";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
 import { useValidatePoolCreationInput } from "~~/hooks/v3";
-import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
+import { bgBeigeGradient } from "~~/utils";
 
 const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 type TabType = (typeof TABS)[number];
@@ -56,15 +56,14 @@ export function PoolConfiguration() {
             <div
               className={`absolute inset-x-0 top-0 bottom-0 ${bgBeigeGradient} opacity-60 rounded-xl shadow-lg`}
             ></div>
-            {TABS.map((tab, idx) => (
+            {TABS.map(tab => (
               <div
                 key={tab}
-                className={`relative z-10 rounded-xl ${bgBeigeGradientHover} hover:opacity-80 hover:font-bold hover:cursor-pointer text-neutral-700 flex-1 py-3 text-lg ${
-                  selectedTab === tab ? bgBeigeGradient + " font-bold" : ""
+                className={`relative z-10 rounded-xl text-neutral-700 flex-1 py-3 text-lg ${
+                  selectedTab === tab && `${bgBeigeGradient} font-bold`
                 }`}
-                onClick={() => setSelectedTab(tab)}
               >
-                {idx + 1}. {tab}
+                {tab}
               </div>
             ))}
           </div>

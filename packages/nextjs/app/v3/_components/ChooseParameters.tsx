@@ -4,7 +4,7 @@ import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/comm
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 const swapFeeButtonStyles =
-  "bg-base-200 w-20 h-12 rounded-lg flex items-center justify-center hover:cursor-pointer hover:border-2 hover:border-base-content text-lg";
+  "bg-base-200 w-20 h-12 rounded-lg flex items-center justify-center hover:cursor-pointer hover:border-2 hover:border-accent text-lg";
 
 export const ChooseParameters = () => {
   const {
@@ -41,24 +41,25 @@ export const ChooseParameters = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="text-xl">Choose Pool Parameters:</div>
       <div className="bg-base-100 p-5 rounded-xl">
-        <div className="text-lg font-bold mb-3">Swap Fee Percentage</div>
+        <div className="text-lg font-bold mb-3">Swap fee percentage</div>
 
         <div className="flex gap-2">
           <div
-            className={` ${swapFeePercentage === "0.1" ? "border-2 border-base-content" : ""} ${swapFeeButtonStyles} `}
+            className={` ${swapFeePercentage === "0.1" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
             onClick={() => updatePool({ swapFeePercentage: "0.1" })}
           >
             0.1%
           </div>
           <div
-            className={` ${swapFeePercentage === "0.3" ? "border-2 border-base-content" : ""} ${swapFeeButtonStyles} `}
+            className={` ${swapFeePercentage === "0.3" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
             onClick={() => updatePool({ swapFeePercentage: "0.3" })}
           >
             0.3%
           </div>
           <div
-            className={` ${swapFeePercentage === "1" ? "border-2 border-base-content" : ""} ${swapFeeButtonStyles} `}
+            className={` ${swapFeePercentage === "1" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
             onClick={() => updatePool({ swapFeePercentage: "1" })}
           >
             1%
@@ -83,25 +84,19 @@ export const ChooseParameters = () => {
 
           <div className="flex gap-2">
             <div
-              className={` ${
-                amplificationParameter === "1" ? "border-2 border-base-content" : ""
-              } ${swapFeeButtonStyles} `}
+              className={` ${amplificationParameter === "1" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
               onClick={() => updatePool({ amplificationParameter: "1" })}
             >
               1
             </div>
             <div
-              className={` ${
-                amplificationParameter === "69" ? "border-2 border-base-content" : ""
-              } ${swapFeeButtonStyles} `}
+              className={` ${amplificationParameter === "69" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
               onClick={() => updatePool({ amplificationParameter: "69" })}
             >
               69
             </div>
             <div
-              className={` ${
-                amplificationParameter === "420" ? "border-2 border-base-content" : ""
-              } ${swapFeeButtonStyles} `}
+              className={` ${amplificationParameter === "420" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
               onClick={() => updatePool({ amplificationParameter: "420" })}
             >
               420
@@ -137,14 +132,16 @@ export const ChooseParameters = () => {
           onChange={() => updatePool({ isDelegatingManagement: false })}
         />
         {!isDelegatingManagement && (
-          <div className="flex gap-4 mt-3">
+          <div className="flex flex-col gap-3 mt-3">
             <TextField
+              mustBeAddress={true}
               label="Swap fee manager"
               placeholder="Enter address"
               value={swapFeeManager}
               onChange={e => updatePool({ swapFeeManager: e.target.value })}
             />
             <TextField
+              mustBeAddress={true}
               label="Pause manager"
               placeholder="Enter address"
               value={pauseManager}
@@ -178,6 +175,7 @@ export const ChooseParameters = () => {
         {isUsingHooks && (
           <div className="mt-3">
             <TextField
+              mustBeAddress={true}
               label="Contract address"
               placeholder="Enter pool hooks contract address"
               value={poolHooksContract}

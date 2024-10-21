@@ -44,14 +44,18 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <div key={index}>
                 <div className="flex justify-between">
                   <div className="flex items-center gap-2">
-                    {poolType === PoolType.Weighted && <div>{token.weight}%</div>}
-                    {token?.tokenInfo && <TokenImage size="sm" token={token.tokenInfo} />}
-                    <div className="font-bold">{token?.tokenInfo?.symbol}</div>
-                    <i>{token.tokenType === TokenType.STANDARD ? "Standard" : "With Rate Provider"}</i>
+                    {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
+                    <div className="font-bold text-lg">{token?.tokenInfo?.symbol}</div>
+                    {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
                   </div>
                   <div>{token.amount}</div>
                 </div>
-                {token.tokenType === TokenType.TOKEN_WITH_RATE && <div>{abbreviateAddress(token.rateProvider)}</div>}
+                {token.tokenType === TokenType.TOKEN_WITH_RATE && (
+                  <div className="flex gap-2 mt-1">
+                    <i>Rate Provider:</i>
+                    <div>{abbreviateAddress(token.rateProvider)}</div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

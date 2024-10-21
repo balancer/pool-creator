@@ -58,7 +58,8 @@ export function ChooseToken({ index }: { index: number }) {
 
   // When user changes one of the token weights, update the others to sum to 100
   useEffect(() => {
-    const newWeight = tokenWeight;
+    let newWeight = tokenWeight;
+    if (newWeight > 98) newWeight = 98;
     const remainingWeight = 100 - newWeight;
     const remainingTokens = tokenConfigs.length - 1;
     const evenWeight = remainingWeight / remainingTokens;
@@ -104,9 +105,11 @@ export function ChooseToken({ index }: { index: number }) {
             </div>
           </div>
         </div>
-        <div className="cursor-pointer" onClick={handleRemoveToken}>
-          <TrashIcon className="w-5 h-5" />
-        </div>
+        {tokenConfigs.length > 2 && (
+          <div className="cursor-pointer" onClick={handleRemoveToken}>
+            <TrashIcon className="w-5 h-5" />
+          </div>
+        )}
       </div>
 
       {address && (
@@ -124,6 +127,8 @@ export function ChooseToken({ index }: { index: number }) {
         <div>
           <div className="my-1">
             <TextField
+              mustBeAddress={true}
+              label="Rate provider"
               placeholder="Enter rate provider address"
               value={rateProvider !== zeroAddress ? rateProvider : ""}
               onChange={e => handleRateProvider(e.target.value)}
