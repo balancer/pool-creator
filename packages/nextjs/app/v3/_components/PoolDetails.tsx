@@ -108,7 +108,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={!name && !symbol}
         content={
           <div>
-            <div>{name.length > 40 ? `${name.slice(0, 40)}...` : name}</div>
+            <div>{name.length > 38 ? `${name.slice(0, 38)}...` : name}</div>
             <div>{symbol}</div>
           </div>
         }
@@ -128,9 +128,9 @@ interface DetailSectionProps {
 function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSectionProps) {
   return (
     <>
-      <div className="bg-base-100 p-4 rounded-xl">
+      <div className="bg-base-100 p-4 rounded-xl text-lg">
         <div className="flex justify-between mb-2">
-          <div className="font-bold">{title}: </div>
+          <div className="font-bold text-xl">{title}: </div>
           {isPreview && (
             <div className="h-7 w-7 rounded-full">
               {isValid ? (

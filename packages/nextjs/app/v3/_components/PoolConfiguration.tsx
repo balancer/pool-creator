@@ -5,17 +5,13 @@ import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
 import { PoolCreationModal } from "./PoolCreationModal";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
-import { useValidatePoolCreationInput } from "~~/hooks/v3";
+import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
 import { bgBeigeGradient } from "~~/utils";
 
-const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
-type TabType = (typeof TABS)[number];
-
 export function PoolConfiguration() {
+  const { selectedTab, updatePool } = usePoolCreationStore();
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<TabType>("Type");
   const { prev, next } = getAdjacentTabs(selectedTab);
-
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid } =
     useValidatePoolCreationInput();
 
@@ -35,8 +31,8 @@ export function PoolConfiguration() {
   }
 
   function handleTabChange(direction: "prev" | "next") {
-    if (direction === "prev" && prev) setSelectedTab(prev);
-    if (direction === "next" && next) setSelectedTab(next);
+    if (direction === "prev" && prev) updatePool({ selectedTab: prev });
+    if (direction === "next" && next) updatePool({ selectedTab: next });
   }
 
   function getAdjacentTabs(currentTab: TabType): { prev: TabType | null; next: TabType | null } {
@@ -49,7 +45,7 @@ export function PoolConfiguration() {
 
   return (
     <>
-      <div className="w-full max-w-[700px]">
+      <div className="w-full max-w-[700px] flex flex-col gap-5">
         <div className="bg-base-200 rounded-xl p-7 shadow-lg">
           <div className="font-bold text-2xl mb-7">Pool Configuration</div>
           <div className="relative grid grid-cols-4 text-center text-xl rounded-xl">
@@ -101,6 +97,7 @@ export function PoolConfiguration() {
           </div>
         </div>
       </div>
+
       {isPoolCreationModalOpen && <PoolCreationModal setIsModalOpen={setIsPoolCreationModalOpen} />}
     </>
   );

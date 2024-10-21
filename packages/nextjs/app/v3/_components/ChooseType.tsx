@@ -29,9 +29,9 @@ export function ChooseType() {
             } hover:scale-105 p-7 w-full rounded-xl  text-lg text shadow-inner`}
             onClick={() => updatePool({ poolType: type })}
           >
-            <div className="flex flex-col items-start">
-              <div className="font-bold text-xl text-center w-full mb-2">{type}</div>
-              <div className="text-start">{POOL_TYPE_DESCRIPTIONS[type]}</div>
+            <div className="flex flex-col text-center">
+              <div className="font-bold text-xl mb-2 w-full">{type}</div>
+              <div>{POOL_TYPE_DESCRIPTIONS[type]}</div>
             </div>
           </button>
         ))}

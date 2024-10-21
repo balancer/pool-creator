@@ -1,8 +1,10 @@
 import { PoolType, TokenType } from "@balancer/sdk";
 import { isAddress } from "viem";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { usePoolCreationStore, useValidateNetwork } from "~~/hooks/v3";
 
 export function useValidatePoolCreationInput() {
+  const { isWrongNetwork } = useValidateNetwork();
+
   const {
     poolType,
     tokenConfigs,
@@ -17,7 +19,7 @@ export function useValidatePoolCreationInput() {
     poolHooksContract,
   } = usePoolCreationStore();
 
-  const isTypeValid = poolType !== undefined;
+  const isTypeValid = poolType !== undefined && !isWrongNetwork;
 
   const isTokensValid = tokenConfigs.every(token => {
     if (!token.address || !token.amount) return false;

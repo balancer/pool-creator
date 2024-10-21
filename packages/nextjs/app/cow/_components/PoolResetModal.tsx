@@ -32,9 +32,10 @@ export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: Poo
           </li>
           {etherscanURL && (
             <li>
-              Viewing the pool on{" "}
+              Viewing the pool on a{" "}
               <Link target="_blank" rel="noreferrer" href={etherscanURL}>
-                <span className="link">etherscan</span> <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block" />
+                <span className="link">block explorer</span>{" "}
+                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block" />
               </Link>
             </li>
           )}
@@ -47,7 +48,10 @@ export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: Poo
             Cancel
           </button>
           <button
-            onClick={clearState}
+            onClick={() => {
+              clearState();
+              setIsModalOpen(false);
+            }}
             className="bg-error text-neutral-800 px-5 py-3 border border-error rounded-xl w-24"
           >
             Reset

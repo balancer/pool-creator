@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { ApproveButtonManager, PermitButtonManager } from "./";
 import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { StepsDisplay } from "~~/app/cow/_components";
+import { PoolResetModal } from "~~/app/cow/_components";
 import { PoolDetails } from "~~/app/v3/_components";
 import { Alert, TransactionButton } from "~~/components/common";
 import { useCreatePool, useInitializePool, usePoolCreationStore } from "~~/hooks/v3/";
@@ -12,18 +14,15 @@ interface PoolCreationModalProps {
   setIsModalOpen: (isOpen: boolean) => void;
 }
 
-/**
- * TODO: replace sepolia hardcoded chainId by adding chainId to zustand store
- * TODO: Figure out forcing pool creation on chain that tokens are selected?
- */
 export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const {
     mutate: initializePool,
     isPending: isInitializePoolPending,
     error: initializePoolError,
   } = useInitializePool();
-  const { step, tokenConfigs, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
+  const { step, tokenConfigs, createPoolTxHash, initPoolTxHash, clearPoolStore, updatePool } = usePoolCreationStore();
 
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
   const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
@@ -52,6 +51,10 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     blockExplorerUrl: poolInitializationUrl,
   };
 
+  const poolCreationSteps = [firstStep, ...approveOnTokenSteps, ...approveOnPermit2Steps, lastStep];
+  const isPoolCreationInProgress =
+    isCreatePoolPending || isInitializePoolPending || (step > 1 && step < poolCreationSteps.length);
+
   const poolCreationError = createPoolError || initializePoolError;
 
   return (
@@ -59,13 +62,13 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
       <div
         className="absolute w-full h-full"
         onClick={() => {
-          if (isCreatePoolPending || isInitializePoolPending || step > 1) return;
+          if (isPoolCreationInProgress) return;
           setIsModalOpen(false);
         }}
       />
       <div className="flex flex-col gap-5 relative z-10">
         <div className="bg-base-300 rounded-lg min-w-[500px] p-5 flex flex-col gap-5">
-          <div className="font-bold text-2xl">Pool Creation</div>
+          <div className="font-bold text-2xl text-center">Pool Creation</div>
           <PoolDetails />
           {step === 1 ? (
             <TransactionButton
@@ -110,14 +113,25 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
             </div>
           </Alert>
         )}
+        <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg mt-2">
+          Reset progress
+        </div>
       </div>
 
       <div className="relative z-10">
-        <StepsDisplay
-          currentStepNumber={step}
-          steps={[firstStep, ...approveOnTokenSteps, ...approveOnPermit2Steps, lastStep]}
-        />
+        <StepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
       </div>
+      {isResetModalOpen && (
+        <PoolResetModal
+          etherscanURL={poolDeploymentUrl}
+          clearState={() => {
+            clearPoolStore();
+            setIsModalOpen(false);
+            updatePool({ selectedTab: "Type" });
+          }}
+          setIsModalOpen={setIsResetModalOpen}
+        />
+      )}
     </div>
   );
 }

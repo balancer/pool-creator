@@ -2,12 +2,14 @@
 
 import { PoolConfiguration, PoolDetails } from "./_components";
 import type { NextPage } from "next";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
-import { usePoolStoreDebug } from "~~/hooks/v3";
+import { Alert } from "~~/components/common";
+import { usePoolStoreDebug, useValidateNetwork } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
   usePoolStoreDebug();
-
+  const { isWrongNetwork } = useValidateNetwork();
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
@@ -16,13 +18,27 @@ const BalancerV3: NextPage = () => {
             <BalancerLogo width="55px" />
             <h1 className="text-5xl font-bold text-center mb-0">Balancer v3</h1>
           </div>
-          <div className="flex gap-5 w-full justify-center">
-            <PoolConfiguration />
-            <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
-              <div className="font-bold text-2xl mb-3">Pool Preview</div>
-              <PoolDetails isPreview={true} />
+
+          {isWrongNetwork ? (
+            <div className="flex justify-center w-full">
+              <div>
+                <Alert type="warning">
+                  <div className="flex items-center gap-2">
+                    You are connected to an unsupported network. To continue, please switch to Sepolia
+                    <ArrowUpRightIcon className="w-4 h-4" />
+                  </div>
+                </Alert>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex gap-5 w-full justify-center">
+              <PoolConfiguration />
+              <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
+                <div className="font-bold text-2xl mb-3">Pool Preview</div>
+                <PoolDetails isPreview={true} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

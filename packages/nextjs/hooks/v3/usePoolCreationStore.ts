@@ -5,6 +5,9 @@ import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
 import { type Token } from "~~/hooks/token";
 
+export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
+export type TabType = (typeof TABS)[number];
+
 export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted;
 
 export type TokenConfig = {
@@ -19,6 +22,7 @@ export type TokenConfig = {
 
 export interface PoolCreationStore {
   step: number;
+  selectedTab: TabType;
   isDelegatingManagement: boolean;
   isUsingHooks: boolean;
   poolAddress: Address | undefined;
@@ -55,6 +59,7 @@ export const initialPoolCreationState = {
   isDelegatingManagement: true,
   isUsingHooks: false,
   poolAddress: undefined, // set after pool deployment
+  selectedTab: TABS[0],
   name: "",
   symbol: "",
   poolType: undefined,
