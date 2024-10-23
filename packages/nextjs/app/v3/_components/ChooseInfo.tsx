@@ -1,15 +1,28 @@
 import React, { useEffect } from "react";
+import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { TokenConfig } from "~~/hooks/v3/usePoolCreationStore";
 
-function buildPoolName(poolType: string, tokenConfigs: TokenConfig[]): string {
-  const tokenParts = tokenConfigs.map(token => `${token.weight}${token.tokenInfo?.symbol}`).join(" ");
+function buildPoolName(poolType: PoolType, tokenConfigs: TokenConfig[]): string {
+  const tokenParts = tokenConfigs
+    .map(token =>
+      poolType === PoolType.Weighted && token.weight
+        ? `${token.weight}${token.tokenInfo?.symbol}`
+        : token.tokenInfo?.symbol,
+    )
+    .join(" ");
   return `Balancer ${poolType} ${tokenParts}`;
 }
 
-function buildPoolSymbol(tokenConfigs: TokenConfig[]): string {
-  return tokenConfigs.map(token => `${token.weight}${token.tokenInfo?.symbol}`).join("-");
+function buildPoolSymbol(poolType: PoolType, tokenConfigs: TokenConfig[]): string {
+  return tokenConfigs
+    .map(token =>
+      poolType === PoolType.Weighted && token.weight
+        ? `${token.weight}${token.tokenInfo?.symbol}`
+        : token.tokenInfo?.symbol,
+    )
+    .join("-");
 }
 
 export const ChooseInfo = () => {
@@ -17,7 +30,10 @@ export const ChooseInfo = () => {
 
   useEffect(() => {
     if (poolType) {
-      updatePool({ name: buildPoolName(poolType, tokenConfigs), symbol: buildPoolSymbol(tokenConfigs) });
+      updatePool({
+        name: buildPoolName(poolType, tokenConfigs),
+        symbol: buildPoolSymbol(poolType, tokenConfigs),
+      });
     }
   }, [tokenConfigs, poolType, updatePool]);
 

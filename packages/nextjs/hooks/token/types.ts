@@ -5,6 +5,7 @@ export type Token = {
   symbol: string;
   decimals: number;
   logoURI: string;
+  hasBoostedVariant?: boolean;
 };
 
 export type TokenPrice = {

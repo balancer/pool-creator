@@ -5,3 +5,4 @@ export * from "./useFetchTokenPrices";
 export * from "./types";
 export * from "./useApproveOnPermit2";
 export * from "./useAllowanceOnPermit2";
+export * from "./useExoticToken";

@@ -29,7 +29,7 @@ export function ChooseTokens() {
         ))}
         {poolType && tokenConfigs.length < MAX_TOKENS[poolType] && (
           <div className="flex justify-end">
-            <button onClick={handleAddToken} className="btn btn-primary border-none mt-5 w-40 rounded-xl text-lg flex">
+            <button onClick={handleAddToken} className="btn btn-primary border-none w-40 rounded-xl text-lg flex">
               Add Token
             </button>
           </div>

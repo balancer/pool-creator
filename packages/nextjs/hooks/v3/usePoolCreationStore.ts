@@ -18,6 +18,7 @@ export type TokenConfig = {
   weight: number;
   tokenInfo: Token | null;
   amount: string; // human readable
+  useBoostedVariant: boolean;
 };
 
 export interface PoolCreationStore {
@@ -52,6 +53,7 @@ export const initialTokenConfig: TokenConfig = {
   weight: 50, // only used for weighted pools
   tokenInfo: null, // Details including image, symbol, decimals, etc.
   amount: "",
+  useBoostedVariant: false,
 };
 
 export const initialPoolCreationState = {

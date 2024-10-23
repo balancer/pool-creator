@@ -26,7 +26,7 @@ export function ChooseType() {
             key={type}
             className={`${
               type === poolType ? `${bgBeigeGradient} text-neutral-700` : `bg-base-300`
-            } hover:scale-105 p-7 w-full rounded-xl  text-lg text shadow-inner`}
+            } p-7 w-full rounded-xl  text-lg text shadow-inner hover:shadow-lg `}
             onClick={() => updatePool({ poolType: type })}
           >
             <div className="flex flex-col text-center">

@@ -47,6 +47,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
                     <div className="font-bold text-lg">{token?.tokenInfo?.symbol}</div>
                     {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
+                    {token.useBoostedVariant && <i className="text-success">Boosted</i>}
                   </div>
                   <div>{token.amount}</div>
                 </div>

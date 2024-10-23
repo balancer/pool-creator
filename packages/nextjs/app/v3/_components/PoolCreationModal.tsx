@@ -27,8 +27,6 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
   const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
 
-  const numberOfTokens = tokenConfigs.length;
-
   const firstStep = {
     number: 1,
     label: "Deploy Pool",
@@ -41,7 +39,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   }));
 
   const approveOnPermit2Steps = tokenConfigs.map((token, idx) => ({
-    number: idx + numberOfTokens + 2,
+    number: idx + tokenConfigs.length + 2,
     label: `Permit ${token?.tokenInfo?.symbol}`,
   }));
 
@@ -81,7 +79,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
             <ApproveButtonManager tokens={tokenConfigs} />
           ) : step > approveOnTokenSteps.length + 1 &&
             step <= approveOnPermit2Steps.length + approveOnTokenSteps.length + 1 ? (
-            <PermitButtonManager tokens={tokenConfigs} numberOfTokens={numberOfTokens} />
+            <PermitButtonManager tokens={tokenConfigs} numberOfTokens={tokenConfigs.length} />
           ) : step === approveOnPermit2Steps.length + approveOnTokenSteps.length + 2 ? (
             <TransactionButton
               onClick={initializePool}
@@ -113,8 +111,10 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
             </div>
           </Alert>
         )}
-        <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg mt-2">
-          Reset progress
+        <div className="flex justify-center">
+          <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg mt-2">
+            Reset progress
+          </div>
         </div>
       </div>
 

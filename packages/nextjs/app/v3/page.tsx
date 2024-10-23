@@ -9,7 +9,7 @@ import { usePoolStoreDebug, useValidateNetwork } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
   usePoolStoreDebug();
-  const { isWrongNetwork } = useValidateNetwork();
+  const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
@@ -19,7 +19,18 @@ const BalancerV3: NextPage = () => {
             <h1 className="text-5xl font-bold text-center mb-0">Balancer v3</h1>
           </div>
 
-          {isWrongNetwork ? (
+          {!isWalletConnected ? (
+            <div className="flex justify-center w-full">
+              <div>
+                <Alert type="warning">
+                  <div className="flex items-center gap-2">
+                    Please connect a wallet and switch to the Sepolia mainnet network
+                    <ArrowUpRightIcon className="w-4 h-4" />
+                  </div>
+                </Alert>
+              </div>
+            </div>
+          ) : isWrongNetwork ? (
             <div className="flex justify-center w-full">
               <div>
                 <Alert type="warning">

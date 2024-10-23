@@ -15,8 +15,6 @@ export const useApproveOnPermit2 = () => {
   const publicClient = usePublicClient();
   const chainId = publicClient?.chain.id;
 
-  console.log("walletClient", walletClient);
-  console.log("publicClient", publicClient);
   const writeTx = useTransactor();
 
   const approve = async ({ token, spender }: ApproveOnPermit2Payload) => {

@@ -119,7 +119,7 @@ export const ChooseParameters = () => {
         <label className="text-lg font-bold">Pool management</label>
         <RadioInput
           name="pool-management"
-          label="Delegate swap and pause management to the Balancer DAO"
+          label="Delegate swap fee and pause management to the Balancer DAO"
           checked={isDelegatingManagement}
           onChange={() => {
             updatePool({ isDelegatingManagement: true, swapFeeManager: "", pauseManager: "" });
