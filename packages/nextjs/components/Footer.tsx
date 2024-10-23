@@ -1,4 +1,5 @@
 import React from "react";
+import { sepolia } from "viem/chains";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 
 // import Link from "next/link";
@@ -18,7 +19,7 @@ export const Footer = () => {
   // const nativeCurrencyPrice = useGlobalState(state => state.nativeCurrency.price);
   const { targetNetwork } = useTargetNetwork();
   // const isLocalNetwork = targetNetwork.id === hardhat.id;
-  const isSepolia = targetNetwork.id == 11155111;
+  const isSepolia = targetNetwork.id == sepolia.id;
 
   return (
     <div className="min-h-0 py-5 px-1 lg:mb-0 bg-base-300 border-t border-base-200">
@@ -53,7 +54,7 @@ export const Footer = () => {
               <>
                 <div className="text-center">
                   <a
-                    href="https://beta-app-v2-git-sepolia-faucets-balancer.vercel.app/#/sepolia/faucet"
+                    href="https://sepolia.etherscan.io/address/0x26bfAecAe4D5fa93eE1737ce1Ce7D53F2a0E9b2d#writeContract"
                     target="_blank"
                     rel="noreferrer"
                     className="link no-underline hover:underline"
