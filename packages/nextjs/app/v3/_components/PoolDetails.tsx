@@ -2,7 +2,7 @@
 
 import { PoolType, TokenType } from "@balancer/sdk";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
 import { TokenImage } from "~~/components/common";
 import { usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
@@ -47,7 +47,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
                     <div className="font-bold text-lg">{token?.tokenInfo?.symbol}</div>
                     {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
-                    {token.useBoostedVariant && <i className="text-success">Boosted</i>}
+                    {token.useBoostedVariant && (
+                      <i className="text-success flex gap-1 items-center">
+                        Boosted <RocketLaunchIcon className="w-4 h-4" />
+                      </i>
+                    )}
                   </div>
                   <div>{token.amount}</div>
                 </div>

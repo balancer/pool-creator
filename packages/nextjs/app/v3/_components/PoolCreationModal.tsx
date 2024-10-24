@@ -27,6 +27,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
   const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
 
+  // TODO: expand steps into functions that check if any tokens have useBoostedVariant set to true
   const firstStep = {
     number: 1,
     label: "Deploy Pool",

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { TokenType } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
@@ -88,7 +88,7 @@ export function ChooseToken({ index }: { index: number }) {
 
   return (
     <>
-      <div className="bg-base-100 p-4 rounded-xl">
+      <div className="bg-base-100 p-4 rounded-xl flex flex-col gap-3">
         <div className="flex gap-3 w-full items-center">
           {poolType === PoolType.Weighted && (
             <div className="w-full max-w-[80px] h-full flex flex-col relative">
@@ -125,34 +125,37 @@ export function ChooseToken({ index }: { index: number }) {
         </div>
 
         {tokenInfo && (
-          <div className="flex justify-between items-center mt-2">
+          <div className="flex justify-between items-center">
             <Checkbox
-              label={`Use rate provider for ${tokenInfo.symbol}?`}
+              label={`Use a rate provider?`}
               checked={tokenType === TokenType.TOKEN_WITH_RATE}
               onChange={handleTokenType}
             />
 
             {hasBoostedVariant && (
-              <Checkbox
-                label={`Earn extra yield on ${tokenInfo.symbol}?`}
-                checked={useBoostedVariant}
-                onChange={() => setShowBoostOpportunityModal(true)}
-              />
+              <div
+                className={`flex gap-1 items-center cursor-pointer ${
+                  useBoostedVariant ? "text-success" : "text-warning"
+                }`}
+                onClick={() => setShowBoostOpportunityModal(true)}
+              >
+                {useBoostedVariant
+                  ? `Earning 3.5% with Aave Boosted ${tokenInfo.symbol}`
+                  : `Using standard ${tokenInfo.symbol}`}
+                <Cog6ToothIcon className="w-5 h-5" />
+              </div>
             )}
           </div>
         )}
 
         {tokenType === TokenType.TOKEN_WITH_RATE && (
-          <div>
-            <div className="my-1">
-              <TextField
-                mustBeAddress={true}
-                placeholder="Enter rate provider address"
-                value={rateProvider !== zeroAddress ? rateProvider : ""}
-                onChange={e => handleRateProvider(e.target.value)}
-              />
-            </div>
-
+          <>
+            <TextField
+              mustBeAddress={true}
+              placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
+              value={rateProvider !== zeroAddress ? rateProvider : ""}
+              onChange={e => handleRateProvider(e.target.value)}
+            />
             <div className="flex gap-1 items-center">
               {/* <InformationCircleIcon className="w-5 h-5" /> */}
               <Checkbox
@@ -161,7 +164,7 @@ export function ChooseToken({ index }: { index: number }) {
                 onChange={handlePaysYieldFees}
               />
             </div>
-          </div>
+          </>
         )}
       </div>
       {showBoostOpportunityModal && tokenInfo && (
@@ -190,16 +193,16 @@ const BoostOpportunityModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="relative w-[550px] bg-base-300 rounded-lg p-7 flex flex-col items-center">
-        <h3 className="font-bold text-2xl mb-5">Aave Boosted {tokenInfo.symbol}</h3>
-        <div className="text-lg mb-7 px-5">
+      <div className="w-[625px] min-h-[333px] bg-base-300 rounded-lg p-7 flex flex-col gap-5 items-center">
+        <h3 className="font-bold text-3xl mb-5">Aave Boosted {tokenInfo.symbol}</h3>
+        <div className="text-xl mb-7 px-5">
           Boosted tokens provide your liquidity pool with a layer of sustainable yield. If you select{" "}
           <b>Aave Boosted {tokenInfo.symbol}</b>, all <b>{tokenInfo.symbol}</b> in this pool will be supplied to
           Aave&apos;s lending market to earn additional yield.
         </div>
         <div className="grid grid-cols-2 gap-4 w-full">
           <button className={`btn ${bgBeigeGradient} rounded-xl text-lg`} onClick={() => handleBoost(false)}>
-            {tokenInfo.symbol}
+            Standard {tokenInfo.symbol}
           </button>
           <button className={`btn ${bgPrimaryGradient} rounded-xl text-lg`} onClick={() => handleBoost(true)}>
             Aave Boosted {tokenInfo.symbol}
