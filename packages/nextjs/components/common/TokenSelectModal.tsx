@@ -4,6 +4,7 @@ import { ExclamationTriangleIcon, RocketLaunchIcon, XMarkIcon } from "@heroicons
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useExoticToken } from "~~/hooks/token";
+import { useFetchBoostableTokens } from "~~/hooks/v3";
 
 type ModalProps = {
   tokenOptions: Token[];
@@ -29,7 +30,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
   const networkColor = useNetworkColor();
   const { exoticToken, isLoadingExoticToken } = useExoticToken(searchText, searchFilteredTokenList);
   const { targetNetwork } = useTargetNetwork();
-
+  const { standardToBoosted } = useFetchBoostableTokens();
   const tokenList = exoticToken ? [exoticToken] : searchFilteredTokenList;
 
   return (
@@ -102,7 +103,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                               <ExclamationTriangleIcon className="w-8 h-8 hover:cursor-pointer " />
                             </div>
                           )}
-                          {token.hasBoostedVariant && (
+                          {standardToBoosted[token.address] && (
                             <div className="flex flex-col justify-around text-success">
                               <RocketLaunchIcon className="w-7 h-7 hover:cursor-pointer " />
                             </div>

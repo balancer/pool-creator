@@ -2,8 +2,9 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 interface StepsDisplayProps {
   currentStepNumber: number;
-  steps: { number: number; label: string; blockExplorerUrl?: string }[];
+  steps: Step[];
 }
+export type Step = { number: number; label: string; blockExplorerUrl?: string; actionComponent?: React.ReactNode };
 
 export function StepsDisplay({ currentStepNumber, steps }: StepsDisplayProps) {
   return (

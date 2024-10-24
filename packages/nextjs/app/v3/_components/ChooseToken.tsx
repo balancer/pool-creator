@@ -16,15 +16,17 @@ export function ChooseToken({ index }: { index: number }) {
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
   const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount, address, useBoostedVariant } =
     tokenConfigs[index];
-  const { balance } = useReadToken(tokenInfo?.address);
+  const { balance: userTokenBalance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
-  const { boostableTokenMap } = useFetchBoostableTokens();
+  const { standardToBoosted } = useFetchBoostableTokens();
   const tokenList = data || [];
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
-  const hasBoostedVariant = boostableTokenMap[address];
+  const boostedVariantAddress = standardToBoosted[address];
+
+  const { symbol: boostedSymbol, name: boostedName } = useReadToken(boostedVariantAddress);
 
   const handleTokenSelection = (tokenInfo: Token) => {
-    const hasBoostedVariant = boostableTokenMap[tokenInfo.address];
+    const hasBoostedVariant = standardToBoosted[tokenInfo.address];
     if (hasBoostedVariant) {
       setShowBoostOpportunityModal(true);
     }
@@ -112,7 +114,7 @@ export function ChooseToken({ index }: { index: number }) {
                   setToken={handleTokenSelection}
                   setTokenAmount={handleTokenAmount}
                   tokenOptions={remainingTokens}
-                  balance={balance}
+                  balance={userTokenBalance}
                 />
               </div>
             </div>
@@ -132,16 +134,14 @@ export function ChooseToken({ index }: { index: number }) {
               onChange={handleTokenType}
             />
 
-            {hasBoostedVariant && (
+            {boostedVariantAddress && (
               <div
                 className={`flex gap-1 items-center cursor-pointer ${
                   useBoostedVariant ? "text-success" : "text-warning"
                 }`}
                 onClick={() => setShowBoostOpportunityModal(true)}
               >
-                {useBoostedVariant
-                  ? `Earning 3.5% with Aave Boosted ${tokenInfo.symbol}`
-                  : `Using standard ${tokenInfo.symbol}`}
+                {useBoostedVariant ? `Earning 3.5% with ${boostedSymbol}` : `Using standard ${tokenInfo.symbol}`}
                 <Cog6ToothIcon className="w-5 h-5" />
               </div>
             )}
@@ -167,8 +167,13 @@ export function ChooseToken({ index }: { index: number }) {
           </>
         )}
       </div>
-      {showBoostOpportunityModal && tokenInfo && (
-        <BoostOpportunityModal tokenIndex={index} setShowBoostOpportunityModal={setShowBoostOpportunityModal} />
+      {showBoostOpportunityModal && tokenInfo && boostedSymbol && boostedName && (
+        <BoostOpportunityModal
+          tokenIndex={index}
+          setShowBoostOpportunityModal={setShowBoostOpportunityModal}
+          boostedSymbol={boostedSymbol}
+          boostedName={boostedName}
+        />
       )}
     </>
   );
@@ -177,9 +182,13 @@ export function ChooseToken({ index }: { index: number }) {
 const BoostOpportunityModal = ({
   tokenIndex,
   setShowBoostOpportunityModal,
+  boostedSymbol,
+  boostedName,
 }: {
   tokenIndex: number;
   setShowBoostOpportunityModal: Dispatch<SetStateAction<boolean>>;
+  boostedSymbol: string;
+  boostedName: string;
 }) => {
   const { tokenConfigs, updateTokenConfig } = usePoolCreationStore();
   const { tokenInfo } = tokenConfigs[tokenIndex];
@@ -194,18 +203,18 @@ const BoostOpportunityModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="w-[625px] min-h-[333px] bg-base-300 rounded-lg p-7 flex flex-col gap-5 items-center">
-        <h3 className="font-bold text-3xl mb-5">Aave Boosted {tokenInfo.symbol}</h3>
+        <h3 className="font-bold text-3xl mb-5">{boostedName}</h3>
         <div className="text-xl mb-7 px-5">
           Boosted tokens provide your liquidity pool with a layer of sustainable yield. If you select{" "}
-          <b>Aave Boosted {tokenInfo.symbol}</b>, all <b>{tokenInfo.symbol}</b> in this pool will be supplied to
-          Aave&apos;s lending market to earn additional yield.
+          <b>{boostedSymbol}</b>, all <b>{tokenInfo.symbol}</b> in this pool will be supplied to Aave&apos;s lending
+          market to earn additional yield.
         </div>
         <div className="grid grid-cols-2 gap-4 w-full">
           <button className={`btn ${bgBeigeGradient} rounded-xl text-lg`} onClick={() => handleBoost(false)}>
-            Standard {tokenInfo.symbol}
+            {tokenInfo.symbol}
           </button>
           <button className={`btn ${bgPrimaryGradient} rounded-xl text-lg`} onClick={() => handleBoost(true)}>
-            Aave Boosted {tokenInfo.symbol}
+            {boostedSymbol}
           </button>
         </div>
       </div>

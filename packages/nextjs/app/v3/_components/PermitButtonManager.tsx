@@ -7,15 +7,16 @@ import { useAllowanceOnPermit2, useApproveOnPermit2 } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { type TokenConfig } from "~~/hooks/v3";
 
-export const PermitButtonManager = ({ tokens, numberOfTokens }: { tokens: TokenConfig[]; numberOfTokens: number }) => {
+export const PermitButtonManager = ({ token }: { token: TokenConfig }) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approveOnPermit2, isPending: isApprovePending, error: approveError } = useApproveOnPermit2();
-  const token = tokens[step - 2 - numberOfTokens];
+  if (!token.tokenInfo) throw Error("Token decimals are undefined");
 
   const { data: allowanceData } = useAllowanceOnPermit2(token.address);
+
   const spender = BALANCER_ROUTER[targetNetwork.id];
-  const rawAmount = parseUnits(token.amount, token?.tokenInfo?.decimals ?? 18);
+  const rawAmount = parseUnits(token.amount, token.tokenInfo.decimals);
 
   const handleApprove = async () => {
     await approveOnPermit2(

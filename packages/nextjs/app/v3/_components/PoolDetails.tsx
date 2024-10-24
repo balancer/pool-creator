@@ -45,7 +45,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 <div className="flex justify-between">
                   <div className="flex items-center gap-2">
                     {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
-                    <div className="font-bold text-lg">{token?.tokenInfo?.symbol}</div>
+                    <div className="font-bold text-lg">{token.tokenInfo?.symbol}</div>
                     {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
                     {token.useBoostedVariant && (
                       <i className="text-success flex gap-1 items-center">

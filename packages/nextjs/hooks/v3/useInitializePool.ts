@@ -27,11 +27,18 @@ export const useInitializePool = () => {
 
     const initPool = new InitPool();
 
+    // Make sure all tokenConfigs have decimals and address
+    tokenConfigs.forEach(token => {
+      if (token.tokenInfo?.decimals === null || token.address === "") {
+        throw new Error(`Token ${token.address} is missing tokenInfo.decimals`);
+      }
+    });
+
     const amountsIn = tokenConfigs
       .map(token => ({
         address: token.address as `0x${string}`,
-        rawAmount: parseUnits(token.amount, token.tokenInfo?.decimals || 18),
-        decimals: token.tokenInfo?.decimals || 18,
+        rawAmount: parseUnits(token.amount, token.tokenInfo?.decimals as number),
+        decimals: token.tokenInfo?.decimals as number,
       }))
       .sort((a, b) => a.address.localeCompare(b.address));
 

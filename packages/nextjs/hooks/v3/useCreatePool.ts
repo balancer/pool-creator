@@ -11,7 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { parseEventLogs, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
 
 const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
@@ -39,7 +39,7 @@ export const useCreatePool = () => {
     amplificationParameter,
     updatePool,
   } = usePoolCreationStore();
-
+  const { standardToBoosted } = useFetchBoostableTokens();
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
     const baseInput: CreatePoolV3BaseInput = {
@@ -55,13 +55,16 @@ export const useCreatePool = () => {
       disableUnbalancedLiquidity,
     };
 
-    const tokens = tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees }) => ({
-      address,
-      rateProvider,
-      tokenType,
-      paysYieldFees,
-      ...(poolType === PoolType.Weighted && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
-    }));
+    // Conditionally creates pool with boosted variant addresses if useBoostedVariant is true
+    const tokens = tokenConfigs.map(
+      ({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => ({
+        address: useBoostedVariant ? standardToBoosted[address] : address, // BOOST!!!
+        rateProvider,
+        tokenType,
+        paysYieldFees,
+        ...(poolType === PoolType.Weighted && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
+      }),
+    );
 
     return {
       ...baseInput,

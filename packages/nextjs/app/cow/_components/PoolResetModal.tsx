@@ -4,7 +4,7 @@ import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outlin
 interface PoolResetModalModalProps {
   setIsModalOpen: (isOpen: boolean) => void;
   clearState: () => void;
-  etherscanURL: string | undefined;
+  etherscanURL?: string | undefined;
 }
 
 export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: PoolResetModalModalProps) => {

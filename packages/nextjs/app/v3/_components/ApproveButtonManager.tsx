@@ -7,13 +7,13 @@ import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { type TokenConfig } from "~~/hooks/v3";
 
-export const ApproveButtonManager = ({ tokens }: { tokens: TokenConfig[] }) => {
+export const ApproveButtonManager = ({ token }: { token: TokenConfig }) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approveOnToken, isPending: isApprovePending, error: approveError } = useApproveToken();
 
-  const token = tokens[step - 2]; // step value starts at 2 so start from index 0
-  const rawAmount = parseUnits(token.amount, token?.tokenInfo?.decimals ?? 18);
+  if (!token.tokenInfo) throw Error("Token decimals are undefined");
+  const rawAmount = parseUnits(token.amount, token.tokenInfo.decimals);
   const spender = PERMIT2[targetNetwork.id];
   const { allowance, refetchAllowance } = useReadToken(token.address, spender);
 
@@ -33,7 +33,6 @@ export const ApproveButtonManager = ({ tokens }: { tokens: TokenConfig[] }) => {
 
   // auto move to next step if allowance is already enough
   useEffect(() => {
-    // TODO: test this with wallet that has already max approved permit2 for some tokens
     if (allowance && allowance >= rawAmount) {
       updatePool({ step: step + 1 });
     }
