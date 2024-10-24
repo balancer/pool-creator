@@ -259,7 +259,18 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           </div>
         </div>
         <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
-          <StepsDisplay state={state} />
+          <StepsDisplay
+            currentStepNumber={state.step}
+            steps={[
+              { number: 1, label: "Create Pool" },
+              { number: 2, label: `Approve ${state.token1.symbol}` },
+              { number: 3, label: `Approve ${state.token2.symbol}` },
+              { number: 4, label: `Add ${state.token1.symbol}` },
+              { number: 5, label: `Add ${state.token2.symbol}` },
+              { number: 6, label: "Set Swap Fee" },
+              { number: 7, label: "Finalize Pool" },
+            ]}
+          />
         </div>
       </div>
 

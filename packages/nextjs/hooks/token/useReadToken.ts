@@ -2,20 +2,20 @@ import { erc20Abi } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { useReadContract, useWalletClient } from "wagmi";
 
-type UseReadToken = {
-  allowance: bigint;
-  refetchAllowance: () => void;
-  balance: bigint;
-  refetchBalance: () => void;
-  symbol: string | undefined;
-  name: string | undefined;
-  decimals: number | undefined;
-  isLoadingSymbol: boolean;
-  isLoadingName: boolean;
-  isLoadingDecimals: boolean;
-};
+// type UseReadToken = {
+//   allowance: bigint;
+//   refetchAllowance: () => void;
+//   balance: bigint;
+//   refetchBalance: () => Promise<void>;
+//   symbol: string | undefined;
+//   name: string | undefined;
+//   decimals: number | undefined;
+//   isLoadingSymbol: boolean;
+//   isLoadingName: boolean;
+//   isLoadingDecimals: boolean;
+// };
 
-export const useReadToken = (token: Address | undefined, spender?: Address): UseReadToken => {
+export const useReadToken = (token: Address | undefined, spender?: Address) => {
   const { data: walletClient } = useWalletClient();
   const connectedAddress = walletClient?.account.address || zeroAddress;
 
