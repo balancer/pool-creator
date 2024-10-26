@@ -57,14 +57,20 @@ export const useCreatePool = () => {
 
     // Conditionally creates pool with boosted variant addresses if useBoostedVariant is true
     const tokens = tokenConfigs.map(
-      ({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => ({
-        address: useBoostedVariant ? standardToBoosted[address] : address, // BOOST!!!
-        rateProvider,
-        tokenType,
-        paysYieldFees,
-        ...(poolType === PoolType.Weighted && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
-      }),
+      ({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => {
+        const boostedVariant = standardToBoosted[address];
+        const tokenAddress = useBoostedVariant ? boostedVariant.address : address;
+        return {
+          address: tokenAddress,
+          rateProvider,
+          tokenType,
+          paysYieldFees,
+          ...(poolType === PoolType.Weighted && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
+        };
+      },
     );
+
+    console.log("Batch swap token paths:", tokens);
 
     return {
       ...baseInput,

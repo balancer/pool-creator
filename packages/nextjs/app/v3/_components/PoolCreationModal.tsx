@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApproveButtonManager, PermitButtonManager } from "./";
+import { ApproveOnPermitManager, ApproveOnTokenManager } from "./";
 import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolResetModal, StepsDisplay } from "~~/app/cow/_components";
@@ -12,7 +12,6 @@ import {
   useInitializePool,
   usePoolCreationStore,
 } from "~~/hooks/v3/";
-import { bgBeigeGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
 interface PoolCreationModalProps {
@@ -21,8 +20,8 @@ interface PoolCreationModalProps {
 
 export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
 
+  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
   const { standardToBoosted } = useFetchBoostableTokens();
 
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
@@ -41,7 +40,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
 
     return {
       label: `Approve ${symbol}`,
-      component: <ApproveButtonManager key={idx} token={{ address, amount, decimals, symbol }} />,
+      component: <ApproveOnTokenManager key={idx} token={{ address, amount, decimals, symbol }} />,
     };
   });
 
@@ -58,7 +57,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     approveOnBoostedVariantSteps.push({
       label: `Approve ${boostedVariant.symbol}`,
       component: (
-        <ApproveButtonManager
+        <ApproveOnTokenManager
           key={idx}
           token={{
             address: boostedVariant.address,
@@ -71,12 +70,19 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     });
   });
 
-  // TODO change permitManager to handle if boosted variant is used
   const approveOnPermit2Steps = tokenConfigs.map((token, idx) => {
+    const { useBoostedVariant } = token;
     const boostedVariant = standardToBoosted[token.address];
+
+    const address = useBoostedVariant ? boostedVariant.address : token.address;
+    const decimals = useBoostedVariant ? boostedVariant.decimals : token.tokenInfo?.decimals;
+    const symbol = useBoostedVariant ? boostedVariant.symbol : token.tokenInfo?.symbol;
+    const amount = token.amount;
+    if (!symbol || !decimals) throw Error("Token symbol or decimals are undefined");
+
     return {
-      label: `Permit ${boostedVariant ? boostedVariant.symbol : token?.tokenInfo?.symbol}`,
-      component: <PermitButtonManager key={idx} token={token} />,
+      label: `Permit ${symbol}`,
+      component: <ApproveOnPermitManager key={idx} token={{ address, amount, decimals, symbol }} />,
     };
   });
 
@@ -161,9 +167,9 @@ const SwapTokens = () => {
   return (
     <div>
       <TransactionButton
-        key="initialize"
+        key="batch-swap"
         onClick={batchSwap}
-        title="Initialize Pool"
+        title="Batch Swap"
         isDisabled={isBatchSwapPending}
         isPending={isBatchSwapPending}
       />
@@ -207,23 +213,20 @@ const InitializePool = () => {
   );
 };
 
+// TODO figure out how to link to the newly created pool on Balancer frontend
 const PoolCreatedView = () => {
-  const { createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
-
-  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
-  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
+  const { poolAddress } = usePoolCreationStore();
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <a href={poolDeploymentUrl} target="_blank" rel="noopener noreferrer" className="">
-        <button className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} text-neutral-700`}>
-          <div>View creation</div>
-          <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
-        </button>
-      </a>
-      <a href={poolInitializationUrl} target="_blank" rel="noopener noreferrer" className="">
-        <button className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} text-neutral-700`}>
-          <div>View initialization</div>
+    <div className="">
+      <a
+        href={`https://test.balancer.fi/pools/sepolia/v3/${poolAddress}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className=""
+      >
+        <button className={`btn w-full rounded-xl text-lg btn-accent text-neutral-700`}>
+          <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
         </button>
       </a>

@@ -7,11 +7,9 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
-export const ApproveButtonManager = ({
-  token,
-}: {
-  token: { address: Address; amount: string; decimals: number; symbol: string };
-}) => {
+type MinimalToken = { address: Address; amount: string; decimals: number; symbol: string };
+
+export const ApproveOnTokenManager = ({ token }: { token: MinimalToken }) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approveOnToken, isPending: isApprovePending, error: approveError } = useApproveToken();

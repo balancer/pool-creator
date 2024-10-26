@@ -25,7 +25,7 @@ export function StepsDisplay({ currentStepNumber, steps }: StepsDisplayProps) {
                 {step.label}
                 {step.blockExplorerUrl && (
                   <a href={step.blockExplorerUrl} target="_blank" rel="noopener noreferrer">
-                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4 text-accent" />
                   </a>
                 )}
               </div>

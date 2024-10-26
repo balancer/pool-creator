@@ -1,41 +1,32 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
-import { usePoolCreationStore } from "~~/hooks/v3";
-import { TokenConfig } from "~~/hooks/v3/usePoolCreationStore";
-
-function buildPoolName(poolType: PoolType, tokenConfigs: TokenConfig[]): string {
-  const tokenParts = tokenConfigs
-    .map(token =>
-      poolType === PoolType.Weighted && token.weight
-        ? `${token.weight}${token.tokenInfo?.symbol}`
-        : token.tokenInfo?.symbol,
-    )
-    .join(" ");
-  return `Balancer ${poolType} ${tokenParts}`;
-}
-
-function buildPoolSymbol(poolType: PoolType, tokenConfigs: TokenConfig[]): string {
-  return tokenConfigs
-    .map(token =>
-      poolType === PoolType.Weighted && token.weight
-        ? `${token.weight}${token.tokenInfo?.symbol}`
-        : token.tokenInfo?.symbol,
-    )
-    .join("-");
-}
+import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
 
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
+  const { standardToBoosted } = useFetchBoostableTokens();
 
   useEffect(() => {
     if (poolType) {
+      const symbol = tokenConfigs
+        .map(token => {
+          const { useBoostedVariant, tokenInfo, weight } = token;
+          const boostedVariant = standardToBoosted[token.address];
+          const symbol = useBoostedVariant ? boostedVariant.symbol : tokenInfo?.symbol;
+          if (poolType === PoolType.Weighted && weight) {
+            return `${token.weight}${symbol}`;
+          }
+          return symbol;
+        })
+        .join("-");
+
       updatePool({
-        name: buildPoolName(poolType, tokenConfigs),
-        symbol: buildPoolSymbol(poolType, tokenConfigs),
+        name: `Balancer ${symbol.split("-").join(" ")}`,
+        symbol,
       });
     }
-  }, [tokenConfigs, poolType, updatePool]);
+  }, [tokenConfigs, poolType, updatePool, standardToBoosted]);
 
   return (
     <div>

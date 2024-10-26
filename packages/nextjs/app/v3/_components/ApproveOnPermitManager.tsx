@@ -1,22 +1,24 @@
 import { useEffect } from "react";
 import { BALANCER_ROUTER } from "@balancer/sdk";
-import { parseUnits } from "viem";
+import { Address, parseUnits } from "viem";
+import { usePublicClient } from "wagmi";
 import { Alert, TransactionButton } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useAllowanceOnPermit2, useApproveOnPermit2 } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
-import { type TokenConfig } from "~~/hooks/v3";
 
-export const PermitButtonManager = ({ token }: { token: TokenConfig }) => {
+type MinimalToken = { address: Address; amount: string; decimals: number; symbol: string };
+
+export const ApproveOnPermitManager = ({ token }: { token: MinimalToken }) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
+  const publicClient = usePublicClient();
   const { mutateAsync: approveOnPermit2, isPending: isApprovePending, error: approveError } = useApproveOnPermit2();
-  if (!token.tokenInfo) throw Error("Token decimals are undefined");
 
   const { data: allowanceData } = useAllowanceOnPermit2(token.address);
 
   const spender = BALANCER_ROUTER[targetNetwork.id];
-  const rawAmount = parseUnits(token.amount, token.tokenInfo.decimals);
+  const rawAmount = parseUnits(token.amount, token.decimals);
 
   const handleApprove = async () => {
     await approveOnPermit2(
@@ -31,22 +33,25 @@ export const PermitButtonManager = ({ token }: { token: TokenConfig }) => {
 
   // auto move to next step if allowance is already enough
   useEffect(() => {
-    if (allowanceData) {
+    async function checkAllowance() {
+      if (!allowanceData) return;
+      if (!publicClient) return;
       const [amount, expiration] = allowanceData;
-      // TODO: make sure this is okay? maybe read block.timestamp instead?
-      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const block = await publicClient.getBlock();
+      const currentTimestamp = Number(block.timestamp);
 
-      // If allowance is sufficient and not expired, move to next step
       if (amount >= rawAmount && expiration > currentTimestamp) {
         updatePool({ step: step + 1 });
       }
     }
-  }, [allowanceData, token, step, updatePool, rawAmount]);
+
+    checkAllowance();
+  }, [allowanceData, token, step, updatePool, rawAmount, publicClient]);
 
   return (
     <div>
       <TransactionButton
-        title={`Permit ${token?.tokenInfo?.symbol}`}
+        title={`Permit ${token.symbol}`}
         isDisabled={isApprovePending}
         isPending={isApprovePending}
         onClick={handleApprove}
