@@ -1,19 +1,22 @@
 import { useEffect } from "react";
 import { PERMIT2 } from "@balancer/sdk";
 import { parseUnits } from "viem";
+import { Address } from "viem";
 import { Alert, TransactionButton } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
-import { type TokenConfig } from "~~/hooks/v3";
 
-export const ApproveButtonManager = ({ token }: { token: TokenConfig }) => {
+export const ApproveButtonManager = ({
+  token,
+}: {
+  token: { address: Address; amount: string; decimals: number; symbol: string };
+}) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approveOnToken, isPending: isApprovePending, error: approveError } = useApproveToken();
 
-  if (!token.tokenInfo) throw Error("Token decimals are undefined");
-  const rawAmount = parseUnits(token.amount, token.tokenInfo.decimals);
+  const rawAmount = parseUnits(token.amount, token.decimals);
   const spender = PERMIT2[targetNetwork.id];
   const { allowance, refetchAllowance } = useReadToken(token.address, spender);
 
@@ -41,7 +44,7 @@ export const ApproveButtonManager = ({ token }: { token: TokenConfig }) => {
   return (
     <div>
       <TransactionButton
-        title={`Approve ${token?.tokenInfo?.symbol}`}
+        title={`Approve ${token.symbol}`}
         isDisabled={isApprovePending}
         isPending={isApprovePending}
         onClick={handleApprove}

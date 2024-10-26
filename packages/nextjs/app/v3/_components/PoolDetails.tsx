@@ -2,9 +2,15 @@
 
 import { PoolType, TokenType } from "@balancer/sdk";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import { CheckCircleIcon, RocketLaunchIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { TokenImage } from "~~/components/common";
-import { usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
+import { useReadToken } from "~~/hooks/token";
+import {
+  type TokenConfig,
+  useFetchBoostableTokens,
+  usePoolCreationStore,
+  useValidatePoolCreationInput,
+} from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
@@ -41,27 +47,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         content={
           <div className="flex flex-col gap-2">
             {tokenConfigs.map((token, index) => (
-              <div key={index}>
-                <div className="flex justify-between">
-                  <div className="flex items-center gap-2">
-                    {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
-                    <div className="font-bold text-lg">{token.tokenInfo?.symbol}</div>
-                    {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
-                    {token.useBoostedVariant && (
-                      <i className="text-success flex gap-1 items-center">
-                        Boosted <RocketLaunchIcon className="w-4 h-4" />
-                      </i>
-                    )}
-                  </div>
-                  <div>{token.amount}</div>
-                </div>
-                {token.tokenType === TokenType.TOKEN_WITH_RATE && (
-                  <div className="flex gap-2 mt-1">
-                    <i>Rate Provider:</i>
-                    <div>{abbreviateAddress(token.rateProvider)}</div>
-                  </div>
-                )}
-              </div>
+              <TokenDetails key={index} token={token} />
             ))}
           </div>
         }
@@ -149,5 +135,36 @@ function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSe
         {isEmpty ? <i>No {title.toLowerCase()} selected</i> : <div>{content}</div>}
       </div>
     </>
+  );
+}
+
+function TokenDetails({ token }: { token: TokenConfig }) {
+  const { poolType } = usePoolCreationStore();
+
+  const { useBoostedVariant } = token;
+
+  const { standardToBoosted } = useFetchBoostableTokens();
+
+  const boostedToken = standardToBoosted[token.address];
+
+  const { symbol: boostedSymbol } = useReadToken(boostedToken?.address);
+
+  return (
+    <div>
+      <div className="flex justify-between">
+        <div className="flex items-center gap-2">
+          {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
+          <div className="font-bold text-lg">{useBoostedVariant ? boostedSymbol : token.tokenInfo?.symbol}</div>
+          {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
+        </div>
+        <div>{token.amount}</div>
+      </div>
+      {token.tokenType === TokenType.TOKEN_WITH_RATE && (
+        <div className="flex gap-2 mt-1">
+          <i>Rate Provider:</i>
+          <div>{abbreviateAddress(token.rateProvider)}</div>
+        </div>
+      )}
+    </div>
   );
 }

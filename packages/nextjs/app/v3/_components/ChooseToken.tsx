@@ -21,9 +21,9 @@ export function ChooseToken({ index }: { index: number }) {
   const { standardToBoosted } = useFetchBoostableTokens();
   const tokenList = data || [];
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
-  const boostedVariantAddress = standardToBoosted[address];
 
-  const { symbol: boostedSymbol, name: boostedName } = useReadToken(boostedVariantAddress);
+  const boostedVariant = standardToBoosted[address];
+  const { symbol: boostedSymbol, name: boostedName } = useReadToken(boostedVariant?.address);
 
   const handleTokenSelection = (tokenInfo: Token) => {
     const hasBoostedVariant = standardToBoosted[tokenInfo.address];
@@ -62,8 +62,10 @@ export function ChooseToken({ index }: { index: number }) {
 
   const handleRemoveToken = () => {
     if (tokenConfigs.length > 2) {
-      const updatedTokenConfigs = [...tokenConfigs];
-      updatedTokenConfigs.splice(index, 1);
+      const remainingTokenConfigs = [...tokenConfigs].filter((_, i) => i !== index);
+      const updatedTokenConfigs = remainingTokenConfigs.map(token => {
+        return { ...token, weight: 100 / remainingTokenConfigs.length };
+      });
       updatePool({ tokenConfigs: updatedTokenConfigs });
     }
   };
@@ -134,7 +136,7 @@ export function ChooseToken({ index }: { index: number }) {
               onChange={handleTokenType}
             />
 
-            {boostedVariantAddress && (
+            {boostedVariant && (
               <div
                 className={`flex gap-1 items-center cursor-pointer ${
                   useBoostedVariant ? "text-success" : "text-warning"
