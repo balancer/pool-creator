@@ -6,10 +6,10 @@ import { PoolResetModal, StepsDisplay } from "~~/app/cow/_components";
 import { PoolDetails } from "~~/app/v3/_components";
 import { Alert, TransactionButton } from "~~/components/common";
 import {
-  useBatchSwap,
   useCreatePool,
   useFetchBoostableTokens,
   useInitializePool,
+  useMultiSwap,
   usePoolCreationStore,
 } from "~~/hooks/v3/";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
@@ -46,7 +46,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
 
   const swapIntoBoostedStep = [];
   if (tokenConfigs.some(token => token.useBoostedVariant === true)) {
-    swapIntoBoostedStep.push({ label: "Swap Tokens", component: <SwapTokens /> });
+    swapIntoBoostedStep.push({ label: "Multi Swap Tokens", component: <SwapTokens /> });
   }
 
   const approveOnBoostedVariantSteps: { label: string; component: React.ReactNode }[] = [];
@@ -162,22 +162,22 @@ const DeployPool = () => {
 };
 
 const SwapTokens = () => {
-  const { mutate: batchSwap, isPending: isBatchSwapPending, error: batchSwapError } = useBatchSwap();
+  const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
 
   return (
     <div>
       <TransactionButton
-        key="batch-swap"
-        onClick={batchSwap}
-        title="Batch Swap"
-        isDisabled={isBatchSwapPending}
-        isPending={isBatchSwapPending}
+        key="multi-swap"
+        onClick={multiSwap}
+        title="Multi Swap"
+        isDisabled={isMultiSwapPending}
+        isPending={isMultiSwapPending}
       />
 
-      {batchSwapError && (
+      {multiSwapError && (
         <Alert type="error">
           <div className="flex items-center gap-2">
-            Error: {(batchSwapError as { shortMessage?: string }).shortMessage || batchSwapError.message}
+            Error: {(multiSwapError as { shortMessage?: string }).shortMessage || multiSwapError.message}
           </div>
         </Alert>
       )}

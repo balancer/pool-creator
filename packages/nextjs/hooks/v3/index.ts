@@ -4,4 +4,4 @@ export * from "./useInitializePool";
 export * from "./useValidatePoolCreationInput";
 export * from "./useValidateNetwork";
 export * from "./useFetchBoostableTokens";
-export * from "./useBatchSwap";
+export * from "./useMultiSwap";
