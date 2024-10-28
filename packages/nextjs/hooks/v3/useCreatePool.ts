@@ -70,8 +70,6 @@ export const useCreatePool = () => {
       },
     );
 
-    console.log("Batch swap token paths:", tokens);
-
     return {
       ...baseInput,
       poolType,
