@@ -42,8 +42,9 @@ export const useCreatePool = () => {
   const { standardToBoosted } = useFetchBoostableTokens();
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
+    if (!publicClient) throw new Error("Public client must be available!");
     const baseInput: CreatePoolV3BaseInput = {
-      chainId: 11155111,
+      chainId: publicClient.chain.id,
       protocolVersion: 3,
       name,
       symbol,

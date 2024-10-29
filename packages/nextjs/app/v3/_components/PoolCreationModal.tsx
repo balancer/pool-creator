@@ -106,7 +106,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
       <div
         className="absolute w-full h-full"
         onClick={() => {
-          if (step > 1) return;
+          // if (step > 1) return;
           setIsModalOpen(false);
         }}
       />

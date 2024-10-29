@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
 
 export const useInitializePool = () => {
   const { data: walletClient } = useWalletClient();
@@ -13,6 +13,7 @@ export const useInitializePool = () => {
   const rpcUrl = publicClient?.chain.rpcUrls.default.http[0];
   const protocolVersion = 3;
   const { poolAddress, poolType, tokenConfigs, updatePool, step } = usePoolCreationStore();
+  const { standardToBoosted } = useFetchBoostableTokens();
 
   async function initializePool() {
     if (!poolAddress) throw new Error("Pool address missing");
@@ -25,6 +26,7 @@ export const useInitializePool = () => {
 
     const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 
+    console.log("poolState for initializePool", poolState);
     const initPool = new InitPool();
 
     // Make sure all tokenConfigs have decimals and address
@@ -35,12 +37,21 @@ export const useInitializePool = () => {
     });
 
     const amountsIn = tokenConfigs
-      .map(token => ({
-        address: token.address as `0x${string}`,
-        rawAmount: parseUnits(token.amount, token.tokenInfo?.decimals as number),
-        decimals: token.tokenInfo?.decimals as number,
-      }))
+      .map(token => {
+        if (!token.tokenInfo?.decimals) throw new Error(`Token ${token.address} is missing tokenInfo.decimals`);
+        const boostedToken = standardToBoosted[token.address];
+        const address = token.useBoostedVariant ? boostedToken.address : token.address;
+        const decimals = token.useBoostedVariant ? boostedToken.decimals : token.tokenInfo?.decimals;
+
+        return {
+          address: address as `0x${string}`,
+          rawAmount: parseUnits(token.amount, decimals),
+          decimals,
+        };
+      })
       .sort((a, b) => a.address.localeCompare(b.address));
+
+    console.log("amountsIn for initializePool", amountsIn);
 
     const input: InitPoolInput = {
       amountsIn,

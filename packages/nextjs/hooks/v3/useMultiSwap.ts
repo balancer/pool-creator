@@ -15,13 +15,13 @@ import {
   vaultV3Abi,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { encodeFunctionData, getContract, parseUnits, zeroAddress } from "viem";
+import { encodeFunctionData, formatUnits, getContract, parseEventLogs, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
 
 /**
- * @dev this is only used if user wants to create boosted pool using standard tokens
+ * @dev this hook only called if user wants to create boosted pool using standard tokens
  */
 export const useMultiSwap = () => {
   const { data: walletClient } = useWalletClient();
@@ -29,7 +29,7 @@ export const useMultiSwap = () => {
   const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
   // const rpcUrl = publicClient?.chain.rpcUrls.default.http[0];
-  const { tokenConfigs } = usePoolCreationStore();
+  const { tokenConfigs, updatePool, step, updateTokenConfig } = usePoolCreationStore();
   const { standardToBoosted } = useFetchBoostableTokens();
 
   const userData = "0x";
@@ -41,8 +41,10 @@ export const useMultiSwap = () => {
     if (!chainId) throw new Error("Chain ID missing");
     if (!walletClient) throw new Error("Wallet client missing");
 
+    const batchRouterAddress = BALANCER_BATCH_ROUTER[chainId];
+
     const batchRouterContract = getContract({
-      address: BALANCER_BATCH_ROUTER[chainId],
+      address: batchRouterAddress,
       abi: [...balancerBatchRouterAbi, ...vaultV3Abi, ...vaultExtensionAbi_V3, ...permit2Abi],
       client: { public: publicClient, wallet: walletClient },
     });
@@ -66,23 +68,25 @@ export const useMultiSwap = () => {
       };
     });
 
-    // result = (uint256[] memory pathAmountsOut, address[] memory tokensOut, uint256[] memory amountsOut)
+    // 1. Query the swap result
     const { result: querySwapExactInResult } = await batchRouterContract.simulate.querySwapExactIn([
       paths,
       zeroAddress,
       userData,
     ]);
+    // result = (uint256[] memory pathAmountsOut, address[] memory tokensOut, uint256[] memory amountsOut)
     const [, , amountsOut] = querySwapExactInResult;
-    console.log("multi swap result", querySwapExactInResult);
+    console.log("multi swap query result", querySwapExactInResult);
 
+    // 2. Apply slippage to each path
     // TODO figure out how to make sure the order of amountsOut match paths order?
     const pathsWithSlippage = paths.map((path, index) => {
       const minAmountOut = slippage.applyTo(amountsOut[index], -1);
-      console.log("minAmountOut", minAmountOut);
+      console.log("minAmountOut for", path.tokenIn, ": ", minAmountOut);
       return { ...path, minAmountOut };
     });
 
-    // encode swap data for multicallData arg of Batch Router's permitBatchAndCall function
+    // 3. Encode swap function call for multicallData arg of Batch Router's permitBatchAndCall function
     const encodedSwapData = encodeFunctionData({
       abi: balancerBatchRouterAbi,
       functionName: "swapExactIn",
@@ -95,15 +99,7 @@ export const useMultiSwap = () => {
       client: { public: publicClient, wallet: walletClient },
     });
 
-    // TODO: figure out how to fetch nonce for each token and plug into PermitDetails below
-    const allowanceResult = await permit2Contract.read.allowance([
-      walletClient.account.address,
-      tokenConfigs[0].address,
-      BALANCER_BATCH_ROUTER[chainId],
-    ]);
-    console.log("allowance result", allowanceResult);
-
-    //
+    // 5. Setup permit2 details for permitBatchAndCall
     const details: PermitDetails[] = await Promise.all(
       tokenConfigs.map(async token => {
         if (!token.tokenInfo?.decimals) throw new Error("Token decimals not found");
@@ -111,7 +107,7 @@ export const useMultiSwap = () => {
         const [, , nonce] = await permit2Contract.read.allowance([
           walletClient.account.address,
           token.address,
-          BALANCER_BATCH_ROUTER[chainId],
+          batchRouterAddress,
         ]);
 
         return {
@@ -122,11 +118,10 @@ export const useMultiSwap = () => {
         };
       }),
     );
-    console.log("details", details);
 
     const batch: Permit2Batch = {
       details,
-      spender: BALANCER_BATCH_ROUTER[chainId],
+      spender: batchRouterAddress,
       sigDeadline: MaxSigDeadline,
     };
 
@@ -143,9 +138,9 @@ export const useMultiSwap = () => {
     });
 
     const permit2 = { batch, signature } as Permit2;
-    console.log("permit2", permit2);
 
     const args = [[], [], permit2.batch, permit2.signature, [encodedSwapData]] as const;
+    console.log("args", args);
 
     const hash = await writeTx(() => batchRouterContract.write.permitBatchAndCall(args), {
       blockConfirmations: 1,
@@ -154,7 +149,24 @@ export const useMultiSwap = () => {
       },
     });
 
-    console.log("txHash", hash);
+    if (!hash) throw new Error("No multi swap transaction hash");
+    const txReceipt = await publicClient.getTransactionReceipt({ hash });
+    const logs = parseEventLogs({
+      abi: vaultV3Abi,
+      eventName: "Wrap",
+      logs: txReceipt.logs,
+    });
+
+    console.log("logs", logs);
+    logs.forEach((log, idx) => {
+      // mintedShares is the amount, underlyingToken is an address
+      const { mintedShares, underlyingToken } = log.args;
+      const boostedToken = standardToBoosted[underlyingToken.toLowerCase()];
+      const amount = formatUnits(mintedShares, boostedToken.decimals);
+      updateTokenConfig(idx, { amount });
+    });
+
+    updatePool({ step: step + 1 });
   }
 
   return useMutation({ mutationFn: () => multiSwap() });
