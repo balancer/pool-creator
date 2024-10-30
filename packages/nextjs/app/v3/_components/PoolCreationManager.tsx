@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApproveOnTokenManager } from "./";
+import { ApproveOnTokenManager } from ".";
 import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolResetModal, StepsDisplay } from "~~/app/cow/_components";
@@ -14,26 +14,31 @@ import {
 } from "~~/hooks/v3/";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
-interface PoolCreationModalProps {
-  setIsModalOpen: (isOpen: boolean) => void;
-}
-
-export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
+/**
+ * Manages the pool creation process using a modal that cannot be closed after execution of the first step
+ */
+export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
+  const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
+  const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
+  const { mutate: initializePool, isPending, error } = useInitializePool();
+
   const { standardToBoosted } = useFetchBoostableTokens();
 
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
   const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
 
-  const deployStep = {
+  const deployStep = createTransactionStep({
     label: "Deploy Pool",
     blockExplorerUrl: poolDeploymentUrl,
-    component: <DeployPool key="deploy" />,
-  };
+    onSubmit: createPool,
+    isPending: isCreatePoolPending,
+    error: createPoolError,
+  });
 
-  const approveOnSelectedTokenSteps = tokenConfigs.map((token, idx) => {
+  const approveOnTokenSteps = tokenConfigs.map((token, idx) => {
     const { address, amount, tokenInfo } = token;
     const { decimals, symbol } = tokenInfo || {};
     if (!symbol || !decimals) throw Error("Token symbol or decimals are undefined");
@@ -44,9 +49,16 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     };
   });
 
-  const swapIntoBoostedStep = [];
+  const swapToBoosted = [];
   if (tokenConfigs.some(token => token.useBoostedVariant === true)) {
-    swapIntoBoostedStep.push({ label: "Multi Swap to Boosted", component: <SwapTokens /> });
+    swapToBoosted.push(
+      createTransactionStep({
+        label: "Swap to Boosted",
+        onSubmit: multiSwap,
+        isPending: isMultiSwapPending,
+        error: multiSwapError,
+      }),
+    );
   }
 
   const approveOnBoostedVariantSteps: { label: string; component: React.ReactNode }[] = [];
@@ -70,34 +82,19 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     });
   });
 
-  // const approveOnPermit2Steps = tokenConfigs.map((token, idx) => {
-  //   const { useBoostedVariant } = token;
-  //   const boostedVariant = standardToBoosted[token.address];
-
-  //   const address = useBoostedVariant ? boostedVariant.address : token.address;
-  //   const decimals = useBoostedVariant ? boostedVariant.decimals : token.tokenInfo?.decimals;
-  //   const symbol = useBoostedVariant ? boostedVariant.symbol : token.tokenInfo?.symbol;
-  //   const amount = token.amount;
-  //   if (!symbol || !decimals) throw Error("Token symbol or decimals are undefined");
-
-  //   return {
-  //     label: `Permit ${symbol}`,
-  //     component: <ApproveOnPermitManager key={idx} token={{ address, amount, decimals, symbol }} />,
-  //   };
-  // });
-
-  const initializeStep = {
+  const initializeStep = createTransactionStep({
     label: "Initialize Pool",
+    onSubmit: initializePool,
+    isPending: isPending,
+    error: error,
     blockExplorerUrl: poolInitializationUrl,
-    component: <InitializePool key="initialize" />,
-  };
+  });
 
   const poolCreationSteps = [
     deployStep,
-    ...approveOnSelectedTokenSteps,
-    ...swapIntoBoostedStep,
+    ...approveOnTokenSteps,
+    ...swapToBoosted,
     ...approveOnBoostedVariantSteps,
-    // ...approveOnPermit2Steps,
     initializeStep,
   ];
 
@@ -140,78 +137,36 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
   );
 }
 
-const DeployPool = () => {
-  const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
-  return (
-    <div>
-      <TransactionButton
-        onClick={createPool}
-        title="Deploy Pool"
-        isDisabled={isCreatePoolPending}
-        isPending={isCreatePoolPending}
-      />
-      {createPoolError && (
-        <Alert type="error">
-          <div className="flex items-center gap-2">
-            Error: {(createPoolError as { shortMessage?: string }).shortMessage || createPoolError.message}
-          </div>
-        </Alert>
-      )}
-    </div>
-  );
-};
-
-const SwapTokens = () => {
-  const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
-
-  return (
-    <div>
-      <TransactionButton
-        key="multi-swap"
-        onClick={multiSwap}
-        title="Multi Swap"
-        isDisabled={isMultiSwapPending}
-        isPending={isMultiSwapPending}
-      />
-
-      {multiSwapError && (
-        <Alert type="error">
-          <div className="flex items-center gap-2">
-            Error: {(multiSwapError as { shortMessage?: string }).shortMessage || multiSwapError.message}
-          </div>
-        </Alert>
-      )}
-    </div>
-  );
-};
-
-const InitializePool = () => {
-  const {
-    mutate: initializePool,
-    isPending: isInitializePoolPending,
-    error: initializePoolError,
-  } = useInitializePool();
-
-  return (
-    <div>
-      <TransactionButton
-        key="initialize"
-        onClick={initializePool}
-        title="Initialize Pool"
-        isDisabled={isInitializePoolPending}
-        isPending={isInitializePoolPending}
-      />
-
-      {initializePoolError && (
-        <Alert type="error">
-          <div className="flex items-center gap-2">
-            Error: {(initializePoolError as { shortMessage?: string }).shortMessage || initializePoolError.message}
-          </div>
-        </Alert>
-      )}
-    </div>
-  );
-};
+function createTransactionStep({
+  label,
+  blockExplorerUrl,
+  onSubmit,
+  isPending,
+  error,
+}: {
+  label: string;
+  blockExplorerUrl?: string;
+  onSubmit: () => void;
+  isPending: boolean;
+  error: Error | null;
+}) {
+  return {
+    label,
+    blockExplorerUrl,
+    component: (
+      <div className="flex flex-col gap-3">
+        <TransactionButton onClick={onSubmit} title={label} isDisabled={isPending} isPending={isPending} />
+        {error && (
+          <Alert type="error">
+            <div className="flex items-center gap-2">
+              Error: {(error as { shortMessage?: string }).shortMessage || error.message}
+            </div>
+          </Alert>
+        )}
+      </div>
+    ),
+  };
+}
 
 const PoolCreatedView = () => {
   const { poolAddress } = usePoolCreationStore();

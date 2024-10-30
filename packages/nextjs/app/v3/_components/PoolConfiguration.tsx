@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType } from "./";
-import { PoolCreationModal } from "./PoolCreationModal";
+import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
 import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
@@ -98,7 +97,7 @@ export function PoolConfiguration() {
         </div>
       </div>
 
-      {isPoolCreationModalOpen && <PoolCreationModal setIsModalOpen={setIsPoolCreationModalOpen} />}
+      {isPoolCreationModalOpen && <PoolCreationManager setIsModalOpen={setIsPoolCreationModalOpen} />}
     </>
   );
 }

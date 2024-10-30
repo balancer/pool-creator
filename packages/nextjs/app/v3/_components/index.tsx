@@ -4,6 +4,5 @@ export * from "./ChooseType";
 export * from "./ChooseTokens";
 export * from "./ChooseParameters";
 export * from "./ChooseInfo";
-export * from "./PoolCreationModal";
+export * from "./PoolCreationManager";
 export * from "./ApproveOnTokenManager";
-export * from "./ApproveOnPermitManager";

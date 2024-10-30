@@ -7,7 +7,6 @@ import {
   MaxAllowanceExpiration,
   MaxSigDeadline,
   PERMIT2,
-  Permit2,
   Permit2Batch,
   PermitDetails,
   balancerRouterAbi,
@@ -75,10 +74,18 @@ export const useInitializePool = () => {
     // Setup permit2 stuffs for permitBatchAndCall
     const balancerRouterAddress = BALANCER_ROUTER[chainId];
     const permit2Address = PERMIT2[chainId];
+    const client = { public: publicClient, wallet: walletClient };
+
+    const router = getContract({
+      address: balancerRouterAddress,
+      abi: balancerRouterAbi,
+      client,
+    });
+
     const permit2Contract = getContract({
       address: permit2Address,
       abi: permit2Abi,
-      client: { public: publicClient, wallet: walletClient },
+      client,
     });
 
     const details: PermitDetails[] = await Promise.all(
@@ -116,17 +123,10 @@ export const useInitializePool = () => {
       types,
     });
 
-    const permit2 = { batch, signature } as Permit2;
-
-    const args = [[], [], permit2.batch, permit2.signature, [encodedInitData]] as const;
+    const args = [[], [], batch, signature, [encodedInitData]] as const;
     console.log("router.permitBatchAndCall args for initialize pool", args);
 
-    const router = getContract({
-      address: balancerRouterAddress,
-      abi: balancerRouterAbi,
-      client: { public: publicClient, wallet: walletClient },
-    });
-
+    // Execute the transaction
     const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
       blockConfirmations: 1,
       onBlockConfirmation: () => {

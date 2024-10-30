@@ -5,7 +5,6 @@ import {
   MaxAllowanceExpiration,
   MaxSigDeadline,
   PERMIT2,
-  type Permit2,
   Permit2Batch,
   PermitDetails,
   Slippage,
@@ -20,15 +19,12 @@ import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
 
-/**
- * @dev this hook only called if user wants to create boosted pool using standard tokens
- */
+// This hook only used if creating boosted pool using standard tokens
 export const useMultiSwap = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
-  // const rpcUrl = publicClient?.chain.rpcUrls.default.http[0];
   const { tokenConfigs, updatePool, step, updateTokenConfig } = usePoolCreationStore();
   const { standardToBoosted } = useFetchBoostableTokens();
 
@@ -79,8 +75,8 @@ export const useMultiSwap = () => {
     console.log("multi swap query result", querySwapExactInResult);
 
     // 2. Apply slippage to each path
-    // TODO figure out how to make sure the order of amountsOut match paths order?
     const pathsWithSlippage = paths.map((path, index) => {
+      // TODO figure out how to make sure the order of amountsOut match paths order?
       const minAmountOut = slippage.applyTo(amountsOut[index], -1);
       console.log("minAmountOut for", path.tokenIn, ": ", minAmountOut);
       return { ...path, minAmountOut };
@@ -137,10 +133,8 @@ export const useMultiSwap = () => {
       types,
     });
 
-    const permit2 = { batch, signature } as Permit2;
-
-    const args = [[], [], permit2.batch, permit2.signature, [encodedSwapData]] as const;
-    console.log("args", args);
+    const args = [[], [], batch, signature, [encodedSwapData]] as const;
+    console.log("batchRouter.permitBatchAndCall args", args);
 
     const hash = await writeTx(() => batchRouterContract.write.permitBatchAndCall(args), {
       blockConfirmations: 1,
