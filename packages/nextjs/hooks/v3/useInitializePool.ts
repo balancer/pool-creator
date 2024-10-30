@@ -1,22 +1,10 @@
-import {
-  AllowanceTransfer,
-  BALANCER_ROUTER,
-  InitPool,
-  InitPoolDataProvider,
-  InitPoolInput,
-  MaxAllowanceExpiration,
-  MaxSigDeadline,
-  PERMIT2,
-  Permit2Batch,
-  PermitDetails,
-  balancerRouterAbi,
-  permit2Abi,
-} from "@balancer/sdk";
+import { BALANCER_ROUTER, InitPool, InitPoolDataProvider, InitPoolInput, balancerRouterAbi } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { getContract, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
+import { createPermit2 } from "~~/utils/permit2Helper";
 
 export const useInitializePool = () => {
   const { data: walletClient } = useWalletClient();
@@ -73,54 +61,19 @@ export const useInitializePool = () => {
 
     // Setup permit2 stuffs for permitBatchAndCall
     const balancerRouterAddress = BALANCER_ROUTER[chainId];
-    const permit2Address = PERMIT2[chainId];
     const client = { public: publicClient, wallet: walletClient };
+
+    const { batch, signature } = await createPermit2({
+      chainId,
+      tokens: amountsIn.map(token => ({ address: token.address, amount: token.rawAmount })),
+      client,
+      spender: balancerRouterAddress,
+    });
 
     const router = getContract({
       address: balancerRouterAddress,
       abi: balancerRouterAbi,
       client,
-    });
-
-    const permit2Contract = getContract({
-      address: permit2Address,
-      abi: permit2Abi,
-      client,
-    });
-
-    const details: PermitDetails[] = await Promise.all(
-      amountsIn.map(async token => {
-        const [, , nonce] = await permit2Contract.read.allowance([
-          walletClient.account.address,
-          token.address,
-          balancerRouterAddress,
-        ]);
-
-        return {
-          token: token.address,
-          amount: token.rawAmount,
-          expiration: Number(MaxAllowanceExpiration),
-          nonce,
-        };
-      }),
-    );
-
-    const batch: Permit2Batch = {
-      details,
-      spender: balancerRouterAddress,
-      sigDeadline: MaxSigDeadline,
-    };
-
-    const { domain, types, values } = AllowanceTransfer.getPermitData(batch, permit2Address, walletClient.chain.id);
-
-    const signature = await walletClient.signTypedData({
-      account: walletClient.account,
-      message: {
-        ...values,
-      },
-      domain,
-      primaryType: "PermitBatch",
-      types,
     });
 
     const args = [[], [], batch, signature, [encodedInitData]] as const;

@@ -97,7 +97,9 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
 /**
  * Gives the block explorer transaction URL, returns empty string if the network is a local chain
  */
-export function getBlockExplorerTxLink(chainId: number, txnHash: string) {
+export function getBlockExplorerTxLink(chainId: number | undefined, txnHash: string) {
+  if (!chainId) return undefined;
+
   const chainNames = Object.keys(chains);
 
   const targetChainArr = chainNames.filter(chainName => {

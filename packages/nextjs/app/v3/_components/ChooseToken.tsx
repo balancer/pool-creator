@@ -143,7 +143,7 @@ export function ChooseToken({ index }: { index: number }) {
                 }`}
                 onClick={() => setShowBoostOpportunityModal(true)}
               >
-                {useBoostedVariant ? `Earning 3.5% with ${boostedSymbol}` : `Using standard ${tokenInfo.symbol}`}
+                {useBoostedVariant ? `Earning TODO% with ${boostedSymbol}` : `Using standard ${tokenInfo.symbol}`}
                 <Cog6ToothIcon className="w-5 h-5" />
               </div>
             )}

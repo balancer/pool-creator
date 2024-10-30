@@ -1,7 +1,8 @@
 "use client";
 
 import { PoolType, TokenType } from "@balancer/sdk";
-import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { sepolia } from "viem/chains";
+import { ArrowTopRightOnSquareIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { TokenImage } from "~~/components/common";
 import { useReadToken } from "~~/hooks/token";
@@ -12,6 +13,7 @@ import {
   useValidatePoolCreationInput,
 } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
+import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const {
@@ -26,9 +28,13 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     name,
     symbol,
     amplificationParameter,
+    poolAddress,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
+
+  // TODO replace sepolia with dynamic network chain type thingy
+  const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(sepolia, poolAddress) : undefined;
 
   return (
     <div className="flex flex-col gap-3">
@@ -101,6 +107,17 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           <div>
             <div>{name.length > 38 ? `${name.slice(0, 38)}...` : name}</div>
             <div>{symbol}</div>
+            {poolAddress && (
+              <a
+                href={poolDeploymentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-info hover:underline"
+              >
+                {poolAddress.slice(0, 33)}...
+                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+              </a>
+            )}
           </div>
         }
       />

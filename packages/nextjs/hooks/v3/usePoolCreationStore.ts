@@ -39,6 +39,7 @@ export interface PoolCreationStore {
   enableDonation: boolean;
   amplificationParameter: string;
   createPoolTxHash: string | undefined;
+  swapTxHash: string | undefined;
   initPoolTxHash: string | undefined;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
@@ -75,6 +76,7 @@ export const initialPoolCreationState = {
   enableDonation: false,
   createPoolTxHash: undefined,
   initPoolTxHash: undefined,
+  swapTxHash: undefined,
 };
 
 // Stores all the data that will be used for pool creation

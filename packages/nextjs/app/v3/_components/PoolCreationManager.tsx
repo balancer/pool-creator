@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ApproveOnTokenManager } from ".";
-import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolResetModal, StepsDisplay } from "~~/app/cow/_components";
 import { PoolDetails } from "~~/app/v3/_components";
@@ -12,6 +11,7 @@ import {
   useMultiSwap,
   usePoolCreationStore,
 } from "~~/hooks/v3/";
+import { bgPrimaryGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
 /**
@@ -20,15 +20,19 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
-  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, initPoolTxHash } = usePoolCreationStore();
+  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash } =
+    usePoolCreationStore();
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
   const { mutate: initializePool, isPending, error } = useInitializePool();
 
   const { standardToBoosted } = useFetchBoostableTokens();
 
-  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(sepolia.id, createPoolTxHash) : undefined;
-  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(sepolia.id, initPoolTxHash) : undefined;
+  const chainId = tokenConfigs[0].tokenInfo?.chainId;
+
+  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(chainId, createPoolTxHash) : undefined;
+  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(chainId, initPoolTxHash) : undefined;
+  const multiSwapUrl = swapTxHash ? getBlockExplorerTxLink(chainId, swapTxHash) : undefined;
 
   const deployStep = createTransactionStep({
     label: "Deploy Pool",
@@ -57,6 +61,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
         onSubmit: multiSwap,
         isPending: isMultiSwapPending,
         error: multiSwapError,
+        blockExplorerUrl: multiSwapUrl,
       }),
     );
   }
@@ -172,18 +177,19 @@ const PoolCreatedView = () => {
   const { poolAddress } = usePoolCreationStore();
 
   return (
-    <div className="">
+    <div className="flex flex-col gap-5">
       <a
         href={`https://test.balancer.fi/pools/sepolia/v3/${poolAddress}`}
         target="_blank"
         rel="noopener noreferrer"
         className=""
       >
-        <button className={`btn w-full rounded-xl text-lg btn-accent text-neutral-700`}>
+        <button className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}>
           <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
         </button>
       </a>
+      <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
     </div>
   );
 };
