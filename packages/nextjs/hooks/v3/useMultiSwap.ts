@@ -93,13 +93,13 @@ export const useMultiSwap = () => {
       args: [pathsWithSlippage, deadline, wethIsEth, userData],
     });
 
+    // 5. Setup permit2 stuffs for permitBatchAndCall
     const permit2Contract = getContract({
       address: PERMIT2[chainId],
       abi: permit2Abi,
       client: { public: publicClient, wallet: walletClient },
     });
 
-    // 5. Setup permit2 details for permitBatchAndCall
     const details: PermitDetails[] = await Promise.all(
       tokenConfigs.map(async token => {
         if (!token.tokenInfo?.decimals) throw new Error("Token decimals not found");

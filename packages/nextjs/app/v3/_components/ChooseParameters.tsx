@@ -68,7 +68,7 @@ export const ChooseParameters = () => {
             <NumberInput
               placeholder=".001 - 10"
               value={swapFeePercentage}
-              onChange={e => handleNumberInputChange(e, "swapFeePercentage", 0.001, 10)}
+              onChange={e => handleNumberInputChange(e, "swapFeePercentage", 0, 10)}
               min={0.001}
               max={10}
               step={0.001}
@@ -84,10 +84,10 @@ export const ChooseParameters = () => {
 
           <div className="flex gap-2">
             <div
-              className={` ${amplificationParameter === "1" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-              onClick={() => updatePool({ amplificationParameter: "1" })}
+              className={` ${amplificationParameter === "33" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
+              onClick={() => updatePool({ amplificationParameter: "33" })}
             >
-              1
+              33
             </div>
             <div
               className={` ${amplificationParameter === "69" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}

@@ -1,6 +1,20 @@
-import { InitPool, InitPoolDataProvider, InitPoolInput } from "@balancer/sdk";
+import {
+  AllowanceTransfer,
+  BALANCER_ROUTER,
+  InitPool,
+  InitPoolDataProvider,
+  InitPoolInput,
+  MaxAllowanceExpiration,
+  MaxSigDeadline,
+  PERMIT2,
+  Permit2,
+  Permit2Batch,
+  PermitDetails,
+  balancerRouterAbi,
+  permit2Abi,
+} from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { parseUnits } from "viem";
+import { getContract, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
@@ -26,7 +40,6 @@ export const useInitializePool = () => {
 
     const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 
-    console.log("poolState for initializePool", poolState);
     const initPool = new InitPool();
 
     // Make sure all tokenConfigs have decimals and address
@@ -51,31 +64,77 @@ export const useInitializePool = () => {
       })
       .sort((a, b) => a.address.localeCompare(b.address));
 
-    console.log("amountsIn for initializePool", amountsIn);
-
-    const input: InitPoolInput = {
+    const initPoolInput: InitPoolInput = {
       amountsIn,
       minBptAmountOut: 0n,
       chainId,
     };
 
-    const call = initPool.buildCall(input, poolState);
+    const { callData: encodedInitData } = initPool.buildCall(initPoolInput, poolState);
 
-    const hash = await writeTx(
-      () =>
-        walletClient.sendTransaction({
-          account: walletClient.account,
-          data: call.callData,
-          to: call.to,
-        }),
-      {
-        blockConfirmations: 1,
-        onBlockConfirmation: () => {
-          console.log("Successfully initialized pool!", poolAddress);
-        },
-      },
+    // Setup permit2 stuffs for permitBatchAndCall
+    const balancerRouterAddress = BALANCER_ROUTER[chainId];
+    const permit2Address = PERMIT2[chainId];
+    const permit2Contract = getContract({
+      address: permit2Address,
+      abi: permit2Abi,
+      client: { public: publicClient, wallet: walletClient },
+    });
+
+    const details: PermitDetails[] = await Promise.all(
+      amountsIn.map(async token => {
+        const [, , nonce] = await permit2Contract.read.allowance([
+          walletClient.account.address,
+          token.address,
+          balancerRouterAddress,
+        ]);
+
+        return {
+          token: token.address,
+          amount: token.rawAmount,
+          expiration: Number(MaxAllowanceExpiration),
+          nonce,
+        };
+      }),
     );
+
+    const batch: Permit2Batch = {
+      details,
+      spender: balancerRouterAddress,
+      sigDeadline: MaxSigDeadline,
+    };
+
+    const { domain, types, values } = AllowanceTransfer.getPermitData(batch, permit2Address, walletClient.chain.id);
+
+    const signature = await walletClient.signTypedData({
+      account: walletClient.account,
+      message: {
+        ...values,
+      },
+      domain,
+      primaryType: "PermitBatch",
+      types,
+    });
+
+    const permit2 = { batch, signature } as Permit2;
+
+    const args = [[], [], permit2.batch, permit2.signature, [encodedInitData]] as const;
+    console.log("router.permitBatchAndCall args for initialize pool", args);
+
+    const router = getContract({
+      address: balancerRouterAddress,
+      abi: balancerRouterAbi,
+      client: { public: publicClient, wallet: walletClient },
+    });
+
+    const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
+      blockConfirmations: 1,
+      onBlockConfirmation: () => {
+        console.log("Successfully initialized pool!", poolAddress);
+      },
+    });
     if (!hash) throw new Error("No pool initialization transaction hash");
+
     updatePool({ step: step + 1, initPoolTxHash: hash });
     return hash;
   }

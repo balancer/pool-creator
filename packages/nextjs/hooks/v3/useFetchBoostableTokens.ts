@@ -19,6 +19,13 @@ const standardToBoosted: Record<Address, { address: Address; name: string; symbo
     symbol: "stataEthUSDC",
     decimals: 6,
   },
+  // usdt-aave (faucet token) -> stataEthUSDT
+  "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0": {
+    address: "0x978206fAe13faF5a8d293FB614326B237684B750",
+    name: "Static Aave Ethereum USDT",
+    symbol: "stataEthUSDT",
+    decimals: 6, // beware cant read contract decimals for stataEthUSDT on etherscan?!?
+  },
 };
 
 export const useFetchBoostableTokens = () => {

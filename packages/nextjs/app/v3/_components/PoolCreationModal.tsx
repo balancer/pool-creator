@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ApproveOnPermitManager, ApproveOnTokenManager } from "./";
+import { ApproveOnTokenManager } from "./";
 import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolResetModal, StepsDisplay } from "~~/app/cow/_components";
@@ -46,7 +46,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
 
   const swapIntoBoostedStep = [];
   if (tokenConfigs.some(token => token.useBoostedVariant === true)) {
-    swapIntoBoostedStep.push({ label: "Multi Swap Tokens", component: <SwapTokens /> });
+    swapIntoBoostedStep.push({ label: "Multi Swap to Boosted", component: <SwapTokens /> });
   }
 
   const approveOnBoostedVariantSteps: { label: string; component: React.ReactNode }[] = [];
@@ -70,21 +70,21 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     });
   });
 
-  const approveOnPermit2Steps = tokenConfigs.map((token, idx) => {
-    const { useBoostedVariant } = token;
-    const boostedVariant = standardToBoosted[token.address];
+  // const approveOnPermit2Steps = tokenConfigs.map((token, idx) => {
+  //   const { useBoostedVariant } = token;
+  //   const boostedVariant = standardToBoosted[token.address];
 
-    const address = useBoostedVariant ? boostedVariant.address : token.address;
-    const decimals = useBoostedVariant ? boostedVariant.decimals : token.tokenInfo?.decimals;
-    const symbol = useBoostedVariant ? boostedVariant.symbol : token.tokenInfo?.symbol;
-    const amount = token.amount;
-    if (!symbol || !decimals) throw Error("Token symbol or decimals are undefined");
+  //   const address = useBoostedVariant ? boostedVariant.address : token.address;
+  //   const decimals = useBoostedVariant ? boostedVariant.decimals : token.tokenInfo?.decimals;
+  //   const symbol = useBoostedVariant ? boostedVariant.symbol : token.tokenInfo?.symbol;
+  //   const amount = token.amount;
+  //   if (!symbol || !decimals) throw Error("Token symbol or decimals are undefined");
 
-    return {
-      label: `Permit ${symbol}`,
-      component: <ApproveOnPermitManager key={idx} token={{ address, amount, decimals, symbol }} />,
-    };
-  });
+  //   return {
+  //     label: `Permit ${symbol}`,
+  //     component: <ApproveOnPermitManager key={idx} token={{ address, amount, decimals, symbol }} />,
+  //   };
+  // });
 
   const initializeStep = {
     label: "Initialize Pool",
@@ -97,7 +97,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
     ...approveOnSelectedTokenSteps,
     ...swapIntoBoostedStep,
     ...approveOnBoostedVariantSteps,
-    ...approveOnPermit2Steps,
+    // ...approveOnPermit2Steps,
     initializeStep,
   ];
 
@@ -106,7 +106,7 @@ export function PoolCreationModal({ setIsModalOpen }: PoolCreationModalProps) {
       <div
         className="absolute w-full h-full"
         onClick={() => {
-          // if (step > 1) return;
+          if (step > 1) return;
           setIsModalOpen(false);
         }}
       />
@@ -213,7 +213,6 @@ const InitializePool = () => {
   );
 };
 
-// TODO figure out how to link to the newly created pool on Balancer frontend
 const PoolCreatedView = () => {
   const { poolAddress } = usePoolCreationStore();
 

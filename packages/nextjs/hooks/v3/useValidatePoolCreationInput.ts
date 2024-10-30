@@ -31,7 +31,7 @@ export function useValidatePoolCreationInput() {
   });
 
   const isParametersValid = [
-    !!swapFeePercentage,
+    !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
     poolType !== PoolType.Stable || !!amplificationParameter,
     isDelegatingManagement || (isAddress(swapFeeManager) && isAddress(pauseManager)),
     !isUsingHooks || isAddress(poolHooksContract),

@@ -72,6 +72,8 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                 renderItem={({ index, style }) => {
                   const token = tokenList[index];
 
+                  console.log(token.symbol, token.address);
+
                   return (
                     <button
                       key={index}
@@ -103,7 +105,8 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                               <ExclamationTriangleIcon className="w-8 h-8 hover:cursor-pointer " />
                             </div>
                           )}
-                          {standardToBoosted[token.address] && (
+                          {/* TODO: remove this rocket ship inidicator before launch? */}
+                          {standardToBoosted[token.address.toLowerCase()] && (
                             <div className="flex flex-col justify-around text-success">
                               <RocketLaunchIcon className="w-7 h-7 hover:cursor-pointer " />
                             </div>
