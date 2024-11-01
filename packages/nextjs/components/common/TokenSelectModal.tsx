@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
+import { isAddress } from "viem";
 import { ExclamationTriangleIcon, RocketLaunchIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -59,7 +60,14 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
             {isLoadingExoticToken ? (
               <div className="w-full text-lg text-center">Fetching token details...</div>
             ) : tokenList.length === 0 ? (
-              <div className="text-center text-lg">No results found for {searchText}</div>
+              <>
+                <div className="text-center text-lg text-error mb-3 flex items-center justify-center gap-2">
+                  No results found for {searchText}
+                </div>
+                {!isAddress(searchText) && (
+                  <div className="text-center text-lg text-error">Try searching by the token contract address</div>
+                )}
+              </>
             ) : null}
 
             <div>

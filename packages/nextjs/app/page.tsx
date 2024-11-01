@@ -28,15 +28,15 @@ const Home: NextPage = () => {
             Create and initialize a variety of liquidity pool types with Balancer protocol
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 justify-center gap-14 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 justify-center gap-10 w-full">
             {PAGES.map(item => (
               <Link
-                className="shadow-xl bg-base-100 hover:scale-105 flex flex-col justify-around text-2xl text-center p-8 rounded-3xl w-full h-72"
+                className="shadow-inner relative bg-base-100 hover:bg-base-200 text-2xl text-center p-8 rounded-3xl"
                 key={item.href}
                 href={item.href}
                 passHref
               >
-                <div className="flex justify-center">
+                <div className="flex justify-center mb-5">
                   <div>{item.emoji}</div>
                 </div>
                 <h3 className="text-3xl md:text-4xl font-bold mb-0">{item.title}</h3>

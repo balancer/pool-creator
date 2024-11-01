@@ -47,8 +47,8 @@ module.exports = {
           "secondary-content": "rgb(229, 211, 190)",
           accent: "#9f95f0",
           "accent-content": "rgb(45, 55, 72)",
-          neutral: "rgb(229, 211, 190)",
-          "neutral-content": "rgb(70, 77, 88)",
+          neutral: "#525252",
+          "neutral-content": "rgb(229, 211, 190)",
           "base-100": "rgb(70, 77, 88)",
           "base-200": "rgb(63, 70, 80)",
           "base-300": "rgb(56, 62, 71)", // bg color

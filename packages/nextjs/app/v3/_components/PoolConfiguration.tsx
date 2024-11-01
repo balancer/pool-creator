@@ -54,7 +54,7 @@ export function PoolConfiguration() {
             {TABS.map(tab => (
               <div
                 key={tab}
-                className={`relative z-10 rounded-xl text-neutral-700 flex-1 py-3 text-lg ${
+                className={`relative z-10 rounded-xl text-neutral-700 flex-1 py-3 text-lg  ${
                   selectedTab === tab && `${bgBeigeGradient} font-bold`
                 }`}
               >

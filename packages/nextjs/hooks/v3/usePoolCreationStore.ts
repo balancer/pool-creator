@@ -3,6 +3,7 @@ import { PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { type Token } from "~~/hooks/token";
 
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
@@ -80,17 +81,25 @@ export const initialPoolCreationState = {
 };
 
 // Stores all the data that will be used for pool creation
-export const usePoolCreationStore = create<PoolCreationStore>(set => ({
-  ...initialPoolCreationState,
-  updatePool: (updates: Partial<PoolCreationStore>) => set(state => ({ ...state, ...updates })),
-  updateTokenConfig: (index: number, updates: Partial<TokenConfig>) =>
-    set(state => {
-      const newTokenConfigs = [...state.tokenConfigs];
-      newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
-      return { ...state, tokenConfigs: newTokenConfigs };
+export const usePoolCreationStore = create(
+  persist<PoolCreationStore>(
+    set => ({
+      ...initialPoolCreationState,
+      updatePool: (updates: Partial<PoolCreationStore>) => set(state => ({ ...state, ...updates })),
+      updateTokenConfig: (index: number, updates: Partial<TokenConfig>) =>
+        set(state => {
+          const newTokenConfigs = [...state.tokenConfigs];
+          newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
+          return { ...state, tokenConfigs: newTokenConfigs };
+        }),
+      clearPoolStore: () => set(initialPoolCreationState),
     }),
-  clearPoolStore: () => set(initialPoolCreationState),
-}));
+    {
+      name: "v3-pool-creation-store",
+      getStorage: () => localStorage,
+    },
+  ),
+);
 
 export function usePoolStoreDebug() {
   const poolState = usePoolCreationStore();

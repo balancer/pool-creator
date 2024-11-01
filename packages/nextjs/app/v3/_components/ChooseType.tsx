@@ -2,7 +2,6 @@ import React from "react";
 import { PoolType } from "@balancer/sdk";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
-import { bgBeigeGradient } from "~~/utils";
 
 const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable];
 
@@ -25,8 +24,10 @@ export function ChooseType() {
           <button
             key={type}
             className={`${
-              type === poolType ? `${bgBeigeGradient} text-neutral-700` : `bg-base-300`
-            } p-7 w-full rounded-xl text-lg text shadow-inner`}
+              type === poolType
+                ? `bg-[#757e89] text-accent-content`
+                : `bg-base-100 hover:bg-[#7e8793] hover:text-accent-content`
+            } p-7 w-full rounded-xl text-lg text shadow-lg`}
             onClick={() => updatePool({ poolType: type })}
           >
             <div className="flex flex-col text-center">

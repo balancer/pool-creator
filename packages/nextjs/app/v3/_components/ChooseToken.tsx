@@ -102,7 +102,7 @@ export function ChooseToken({ index }: { index: number }) {
                 max="99"
                 value={weight}
                 onChange={e => setTokenWeight(Number(e.target.value))}
-                className="input text-xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
+                className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
               />
               <div className="absolute top-1 right-1 text-md text-neutral-400">%</div>
             </div>

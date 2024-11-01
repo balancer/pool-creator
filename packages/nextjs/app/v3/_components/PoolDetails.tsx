@@ -1,6 +1,7 @@
 "use client";
 
-import { PoolType, TokenType } from "@balancer/sdk";
+import { PoolType } from "@balancer/sdk";
+import { zeroAddress } from "viem";
 import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
@@ -136,7 +137,7 @@ interface DetailSectionProps {
 function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSectionProps) {
   return (
     <>
-      <div className="bg-base-100 p-4 rounded-xl text-lg">
+      <div className="bg-base-100 p-4 rounded-xl text-lg shadow-sm border border-neutral">
         <div className="flex justify-between mb-2">
           <div className="font-bold text-xl">{title}: </div>
           {isPreview && (
@@ -170,13 +171,14 @@ function TokenDetails({ token }: { token: TokenConfig }) {
     <div>
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
+          {poolType === PoolType.Weighted && <span>{token.weight}%</span>}
+
           {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
           <div className="font-bold text-lg">{useBoostedVariant ? boostedSymbol : token.tokenInfo?.symbol}</div>
-          {poolType === PoolType.Weighted && <i>{token.weight}%</i>}
         </div>
         <div>{token.amount}</div>
       </div>
-      {token.tokenType === TokenType.TOKEN_WITH_RATE && (
+      {token.rateProvider && token.rateProvider !== zeroAddress && (
         <div className="flex gap-2 mt-1">
           <i>Rate Provider:</i>
           <div>{abbreviateAddress(token.rateProvider)}</div>
