@@ -11,11 +11,25 @@ const MAX_TOKENS = {
 export function ChooseTokens() {
   const { tokenConfigs, poolType, updatePool } = usePoolCreationStore();
 
+  // Beware of javascript floating point precision issues if 100 % number of tokens is not equal to zero
   function handleAddToken() {
     const updatedTokenCount = tokenConfigs.length + 1;
-    const updatedWeight = 100 / updatedTokenCount;
-    const updatedPoolTokens = tokenConfigs.map(token => ({ ...token, weight: updatedWeight }));
-    updatedPoolTokens.push({ ...initialTokenConfig, weight: updatedWeight });
+    // Calculate equal weights ensuring they sum to exactly 100
+    const baseWeight = Math.floor(100 / updatedTokenCount);
+    const remainder = 100 - baseWeight * updatedTokenCount;
+
+    // Update existing tokens with equal weights
+    const updatedPoolTokens = tokenConfigs.map(token => ({
+      ...token,
+      weight: baseWeight,
+    }));
+
+    // Add the new token with any remaining weight to ensure sum is 100
+    updatedPoolTokens.push({
+      ...initialTokenConfig,
+      weight: baseWeight + remainder,
+    });
+
     updatePool({ tokenConfigs: updatedPoolTokens });
   }
 

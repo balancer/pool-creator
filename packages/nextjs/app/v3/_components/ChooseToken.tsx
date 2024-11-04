@@ -1,29 +1,26 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { TokenType } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
+import { type BoostedTokenInfo, useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
 
 export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
-
-  const [tokenWeight, setTokenWeight] = useState<number>(50);
 
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
   const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount, address, useBoostedVariant } =
     tokenConfigs[index];
   const { balance: userTokenBalance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
-  const { standardToBoosted } = useFetchBoostableTokens();
   const tokenList = data || [];
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
+  const { standardToBoosted } = useFetchBoostableTokens();
   const boostedVariant = standardToBoosted[address];
-  const { symbol: boostedSymbol, name: boostedName } = useReadToken(boostedVariant?.address);
 
   const handleTokenSelection = (tokenInfo: Token) => {
     const hasBoostedVariant = standardToBoosted[tokenInfo.address];
@@ -70,25 +67,24 @@ export function ChooseToken({ index }: { index: number }) {
     }
   };
 
-  // When user changes one of the token weights, update the others to sum to 100
-  useEffect(() => {
-    let newWeight = tokenWeight;
-    if (newWeight > 98) newWeight = 98;
-    const remainingWeight = 100 - newWeight;
-    const remainingTokens = tokenConfigs.length - 1;
-    const evenWeight = remainingWeight / remainingTokens;
+  const isUpdatingWeights = useRef(false);
 
-    const updatedTokenConfigs = tokenConfigs.map((token, i) => {
-      if (i === index) {
-        return { ...token, weight: newWeight };
-      } else {
-        return { ...token, weight: evenWeight };
-      }
-    });
+  const handleWeightChange = (newWeight: number) => {
+    if (isUpdatingWeights.current) return;
+    isUpdatingWeights.current = true;
+
+    const adjustedWeight = Math.min(newWeight, 99);
+    const remainingWeight = 100 - adjustedWeight;
+    const evenWeight = remainingWeight / (tokenConfigs.length - 1);
+
+    const updatedTokenConfigs = tokenConfigs.map((token, i) => ({
+      ...token,
+      weight: i === index ? adjustedWeight : evenWeight,
+    }));
 
     updatePool({ tokenConfigs: updatedTokenConfigs });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokenWeight]);
+    isUpdatingWeights.current = false;
+  };
 
   return (
     <>
@@ -101,7 +97,7 @@ export function ChooseToken({ index }: { index: number }) {
                 min="1"
                 max="99"
                 value={weight}
-                onChange={e => setTokenWeight(Number(e.target.value))}
+                onChange={e => handleWeightChange(Number(e.target.value))}
                 className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
               />
               <div className="absolute top-1 right-1 text-md text-neutral-400">%</div>
@@ -143,7 +139,9 @@ export function ChooseToken({ index }: { index: number }) {
                 }`}
                 onClick={() => setShowBoostOpportunityModal(true)}
               >
-                {useBoostedVariant ? `Earning TODO% with ${boostedSymbol}` : `Using standard ${tokenInfo.symbol}`}
+                {useBoostedVariant
+                  ? `Earning TODO% with ${boostedVariant.symbol}`
+                  : `Using standard ${tokenInfo.symbol}`}
                 <Cog6ToothIcon className="w-5 h-5" />
               </div>
             )}
@@ -169,12 +167,12 @@ export function ChooseToken({ index }: { index: number }) {
           </>
         )}
       </div>
-      {showBoostOpportunityModal && tokenInfo && boostedSymbol && boostedName && (
+      {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal
           tokenIndex={index}
+          standardVariant={tokenInfo}
+          boostedVariant={boostedVariant}
           setShowBoostOpportunityModal={setShowBoostOpportunityModal}
-          boostedSymbol={boostedSymbol}
-          boostedName={boostedName}
         />
       )}
     </>
@@ -184,39 +182,36 @@ export function ChooseToken({ index }: { index: number }) {
 const BoostOpportunityModal = ({
   tokenIndex,
   setShowBoostOpportunityModal,
-  boostedSymbol,
-  boostedName,
+  boostedVariant,
+  standardVariant,
 }: {
   tokenIndex: number;
   setShowBoostOpportunityModal: Dispatch<SetStateAction<boolean>>;
-  boostedSymbol: string;
-  boostedName: string;
+  boostedVariant: BoostedTokenInfo;
+  standardVariant: Token;
 }) => {
-  const { tokenConfigs, updateTokenConfig } = usePoolCreationStore();
-  const { tokenInfo } = tokenConfigs[tokenIndex];
+  const { updateTokenConfig } = usePoolCreationStore();
 
   const handleBoost = (enableBoost: boolean) => {
     updateTokenConfig(tokenIndex, { useBoostedVariant: enableBoost });
     setShowBoostOpportunityModal(false);
   };
 
-  if (!tokenInfo) return null;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="w-[625px] min-h-[333px] bg-base-300 rounded-lg p-7 flex flex-col gap-5 items-center">
-        <h3 className="font-bold text-3xl mb-5">{boostedName}</h3>
+        <h3 className="font-bold text-3xl mb-5">{boostedVariant.name}</h3>
         <div className="text-xl mb-7 px-5">
           Boosted tokens provide your liquidity pool with a layer of sustainable yield. If you select{" "}
-          <b>{boostedSymbol}</b>, all <b>{tokenInfo.symbol}</b> in this pool will be supplied to Aave&apos;s lending
-          market to earn additional yield.
+          <b>{boostedVariant.symbol}</b>, all <b>{standardVariant.symbol}</b> in this pool will be supplied to
+          Aave&apos;s lending market to earn additional yield.
         </div>
         <div className="grid grid-cols-2 gap-4 w-full">
           <button className={`btn ${bgBeigeGradient} rounded-xl text-lg`} onClick={() => handleBoost(false)}>
-            {tokenInfo.symbol}
+            {standardVariant.symbol}
           </button>
           <button className={`btn ${bgPrimaryGradient} rounded-xl text-lg`} onClick={() => handleBoost(true)}>
-            {boostedSymbol}
+            {boostedVariant.symbol}
           </button>
         </div>
       </div>

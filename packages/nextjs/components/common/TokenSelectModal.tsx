@@ -113,8 +113,9 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                           )}
                           {/* TODO: remove this rocket ship inidicator before launch? */}
                           {standardToBoosted[token.address.toLowerCase()] && (
-                            <div className="flex flex-col justify-around text-accent">
-                              <RocketLaunchIcon className="w-7 h-7 hover:cursor-pointer " />
+                            <div className="flex flex-col justify-around items-end text-success text-lg">
+                              <RocketLaunchIcon className="w-6 h-6 hover:cursor-pointer " />
+                              boostable
                             </div>
                           )}
                         </div>

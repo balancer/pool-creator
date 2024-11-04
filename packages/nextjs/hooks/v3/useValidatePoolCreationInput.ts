@@ -27,6 +27,9 @@ export function useValidatePoolCreationInput() {
     // Must have rate provider if token type is TOKEN_WITH_RATE
     if (token.tokenType === TokenType.TOKEN_WITH_RATE && !isAddress(token.rateProvider)) return false;
 
+    // If pool type is weighted, no token can have a weight of 0
+    if (poolType === PoolType.Weighted && token.weight === 0) return false;
+
     return true;
   });
 

@@ -15,7 +15,7 @@ export const ChooseInfo = () => {
           const boostedVariant = standardToBoosted[token.address];
           const symbol = useBoostedVariant ? boostedVariant.symbol : tokenInfo?.symbol;
           if (poolType === PoolType.Weighted && weight) {
-            return `${token.weight.toFixed(1)}${symbol}`;
+            return `${token.weight.toFixed(0)}${symbol}`;
           }
           return symbol;
         })
@@ -31,20 +31,24 @@ export const ChooseInfo = () => {
   return (
     <div>
       <div className="text-xl mb-5">Choose pool information:</div>
-      <div className="mb-5 flex flex-col gap-4 px-5">
-        <TextField
-          label="Pool name"
-          placeholder="Enter pool name"
-          value={name}
-          onChange={e => updatePool({ name: e.target.value })}
-        />
+      <div className="mb-5 flex flex-col gap-4">
+        <div className="bg-base-100 p-5 rounded-xl">
+          <TextField
+            label="Pool name"
+            placeholder="Enter pool name"
+            value={name}
+            onChange={e => updatePool({ name: e.target.value })}
+          />
+        </div>
 
-        <TextField
-          label="Pool symbol"
-          placeholder="Enter pool symbol"
-          value={symbol}
-          onChange={e => updatePool({ symbol: e.target.value })}
-        />
+        <div className="bg-base-100 p-5 rounded-xl">
+          <TextField
+            label="Pool symbol"
+            placeholder="Enter pool symbol"
+            value={symbol}
+            onChange={e => updatePool({ symbol: e.target.value })}
+          />
+        </div>
       </div>
     </div>
   );

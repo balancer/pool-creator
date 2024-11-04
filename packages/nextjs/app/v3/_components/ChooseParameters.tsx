@@ -3,8 +3,8 @@ import { PoolType } from "@balancer/sdk";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
-const swapFeeButtonStyles =
-  "bg-base-200 w-20 h-12 rounded-lg flex items-center justify-center hover:cursor-pointer hover:border-2 hover:border-accent text-lg";
+const swapFeePercentages = ["0.1", "0.3", "1"];
+const amplificationParameters = ["33", "69", "420"];
 
 export const ChooseParameters = () => {
   const {
@@ -46,24 +46,15 @@ export const ChooseParameters = () => {
         <div className="text-lg font-bold mb-3">Swap fee percentage</div>
 
         <div className="flex gap-2">
-          <div
-            className={` ${swapFeePercentage === "0.1" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-            onClick={() => updatePool({ swapFeePercentage: "0.1" })}
-          >
-            0.1%
-          </div>
-          <div
-            className={` ${swapFeePercentage === "0.3" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-            onClick={() => updatePool({ swapFeePercentage: "0.3" })}
-          >
-            0.3%
-          </div>
-          <div
-            className={` ${swapFeePercentage === "1" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-            onClick={() => updatePool({ swapFeePercentage: "1" })}
-          >
-            1%
-          </div>
+          {swapFeePercentages.map(fee => (
+            <NumberParameterButton
+              key={fee}
+              value={fee}
+              selectedValue={swapFeePercentage}
+              onClick={() => updatePool({ swapFeePercentage: fee })}
+              isPercentage={true}
+            />
+          ))}
           <div>
             <NumberInput
               placeholder=".001 - 10"
@@ -82,25 +73,16 @@ export const ChooseParameters = () => {
         <div className="bg-base-100 p-5 rounded-xl">
           <div className="text-lg font-bold mb-3">Amplification Parameter</div>
 
-          <div className="flex gap-2">
-            <div
-              className={` ${amplificationParameter === "33" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-              onClick={() => updatePool({ amplificationParameter: "33" })}
-            >
-              33
-            </div>
-            <div
-              className={` ${amplificationParameter === "69" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-              onClick={() => updatePool({ amplificationParameter: "69" })}
-            >
-              69
-            </div>
-            <div
-              className={` ${amplificationParameter === "420" ? "border-2 border-accent" : ""} ${swapFeeButtonStyles} `}
-              onClick={() => updatePool({ amplificationParameter: "420" })}
-            >
-              420
-            </div>
+          <div className="flex gap-2 items-end">
+            {amplificationParameters.map(value => (
+              <NumberParameterButton
+                key={value}
+                value={value}
+                selectedValue={amplificationParameter}
+                onClick={() => updatePool({ amplificationParameter: value })}
+                isPercentage={false}
+              />
+            ))}
             <div className="w-[135px]">
               <NumberInput
                 placeholder="1 - 5000"
@@ -199,3 +181,27 @@ export const ChooseParameters = () => {
     </div>
   );
 };
+
+function NumberParameterButton({
+  value,
+  selectedValue,
+  onClick,
+  isPercentage = false,
+}: {
+  isPercentage?: boolean;
+  value: string;
+  selectedValue: string;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      className={`bg-base-200 w-20 h-12 rounded-lg flex items-center justify-center hover:cursor-pointer hover:border-2 hover:border-accent text-lg ${
+        value === selectedValue ? "border-2 border-accent" : ""
+      }`}
+      onClick={onClick}
+    >
+      {value}
+      {isPercentage && "%"}
+    </div>
+  );
+}

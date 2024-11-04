@@ -1,5 +1,12 @@
 import { Address } from "viem";
 
+export type BoostedTokenInfo = {
+  address: Address;
+  name: string;
+  symbol: string;
+  decimals: number;
+};
+
 /**
  * @TODO change so this hook accepts underlying token address as arg and finds the boosted version using fetch to balancer api
  */
@@ -12,7 +19,7 @@ export const useFetchBoostableTokens = () => {
  * KEY: address of non yield bearing asset (from balancer token list)
  * VALUE: address of the boosted variant (wrapped "static" version that vault supports)
  */
-const standardToBoosted: Record<Address, { address: Address; name: string; symbol: string; decimals: number }> = {
+const standardToBoosted: Record<Address, BoostedTokenInfo> = {
   // dai-aave (faucet token) -> stataEthDAI
   "0xff34b3d4aee8ddcd6f9afffb6fe49bd371b8a357": {
     address: "0xDE46e43F46ff74A23a65EBb0580cbe3dFE684a17",
