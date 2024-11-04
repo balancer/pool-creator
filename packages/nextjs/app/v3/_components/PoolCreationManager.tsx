@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { ApproveOnTokenManager } from ".";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import { PoolResetModal, StepsDisplay } from "~~/app/cow/_components";
 import { PoolDetails } from "~~/app/v3/_components";
-import { Alert, TransactionButton } from "~~/components/common";
+import { Alert, PoolStateResetModal, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import {
   useCreatePool,
   useFetchBoostableTokens,
@@ -24,7 +23,11 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     usePoolCreationStore();
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
-  const { mutate: initializePool, isPending, error } = useInitializePool();
+  const {
+    mutate: initializePool,
+    isPending: isInitializePoolPending,
+    error: initializePoolError,
+  } = useInitializePool();
 
   const { standardToBoosted } = useFetchBoostableTokens();
 
@@ -90,8 +93,8 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const initializeStep = createTransactionStep({
     label: "Initialize Pool",
     onSubmit: initializePool,
-    isPending: isPending,
-    error: error,
+    isPending: isInitializePoolPending,
+    error: initializePoolError,
     blockExplorerUrl: poolInitializationUrl,
   });
 
@@ -126,10 +129,10 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
       </div>
 
       <div className="relative z-10">
-        <StepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
+        <PoolStepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
       </div>
       {isResetModalOpen && (
-        <PoolResetModal
+        <PoolStateResetModal
           clearState={() => {
             clearPoolStore();
             setIsModalOpen(false);

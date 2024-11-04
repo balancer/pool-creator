@@ -1,6 +1,14 @@
 import { Address } from "viem";
 
 /**
+ * @TODO change so this hook accepts underlying token address as arg and finds the boosted version using fetch to balancer api
+ */
+
+export const useFetchBoostableTokens = () => {
+  return { standardToBoosted };
+};
+
+/**
  * KEY: address of non yield bearing asset (from balancer token list)
  * VALUE: address of the boosted variant (wrapped "static" version that vault supports)
  */
@@ -26,8 +34,4 @@ const standardToBoosted: Record<Address, { address: Address; name: string; symbo
     symbol: "stataEthUSDT",
     decimals: 6, // beware cant read contract decimals for stataEthUSDT on etherscan?!?
   },
-};
-
-export const useFetchBoostableTokens = () => {
-  return { standardToBoosted };
 };

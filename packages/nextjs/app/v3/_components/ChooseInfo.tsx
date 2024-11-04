@@ -15,7 +15,7 @@ export const ChooseInfo = () => {
           const boostedVariant = standardToBoosted[token.address];
           const symbol = useBoostedVariant ? boostedVariant.symbol : tokenInfo?.symbol;
           if (poolType === PoolType.Weighted && weight) {
-            return `${token.weight}${symbol}`;
+            return `${token.weight.toFixed(1)}${symbol}`;
           }
           return symbol;
         })

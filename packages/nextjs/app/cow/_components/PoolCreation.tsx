@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
-import { PoolCreated, PoolResetModal, StepsDisplay } from "./";
+import { PoolCreated } from "./";
 import { Address, parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
-import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
+import {
+  Alert,
+  PoolStateResetModal,
+  PoolStepsDisplay,
+  TextField,
+  TokenField,
+  TransactionButton,
+} from "~~/components/common/";
 import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
@@ -259,7 +266,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           </div>
         </div>
         <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
-          <StepsDisplay
+          <PoolStepsDisplay
             currentStepNumber={state.step}
             steps={[
               { label: "Create Pool" },
@@ -309,7 +316,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         </div>
       )}
       {isResetModalOpen && (
-        <PoolResetModal
+        <PoolStateResetModal
           setIsModalOpen={setIsResetModalOpen}
           etherscanURL={pool && !pool.isFinalized ? etherscanURL : undefined}
           clearState={() => clearState()}

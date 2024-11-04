@@ -1,12 +1,12 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
-interface StepsDisplayProps {
+interface PoolStepsDisplayProps {
   currentStepNumber: number;
   steps: Step[];
 }
 export type Step = { label: string; blockExplorerUrl?: string };
 
-export function StepsDisplay({ currentStepNumber, steps }: StepsDisplayProps) {
+export function PoolStepsDisplay({ currentStepNumber, steps }: PoolStepsDisplayProps) {
   return (
     <div className="bg-base-200 px-5 pt-7 rounded-xl shadow-xl">
       <h5 className="text-xl font-bold text-center">Steps</h5>

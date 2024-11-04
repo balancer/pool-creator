@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-interface PoolResetModalModalProps {
+interface PoolStateResetModalProps {
   setIsModalOpen: (isOpen: boolean) => void;
   clearState: () => void;
   etherscanURL?: string | undefined;
 }
 
-export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: PoolResetModalModalProps) => {
+export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }: PoolStateResetModalProps) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
