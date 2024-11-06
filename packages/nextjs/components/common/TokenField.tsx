@@ -6,7 +6,7 @@ import { ChevronDownIcon, ExclamationTriangleIcon } from "@heroicons/react/24/ou
 import { WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
-import { useFetchTokenPrices } from "~~/hooks/token";
+import { useTokenUsdValue } from "~~/hooks/token";
 import { COW_MIN_AMOUNT, formatToHuman } from "~~/utils";
 
 interface TokenFieldProps {
@@ -33,13 +33,8 @@ export const TokenField: React.FC<TokenFieldProps> = ({
   tokenWeight,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { data: tokenPrices, isLoading, isError } = useFetchTokenPrices();
 
-  let price = 0;
-  if (tokenPrices && selectedToken?.address) {
-    price = tokenPrices.find(token => token.address.toLowerCase() === selectedToken?.address.toLowerCase())?.price ?? 0;
-  }
-  if (price > 0) price = price * Number(value);
+  const { tokenUsdValue, isLoading, isError } = useTokenUsdValue(selectedToken?.address, value);
 
   const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
 
@@ -55,6 +50,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
 
   const setAmountToMax = () =>
     setTokenAmount && setTokenAmount(formatUnits(balance || 0n, selectedToken?.decimals || 0));
+
   return (
     <>
       <div className="relative w-full rounded-xl">
@@ -113,11 +109,19 @@ export const TokenField: React.FC<TokenFieldProps> = ({
             )}
           </div>
         </div>
-        {price !== 0 ? (
-          <div className="absolute bottom-1 right-5 text-neutral-400">
-            {isLoading ? <div>...</div> : isError ? <div>price error</div> : <div>${price.toFixed(2)}</div>}
-          </div>
-        ) : null}
+        <div className="absolute bottom-1 right-5 text-neutral-400">
+          {typeof tokenUsdValue === "number" ? (
+            isLoading ? (
+              <div>...</div>
+            ) : isError ? (
+              <div>price error</div>
+            ) : (
+              <div>${tokenUsdValue.toFixed(2)}</div>
+            )
+          ) : !isLoading && selectedToken && value ? (
+            <div>unknown price</div>
+          ) : null}
+        </div>
       </div>
       {isModalOpen && tokenOptions && setToken && (
         <TokenSelectModal tokenOptions={tokenOptions} setToken={setToken} setIsModalOpen={setIsModalOpen} />

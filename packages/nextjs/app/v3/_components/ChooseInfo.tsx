@@ -2,7 +2,12 @@ import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
 import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
+import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
+/**
+ * @dev Gauge creation reverts if the name is longer than 32 characters
+ * https://github.com/balancer/pool-creator/issues/17#issuecomment-2430158673
+ */
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
   const { standardToBoosted } = useFetchBoostableTokens();
@@ -22,7 +27,7 @@ export const ChooseInfo = () => {
         .join("-");
 
       updatePool({
-        name: `Balancer ${symbol.split("-").join(" ")}`,
+        name: symbol.split("-").join(" "),
         symbol,
       });
     }
@@ -37,6 +42,7 @@ export const ChooseInfo = () => {
             label="Pool name"
             placeholder="Enter pool name"
             value={name}
+            maxLength={MAX_POOL_NAME_LENGTH}
             onChange={e => updatePool({ name: e.target.value })}
           />
         </div>

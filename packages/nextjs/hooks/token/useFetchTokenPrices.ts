@@ -1,26 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
+import { type Address } from "viem";
 import { useApiConfig } from "~~/hooks/balancer";
-import { type TokenPrice } from "~~/hooks/token";
 
 /**
- * Fetch token prices to help user set 50/50 weight when creating pools?
+ * Fetch token price for a given address
  */
 export const useFetchTokenPrices = () => {
   const { url, chainName } = useApiConfig();
 
+  // API seems to only return full list with no filtering options?
   const query = `
   {
     tokenGetCurrentPrices(chains:${chainName}) {
-    chain
-    address
-    price
-    updatedAt
+      address
+      price
     }
   }
   `;
 
   return useQuery<TokenPrice[]>({
-    queryKey: ["fetchTokenPrices", chainName],
+    queryKey: ["fetchTokenPrice", chainName],
     queryFn: async () => {
       const response = await fetch(url, {
         method: "POST",
@@ -37,4 +36,9 @@ export const useFetchTokenPrices = () => {
       return json.data.tokenGetCurrentPrices;
     },
   });
+};
+
+export type TokenPrice = {
+  address: Address;
+  price: number;
 };

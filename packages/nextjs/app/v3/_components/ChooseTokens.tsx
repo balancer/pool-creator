@@ -1,7 +1,9 @@
 import React from "react";
 import { ChooseToken } from "./ChooseToken";
 import { PoolType } from "@balancer/sdk";
-import { initialTokenConfig, usePoolCreationStore } from "~~/hooks/v3";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { Alert } from "~~/components/common";
+import { initialTokenConfig, usePoolCreationStore, useVerifyProportionalInit } from "~~/hooks/v3";
 
 const MAX_TOKENS = {
   [PoolType.Weighted]: 8,
@@ -10,6 +12,7 @@ const MAX_TOKENS = {
 
 export function ChooseTokens() {
   const { tokenConfigs, poolType, updatePool } = usePoolCreationStore();
+  const isProportional = useVerifyProportionalInit();
 
   // Beware of javascript floating point precision issues if 100 % number of tokens is not equal to zero
   function handleAddToken() {
@@ -34,21 +37,24 @@ export function ChooseTokens() {
   }
 
   return (
-    <div>
-      <div className="text-xl mb-5">Choose up to {poolType ? MAX_TOKENS[poolType] : 0} tokens:</div>
+    <div className="flex flex-col flex-grow gap-6">
+      <div className="flex justify-between items-center">
+        <div className="text-xl">Choose up to {poolType ? MAX_TOKENS[poolType] : 0} tokens:</div>
+        {poolType && tokenConfigs.length < MAX_TOKENS[poolType] && (
+          <button onClick={handleAddToken} className="btn btn-primary border-none w-40 rounded-xl text-lg flex">
+            Add Token
+            <PlusIcon className="w-5 h-5 ml-2" />
+          </button>
+        )}
+      </div>
 
-      <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-6">
         {Array.from({ length: tokenConfigs.length }).map((_, index) => (
           <ChooseToken key={index} index={index} />
         ))}
-        {poolType && tokenConfigs.length < MAX_TOKENS[poolType] && (
-          <div className="flex justify-end">
-            <button onClick={handleAddToken} className="btn btn-primary border-none w-40 rounded-xl text-lg flex">
-              Add Token
-            </button>
-          </div>
-        )}
       </div>
+
+      {!isProportional && <Alert type="warning">Token USD values are not proportional to selected weights</Alert>}
     </div>
   );
 }

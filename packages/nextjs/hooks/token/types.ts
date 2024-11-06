@@ -6,11 +6,12 @@ export type Token = {
   decimals: number;
   logoURI: string;
   hasBoostedVariant?: boolean;
-};
-
-export type TokenPrice = {
-  chain: string;
-  address: string;
-  price: number;
-  updatedAt: number;
+  priceRateProviderData: {
+    address: string;
+    summary: string;
+    name: string;
+    reviewed: boolean;
+    warnings: string[];
+    reviewFile: string;
+  } | null;
 };

@@ -18,6 +18,15 @@ export const useFetchTokenList = () => {
       symbol
       decimals
       logoURI
+      isErc4626
+      priceRateProviderData {
+        address
+        summary
+        name
+        reviewed
+        warnings
+        reviewFile
+    }
     }
   }
   `;

@@ -100,7 +100,7 @@ export function ChooseToken({ index }: { index: number }) {
                 onChange={e => handleWeightChange(Number(e.target.value))}
                 className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
               />
-              <div className="absolute top-1 right-1 text-md text-neutral-400">%</div>
+              <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
             </div>
           )}
           <div className="flex-grow">
@@ -125,6 +125,8 @@ export function ChooseToken({ index }: { index: number }) {
         </div>
 
         {tokenInfo && (
+          // TODO: auto fill rate provider address if data available from API
+          // TODO: inform user that if using un-reviewed rate provider, it will need to be reviewed before users can add / join pool via our v3 UI
           <div className="flex justify-between items-center">
             <Checkbox
               label={`Use a rate provider?`}

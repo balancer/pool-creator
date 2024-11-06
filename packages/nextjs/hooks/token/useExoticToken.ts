@@ -20,6 +20,7 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
         logoURI: "",
         decimals,
         chainId: targetNetwork.id,
+        priceRateProviderData: null,
       };
     }
   }, [exoticTokenAddress, name, symbol, decimals, targetNetwork.id]);

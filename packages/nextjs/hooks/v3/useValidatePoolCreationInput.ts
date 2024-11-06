@@ -1,6 +1,7 @@
 import { PoolType, TokenType } from "@balancer/sdk";
 import { isAddress } from "viem";
 import { usePoolCreationStore, useValidateNetwork } from "~~/hooks/v3";
+import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 export function useValidatePoolCreationInput() {
   const { isWrongNetwork } = useValidateNetwork();
@@ -40,7 +41,7 @@ export function useValidatePoolCreationInput() {
     !isUsingHooks || isAddress(poolHooksContract),
   ].every(Boolean);
 
-  const isInfoValid = !!name && !!symbol;
+  const isInfoValid = !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH;
 
   const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
 

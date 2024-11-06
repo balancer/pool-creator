@@ -9,6 +9,7 @@ interface TextFieldProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isDisabled?: boolean;
   mustBeAddress?: boolean;
+  maxLength?: number;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -18,8 +19,11 @@ export const TextField: React.FC<TextFieldProps> = ({
   onChange,
   isDisabled,
   mustBeAddress,
+  maxLength,
 }) => {
   const isValidValue = !mustBeAddress || !value || isAddress(value);
+
+  const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
 
   return (
     <div className="w-full">
@@ -31,6 +35,11 @@ export const TextField: React.FC<TextFieldProps> = ({
             Invalid address
           </div>
         )}
+        {!isValidLength && (
+          <div className="text-sm text-error">
+            Pool name is too long: {value?.length ?? 0}/{maxLength}
+          </div>
+        )}
       </div>
       <input
         type="text"
@@ -39,7 +48,7 @@ export const TextField: React.FC<TextFieldProps> = ({
         onChange={onChange}
         disabled={isDisabled}
         className={`shadow-inner border-0 rounded-xl w-full input bg-base-300 disabled:text-base-content disabled:bg-base-300 px-5 text-lg
-          ${!isValidValue && "ring-1 ring-red-400"}`}
+          ${!isValidValue || (!isValidLength && "ring-1 ring-red-400")}`}
       />
     </div>
   );
