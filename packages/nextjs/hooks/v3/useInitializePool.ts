@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getContract, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
+import { useFetchBoostableMap, usePoolCreationStore } from "~~/hooks/v3";
 import { createPermit2 } from "~~/utils/permit2Helper";
 
 export const useInitializePool = () => {
@@ -14,7 +14,7 @@ export const useInitializePool = () => {
   const rpcUrl = publicClient?.chain.rpcUrls.default.http[0];
   const protocolVersion = 3;
   const { poolAddress, poolType, tokenConfigs, updatePool, step } = usePoolCreationStore();
-  const { standardToBoosted } = useFetchBoostableTokens();
+  const { data: boostableMap } = useFetchBoostableMap();
 
   async function initializePool() {
     if (!poolAddress) throw new Error("Pool address missing");
@@ -39,10 +39,10 @@ export const useInitializePool = () => {
     const amountsIn = tokenConfigs
       .map(token => {
         if (!token.tokenInfo?.decimals) throw new Error(`Token ${token.address} is missing tokenInfo.decimals`);
-        const boostedToken = standardToBoosted[token.address];
-        const address = token.useBoostedVariant ? boostedToken.address : token.address;
-        const decimals = token.useBoostedVariant ? boostedToken.decimals : token.tokenInfo?.decimals;
-
+        const boostedToken = boostableMap?.[token.address];
+        const address = token.useBoostedVariant ? boostedToken?.address : token.address;
+        const decimals = token.useBoostedVariant ? boostedToken?.decimals : token.tokenInfo?.decimals;
+        if (!decimals) throw new Error(`Token ${token.address} is missing decimals`);
         return {
           address: address as `0x${string}`,
           rawAmount: parseUnits(token.amount, decimals),

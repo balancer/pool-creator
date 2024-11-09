@@ -6,6 +6,7 @@ export type Token = {
   decimals: number;
   logoURI: string;
   hasBoostedVariant?: boolean;
+  underlyingTokenAddress: string | null;
   priceRateProviderData: {
     address: string;
     summary: string;

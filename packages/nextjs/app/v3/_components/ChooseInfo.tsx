@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
-import { useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
+import { useFetchBoostableMap, usePoolCreationStore } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 /**
@@ -10,15 +10,16 @@ import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
  */
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
-  const { standardToBoosted } = useFetchBoostableTokens();
+
+  const { data: boostableWhitelist } = useFetchBoostableMap();
 
   useEffect(() => {
     if (poolType) {
       const symbol = tokenConfigs
         .map(token => {
           const { useBoostedVariant, tokenInfo, weight } = token;
-          const boostedVariant = standardToBoosted[token.address];
-          const symbol = useBoostedVariant ? boostedVariant.symbol : tokenInfo?.symbol;
+          const boostedVariant = boostableWhitelist?.[token.address];
+          const symbol = useBoostedVariant ? boostedVariant?.symbol : tokenInfo?.symbol;
           if (poolType === PoolType.Weighted && weight) {
             return `${token.weight.toFixed(0)}${symbol}`;
           }
@@ -31,7 +32,7 @@ export const ChooseInfo = () => {
         symbol,
       });
     }
-  }, [tokenConfigs, poolType, updatePool, standardToBoosted]);
+  }, [tokenConfigs, poolType, updatePool, boostableWhitelist]);
 
   return (
     <div>

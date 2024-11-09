@@ -4,7 +4,7 @@ import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/comm
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 const swapFeePercentages = ["0.1", "0.3", "1"];
-const amplificationParameters = ["33", "69", "420"];
+const amplificationParameters = ["10", "100", "1000"];
 
 export const ChooseParameters = () => {
   const {

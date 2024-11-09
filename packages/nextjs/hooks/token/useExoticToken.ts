@@ -21,6 +21,7 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
         decimals,
         chainId: targetNetwork.id,
         priceRateProviderData: null,
+        underlyingTokenAddress: null,
       };
     }
   }, [exoticTokenAddress, name, symbol, decimals, targetNetwork.id]);

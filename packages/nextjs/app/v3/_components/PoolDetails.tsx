@@ -6,10 +6,9 @@ import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { TokenImage } from "~~/components/common";
-import { useReadToken } from "~~/hooks/token";
 import {
   type TokenConfig,
-  useFetchBoostableTokens,
+  useFetchBoostableMap,
   usePoolCreationStore,
   useValidatePoolCreationInput,
 } from "~~/hooks/v3";
@@ -159,13 +158,9 @@ function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSe
 function TokenDetails({ token }: { token: TokenConfig }) {
   const { poolType } = usePoolCreationStore();
 
-  const { useBoostedVariant } = token;
+  const { data: boostableMap } = useFetchBoostableMap();
 
-  const { standardToBoosted } = useFetchBoostableTokens();
-
-  const boostedToken = standardToBoosted[token.address];
-
-  const { symbol: boostedSymbol } = useReadToken(boostedToken?.address);
+  const boostedToken = boostableMap?.[token.address];
 
   return (
     <div>
@@ -174,7 +169,9 @@ function TokenDetails({ token }: { token: TokenConfig }) {
           {poolType === PoolType.Weighted && <span className="font-bold">{token.weight.toFixed(0)}%</span>}
 
           {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
-          <div className="font-bold text-lg">{useBoostedVariant ? boostedSymbol : token.tokenInfo?.symbol}</div>
+          <div className="font-bold text-lg">
+            {token.useBoostedVariant ? boostedToken?.symbol : token.tokenInfo?.symbol}
+          </div>
         </div>
         <div>{token.amount}</div>
       </div>

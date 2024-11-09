@@ -5,7 +5,7 @@ import { zeroAddress } from "viem";
 import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { type BoostedTokenInfo, useFetchBoostableTokens, usePoolCreationStore } from "~~/hooks/v3";
+import { type BoostedTokenInfo, useFetchBoostableMap, usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
 
 export function ChooseToken({ index }: { index: number }) {
@@ -19,14 +19,10 @@ export function ChooseToken({ index }: { index: number }) {
   const tokenList = data || [];
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
-  const { standardToBoosted } = useFetchBoostableTokens();
-  const boostedVariant = standardToBoosted[address];
+  const { data: boostableMap } = useFetchBoostableMap();
+  const boostedVariant = boostableMap?.[address];
 
   const handleTokenSelection = (tokenInfo: Token) => {
-    const hasBoostedVariant = standardToBoosted[tokenInfo.address];
-    if (hasBoostedVariant) {
-      setShowBoostOpportunityModal(true);
-    }
     updateTokenConfig(index, {
       address: tokenInfo.address,
       tokenType: TokenType.STANDARD,
@@ -35,6 +31,10 @@ export function ChooseToken({ index }: { index: number }) {
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
     });
+
+    if (boostableMap?.[tokenInfo.address]) {
+      setShowBoostOpportunityModal(true);
+    }
   };
 
   const handleTokenAmount = (amount: string) => {

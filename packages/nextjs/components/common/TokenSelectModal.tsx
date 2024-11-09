@@ -5,7 +5,7 @@ import { ExclamationTriangleIcon, RocketLaunchIcon, XMarkIcon } from "@heroicons
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useExoticToken } from "~~/hooks/token";
-import { useFetchBoostableTokens } from "~~/hooks/v3";
+import { useFetchBoostableMap } from "~~/hooks/v3";
 
 type ModalProps = {
   tokenOptions: Token[];
@@ -31,7 +31,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
   const networkColor = useNetworkColor();
   const { exoticToken, isLoadingExoticToken } = useExoticToken(searchText, searchFilteredTokenList);
   const { targetNetwork } = useTargetNetwork();
-  const { standardToBoosted } = useFetchBoostableTokens();
+  const { data: boostableMap } = useFetchBoostableMap();
   const tokenList = exoticToken ? [exoticToken] : searchFilteredTokenList;
 
   return (
@@ -112,7 +112,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                             </div>
                           )}
                           {/* TODO: remove this rocket ship inidicator before launch? */}
-                          {standardToBoosted[token.address.toLowerCase()] && (
+                          {boostableMap?.[token.address.toLowerCase()] && (
                             <div className="flex flex-col justify-around items-end text-success text-lg">
                               <RocketLaunchIcon className="w-6 h-6 hover:cursor-pointer " />
                               boostable

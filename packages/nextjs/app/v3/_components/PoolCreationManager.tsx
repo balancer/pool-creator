@@ -5,7 +5,7 @@ import { PoolDetails } from "~~/app/v3/_components";
 import { Alert, PoolStateResetModal, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import {
   useCreatePool,
-  useFetchBoostableTokens,
+  useFetchBoostableMap,
   useInitializePool,
   useMultiSwap,
   usePoolCreationStore,
@@ -29,7 +29,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     error: initializePoolError,
   } = useInitializePool();
 
-  const { standardToBoosted } = useFetchBoostableTokens();
+  const { data: boostableMap } = useFetchBoostableMap();
 
   const chainId = tokenConfigs[0].tokenInfo?.chainId;
 
@@ -73,7 +73,8 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const boostedVariants = tokenConfigs.filter(token => token.useBoostedVariant);
   boostedVariants.forEach((token, idx) => {
     const { amount } = token;
-    const boostedVariant = standardToBoosted[token.address];
+    const boostedVariant = boostableMap?.[token.address];
+    if (!boostedVariant) return;
     approveOnBoostedVariantSteps.push({
       label: `Approve ${boostedVariant.symbol}`,
       component: (
