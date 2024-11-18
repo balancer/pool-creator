@@ -28,6 +28,13 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
   const searchParams = useSearchParams();
   const poolAddress = searchParams.get("address") || poolCreation.address;
 
+  useEffect(() => {
+    const addressParam = searchParams.get("address");
+    if (addressParam && addressParam !== poolCreation.address) {
+      updatePoolCreation({ address: addressParam });
+    }
+  }, [searchParams, poolCreation.address, updatePoolCreation]);
+
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
   const { token1Weight, token2Weight } = getPerTokenWeights(poolCreation.tokenWeights);
