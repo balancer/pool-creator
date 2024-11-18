@@ -26,6 +26,7 @@ export const useCreatePool = () => {
       logs: txReceipt.logs,
     });
     const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
+    if (!newPool) throw new Error("No new pool address from pool creation tx receipt");
     console.log("New pool address from txReceipt logs:", newPool);
 
     return newPool;

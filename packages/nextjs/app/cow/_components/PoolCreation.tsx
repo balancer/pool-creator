@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { PoolCreated, PoolResetModal, StepsDisplay } from "./";
-import { Address, parseUnits } from "viem";
+import { parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
 import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
 import { CHAIN_NAMES } from "~~/hooks/balancer/";
@@ -9,8 +10,6 @@ import {
   useBindToken,
   useCreatePool,
   useFinalizePool,
-  useNewPoolEvents,
-  usePoolCreationPersistedState,
   useReadPool,
   useSetSwapFee,
 } from "~~/hooks/cow/";
@@ -20,95 +19,111 @@ import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
 import { getPerTokenWeights } from "~~/utils/token-weights";
 
 interface ManagePoolCreationProps {
-  state: PoolCreationState;
-  clearState: () => void;
+  poolCreation: PoolCreationState;
+  updatePoolCreation: (updates: Partial<PoolCreationState>) => void;
+  clearPoolCreation: () => void;
 }
 
-export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => {
-  const token1RawAmount = parseUnits(state.token1Amount, state.token1.decimals);
-  const token2RawAmount = parseUnits(state.token2Amount, state.token2.decimals);
-  const { token1Weight, token2Weight } = getPerTokenWeights(state.tokenWeights);
+export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
+  const searchParams = useSearchParams();
+  const poolAddress = searchParams.get("address") || poolCreation.address;
 
-  const [userPoolAddress, setUserPoolAddress] = useState<Address>();
+  const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
+  const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
+  const { token1Weight, token2Weight } = getPerTokenWeights(poolCreation.tokenWeights);
+
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
-  useNewPoolEvents(setUserPoolAddress);
   const { targetNetwork } = useTargetNetwork();
   const { switchChain } = useSwitchChain();
-  const isWrongNetwork = targetNetwork.id !== state.chainId;
-  const { data: pool, refetch: refetchPool } = useReadPool(userPoolAddress);
+  const isWrongNetwork = targetNetwork.id !== poolCreation.chainId;
+
+  const { data: poolData, refetch: refetchPool } = useReadPool(poolAddress);
   const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(
-    state.token1.address,
-    pool?.address,
+    poolCreation.token1.address,
+    poolAddress,
   );
   const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(
-    state.token2.address,
-    pool?.address,
+    poolCreation.token2.address,
+    poolAddress,
   );
   const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
   const { mutate: approve1, isPending: isApprove1Pending, error: approve1Error } = useApproveToken();
   const { mutate: approve2, isPending: isApprove2Pending, error: approve2Error } = useApproveToken();
-  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken(state.tokenWeights, true);
-  const { mutate: bind2, isPending: isBind2Pending, error: bind2Error } = useBindToken(state.tokenWeights, false);
+  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken(poolCreation.tokenWeights, true);
+  const {
+    mutate: bind2,
+    isPending: isBind2Pending,
+    error: bind2Error,
+  } = useBindToken(poolCreation.tokenWeights, false);
   const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
   const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
   const txError =
     createPoolError || approve1Error || approve2Error || bind1Error || bind2Error || setSwapFeeError || finalizeError;
 
-  const setPersistedState = usePoolCreationPersistedState(state => state.setPersistedState);
-
   useEffect(() => {
-    if (state.step === 1) return;
-    if (pool && pool.numTokens === 0n) {
-      if (allowance1 < token1RawAmount) {
-        setPersistedState({ ...state, step: 2 });
-      } else if (allowance2 < token2RawAmount) {
-        setPersistedState({ ...state, step: 3 });
-      } else if (allowance1 >= token1RawAmount && allowance2 >= token2RawAmount) {
-        setPersistedState({ ...state, step: 4 });
-      }
-    }
-    if (pool && pool.numTokens === 1n) setPersistedState({ ...state, step: 5 });
-    if (pool && pool.numTokens === 2n && !pool.isFinalized) {
-      if (pool.swapFee !== pool.MAX_FEE) {
-        setPersistedState({ ...state, step: 6 });
-      } else {
-        setPersistedState({ ...state, step: 7 });
-      }
-    }
-    if (pool && pool.isFinalized) setPersistedState({ ...state, step: 8 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pool, allowance1, allowance2, token1RawAmount, token2RawAmount]);
+    if (!poolData) return;
 
-  const etherscanURL = pool && getBlockExplorerAddressLink(targetNetwork, pool.address);
+    if (poolData.isFinalized) {
+      updatePoolCreation({ step: 8 });
+      return;
+    }
+
+    switch (poolData.numTokens) {
+      case 0n:
+        if (allowance1 < token1RawAmount) {
+          updatePoolCreation({ step: 2 });
+        } else if (allowance2 < token2RawAmount) {
+          updatePoolCreation({ step: 3 });
+        } else if (allowance1 >= token1RawAmount && allowance2 >= token2RawAmount) {
+          updatePoolCreation({ step: 4 });
+        }
+        break;
+
+      case 1n:
+        updatePoolCreation({ step: 5 });
+        break;
+
+      case 2n:
+        if (poolData.swapFee !== poolData.MAX_FEE) {
+          updatePoolCreation({ step: 6 });
+        } else {
+          updatePoolCreation({ step: 7 });
+        }
+        break;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolData, allowance1, allowance2, token1RawAmount, token2RawAmount]);
+
+  const etherscanURL = poolData && getBlockExplorerAddressLink(targetNetwork, poolData.address);
 
   return (
     <>
       <div className="flex flex-wrap justify-center gap-5 lg:relative">
         <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-xl md:w-[555px]">
           <div className="flex flex-col items-center gap-5 w-full">
-            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
+            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your poolCreation</h5>
             <div className="w-full">
-              <div className="ml-1 mb-1">Selected pool tokens:</div>
+              <div className="ml-1 mb-1">Selected poolCreation tokens:</div>
               <div className="w-full flex flex-col gap-3">
                 <TokenField
-                  value={state.token1Amount}
-                  selectedToken={state.token1}
+                  value={poolCreation.token1Amount}
+                  selectedToken={poolCreation.token1}
                   isDisabled={true}
                   tokenWeight={token1Weight}
                 />
                 <TokenField
-                  value={state.token2Amount}
-                  selectedToken={state.token2}
+                  value={poolCreation.token2Amount}
+                  selectedToken={poolCreation.token2}
                   isDisabled={true}
                   tokenWeight={token2Weight}
                 />
               </div>
             </div>
-            <TextField label="Pool name:" value={state.poolName} isDisabled={true} />
-            <TextField label="Pool symbol:" value={state.poolSymbol} isDisabled={true} />
+            <TextField label="Pool name:" value={poolCreation.name} isDisabled={true} />
+            <TextField label="Pool symbol:" value={poolCreation.symbol} isDisabled={true} />
             {(() => {
-              switch (state.step) {
+              switch (poolCreation.step) {
                 case 1:
                   return (
                     <TransactionButton
@@ -117,11 +132,10 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                       isDisabled={isCreatePending || isWrongNetwork}
                       onClick={() => {
                         createPool(
-                          { name: state.poolName, symbol: state.poolSymbol },
+                          { name: poolCreation.name, symbol: poolCreation.symbol },
                           {
                             onSuccess: newPoolAddress => {
-                              setUserPoolAddress(newPoolAddress);
-                              setPersistedState({ ...state, step: 2 });
+                              updatePoolCreation({ address: newPoolAddress, step: 2 });
                             },
                           },
                         );
@@ -131,16 +145,20 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 case 2:
                   return (
                     <TransactionButton
-                      title={`Approve ${state.token1.symbol}`}
+                      title={`Approve ${poolCreation.token1.symbol}`}
                       isPending={isApprove1Pending}
                       isDisabled={isApprove1Pending || isWrongNetwork}
                       onClick={() => {
                         approve1(
-                          { token: state.token1.address, spender: pool?.address, rawAmount: token1RawAmount },
+                          {
+                            token: poolCreation.token1.address,
+                            spender: poolData?.address,
+                            rawAmount: token1RawAmount,
+                          },
                           {
                             onSuccess: () => {
                               refetchAllowance1();
-                              if (allowance1 >= token1RawAmount) setPersistedState({ ...state, step: 3 });
+                              if (allowance1 >= token1RawAmount) updatePoolCreation({ step: 3 });
                             },
                           },
                         );
@@ -150,16 +168,20 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 case 3:
                   return (
                     <TransactionButton
-                      title={`Approve ${state.token2.symbol}`}
+                      title={`Approve ${poolCreation.token2.symbol}`}
                       isPending={isApprove2Pending}
                       isDisabled={isApprove2Pending || isWrongNetwork}
                       onClick={() => {
                         approve2(
-                          { token: state.token2.address, spender: pool?.address, rawAmount: token2RawAmount },
+                          {
+                            token: poolCreation.token2.address,
+                            spender: poolData?.address,
+                            rawAmount: token2RawAmount,
+                          },
                           {
                             onSuccess: () => {
                               refetchAllowance2();
-                              if (allowance2 >= token2RawAmount) setPersistedState({ ...state, step: 4 });
+                              if (allowance2 >= token2RawAmount) updatePoolCreation({ step: 4 });
                             },
                           },
                         );
@@ -170,20 +192,20 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 case 4:
                   return (
                     <TransactionButton
-                      title={`Add ${state.token1.symbol}`}
+                      title={`Add ${poolCreation.token1.symbol}`}
                       isPending={isBind1Pending}
                       isDisabled={isBind1Pending || isWrongNetwork}
                       onClick={() => {
                         bind1(
                           {
-                            pool: pool?.address,
-                            token: state.token1.address,
+                            pool: poolData?.address,
+                            token: poolCreation.token1.address,
                             rawAmount: token1RawAmount,
                           },
                           {
                             onSuccess: () => {
                               refetchPool();
-                              setPersistedState({ ...state, step: 5 });
+                              updatePoolCreation({ step: 5 });
                             },
                           },
                         );
@@ -193,20 +215,20 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                 case 5:
                   return (
                     <TransactionButton
-                      title={`Add ${state.token2.symbol}`}
+                      title={`Add ${poolCreation.token2.symbol}`}
                       isPending={isBind2Pending}
                       isDisabled={isBind2Pending || isWrongNetwork}
                       onClick={() => {
                         bind2(
                           {
-                            pool: pool?.address,
-                            token: state.token2.address,
+                            pool: poolData?.address,
+                            token: poolCreation.token2.address,
                             rawAmount: token2RawAmount,
                           },
                           {
                             onSuccess: () => {
                               refetchPool();
-                              setPersistedState({ ...state, step: 6 });
+                              updatePoolCreation({ step: 6 });
                             },
                           },
                         );
@@ -222,11 +244,11 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                         isDisabled={isSetSwapFeePending || isWrongNetwork}
                         onClick={() => {
                           setSwapFee(
-                            { pool: pool?.address, rawAmount: pool?.MAX_FEE },
+                            { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
                             {
                               onSuccess: () => {
                                 refetchPool();
-                                setPersistedState({ ...state, step: 7 });
+                                updatePoolCreation({ step: 7 });
                               },
                             },
                           );
@@ -241,17 +263,17 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
                       isPending={isFinalizePending}
                       isDisabled={isFinalizePending || isWrongNetwork}
                       onClick={() => {
-                        finalizePool(pool?.address, {
+                        finalizePool(poolData?.address, {
                           onSuccess: () => {
                             refetchPool();
-                            setPersistedState({ ...state, step: 8 });
+                            updatePoolCreation({ step: 8 });
                           },
                         });
                       }}
                     />
                   );
                 case 8:
-                  return <Alert type="success">Your CoW AMM pool was successfully created!</Alert>;
+                  return <Alert type="success">Your CoW AMM poolCreation was successfully created!</Alert>;
                 default:
                   return null;
               }
@@ -259,27 +281,27 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
           </div>
         </div>
         <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
-          <StepsDisplay state={state} />
+          <StepsDisplay state={poolCreation} />
         </div>
       </div>
 
-      {state.step === 6 && <Alert type="info">All CoW AMMs must set the swap fee to the maximum of 99.99%</Alert>}
-      {state.step === 8 && (
+      {poolCreation.step === 6 && <Alert type="info">All CoW AMMs should set the swap fee to the maximum value</Alert>}
+      {poolCreation.step === 8 && (
         <PoolCreated
-          clearState={clearState}
+          clearState={clearPoolCreation}
           etherscanURL={etherscanURL}
-          poolAddress={pool?.address}
-          chainId={state.chainId}
+          poolAddress={poolData?.address}
+          chainId={poolCreation.chainId}
         />
       )}
 
       {isWrongNetwork && (
         <Alert type="error">
           You&apos;re connected to the wrong network, switch to{" "}
-          <span onClick={() => switchChain?.({ chainId: state.chainId })} className="link">
-            {CHAIN_NAMES[state.chainId]}
+          <span onClick={() => switchChain?.({ chainId: poolCreation.chainId })} className="link">
+            {CHAIN_NAMES[poolCreation.chainId]}
           </span>{" "}
-          to finish creating your pool, or start over.
+          to finish creating your poolCreation, or start over.
         </Alert>
       )}
 
@@ -292,7 +314,7 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
         </Alert>
       )}
 
-      {state.step < 8 && (
+      {poolCreation.step < 8 && (
         <div className=" link flex items-center gap-2" onClick={() => setIsResetModalOpen(true)}>
           Start Over
         </div>
@@ -300,8 +322,8 @@ export const PoolCreation = ({ state, clearState }: ManagePoolCreationProps) => 
       {isResetModalOpen && (
         <PoolResetModal
           setIsModalOpen={setIsResetModalOpen}
-          etherscanURL={pool && !pool.isFinalized ? etherscanURL : undefined}
-          clearState={() => clearState()}
+          etherscanURL={etherscanURL}
+          clearState={() => clearPoolCreation()}
         />
       )}
     </>
