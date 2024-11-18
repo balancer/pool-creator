@@ -2,13 +2,13 @@
 
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { TokenImage } from "~~/components/common";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
   type TokenConfig,
-  useFetchBoostableMap,
+  useBoostableWhitelist,
   usePoolCreationStore,
   useValidatePoolCreationInput,
 } from "~~/hooks/v3";
@@ -16,6 +16,8 @@ import { abbreviateAddress } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
+  const { targetNetwork } = useTargetNetwork();
+
   const {
     poolType,
     tokenConfigs,
@@ -33,8 +35,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
 
-  // TODO replace sepolia with dynamic network chain type thingy
-  const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(sepolia, poolAddress) : undefined;
+  const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(targetNetwork, poolAddress) : undefined;
 
   return (
     <div className="flex flex-col gap-3">
@@ -158,9 +159,9 @@ function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSe
 function TokenDetails({ token }: { token: TokenConfig }) {
   const { poolType } = usePoolCreationStore();
 
-  const { data: boostableMap } = useFetchBoostableMap();
+  const { data: boostableWhitelist } = useBoostableWhitelist();
 
-  const boostedToken = boostableMap?.[token.address];
+  const boostedToken = boostableWhitelist?.[token.address];
 
   return (
     <div>

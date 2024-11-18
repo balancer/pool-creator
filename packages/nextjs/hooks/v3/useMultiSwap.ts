@@ -11,7 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import { encodeFunctionData, formatUnits, getContract, parseEventLogs, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
-import { useFetchBoostableMap, usePoolCreationStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { createPermit2 } from "~~/utils/permit2Helper";
 
 // This hook only used if creating boosted pool using standard tokens
@@ -21,7 +21,7 @@ export const useMultiSwap = () => {
   const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
   const { tokenConfigs, updatePool, step, updateTokenConfig } = usePoolCreationStore();
-  const { data: boostableMap } = useFetchBoostableMap();
+  const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const userData = "0x";
   const slippage = Slippage.fromPercentage("0.5"); // 0.5%
@@ -44,7 +44,7 @@ export const useMultiSwap = () => {
     const paths = tokenConfigs
       .filter(token => token.useBoostedVariant)
       .map(token => {
-        const boostedToken = boostableMap?.[token.address];
+        const boostedToken = boostableWhitelist?.[token.address];
         if (!token.tokenInfo) throw new Error("Token info not found");
         if (!boostedToken) throw new Error("Boosted token not found");
 
@@ -120,7 +120,7 @@ export const useMultiSwap = () => {
     logs.forEach((log, idx) => {
       // mintedShares is the amount, underlyingToken is an address
       const { mintedShares, underlyingToken } = log.args;
-      const boostedToken = boostableMap?.[underlyingToken.toLowerCase()];
+      const boostedToken = boostableWhitelist?.[underlyingToken.toLowerCase()];
       if (!boostedToken) throw new Error("Boosted token not found");
       const amount = formatUnits(mintedShares, boostedToken?.decimals);
       updateTokenConfig(idx, { amount });

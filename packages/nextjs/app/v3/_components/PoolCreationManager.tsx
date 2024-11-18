@@ -4,8 +4,8 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolDetails } from "~~/app/v3/_components";
 import { Alert, PoolStateResetModal, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import {
+  useBoostableWhitelist,
   useCreatePool,
-  useFetchBoostableMap,
   useInitializePool,
   useMultiSwap,
   usePoolCreationStore,
@@ -29,7 +29,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     error: initializePoolError,
   } = useInitializePool();
 
-  const { data: boostableMap } = useFetchBoostableMap();
+  const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const chainId = tokenConfigs[0].tokenInfo?.chainId;
 
@@ -73,7 +73,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const boostedVariants = tokenConfigs.filter(token => token.useBoostedVariant);
   boostedVariants.forEach((token, idx) => {
     const { amount } = token;
-    const boostedVariant = boostableMap?.[token.address];
+    const boostedVariant = boostableWhitelist?.[token.address];
     if (!boostedVariant) return;
     approveOnBoostedVariantSteps.push({
       label: `Approve ${boostedVariant.symbol}`,
@@ -112,7 +112,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
       <div
         className="absolute w-full h-full"
         onClick={() => {
-          if (step > 1) return;
+          if (step > 1 || isCreatePoolPending) return;
           setIsModalOpen(false);
         }}
       />

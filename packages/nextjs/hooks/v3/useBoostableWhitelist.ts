@@ -4,18 +4,13 @@ import { useApiConfig } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token } from "~~/hooks/token/types";
 
-export type BoostedTokenInfo = {
-  address: Address;
-  name: string;
-  symbol: string;
-  decimals: number;
-};
-
 /**
- * @TODO change so this hook accepts underlying token address as arg and finds the boosted version using fetch to balancer api
+ * 1. Fetch whitelist of yield bearing erc4626 tokens from https://github.com/balancer/metadata/blob/main/erc4626/index.json
+ * 2. Fetch data from balancer api for each token in whitelist
+ * 3. Return map of underlying token address to boosted token info
  */
 
-export const useFetchBoostableMap = () => {
+export const useBoostableWhitelist = () => {
   const { url, chainName } = useApiConfig();
   const { targetNetwork } = useTargetNetwork();
 
@@ -26,7 +21,7 @@ export const useFetchBoostableMap = () => {
 
       const boostableWhitelist: BoostableWhitelist = await response.json();
 
-      const boostableTokensAddresses = boostableWhitelist.map(list => {
+      const boostableAddresses = boostableWhitelist.map(list => {
         return list.addresses[targetNetwork.id].map(address => `"${address}"`).join(",");
       });
 
@@ -34,7 +29,7 @@ export const useFetchBoostableMap = () => {
             {
               tokenGetTokens(
               chains:[${chainName}]
-              where: {tokensIn: [${boostableTokensAddresses}]}
+              where: {tokensIn: [${boostableAddresses}]}
               ) {
                 chainId
                 address
@@ -56,8 +51,6 @@ export const useFetchBoostableMap = () => {
             }
             `;
 
-      console.log("query", query);
-
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -68,16 +61,23 @@ export const useFetchBoostableMap = () => {
 
       const data = json.data.tokenGetTokens;
 
+      // Create map of underlying token address to matching boosted variant info
       const boostableTokensMap = data.reduce((acc: Record<Address, Token>, token: Token) => {
         if (token.underlyingTokenAddress) acc[token.underlyingTokenAddress] = token;
         return acc;
       }, {});
 
-      console.log("boostableTokensMap", boostableTokensMap);
-
       return boostableTokensMap;
     },
   });
+};
+
+// TYPES
+export type BoostedTokenInfo = {
+  address: Address;
+  name: string;
+  symbol: string;
+  decimals: number;
 };
 
 type BoostableWhitelist = {

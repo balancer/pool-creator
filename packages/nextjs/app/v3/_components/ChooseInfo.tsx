@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
-import { useFetchBoostableMap, usePoolCreationStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 /**
@@ -11,7 +11,7 @@ import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
 
-  const { data: boostableWhitelist } = useFetchBoostableMap();
+  const { data: boostableWhitelist } = useBoostableWhitelist();
 
   useEffect(() => {
     if (poolType) {

@@ -1,11 +1,10 @@
 import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
 import { isAddress } from "viem";
-import { ExclamationTriangleIcon, RocketLaunchIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useExoticToken } from "~~/hooks/token";
-import { useFetchBoostableMap } from "~~/hooks/v3";
 
 type ModalProps = {
   tokenOptions: Token[];
@@ -31,7 +30,6 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
   const networkColor = useNetworkColor();
   const { exoticToken, isLoadingExoticToken } = useExoticToken(searchText, searchFilteredTokenList);
   const { targetNetwork } = useTargetNetwork();
-  const { data: boostableMap } = useFetchBoostableMap();
   const tokenList = exoticToken ? [exoticToken] : searchFilteredTokenList;
 
   return (
@@ -109,13 +107,6 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                           {exoticToken && (
                             <div className="flex flex-col justify-center text-error">
                               <ExclamationTriangleIcon className="w-8 h-8 hover:cursor-pointer " />
-                            </div>
-                          )}
-                          {/* TODO: remove this rocket ship inidicator before launch? */}
-                          {boostableMap?.[token.address.toLowerCase()] && (
-                            <div className="flex flex-col justify-around items-end text-success text-lg">
-                              <RocketLaunchIcon className="w-6 h-6 hover:cursor-pointer " />
-                              boostable
                             </div>
                           )}
                         </div>

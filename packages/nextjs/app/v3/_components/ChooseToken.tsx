@@ -5,7 +5,7 @@ import { zeroAddress } from "viem";
 import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { type BoostedTokenInfo, useFetchBoostableMap, usePoolCreationStore } from "~~/hooks/v3";
+import { type BoostedTokenInfo, useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
 
 export function ChooseToken({ index }: { index: number }) {
@@ -19,8 +19,8 @@ export function ChooseToken({ index }: { index: number }) {
   const tokenList = data || [];
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
-  const { data: boostableMap } = useFetchBoostableMap();
-  const boostedVariant = boostableMap?.[address];
+  const { data: boostableWhitelist } = useBoostableWhitelist();
+  const boostedVariant = boostableWhitelist?.[address];
 
   const handleTokenSelection = (tokenInfo: Token) => {
     updateTokenConfig(index, {
@@ -32,7 +32,7 @@ export function ChooseToken({ index }: { index: number }) {
       useBoostedVariant: false,
     });
 
-    if (boostableMap?.[tokenInfo.address]) {
+    if (boostableWhitelist?.[tokenInfo.address]) {
       setShowBoostOpportunityModal(true);
     }
   };
@@ -142,7 +142,7 @@ export function ChooseToken({ index }: { index: number }) {
                 onClick={() => setShowBoostOpportunityModal(true)}
               >
                 {useBoostedVariant
-                  ? `Earning TODO% with ${boostedVariant.symbol}`
+                  ? `Earning yield with ${boostedVariant.symbol}`
                   : `Using standard ${tokenInfo.symbol}`}
                 <Cog6ToothIcon className="w-5 h-5" />
               </div>

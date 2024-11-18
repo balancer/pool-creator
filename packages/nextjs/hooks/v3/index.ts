@@ -5,4 +5,4 @@ export * from "./useValidatePoolCreationInput";
 export * from "./useValidateNetwork";
 export * from "./useMultiSwap";
 export * from "./useVerifyProportionalInit";
-export * from "./useFetchBoostableMap";
+export * from "./useBoostableWhitelist";
