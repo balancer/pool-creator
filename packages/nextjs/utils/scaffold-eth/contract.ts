@@ -65,6 +65,7 @@ export type GenericContract = {
   abi: Abi;
   inheritedFunctions?: InheritedFunctions;
   external?: true;
+  fromBlock?: bigint;
 };
 
 export type GenericContractsDeclaration = {
