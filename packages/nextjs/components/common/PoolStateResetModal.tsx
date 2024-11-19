@@ -11,7 +11,7 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
-      <div className="w-[500px] relative bg-base-300 border border-base-200 rounded-lg p-6">
+      <div className="w-[550px] relative bg-base-300 border border-base-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-5">
           <h5 className="font-bold text-2xl mb-0">Are you sure?</h5>
 
@@ -19,14 +19,10 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
         </div>
 
         <div className="text-lg mb-5">If you are having trouble with the pool creation process, please consider:</div>
-        <ul className="list-disc pl-5 mb-10 text-lg">
+        <ol className="list-decimal pl-5 mb-10 text-lg">
           <li>
             Reaching out for assistance on{" "}
-            <Link
-              target="_blank"
-              rel="noreferrer"
-              href="https://discord.com/channels/638460494168064021/1246145461123809292"
-            >
+            <Link target="_blank" rel="noreferrer" href="https://discord.balancer.fi/">
               <span className="link">discord</span> <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block" />
             </Link>
           </li>
@@ -39,7 +35,13 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
               </Link>
             </li>
           )}
-        </ul>
+          <li>
+            Adding pool address to URL search params
+            <ol className="">
+              <li className="text-info">https://pool-creator.balancer.fi/cow?address=0x...</li>
+            </ol>
+          </li>
+        </ol>
         <div className="flex gap-3 justify-end">
           <button
             className="w-24 border border-base-content px-5 py-3 rounded-xl"

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { getAddress } from "viem";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
@@ -15,6 +16,8 @@ interface PoolCreatedProps {
 
 export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: PoolCreatedProps) => {
   const [addressCopied, setAddressCopied] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   if (!poolAddress) return null;
 
@@ -22,6 +25,11 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
 
   const domainName = extractDomain(etherscanURL || "");
   const blockExplorerName = domainName.split(".")[0];
+
+  const handleCreateAnother = () => {
+    clearState();
+    router.replace(pathname);
+  };
 
   return (
     <>
@@ -67,7 +75,12 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
         <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
       </div>
       <div className="w-80">
-        <TransactionButton title="Create Another Pool" onClick={clearState} isPending={false} isDisabled={false} />
+        <TransactionButton
+          title="Create Another Pool"
+          onClick={handleCreateAnother}
+          isPending={false}
+          isDisabled={false}
+        />
       </div>
     </>
   );

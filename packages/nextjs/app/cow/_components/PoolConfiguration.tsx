@@ -10,7 +10,7 @@ import { TextField, TokenField } from "~~/components/common/";
 import { ButtonTabs } from "~~/components/common/ButtonTabs";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
-import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
+import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { COW_MIN_AMOUNT } from "~~/utils";
@@ -26,7 +26,7 @@ export const PoolConfiguration = () => {
   const [hasAgreedToWarning, setAgreedToWarning] = useState<boolean>(false);
   const [poolName, setPoolName] = useState<string>("");
   const [poolSymbol, setPoolSymbol] = useState<string>("");
-  const setPersistedState = usePoolCreationPersistedState(state => state.setPersistedState);
+  const { setPoolCreation } = usePoolCreationStore();
   const [tokenWeights, setTokenWeights] = useState<SupportedTokenWeight>("5050");
   const { token1Weight, token2Weight } = getPerTokenWeights(tokenWeights);
 
@@ -157,7 +157,7 @@ export const PoolConfiguration = () => {
             isPending={false}
             isDisabled={!canProceedToCreate}
             onClick={() => {
-              setPersistedState({
+              setPoolCreation({
                 chainId: chain?.id || 0,
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 token1: token1!,
@@ -165,8 +165,9 @@ export const PoolConfiguration = () => {
                 token2: token2!,
                 token1Amount,
                 token2Amount,
-                poolName: poolName.trim(),
-                poolSymbol: poolSymbol.trim(),
+                name: poolName.trim(),
+                symbol: poolSymbol.trim(),
+                address: undefined,
                 step: 1,
                 tokenWeights,
               });

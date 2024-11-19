@@ -4,13 +4,12 @@ import { useEffect, useState } from "react";
 import { PoolConfiguration, PoolCreation } from "./_components";
 import type { NextPage } from "next";
 import { CowAMM } from "~~/components/assets/CowAMM";
-import { usePoolCreationPersistedState } from "~~/hooks/cow/usePoolCreationState";
+import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
 
 const CowAmm: NextPage = () => {
   const [isMounted, setIsMounted] = useState(false);
 
-  const persistedState = usePoolCreationPersistedState(state => state.state);
-  const clearPersistedState = usePoolCreationPersistedState(state => state.clearPersistedState);
+  const { poolCreation, updatePoolCreation, clearPoolCreation } = usePoolCreationStore();
 
   useEffect(() => {
     setIsMounted(true);
@@ -24,10 +23,14 @@ const CowAmm: NextPage = () => {
             <CowAMM width="333" />
             {!isMounted ? (
               <CowLoadingSkeleton />
-            ) : !persistedState ? (
+            ) : !poolCreation ? (
               <PoolConfiguration />
             ) : (
-              persistedState && <PoolCreation state={persistedState} clearState={clearPersistedState} />
+              <PoolCreation
+                poolCreation={poolCreation}
+                updatePoolCreation={updatePoolCreation}
+                clearPoolCreation={clearPoolCreation}
+              />
             )}
           </div>
         </div>
