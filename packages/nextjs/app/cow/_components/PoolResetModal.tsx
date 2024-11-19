@@ -36,7 +36,8 @@ export const PoolResetModal = ({ setIsModalOpen, clearState, etherscanURL }: Poo
             <li>
               Viewing the pool on{" "}
               <Link target="_blank" rel="noreferrer" href={etherscanURL}>
-                <span className="link">etherscan</span> <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block" />
+                <span className="link text-info">block explorer</span>{" "}
+                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
               </Link>
             </li>
           )}
