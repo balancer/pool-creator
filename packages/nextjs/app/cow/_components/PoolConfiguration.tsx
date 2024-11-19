@@ -170,6 +170,7 @@ export const PoolConfiguration = () => {
                 address: undefined,
                 step: 1,
                 tokenWeights,
+                isInitialState: true,
               });
             }}
           />

@@ -7,3 +7,4 @@ export * from "./useBindToken";
 export * from "./useSetSwapFee";
 export * from "./getPoolUrl";
 export * from "./usePoolCreationStore";
+export * from "./useCowFactoryEvents";

@@ -14,6 +14,7 @@ export interface PoolCreationState {
   address: Address | undefined; // updated by tx receipt from completion of step 1
   step: number;
   tokenWeights: "5050" | "8020";
+  isInitialState: boolean;
 }
 
 export const usePoolCreationStore = create(

@@ -15,30 +15,35 @@ const externalContracts = {
     BCoWFactory: {
       address: FACTORY_ADDRESSES[scaffoldConfig.targetFork.id],
       abi: abis.CoW.BCoWFactory,
+      fromBlock: 0n,
     },
   },
   11155111: {
     BCoWFactory: {
       address: FACTORY_ADDRESSES[sepolia.id],
       abi: abis.CoW.BCoWFactory,
+      fromBlock: 6415186n,
     },
   },
   1: {
     BCoWFactory: {
       address: FACTORY_ADDRESSES[mainnet.id],
       abi: abis.CoW.BCoWFactory,
+      fromBlock: 20432455n,
     },
   },
   100: {
     BCoWFactory: {
       address: FACTORY_ADDRESSES[gnosis.id],
       abi: abis.CoW.BCoWFactory,
+      fromBlock: 35259725n,
     },
   },
   42161: {
     BCoWFactory: {
       address: FACTORY_ADDRESSES[arbitrum.id],
       abi: abis.CoW.BCoWFactory,
+      fromBlock: 248291297n,
     },
   },
 } as const;

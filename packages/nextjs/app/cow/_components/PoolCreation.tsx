@@ -15,6 +15,7 @@ import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
   useBindToken,
+  useCowFactoryEvents,
   useCreatePool,
   useFinalizePool,
   useReadPool,
@@ -32,6 +33,8 @@ interface ManagePoolCreationProps {
 }
 
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
+  useCowFactoryEvents();
+
   const searchParams = useSearchParams();
   const poolAddress = searchParams.get("address") || poolCreation.address;
 
@@ -76,7 +79,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
     createPoolError || approve1Error || approve2Error || bind1Error || bind2Error || setSwapFeeError || finalizeError;
 
   useEffect(() => {
-    if (!poolData) return;
+    if (!poolData || poolCreation.isInitialState) return;
 
     if (poolData.isFinalized) {
       updatePoolCreation({ step: 8 });
@@ -145,6 +148,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                       isPending={isCreatePending}
                       isDisabled={isCreatePending || isWrongNetwork}
                       onClick={() => {
+                        // user has officially begun the pool creation process
+                        updatePoolCreation({ isInitialState: false });
+
                         createPool(
                           { name: poolCreation.name, symbol: poolCreation.symbol },
                           {
