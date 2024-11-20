@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
-import { TokenType } from "@balancer/sdk";
-import { PoolType } from "@balancer/sdk";
+import { PoolType, TokenType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { Checkbox, TextField, TokenField } from "~~/components/common";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { type BoostedTokenInfo, useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
@@ -12,8 +12,7 @@ export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
 
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
-  const { tokenType, weight, rateProvider, paysYieldFees, tokenInfo, amount, address, useBoostedVariant } =
-    tokenConfigs[index];
+  const { tokenType, weight, rateProvider, tokenInfo, amount, address, useBoostedVariant } = tokenConfigs[index];
   const { balance: userTokenBalance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
   const tokenList = data || [];
@@ -53,9 +52,9 @@ export function ChooseToken({ index }: { index: number }) {
     updateTokenConfig(index, { rateProvider });
   };
 
-  const handlePaysYieldFees = () => {
-    updateTokenConfig(index, { paysYieldFees: !paysYieldFees });
-  };
+  // const handlePaysYieldFees = () => {
+  //   updateTokenConfig(index, { paysYieldFees: !paysYieldFees });
+  // };
 
   const handleRemoveToken = () => {
     if (tokenConfigs.length > 2) {
@@ -124,50 +123,78 @@ export function ChooseToken({ index }: { index: number }) {
           )}
         </div>
 
-        {tokenInfo && (
-          // TODO: auto fill rate provider address if data available from API
-          // TODO: inform user that if using un-reviewed rate provider, it will need to be reviewed before users can add / join pool via our v3 UI
-          <div className="flex justify-between items-center">
-            <Checkbox
-              label={`Use a rate provider?`}
-              checked={tokenType === TokenType.TOKEN_WITH_RATE}
-              onChange={handleTokenType}
-            />
-
-            {boostedVariant && (
-              <div
-                className={`flex gap-1 items-center cursor-pointer ${
-                  useBoostedVariant ? "text-success" : "text-warning"
-                }`}
-                onClick={() => setShowBoostOpportunityModal(true)}
-              >
-                {useBoostedVariant
-                  ? `Earning yield with ${boostedVariant.symbol}`
-                  : `Using standard ${tokenInfo.symbol}`}
-                <Cog6ToothIcon className="w-5 h-5" />
+        <div>
+          {tokenInfo && (
+            // TODO: auto fill rate provider address if data available from API
+            <div className="flex justify-between items-center mb-1">
+              <div className="flex gap-1 items-center">
+                <div
+                  className="tooltip tooltip-left tooltip-primary before:text-lg"
+                  data-tip="To ensure proper valuation, yield bearing assets require a rate provider"
+                >
+                  <InformationCircleIcon className="w-5 h-5" />
+                </div>
+                <Checkbox
+                  label={
+                    <span>
+                      Use a{" "}
+                      <a
+                        href="https://docs-v3.balancer.fi/concepts/core-concepts/rate-providers.html"
+                        className="link"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        rate provider
+                      </a>
+                      ?
+                    </span>
+                  }
+                  checked={tokenType === TokenType.TOKEN_WITH_RATE}
+                  onChange={handleTokenType}
+                />
               </div>
-            )}
-          </div>
-        )}
 
-        {tokenType === TokenType.TOKEN_WITH_RATE && (
-          <>
-            <TextField
-              mustBeAddress={true}
-              placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
-              value={rateProvider !== zeroAddress ? rateProvider : ""}
-              onChange={e => handleRateProvider(e.target.value)}
-            />
-            <div className="flex gap-1 items-center">
-              {/* <InformationCircleIcon className="w-5 h-5" /> */}
+              {boostedVariant && (
+                <div
+                  className={`flex gap-1 items-center cursor-pointer ${
+                    useBoostedVariant ? "text-accent" : "text-base-content"
+                  }`}
+                  onClick={() => setShowBoostOpportunityModal(true)}
+                >
+                  <Cog6ToothIcon className="w-5 h-5" />
+                  {useBoostedVariant
+                    ? `Earning yield with ${boostedVariant.symbol}`
+                    : `Using standard ${tokenInfo.symbol}`}
+                </div>
+              )}
+            </div>
+          )}
+
+          {tokenType === TokenType.TOKEN_WITH_RATE && (
+            <div className="flex flex-col gap-4">
+              <TextField
+                mustBeAddress={true}
+                placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
+                value={rateProvider !== zeroAddress ? rateProvider : ""}
+                onChange={e => handleRateProvider(e.target.value)}
+              />
+              <Alert type="warning">
+                Rate provider contracts must be reviewed before pool shows on{" "}
+                <a href="https://balancer.fi/pools" className="link" target="_blank" rel="noreferrer">
+                  balancer.fi
+                </a>
+              </Alert>
+
+              {/* 
               <Checkbox
                 label={`Should yield fees be charged on ${tokenInfo?.symbol}?`}
                 checked={paysYieldFees}
                 onChange={handlePaysYieldFees}
-              />
+              /> 
+              */}
             </div>
-          </>
-        )}
+          )}
+        </div>
       </div>
       {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal

@@ -26,12 +26,24 @@ export const TextField: React.FC<TextFieldProps> = ({
   const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
 
   return (
-    <div className="w-full">
-      <div className="mb-1 flex justify-between items-center gap-1 px-2">
-        {label && <label className="font-bold">{label}</label>}
+    <div className="w-full relative">
+      <div className="mb-1 flex items-center gap-1 px-2">{label && <label className="font-bold">{label}</label>}</div>
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value ?? ""}
+        onChange={onChange}
+        disabled={isDisabled}
+        className={`
+          shadow-inner border-0 rounded-xl w-full input bg-base-300 
+          disabled:text-base-content disabled:bg-base-300 px-5 text-lg
+          ${!isValidValue || !isValidLength ? "ring-2 ring-red-400 focus:ring-red-400" : "focus:ring-primary"}
+        `}
+      />
+      <div className="absolute bottom-0.5 right-3 flex gap-4">
         {!isValidValue && (
           <div className="text-red-400 flex items-center gap-1">
-            <ExclamationTriangleIcon className="w-4 h-4 mt-0.5" />
+            <ExclamationTriangleIcon className="w-4 h-4" />
             Invalid address
           </div>
         )}
@@ -41,15 +53,6 @@ export const TextField: React.FC<TextFieldProps> = ({
           </div>
         )}
       </div>
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value ?? ""}
-        onChange={onChange}
-        disabled={isDisabled}
-        className={`shadow-inner border-0 rounded-xl w-full input bg-base-300 disabled:text-base-content disabled:bg-base-300 px-5 text-lg
-          ${!isValidValue || (!isValidLength && "ring-1 ring-red-400")}`}
-      />
     </div>
   );
 };

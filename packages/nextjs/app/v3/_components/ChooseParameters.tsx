@@ -1,5 +1,6 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
@@ -41,10 +42,19 @@ export const ChooseParameters = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="text-xl">Choose Pool Parameters:</div>
+      <div className="text-xl">Choose pool parameters:</div>
       <div className="bg-base-100 p-5 rounded-xl">
-        <div className="text-lg font-bold mb-3">Swap fee percentage</div>
-
+        <div className="text-lg font-bold mb-3 ">
+          <a
+            className="flex items-center gap-2 link no-underline hover:underline"
+            href="https://docs-v3.balancer.fi/concepts/vault/swap-fee.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Swap fee percentage
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+          </a>
+        </div>
         <div className="flex gap-2">
           {swapFeePercentages.map(fee => (
             <NumberParameterButton
@@ -71,7 +81,17 @@ export const ChooseParameters = () => {
 
       {poolType === PoolType.Stable && (
         <div className="bg-base-100 p-5 rounded-xl">
-          <div className="text-lg font-bold mb-3">Amplification Parameter</div>
+          <div className="text-lg font-bold mb-3">
+            <a
+              className="flex items-center gap-2 link no-underline hover:underline"
+              href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/stable-pool/stable-math.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Amplification Parameter
+              <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+            </a>
+          </div>
 
           <div className="flex gap-2 items-end">
             {amplificationParameters.map(value => (
@@ -98,7 +118,17 @@ export const ChooseParameters = () => {
       )}
 
       <div className="bg-base-100 p-5 rounded-xl">
-        <label className="text-lg font-bold">Pool management</label>
+        <label className="text-lg font-bold">
+          <a
+            className="flex items-center gap-2 link no-underline hover:underline"
+            href="https://docs-v3.balancer.fi/concepts/core-concepts/pool-role-accounts.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Pool management
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+          </a>
+        </label>
         <RadioInput
           name="pool-management"
           label="Delegate swap fee and pause management to the Balancer DAO"
@@ -134,7 +164,17 @@ export const ChooseParameters = () => {
       </div>
 
       <div className="bg-base-100 p-5 rounded-xl">
-        <label className="text-lg font-bold">Pool hooks</label>
+        <label className="text-lg font-bold">
+          <a
+            className="flex items-center gap-2 link no-underline hover:underline"
+            href="https://docs-v3.balancer.fi/concepts/core-concepts/hooks.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Pool hooks
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+          </a>
+        </label>
         <RadioInput
           name="pool-hooks"
           label="I do not want this pool to use any hooks"
@@ -158,7 +198,6 @@ export const ChooseParameters = () => {
           <div className="mt-3">
             <TextField
               mustBeAddress={true}
-              label="Contract address"
               placeholder="Enter pool hooks contract address"
               value={poolHooksContract}
               onChange={e => updatePool({ poolHooksContract: e.target.value })}
