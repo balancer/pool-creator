@@ -6,3 +6,4 @@ export * from "./useValidateNetwork";
 export * from "./useMultiSwap";
 export * from "./useVerifyProportionalInit";
 export * from "./useBoostableWhitelist";
+export * from "./useValidateTextField";

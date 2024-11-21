@@ -1,6 +1,7 @@
-import React from "react";
-import { isAddress } from "viem";
+"use client";
+
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { useValidateTextField } from "~~/hooks/v3";
 
 interface TextFieldProps {
   label?: string;
@@ -10,6 +11,7 @@ interface TextFieldProps {
   isDisabled?: boolean;
   mustBeAddress?: boolean;
   maxLength?: number;
+  isRateProvider?: boolean;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -20,10 +22,9 @@ export const TextField: React.FC<TextFieldProps> = ({
   isDisabled,
   mustBeAddress,
   maxLength,
+  isRateProvider,
 }) => {
-  const isValidValue = !mustBeAddress || !value || isAddress(value);
-
-  const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
+  const { isValid, errorMessage } = useValidateTextField({ value, mustBeAddress, maxLength, isRateProvider });
 
   return (
     <div className="w-full relative">
@@ -37,19 +38,14 @@ export const TextField: React.FC<TextFieldProps> = ({
         className={`
           shadow-inner border-0 rounded-xl w-full input bg-base-300 
           disabled:text-base-content disabled:bg-base-300 px-5 text-lg
-          ${!isValidValue || !isValidLength ? "ring-2 ring-red-400 focus:ring-red-400" : "focus:ring-primary"}
+          ${!isValid ? "ring-2 ring-red-400 focus:ring-red-400" : "focus:ring-primary"}
         `}
       />
       <div className="absolute bottom-0.5 right-3 flex gap-4">
-        {!isValidValue && (
+        {errorMessage && (
           <div className="text-red-400 flex items-center gap-1">
             <ExclamationTriangleIcon className="w-4 h-4" />
-            Invalid address
-          </div>
-        )}
-        {!isValidLength && (
-          <div className="text-sm text-error">
-            Pool name is too long: {value?.length ?? 0}/{maxLength}
+            {errorMessage}
           </div>
         )}
       </div>

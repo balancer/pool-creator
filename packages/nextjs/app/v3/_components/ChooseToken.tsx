@@ -173,6 +173,7 @@ export function ChooseToken({ index }: { index: number }) {
           {tokenType === TokenType.TOKEN_WITH_RATE && (
             <div className="flex flex-col gap-4">
               <TextField
+                isRateProvider={true}
                 mustBeAddress={true}
                 placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
                 value={rateProvider !== zeroAddress ? rateProvider : ""}
