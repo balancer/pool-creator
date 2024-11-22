@@ -1,6 +1,6 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
@@ -29,14 +29,23 @@ export const ChooseParameters = () => {
     max: number,
   ) => {
     const value = e.target.value;
-    const numberValue = Number(value);
+    let numberValue = Number(value);
+
+    if (value === "") {
+      updatePool({ [field]: "" });
+      return;
+    }
+
+    if (field === "amplificationParameter") {
+      numberValue = Math.round(numberValue);
+    }
 
     if (numberValue < min) {
       updatePool({ [field]: min.toString() });
     } else if (numberValue > max) {
       updatePool({ [field]: max.toString() });
     } else {
-      updatePool({ [field]: value });
+      updatePool({ [field]: numberValue.toString() });
     }
   };
 
@@ -44,7 +53,7 @@ export const ChooseParameters = () => {
     <div className="flex flex-col gap-4">
       <div className="text-xl">Choose pool parameters:</div>
       <div className="bg-base-100 p-5 rounded-xl">
-        <div className="text-lg font-bold mb-3 ">
+        <div className="text-lg font-bold mb-3 inline-flex">
           <a
             className="flex items-center gap-2 link no-underline hover:underline"
             href="https://docs-v3.balancer.fi/concepts/vault/swap-fee.html"
@@ -52,7 +61,7 @@ export const ChooseParameters = () => {
             rel="noreferrer"
           >
             Swap fee percentage
-            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
           </a>
         </div>
         <div className="flex gap-2">
@@ -81,7 +90,7 @@ export const ChooseParameters = () => {
 
       {poolType === PoolType.Stable && (
         <div className="bg-base-100 p-5 rounded-xl">
-          <div className="text-lg font-bold mb-3">
+          <div className="text-lg font-bold mb-3 inline-flex">
             <a
               className="flex items-center gap-2 link no-underline hover:underline"
               href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/stable-pool/stable-math.html"
@@ -89,7 +98,7 @@ export const ChooseParameters = () => {
               rel="noreferrer"
             >
               Amplification Parameter
-              <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+              <InformationCircleIcon className="w-5 h-5 mt-0.5" />
             </a>
           </div>
 
@@ -107,7 +116,7 @@ export const ChooseParameters = () => {
               <NumberInput
                 placeholder="1 - 5000"
                 value={amplificationParameter}
-                onChange={e => handleNumberInputChange(e, "amplificationParameter", 1, 5000)}
+                onChange={e => handleNumberInputChange(e, "amplificationParameter", 0, 5000)}
                 min={1}
                 max={5000}
                 step={1}
@@ -118,7 +127,7 @@ export const ChooseParameters = () => {
       )}
 
       <div className="bg-base-100 p-5 rounded-xl">
-        <label className="text-lg font-bold">
+        <label className="text-lg font-bold inline-flex">
           <a
             className="flex items-center gap-2 link no-underline hover:underline"
             href="https://docs-v3.balancer.fi/concepts/core-concepts/pool-role-accounts.html"
@@ -126,7 +135,7 @@ export const ChooseParameters = () => {
             rel="noreferrer"
           >
             Pool management
-            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
         <RadioInput
@@ -164,7 +173,7 @@ export const ChooseParameters = () => {
       </div>
 
       <div className="bg-base-100 p-5 rounded-xl">
-        <label className="text-lg font-bold">
+        <label className="text-lg font-bold inline-flex">
           <a
             className="flex items-center gap-2 link no-underline hover:underline"
             href="https://docs-v3.balancer.fi/concepts/core-concepts/hooks.html"
@@ -172,7 +181,7 @@ export const ChooseParameters = () => {
             rel="noreferrer"
           >
             Pool hooks
-            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
         <RadioInput
@@ -195,13 +204,16 @@ export const ChooseParameters = () => {
           onChange={() => updatePool({ isUsingHooks: true })}
         />
         {isUsingHooks && (
-          <div className="mt-3">
-            <TextField
-              mustBeAddress={true}
-              placeholder="Enter pool hooks contract address"
-              value={poolHooksContract}
-              onChange={e => updatePool({ poolHooksContract: e.target.value })}
-            />
+          <div className="">
+            <div className="mb-5">
+              <TextField
+                isPoolHooksContract={true}
+                mustBeAddress={true}
+                placeholder="Enter pool hooks contract address"
+                value={poolHooksContract}
+                onChange={e => updatePool({ poolHooksContract: e.target.value })}
+              />
+            </div>
             <div className="mt-2 flex flex-col gap-2">
               <Checkbox
                 label="Should this pool disable unbalanced liquidity operations?"

@@ -1,10 +1,12 @@
 import { PoolType, TokenType } from "@balancer/sdk";
+import { useQueryClient } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import { usePoolCreationStore, useValidateNetwork } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 export function useValidatePoolCreationInput() {
   const { isWrongNetwork } = useValidateNetwork();
+  const queryClient = useQueryClient();
 
   const {
     poolType,
@@ -31,19 +33,30 @@ export function useValidatePoolCreationInput() {
     // If pool type is weighted, no token can have a weight of 0
     if (poolType === PoolType.Weighted && token.weight === 0) return false;
 
+    // Check tanstack query cache for rate provider validity
+    if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
+      const isValidRateProvider = queryClient.getQueryData(["validateRateProvider", token.rateProvider]) ?? false;
+      if (!isValidRateProvider) return false;
+    }
     return true;
   });
 
+  // Check tanstack query cache for pool hooks contract validity
+  const isValidPoolHooksContract = queryClient.getQueryData(["validatePoolHooks", poolHooksContract]) ?? false;
+
   const isParametersValid = [
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
-    poolType !== PoolType.Stable || !!amplificationParameter,
+    poolType !== PoolType.Stable ||
+      (!!amplificationParameter && Number(amplificationParameter) >= 1 && Number(amplificationParameter) <= 5000),
     isDelegatingManagement || (isAddress(swapFeeManager) && isAddress(pauseManager)),
-    !isUsingHooks || isAddress(poolHooksContract),
+    !isUsingHooks || isValidPoolHooksContract,
   ].every(Boolean);
 
   const isInfoValid = !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH;
 
   const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
+
+  console.log("isParametersValid", isParametersValid);
 
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid };
 }

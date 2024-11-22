@@ -1,8 +1,7 @@
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { PoolType, TokenType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon, InformationCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { type BoostedTokenInfo, useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
@@ -171,7 +170,7 @@ export function ChooseToken({ index }: { index: number }) {
           )}
 
           {tokenType === TokenType.TOKEN_WITH_RATE && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mt-3">
               <TextField
                 isRateProvider={true}
                 mustBeAddress={true}

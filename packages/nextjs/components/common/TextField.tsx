@@ -12,6 +12,7 @@ interface TextFieldProps {
   mustBeAddress?: boolean;
   maxLength?: number;
   isRateProvider?: boolean;
+  isPoolHooksContract?: boolean;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -23,27 +24,34 @@ export const TextField: React.FC<TextFieldProps> = ({
   mustBeAddress,
   maxLength,
   isRateProvider,
+  isPoolHooksContract,
 }) => {
-  const { isValid, errorMessage } = useValidateTextField({ value, mustBeAddress, maxLength, isRateProvider });
+  const { isValid, errorMessage } = useValidateTextField({
+    value,
+    mustBeAddress,
+    maxLength,
+    isRateProvider,
+    isPoolHooksContract,
+  });
 
   return (
-    <div className="w-full relative">
+    <div className="w-full mb-2">
       <div className="mb-1 flex items-center gap-1 px-2">{label && <label className="font-bold">{label}</label>}</div>
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={value ?? ""}
-        onChange={onChange}
-        disabled={isDisabled}
-        className={`
-          shadow-inner border-0 rounded-xl w-full input bg-base-300 
-          disabled:text-base-content disabled:bg-base-300 px-5 text-lg
-          ${!isValid ? "ring-2 ring-red-400 focus:ring-red-400" : "focus:ring-primary"}
-        `}
-      />
-      <div className="absolute bottom-0.5 right-3 flex gap-4">
-        {errorMessage && (
-          <div className="text-red-400 flex items-center gap-1">
+      <div className="relative">
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={value ?? ""}
+          onChange={onChange}
+          disabled={isDisabled}
+          className={`
+            shadow-inner border-0 rounded-xl w-full input bg-base-300 
+            disabled:text-base-content disabled:bg-base-300 px-5 text-lg
+            ${!!value && !isValid ? "ring-2 ring-red-400 focus:ring-red-400" : "focus:ring-primary"}
+          `}
+        />
+        {!!value && !isValid && (
+          <div className="absolute top-full right-2 text-red-400 flex items-center gap-1">
             <ExclamationTriangleIcon className="w-4 h-4" />
             {errorMessage}
           </div>

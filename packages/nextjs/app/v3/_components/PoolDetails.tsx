@@ -2,8 +2,7 @@
 
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { ArrowTopRightOnSquareIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { TokenImage } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
@@ -106,19 +105,31 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={!name && !symbol}
         content={
           <div>
-            <div>{name.length > 38 ? `${name.slice(0, 38)}...` : name}</div>
-            <div>{symbol}</div>
-            {poolAddress && (
-              <a
-                href={poolDeploymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-info hover:underline"
-              >
-                {poolAddress.slice(0, 33)}...
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-              </a>
-            )}
+            <div className="flex justify-between">
+              <div className="">Name</div>
+              <div>{name.length > 26 ? `${name.slice(0, 26)}...` : name}</div>
+            </div>
+            <div className="flex justify-between">
+              <div className="">Symbol</div>
+              <div>{symbol.length > 26 ? `${symbol.slice(0, 26)}...` : symbol}</div>
+            </div>
+            <div className="flex justify-between">
+              <div className="">Address</div>
+              <div>
+                {poolAddress ? (
+                  <a
+                    href={poolDeploymentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-info hover:underline"
+                  >
+                    {abbreviateAddress(poolAddress)}
+                  </a>
+                ) : (
+                  "TBD"
+                )}
+              </div>
+            </div>
           </div>
         }
       />

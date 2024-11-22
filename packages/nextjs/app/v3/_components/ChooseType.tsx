@@ -1,6 +1,6 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
@@ -30,12 +30,12 @@ export function ChooseType() {
           Choose a
           <a
             href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/"
-            className="link no-underline hover:underline flex items-center gap-2"
+            className="link no-underline flex items-center gap-1.5"
             target="_blank"
             rel="noreferrer"
           >
             pool type
-            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
           </a>
         </div>
 
