@@ -127,27 +127,16 @@ export function ChooseToken({ index }: { index: number }) {
             // TODO: auto fill rate provider address if data available from API
             <div className="flex justify-between items-center mb-1">
               <div className="flex gap-1 items-center">
-                <div
-                  className="tooltip tooltip-left tooltip-primary before:text-lg"
-                  data-tip="To ensure proper valuation, yield bearing assets require a rate provider"
+                <a
+                  href="https://docs-v3.balancer.fi/concepts/core-concepts/rate-providers.html"
+                  className="link"
+                  target="_blank"
+                  rel="noreferrer"
                 >
                   <InformationCircleIcon className="w-5 h-5" />
-                </div>
+                </a>
                 <Checkbox
-                  label={
-                    <span>
-                      Use a{" "}
-                      <a
-                        href="https://docs-v3.balancer.fi/concepts/core-concepts/rate-providers.html"
-                        className="link"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        rate provider
-                      </a>
-                      ?
-                    </span>
-                  }
+                  label={`Use a rate provider?`}
                   checked={tokenType === TokenType.TOKEN_WITH_RATE}
                   onChange={handleTokenType}
                 />

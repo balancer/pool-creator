@@ -1,13 +1,14 @@
 import { PoolType, TokenType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
-import { isAddress } from "viem";
+import { isAddress, parseUnits } from "viem";
+import { useWalletClient } from "wagmi";
 import { usePoolCreationStore, useValidateNetwork } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 export function useValidatePoolCreationInput() {
   const { isWrongNetwork } = useValidateNetwork();
   const queryClient = useQueryClient();
-
+  const { data: walletClient } = useWalletClient();
   const {
     poolType,
     tokenConfigs,
@@ -25,13 +26,29 @@ export function useValidatePoolCreationInput() {
   const isTypeValid = poolType !== undefined && !isWrongNetwork;
 
   const isTokensValid = tokenConfigs.every(token => {
-    if (!token.address || !token.amount) return false;
+    if (!token.address || !token.amount || !walletClient?.account.address || !token.tokenInfo?.decimals) return false;
 
-    // Must have rate provider if token type is TOKEN_WITH_RATE
-    if (token.tokenType === TokenType.TOKEN_WITH_RATE && !isAddress(token.rateProvider)) return false;
+    // Look up cached user token balance using Wagmi's query key format
+    const tokenBalanceQueryKey = [
+      "readContract",
+      {
+        address: token.address,
+        functionName: "balanceOf",
+        args: [walletClient?.account.address],
+        chainId: walletClient?.chain.id,
+      },
+    ];
+    const rawUserBalance: bigint = queryClient.getQueryData(tokenBalanceQueryKey) ?? 0n;
+    const rawTokenAmount = parseUnits(token.amount, token.tokenInfo.decimals);
+
+    // User must have enough token balance
+    if (rawTokenAmount > rawUserBalance) return false;
 
     // If pool type is weighted, no token can have a weight of 0
     if (poolType === PoolType.Weighted && token.weight === 0) return false;
+
+    // Must have rate provider if token type is TOKEN_WITH_RATE
+    if (token.tokenType === TokenType.TOKEN_WITH_RATE && !isAddress(token.rateProvider)) return false;
 
     // Check tanstack query cache for rate provider validity
     if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
@@ -55,8 +72,6 @@ export function useValidatePoolCreationInput() {
   const isInfoValid = !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH;
 
   const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
-
-  console.log("isParametersValid", isParametersValid);
 
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid };
 }

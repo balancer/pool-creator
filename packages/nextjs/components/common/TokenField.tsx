@@ -7,7 +7,7 @@ import { WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
 import { useTokenUsdValue } from "~~/hooks/token";
-import { COW_MIN_AMOUNT, formatToHuman } from "~~/utils";
+import { COW_MIN_AMOUNT } from "~~/utils";
 
 interface TokenFieldProps {
   value: string;
@@ -90,7 +90,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
                   onClick={setAmountToMax}
                   className="flex items-center gap-1 hover:text-accent hover:cursor-pointer"
                 >
-                  <WalletIcon className="h-4 w-4 mt-0.5" /> {formatToHuman(balance, selectedToken?.decimals || 0)}
+                  <WalletIcon className="h-4 w-4 mt-0.5" /> {formatUnits(balance, selectedToken?.decimals || 0)}
                 </div>
                 {amountGreaterThanBalance && (
                   <div className="flex items-center gap-1 text-red-400">
