@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Address, isAddress, parseAbi } from "viem";
 import { usePublicClient } from "wagmi";
+import { usePoolCreationStore } from "~~/hooks/v3";
 
 interface ValidationProps {
   value?: string;
@@ -8,6 +9,19 @@ interface ValidationProps {
   maxLength?: number;
   isRateProvider?: boolean;
   isPoolHooksContract?: boolean;
+}
+
+export interface HookFlags {
+  enableHookAdjustedAmounts: boolean;
+  shouldCallBeforeInitialize: boolean;
+  shouldCallAfterInitialize: boolean;
+  shouldCallComputeDynamicSwapFee: boolean;
+  shouldCallBeforeSwap: boolean;
+  shouldCallAfterSwap: boolean;
+  shouldCallBeforeAddLiquidity: boolean;
+  shouldCallAfterAddLiquidity: boolean;
+  shouldCallBeforeRemoveLiquidity: boolean;
+  shouldCallAfterRemoveLiquidity: boolean;
 }
 
 export function useValidateTextField({
@@ -18,6 +32,8 @@ export function useValidateTextField({
   isPoolHooksContract,
 }: ValidationProps) {
   const publicClient = usePublicClient();
+
+  const { updatePool } = usePoolCreationStore();
 
   const { data: isValidRateProvider = false } = useQuery({
     queryKey: ["validateRateProvider", value],
@@ -41,18 +57,22 @@ export function useValidateTextField({
 
   const { data: isValidPoolHooksContract = false } = useQuery({
     queryKey: ["validatePoolHooks", value],
-    queryFn: async () => {
+    queryFn: async (): Promise<HookFlags | false> => {
       try {
         if (!publicClient) throw new Error("No public client for validatePoolHooks");
-        const hookFlags = await publicClient.readContract({
+        const hookFlags = (await publicClient.readContract({
           address: value as Address,
           abi: HooksAbi,
           functionName: "getHookFlags",
           args: [],
-        });
+        })) as HookFlags;
         console.log("getHookFlags()", hookFlags);
-        return true;
+        if (hookFlags.enableHookAdjustedAmounts) {
+          updatePool({ disableUnbalancedLiquidity: true });
+        }
+        return hookFlags;
       } catch {
+        updatePool({ disableUnbalancedLiquidity: false });
         return false;
       }
     },

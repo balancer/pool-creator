@@ -21,7 +21,7 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
         <div className="text-xl mb-5">If having trouble with pool creation process:</div>
         <ol className="list-decimal pl-5 mb-10 text-lg">
           <li>
-            <span className="link cursor-pointer text-info" onClick={() => window.location.reload()}>
+            <span className="link cursor-pointer text-blue-400" onClick={() => window.location.reload()}>
               Refresh the page
             </span>{" "}
             after a transaction has been finalized
@@ -29,16 +29,16 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
           <li>
             Reach out for assistance on{" "}
             <Link target="_blank" rel="noreferrer" href="https://discord.balancer.fi/">
-              <span className="link text-info">discord</span>{" "}
-              <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
+              <span className="link text-blue-400">discord</span>{" "}
+              <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-blue-400" />
             </Link>
           </li>
           {etherscanURL && (
             <li>
               View the pool on a{" "}
               <Link target="_blank" rel="noreferrer" href={etherscanURL}>
-                <span className="link text-info">block explorer</span>{" "}
-                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
+                <span className="link text-blue-400">block explorer</span>{" "}
+                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-blue-400" />
               </Link>
             </li>
           )}

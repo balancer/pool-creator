@@ -1,13 +1,17 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { Alert, Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
+import { type HookFlags, usePoolCreationStore } from "~~/hooks/v3";
 
 const swapFeePercentages = ["0.1", "0.3", "1"];
 const amplificationParameters = ["10", "100", "1000"];
 
 export const ChooseParameters = () => {
+  const { address: connectedWalletAddress } = useAccount();
+
   const {
     isUsingHooks,
     poolType,
@@ -21,6 +25,9 @@ export const ChooseParameters = () => {
     isDelegatingManagement,
     updatePool,
   } = usePoolCreationStore();
+
+  const queryClient = useQueryClient();
+  const hookFlags: HookFlags | undefined = queryClient.getQueryData(["validatePoolHooks", poolHooksContract]);
 
   const handleNumberInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -148,28 +155,50 @@ export const ChooseParameters = () => {
         />
         <RadioInput
           name="pool-management"
-          label="Choose a swap fee and pause manager"
-          checked={!isDelegatingManagement}
-          onChange={() => updatePool({ isDelegatingManagement: false })}
+          label="I want my wallet to control swap fee and pause management"
+          checked={
+            !isDelegatingManagement &&
+            swapFeeManager === connectedWalletAddress &&
+            pauseManager === connectedWalletAddress
+          }
+          onChange={() =>
+            updatePool({
+              isDelegatingManagement: false,
+              swapFeeManager: connectedWalletAddress,
+              pauseManager: connectedWalletAddress,
+            })
+          }
         />
-        {!isDelegatingManagement && (
-          <div className="flex flex-col gap-3 mt-3">
-            <TextField
-              mustBeAddress={true}
-              label="Swap fee manager"
-              placeholder="Enter address"
-              value={swapFeeManager}
-              onChange={e => updatePool({ swapFeeManager: e.target.value })}
-            />
-            <TextField
-              mustBeAddress={true}
-              label="Pause manager"
-              placeholder="Enter address"
-              value={pauseManager}
-              onChange={e => updatePool({ pauseManager: e.target.value })}
-            />
-          </div>
-        )}
+        <RadioInput
+          name="pool-management"
+          label="Choose a different swap fee and pause manager"
+          checked={
+            !isDelegatingManagement &&
+            swapFeeManager !== connectedWalletAddress &&
+            pauseManager !== connectedWalletAddress
+          }
+          onChange={() => updatePool({ isDelegatingManagement: false, swapFeeManager: "", pauseManager: "" })}
+        />
+        {!isDelegatingManagement &&
+          swapFeeManager !== connectedWalletAddress &&
+          pauseManager !== connectedWalletAddress && (
+            <div className="flex flex-col gap-3 mt-3">
+              <TextField
+                mustBeAddress={true}
+                label="Swap fee manager"
+                placeholder="Enter address"
+                value={swapFeeManager}
+                onChange={e => updatePool({ swapFeeManager: e.target.value })}
+              />
+              <TextField
+                mustBeAddress={true}
+                label="Pause manager"
+                placeholder="Enter address"
+                value={pauseManager}
+                onChange={e => updatePool({ pauseManager: e.target.value })}
+              />
+            </div>
+          )}
       </div>
 
       <div className="bg-base-100 p-5 rounded-xl">
@@ -205,7 +234,7 @@ export const ChooseParameters = () => {
         />
         {isUsingHooks && (
           <div className="">
-            <div className="mb-5">
+            <div className="mb-4">
               <TextField
                 isPoolHooksContract={true}
                 mustBeAddress={true}
@@ -214,12 +243,17 @@ export const ChooseParameters = () => {
                 onChange={e => updatePool({ poolHooksContract: e.target.value })}
               />
             </div>
-            <div className="mt-2 flex flex-col gap-2">
-              <Checkbox
-                label="Should this pool disable unbalanced liquidity operations?"
-                checked={disableUnbalancedLiquidity}
-                onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
-              />
+            <div className="mt-1 flex flex-col gap-2">
+              {hookFlags?.enableHookAdjustedAmounts ? (
+                <Alert type="warning">This hook requires that unbalanced liquidity operations be disabled</Alert>
+              ) : (
+                <Checkbox
+                  disabled={hookFlags?.enableHookAdjustedAmounts}
+                  label="Should this pool disable unbalanced liquidity operations?"
+                  checked={disableUnbalancedLiquidity}
+                  onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
+                />
+              )}
               <Checkbox
                 label="Should this pool accept donations?"
                 checked={enableDonation}
