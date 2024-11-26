@@ -15,7 +15,7 @@ const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
 };
 
 export function ChooseType() {
-  const { poolType, updatePool } = usePoolCreationStore();
+  const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
 
   return (
     <>
@@ -46,7 +46,7 @@ export function ChooseType() {
               className={`${
                 type === poolType ? `${bgBeigeGradient}` : `bg-base-100 hover:text-neutral-700 ${bgBeigeGradientHover}`
               } p-7 w-full rounded-xl text-lg text shadow-lg`}
-              onClick={() => updatePool({ poolType: type })}
+              onClick={() => updatePool({ poolType: type, tokenConfigs: [...tokenConfigs.slice(0, 4)] })}
             >
               <div className="flex flex-col text-center">
                 <div className="font-bold text-xl mb-2 w-full">{type}</div>

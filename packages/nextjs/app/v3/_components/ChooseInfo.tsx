@@ -44,7 +44,7 @@ export const ChooseInfo = () => {
             placeholder="Enter pool name"
             value={name}
             maxLength={MAX_POOL_NAME_LENGTH}
-            onChange={e => updatePool({ name: e.target.value })}
+            onChange={e => updatePool({ name: e.target.value.trim() })}
           />
         </div>
 
@@ -53,7 +53,7 @@ export const ChooseInfo = () => {
             label="Pool symbol"
             placeholder="Enter pool symbol"
             value={symbol}
-            onChange={e => updatePool({ symbol: e.target.value })}
+            onChange={e => updatePool({ symbol: e.target.value.trim() })}
           />
         </div>
       </div>

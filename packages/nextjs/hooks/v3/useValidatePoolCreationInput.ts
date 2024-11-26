@@ -26,7 +26,14 @@ export function useValidatePoolCreationInput() {
   const isTypeValid = poolType !== undefined && !isWrongNetwork;
 
   const isTokensValid = tokenConfigs.every(token => {
-    if (!token.address || !token.amount || !walletClient?.account.address || !token.tokenInfo?.decimals) return false;
+    if (
+      !token.address ||
+      !token.amount ||
+      !walletClient?.account.address ||
+      !token.tokenInfo?.decimals ||
+      Number(token.amount) <= 0
+    )
+      return false;
 
     // Look up cached user token balance using Wagmi's query key format
     const tokenBalanceQueryKey = [

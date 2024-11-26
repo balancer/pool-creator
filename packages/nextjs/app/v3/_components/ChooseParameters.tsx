@@ -36,23 +36,24 @@ export const ChooseParameters = () => {
     max: number,
   ) => {
     const value = e.target.value;
-    let numberValue = Number(value);
 
     if (value === "") {
       updatePool({ [field]: "" });
       return;
     }
 
-    if (field === "amplificationParameter") {
-      numberValue = Math.round(numberValue);
-    }
+    const numberValue = Number(value);
 
-    if (numberValue < min) {
+    if (numberValue !== 0 && numberValue < min) {
       updatePool({ [field]: min.toString() });
     } else if (numberValue > max) {
       updatePool({ [field]: max.toString() });
     } else {
-      updatePool({ [field]: numberValue.toString() });
+      if (field === "amplificationParameter") {
+        updatePool({ [field]: Math.round(numberValue).toString() });
+      } else {
+        updatePool({ [field]: value.toString() });
+      }
     }
   };
 
@@ -85,7 +86,7 @@ export const ChooseParameters = () => {
             <NumberInput
               placeholder=".001 - 10"
               value={swapFeePercentage}
-              onChange={e => handleNumberInputChange(e, "swapFeePercentage", 0, 10)}
+              onChange={e => handleNumberInputChange(e, "swapFeePercentage", 0.001, 10)}
               min={0.001}
               max={10}
               step={0.001}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { PoolStateResetModal, TransactionButton } from "~~/components/common";
@@ -8,7 +8,7 @@ import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput 
 import { bgBeigeGradient } from "~~/utils";
 
 export function PoolConfiguration() {
-  const { selectedTab, updatePool, clearPoolStore } = usePoolCreationStore();
+  const { selectedTab, updatePool, clearPoolStore, step } = usePoolCreationStore();
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const { prev, next } = getAdjacentTabs(selectedTab);
@@ -42,6 +42,10 @@ export function PoolConfiguration() {
       next: currentIndex < TABS.length - 1 ? TABS[currentIndex + 1] : null,
     };
   }
+
+  useEffect(() => {
+    if (step > 1) setIsPoolCreationModalOpen(true);
+  }, [step]);
 
   return (
     <>

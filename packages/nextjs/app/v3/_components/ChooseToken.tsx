@@ -95,7 +95,7 @@ export function ChooseToken({ index }: { index: number }) {
                 min="1"
                 max="99"
                 value={weight}
-                onChange={e => handleWeightChange(Number(e.target.value))}
+                onChange={e => handleWeightChange(Number(e.target.value.trim()))}
                 className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
               />
               <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
@@ -127,16 +127,18 @@ export function ChooseToken({ index }: { index: number }) {
             // TODO: auto fill rate provider address if data available from API
             <div className="flex justify-between items-center mb-1">
               <div className="flex gap-1 items-center">
-                <a
-                  href="https://docs-v3.balancer.fi/concepts/core-concepts/rate-providers.html"
-                  className="link"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <InformationCircleIcon className="w-5 h-5" />
-                </a>
                 <Checkbox
-                  label={`Use a rate provider?`}
+                  label={
+                    <a
+                      href="https://docs-v3.balancer.fi/partner-onboarding/onboarding-overview/rate-providers.html"
+                      className="link no-underline flex items-center gap-1 text-lg"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <InformationCircleIcon className="w-5 h-5" /> Use a{" "}
+                      <span className="underline">rate provider</span>?
+                    </a>
+                  }
                   checked={tokenType === TokenType.TOKEN_WITH_RATE}
                   onChange={handleTokenType}
                 />
@@ -165,10 +167,10 @@ export function ChooseToken({ index }: { index: number }) {
                 mustBeAddress={true}
                 placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
                 value={rateProvider !== zeroAddress ? rateProvider : ""}
-                onChange={e => handleRateProvider(e.target.value)}
+                onChange={e => handleRateProvider(e.target.value.trim())}
               />
               <Alert type="warning">
-                Rate provider contracts must be reviewed before pool shows on{" "}
+                Rate provider contracts must be reviewed before pool visibility on{" "}
                 <a href="https://balancer.fi/pools" className="link" target="_blank" rel="noreferrer">
                   balancer.fi
                 </a>

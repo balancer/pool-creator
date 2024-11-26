@@ -116,22 +116,30 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
           setIsModalOpen(false);
         }}
       />
-      <div className="flex flex-col gap-5 relative z-10">
-        <div className="bg-base-300 rounded-lg min-w-[500px] p-5 flex flex-col gap-5">
-          <div className="font-bold text-2xl text-center">Pool Creation</div>
-          <PoolDetails />
-          {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
-        </div>
-        <div className="flex justify-center">
-          <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg mt-2">
-            Reset progress
+      <div className="flex flex-col gap-5">
+        <div className="flex gap-5">
+          <div className="flex flex-col gap-5 relative z-10">
+            <div className="bg-base-300 rounded-lg w-[500px] p-5 flex flex-col gap-5">
+              <div className="font-bold text-2xl text-center">Pool Creation</div>
+              <PoolDetails />
+              {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
+            </div>
+            <div className="flex justify-center">
+              <div
+                onClick={() => setIsResetModalOpen(true)}
+                className="text-center underline cursor-pointer text-lg mt-2"
+              >
+                Reset progress
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10">
+            <PoolStepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
           </div>
         </div>
       </div>
 
-      <div className="relative z-10">
-        <PoolStepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
-      </div>
       {isResetModalOpen && (
         <PoolStateResetModal
           clearState={() => {
@@ -167,7 +175,7 @@ function createTransactionStep({
         <TransactionButton onClick={onSubmit} title={label} isDisabled={isPending} isPending={isPending} />
         {error && (
           <Alert type="error">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 break-words max-w-full">
               Error: {(error as { shortMessage?: string }).shortMessage || error.message}
             </div>
           </Alert>
