@@ -3,14 +3,13 @@
 import { useEffect, useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
-import { PoolStateResetModal, TransactionButton } from "~~/components/common";
+import { TransactionButton } from "~~/components/common";
 import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
 import { bgBeigeGradient } from "~~/utils";
 
 export function PoolConfiguration() {
-  const { selectedTab, updatePool, clearPoolStore, step } = usePoolCreationStore();
+  const { selectedTab, updatePool, step } = usePoolCreationStore();
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const { prev, next } = getAdjacentTabs(selectedTab);
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid } =
     useValidatePoolCreationInput();
@@ -100,22 +99,7 @@ export function PoolConfiguration() {
             ) : null}
           </div>
         </div>
-        <div className="flex justify-center">
-          <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg mt-2">
-            Reset progress
-          </div>
-        </div>
       </div>
-
-      {isResetModalOpen && (
-        <PoolStateResetModal
-          setIsModalOpen={setIsResetModalOpen}
-          clearState={() => {
-            clearPoolStore();
-            updatePool({ selectedTab: "Type" });
-          }}
-        />
-      )}
 
       {isPoolCreationModalOpen && <PoolCreationManager setIsModalOpen={setIsPoolCreationModalOpen} />}
     </>

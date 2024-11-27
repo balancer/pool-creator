@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowTopRightOnSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface PoolStateResetModalProps {
   setIsModalOpen: (isOpen: boolean) => void;
@@ -7,43 +7,36 @@ interface PoolStateResetModalProps {
   etherscanURL?: string | undefined;
 }
 
-export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }: PoolStateResetModalProps) => {
+export const PoolStateResetModal = ({ setIsModalOpen, clearState }: PoolStateResetModalProps) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
       <div className="w-[550px] relative bg-base-100 border border-base-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-7">
-          <h5 className="font-bold text-3xl mb-0">Troubleshooting Tips</h5>
-
+          <h5 className="font-bold text-3xl mb-0">Need Assistance?</h5>
           <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
         </div>
-        <ol className="list-disc pl-5 mb-10 text-lg">
-          <li>
-            <span className="link cursor-pointer text-info" onClick={() => window.location.reload()}>
-              Refresh the page
-            </span>{" "}
-            after a transaction has been finalized
-          </li>
-          <li>
-            Reach out for assistance on{" "}
-            <Link target="_blank" rel="noreferrer" href="https://discord.balancer.fi/">
-              <span className="link text-info">discord</span>{" "}
-              <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
-            </Link>
-          </li>
-          {etherscanURL && (
-            <li>
-              View the pool on a{" "}
-              <Link target="_blank" rel="noreferrer" href={etherscanURL}>
-                <span className="link text-info">block explorer</span>{" "}
-                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
-              </Link>
-            </li>
-          )}
-          <li>Or to start over, click the reset button below</li>
-        </ol>
+        <div className="text-lg mb-5">
+          If you have encountered any issues or want help deciding on pool configuration, please reach out to us on{" "}
+          <Link target="_blank" rel="noreferrer" href="https://discord.balancer.fi/">
+            <span className="link text-info">discord</span>{" "}
+          </Link>{" "}
+          or create an issue on{" "}
+          <Link
+            className="link text-info"
+            rel="noreferrer"
+            target="_blank"
+            href="https://github.com/balancer/pool-creator/issues/new/choose"
+          >
+            github
+          </Link>
+        </div>
+        <div className="text-lg mb-10">
+          Or to reset all pool configuration and creation progress, click the red button below
+        </div>
+
         <div className="flex gap-3 justify-end">
-          <button className="w-24 border btn-secondary px-5 py-3 rounded-xl" onClick={() => setIsModalOpen(false)}>
+          <button className="w-24 btn btn-info px-5 py-3 rounded-xl" onClick={() => setIsModalOpen(false)}>
             Cancel
           </button>
           <button
@@ -51,7 +44,7 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
               clearState();
               setIsModalOpen(false);
             }}
-            className="bg-error text-neutral-800 px-5 py-3 border border-error rounded-xl w-24"
+            className="btn btn-error font-bold text-neutral-800 px-5 py-3 rounded-xl w-24"
           >
             Reset
           </button>
