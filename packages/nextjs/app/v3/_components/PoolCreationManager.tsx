@@ -125,7 +125,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
               {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
               <div className="flex justify-center">
                 <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg">
-                  Want help?
+                  Contact Support
                 </div>
               </div>
             </div>
