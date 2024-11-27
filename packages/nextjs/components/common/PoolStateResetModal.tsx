@@ -13,7 +13,7 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState }: PoolStateRes
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
       <div className="w-[550px] relative bg-base-100 border border-base-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-7">
-          <h5 className="font-bold text-3xl mb-0">Need Assistance?</h5>
+          <h5 className="font-bold text-3xl mb-0">Contact Support</h5>
           <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
         </div>
         <div className="text-lg mb-5">
