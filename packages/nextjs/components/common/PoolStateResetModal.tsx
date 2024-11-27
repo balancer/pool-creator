@@ -11,17 +11,15 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
-      <div className="w-[550px] relative bg-base-300 border border-base-200 rounded-lg p-6">
+      <div className="w-[550px] relative bg-base-100 border border-base-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-7">
-          <h5 className="font-bold text-3xl mb-0">Are you sure?</h5>
+          <h5 className="font-bold text-3xl mb-0">Troubleshooting</h5>
 
           <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
         </div>
-
-        <div className="text-xl mb-5">If having trouble with pool creation process:</div>
-        <ol className="list-decimal pl-5 mb-10 text-lg">
+        <ol className="list-disc pl-5 mb-10 text-lg">
           <li>
-            <span className="link cursor-pointer text-blue-400" onClick={() => window.location.reload()}>
+            <span className="link cursor-pointer text-info" onClick={() => window.location.reload()}>
               Refresh the page
             </span>{" "}
             after a transaction has been finalized
@@ -29,19 +27,20 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
           <li>
             Reach out for assistance on{" "}
             <Link target="_blank" rel="noreferrer" href="https://discord.balancer.fi/">
-              <span className="link text-blue-400">discord</span>{" "}
-              <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-blue-400" />
+              <span className="link text-info">discord</span>{" "}
+              <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
             </Link>
           </li>
           {etherscanURL && (
             <li>
               View the pool on a{" "}
               <Link target="_blank" rel="noreferrer" href={etherscanURL}>
-                <span className="link text-blue-400">block explorer</span>{" "}
-                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-blue-400" />
+                <span className="link text-info">block explorer</span>{" "}
+                <ArrowTopRightOnSquareIcon className="w-4 h-4 inline-block text-info" />
               </Link>
             </li>
           )}
+          <li>If you want to start over, use the reset button below</li>
         </ol>
         <div className="flex gap-3 justify-end">
           <button

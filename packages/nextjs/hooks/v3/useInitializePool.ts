@@ -23,7 +23,15 @@ export const useInitializePool = () => {
     if (!poolType) throw new Error("Pool type missing");
     if (!walletClient) throw new Error("Wallet client missing");
 
+    console.log("chainId", chainId);
+    console.log("rpcUrl", rpcUrl);
+
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+
+    console.log("initPoolDataProvider", initPoolDataProvider);
+    console.log("poolAddress", poolAddress);
+    console.log("poolType", poolType);
+    console.log("protocolVersion", protocolVersion);
 
     const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 

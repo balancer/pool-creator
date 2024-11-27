@@ -123,15 +123,24 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
               <div className="font-bold text-2xl text-center">Pool Creation</div>
               <PoolDetails />
               {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
-            </div>
-            <div className="flex justify-center">
-              <div
-                onClick={() => setIsResetModalOpen(true)}
-                className="text-center underline cursor-pointer text-lg mt-2"
-              >
-                Reset progress
+              <div className="flex justify-center">
+                <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg">
+                  Having trouble?
+                </div>
               </div>
             </div>
+            {step > poolCreationSteps.length && (
+              <button
+                onClick={() => {
+                  clearPoolStore();
+                  setIsModalOpen(false);
+                  updatePool({ selectedTab: "Type" });
+                }}
+                className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}
+              >
+                <div>Create new pool</div>
+              </button>
+            )}
           </div>
 
           <div className="relative z-10">
@@ -196,7 +205,7 @@ const PoolCreatedView = () => {
         rel="noopener noreferrer"
         className=""
       >
-        <button className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}>
+        <button className={`btn w-full rounded-xl text-lg btn-accent`}>
           <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
         </button>

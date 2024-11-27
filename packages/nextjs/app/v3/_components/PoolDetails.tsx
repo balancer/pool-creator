@@ -2,7 +2,7 @@
 
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { TokenImage } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
@@ -24,6 +24,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     swapFeeManager,
     pauseManager,
     poolHooksContract,
+    isUsingHooks,
     disableUnbalancedLiquidity,
     enableDonation,
     name,
@@ -77,24 +78,57 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             )}
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
-              <div>{swapFeeManager ? abbreviateAddress(swapFeeManager) : "Balancer"}</div>
+              <div>
+                {swapFeeManager ? (
+                  <a
+                    href={getBlockExplorerAddressLink(targetNetwork, swapFeeManager)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-info hover:underline"
+                  >
+                    {abbreviateAddress(swapFeeManager)}
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                  </a>
+                ) : (
+                  "Balancer"
+                )}
+              </div>
             </div>
             <div className="flex justify-between">
               <div className="">Pause Manager</div>
-              <div>{pauseManager ? abbreviateAddress(pauseManager) : "Balancer"}</div>
+              <div>
+                {pauseManager ? (
+                  <a
+                    href={getBlockExplorerAddressLink(targetNetwork, pauseManager)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-info hover:underline"
+                  >
+                    {abbreviateAddress(pauseManager)}
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                  </a>
+                ) : (
+                  "Balancer"
+                )}
+              </div>
             </div>
-            <div className="flex justify-between">
-              <div className="">Pool Hooks Contract</div>
-              <div>{poolHooksContract ? abbreviateAddress(poolHooksContract) : "-"}</div>
-            </div>
-            <div className="flex justify-between">
-              <div className="">Disable Unbalanced Liquidity</div>
-              <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
-            </div>
-            <div className="flex justify-between">
-              <div className="">Donations Enabled</div>
-              <div>{enableDonation ? "true" : "false"}</div>
-            </div>
+
+            {isUsingHooks && (
+              <>
+                <div className="flex justify-between">
+                  <div className="">Pool Hooks Contract</div>
+                  <div>{poolHooksContract ? abbreviateAddress(poolHooksContract) : "-"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Disable Unbalanced Liquidity</div>
+                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Donations Enabled</div>
+                  <div>{enableDonation ? "true" : "false"}</div>
+                </div>
+              </>
+            )}
           </div>
         }
       />
@@ -124,6 +158,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     className="flex items-center gap-2 text-info hover:underline"
                   >
                     {abbreviateAddress(poolAddress)}
+                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </a>
                 ) : (
                   "TBD"

@@ -3,7 +3,6 @@ import { PoolType } from "@balancer/sdk";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
-import { bgBeigeGradient, bgBeigeGradientHover } from "~~/utils";
 
 const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable];
 
@@ -44,7 +43,9 @@ export function ChooseType() {
             <button
               key={type}
               className={`${
-                type === poolType ? `${bgBeigeGradient}` : `bg-base-100 hover:text-neutral-700 ${bgBeigeGradientHover}`
+                type === poolType
+                  ? `bg-primary text-primary-content`
+                  : `bg-base-100 hover:bg-primary hover:text-primary-content hover:opacity-50`
               } p-7 w-full rounded-xl text-lg text shadow-lg`}
               onClick={() => updatePool({ poolType: type, tokenConfigs: [...tokenConfigs.slice(0, 4)] })}
             >

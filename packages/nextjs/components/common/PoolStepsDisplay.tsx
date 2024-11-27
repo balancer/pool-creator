@@ -8,7 +8,7 @@ export type Step = { label: string; blockExplorerUrl?: string };
 
 export function PoolStepsDisplay({ currentStepNumber, steps }: PoolStepsDisplayProps) {
   return (
-    <div className="bg-base-200 px-5 pt-7 rounded-xl shadow-xl">
+    <div className="bg-base-100 px-5 pt-7 rounded-xl shadow-xl">
       <h5 className="text-xl font-bold text-center">Steps</h5>
       <ul className="steps steps-vertical">
         {steps.map((step, idx) => {
