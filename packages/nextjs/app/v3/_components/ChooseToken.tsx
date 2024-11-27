@@ -104,17 +104,18 @@ export function ChooseToken({ index }: { index: number }) {
       <div className="bg-base-100 border border-neutral p-4 rounded-xl flex flex-col gap-3">
         <div className="flex gap-3 w-full items-center">
           <div className="flex flex-col gap-5 justify-between items-center">
-            {isWeightLocked ? (
-              <LockClosedIcon
-                onClick={() => updateTokenConfig(index, { isWeightLocked: false })}
-                className="w-5 h-5 cursor-pointer"
-              />
-            ) : (
-              <LockOpenIcon
-                onClick={() => updateTokenConfig(index, { isWeightLocked: true })}
-                className="w-5 h-5 cursor-pointer"
-              />
-            )}
+            {poolType === PoolType.Weighted &&
+              (isWeightLocked ? (
+                <LockClosedIcon
+                  onClick={() => updateTokenConfig(index, { isWeightLocked: false })}
+                  className="w-5 h-5 cursor-pointer"
+                />
+              ) : (
+                <LockOpenIcon
+                  onClick={() => updateTokenConfig(index, { isWeightLocked: true })}
+                  className="w-5 h-5 cursor-pointer"
+                />
+              ))}
             {tokenConfigs.length > 2 && (
               <div className="cursor-pointer" onClick={handleRemoveToken}>
                 <TrashIcon className="w-5 h-5" />

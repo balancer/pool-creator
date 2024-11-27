@@ -16,18 +16,24 @@ export function ChooseTokens() {
 
   // Beware of javascript floating point precision issues if 100 % number of tokens is not equal to zero
   function handleAddToken() {
-    const updatedTokenCount = tokenConfigs.length + 1;
-    // Calculate equal weights ensuring they sum to exactly 100
-    const baseWeight = Math.floor(100 / updatedTokenCount);
-    const remainder = 100 - baseWeight * updatedTokenCount;
+    // Count unlocked tokens (including the new one we're adding)
+    const unlockedTokenCount = tokenConfigs.filter(token => !token.isWeightLocked).length + 1;
 
-    // Update existing tokens with equal weights
+    // Calculate remaining weight to distribute (100 minus sum of locked weights)
+    const lockedWeightSum = tokenConfigs.reduce((sum, token) => (token.isWeightLocked ? sum + token.weight : sum), 0);
+    const remainingWeight = 100 - lockedWeightSum;
+
+    // Calculate base weight for unlocked tokens
+    const baseWeight = Math.floor(remainingWeight / unlockedTokenCount);
+    const remainder = remainingWeight - baseWeight * unlockedTokenCount;
+
+    // Update tokens, preserving locked weights
     const updatedPoolTokens = tokenConfigs.map(token => ({
       ...token,
-      weight: baseWeight,
+      weight: token.isWeightLocked ? token.weight : baseWeight,
     }));
 
-    // Add the new token with any remaining weight to ensure sum is 100
+    // Add the new token with any remaining weight
     updatedPoolTokens.push({
       ...initialTokenConfig,
       weight: baseWeight + remainder,
