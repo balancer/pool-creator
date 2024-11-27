@@ -10,7 +10,7 @@ import {
   useMultiSwap,
   usePoolCreationStore,
 } from "~~/hooks/v3/";
-import { bgPrimaryGradient } from "~~/utils";
+import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
 /**
@@ -119,7 +119,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
       <div className="flex flex-col gap-5">
         <div className="flex gap-5">
           <div className="flex flex-col gap-5 relative z-10">
-            <div className="bg-base-300 rounded-lg w-[500px] p-5 flex flex-col gap-5">
+            <div className="bg-base-300 border-neutral border rounded-lg w-[500px] p-5 flex flex-col gap-5">
               <div className="font-bold text-2xl text-center">Pool Creation</div>
               <PoolDetails />
               {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
@@ -136,9 +136,9 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
                   setIsModalOpen(false);
                   updatePool({ selectedTab: "Type" });
                 }}
-                className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}
+                className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} ${bgBeigeGradientHover} text-neutral-700`}
               >
-                <div>Create new pool</div>
+                <div>Create another pool</div>
               </button>
             )}
           </div>
@@ -205,7 +205,7 @@ const PoolCreatedView = () => {
         rel="noopener noreferrer"
         className=""
       >
-        <button className={`btn w-full rounded-xl text-lg btn-accent`}>
+        <button className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}>
           <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
         </button>

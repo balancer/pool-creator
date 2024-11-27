@@ -13,7 +13,7 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
       <div className="absolute w-full h-full" onClick={() => setIsModalOpen(false)} />
       <div className="w-[550px] relative bg-base-100 border border-base-200 rounded-lg p-6">
         <div className="flex items-center justify-between mb-7">
-          <h5 className="font-bold text-3xl mb-0">Troubleshooting</h5>
+          <h5 className="font-bold text-3xl mb-0">Troubleshooting Tips</h5>
 
           <XMarkIcon className="w-6 h-6 hover:cursor-pointer " onClick={() => setIsModalOpen(false)} />
         </div>
@@ -40,13 +40,10 @@ export const PoolStateResetModal = ({ setIsModalOpen, clearState, etherscanURL }
               </Link>
             </li>
           )}
-          <li>If you want to start over, use the reset button below</li>
+          <li>Or to start over, click the reset button below</li>
         </ol>
         <div className="flex gap-3 justify-end">
-          <button
-            className="w-24 border border-base-content px-5 py-3 rounded-xl"
-            onClick={() => setIsModalOpen(false)}
-          >
+          <button className="w-24 border btn-secondary px-5 py-3 rounded-xl" onClick={() => setIsModalOpen(false)}>
             Cancel
           </button>
           <button

@@ -17,6 +17,7 @@ export type TokenConfig = {
   paysYieldFees: boolean;
   tokenType: TokenType;
   weight: number;
+  isWeightLocked: boolean;
   tokenInfo: Token | null;
   amount: string; // human readable
   useBoostedVariant: boolean;
@@ -53,6 +54,7 @@ export const initialTokenConfig: TokenConfig = {
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
   weight: 50, // only used for weighted pools
+  isWeightLocked: false,
   tokenInfo: null, // Details including image, symbol, decimals, etc.
   amount: "",
   useBoostedVariant: false,

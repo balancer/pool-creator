@@ -31,7 +31,7 @@ const Home: NextPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 justify-center gap-10 w-full">
             {PAGES.map(item => (
               <Link
-                className="shadow-inner relative bg-base-100 hover:bg-base-200 text-2xl text-center p-8 rounded-3xl"
+                className="shadow-lg relative bg-base-100 hover:bg-base-200 text-2xl text-center p-8 rounded-3xl"
                 key={item.href}
                 href={item.href}
                 passHref

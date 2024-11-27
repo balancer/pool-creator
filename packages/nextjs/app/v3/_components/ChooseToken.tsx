@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useRef, useState } from "react";
 import { PoolType, TokenType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { Cog6ToothIcon, InformationCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
 import { type BoostedTokenInfo, useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
@@ -11,7 +11,8 @@ export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
 
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
-  const { tokenType, weight, rateProvider, tokenInfo, amount, address, useBoostedVariant } = tokenConfigs[index];
+  const { tokenType, weight, rateProvider, tokenInfo, amount, address, useBoostedVariant, isWeightLocked } =
+    tokenConfigs[index];
   const { balance: userTokenBalance } = useReadToken(tokenInfo?.address);
   const { data } = useFetchTokenList();
   const tokenList = data || [];
@@ -71,13 +72,27 @@ export function ChooseToken({ index }: { index: number }) {
     if (isUpdatingWeights.current) return;
     isUpdatingWeights.current = true;
 
+    // The user's choice for the selected token's weight
     const adjustedWeight = Math.min(newWeight, 99);
-    const remainingWeight = 100 - adjustedWeight;
-    const evenWeight = remainingWeight / (tokenConfigs.length - 1);
+
+    // Calculate total weight of locked tokens (excluding current token)
+    const lockedWeight = tokenConfigs.reduce(
+      (sum, token, i) => (i !== index && token.isWeightLocked ? sum + token.weight : sum),
+      0,
+    );
+
+    // Count unlocked tokens (excluding current token)
+    const unlockedTokenCount = tokenConfigs.reduce(
+      (count, token, i) => (i !== index && !token.isWeightLocked ? count + 1 : count),
+      0,
+    );
+
+    const remainingWeight = 100 - adjustedWeight - lockedWeight;
+    const evenWeight = unlockedTokenCount > 0 ? remainingWeight / unlockedTokenCount : 0;
 
     const updatedTokenConfigs = tokenConfigs.map((token, i) => ({
       ...token,
-      weight: i === index ? adjustedWeight : evenWeight,
+      weight: i === index ? adjustedWeight : token.isWeightLocked ? token.weight : evenWeight,
     }));
 
     updatePool({ tokenConfigs: updatedTokenConfigs });
@@ -86,8 +101,27 @@ export function ChooseToken({ index }: { index: number }) {
 
   return (
     <>
-      <div className="bg-base-100 p-4 rounded-xl flex flex-col gap-3">
+      <div className="bg-base-100 border border-neutral p-4 rounded-xl flex flex-col gap-3">
         <div className="flex gap-3 w-full items-center">
+          <div className="flex flex-col gap-5 justify-between items-center">
+            {isWeightLocked ? (
+              <LockClosedIcon
+                onClick={() => updateTokenConfig(index, { isWeightLocked: false })}
+                className="w-5 h-5 cursor-pointer"
+              />
+            ) : (
+              <LockOpenIcon
+                onClick={() => updateTokenConfig(index, { isWeightLocked: true })}
+                className="w-5 h-5 cursor-pointer"
+              />
+            )}
+            {tokenConfigs.length > 2 && (
+              <div className="cursor-pointer" onClick={handleRemoveToken}>
+                <TrashIcon className="w-5 h-5" />
+              </div>
+            )}
+          </div>
+
           {poolType === PoolType.Weighted && (
             <div className="w-full max-w-[80px] h-full flex flex-col relative">
               <input
@@ -115,11 +149,6 @@ export function ChooseToken({ index }: { index: number }) {
               </div>
             </div>
           </div>
-          {tokenConfigs.length > 2 && (
-            <div className="cursor-pointer" onClick={handleRemoveToken}>
-              <TrashIcon className="w-5 h-5" />
-            </div>
-          )}
         </div>
 
         <div>
@@ -135,8 +164,7 @@ export function ChooseToken({ index }: { index: number }) {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <InformationCircleIcon className="w-5 h-5" /> Use a{" "}
-                      <span className="underline">rate provider</span>?
+                      Use a <span className="underline">rate provider</span>?
                     </a>
                   }
                   checked={tokenType === TokenType.TOKEN_WITH_RATE}

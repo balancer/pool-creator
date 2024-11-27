@@ -8,9 +8,9 @@ export type Step = { label: string; blockExplorerUrl?: string };
 
 export function PoolStepsDisplay({ currentStepNumber, steps }: PoolStepsDisplayProps) {
   return (
-    <div className="bg-base-100 px-5 pt-7 rounded-xl shadow-xl">
-      <h5 className="text-xl font-bold text-center">Steps</h5>
-      <ul className="steps steps-vertical">
+    <div className="bg-base-200 border border-neutral px-5 pt-7 rounded-xl shadow-xl">
+      <h5 className="text-2xl font-bold text-center">Steps</h5>
+      <ul className="steps steps-vertical text-lg pb-3">
         {steps.map((step, idx) => {
           const stepNumber = idx + 1;
           return (
