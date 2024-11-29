@@ -117,10 +117,14 @@ export const useMultiSwap = () => {
     });
 
     console.log("logs", logs);
+
     logs.forEach((log, idx) => {
       // mintedShares is the amount, underlyingToken is an address
-      const { mintedShares, underlyingToken } = log.args;
-      const boostedToken = boostableWhitelist?.[underlyingToken.toLowerCase()];
+      const { mintedShares, wrappedToken } = log.args;
+      console.log("wrappedToken", wrappedToken);
+      const boostedToken = Object.values(boostableWhitelist ?? {}).find(
+        token => token.address.toLowerCase() === wrappedToken.toLowerCase(),
+      );
       if (!boostedToken) throw new Error("Boosted token not found");
       const amount = formatUnits(mintedShares, boostedToken?.decimals);
       updateTokenConfig(idx, { amount });

@@ -1,6 +1,14 @@
-import { BALANCER_ROUTER, InitPool, InitPoolDataProvider, InitPoolInput, balancerRouterAbi } from "@balancer/sdk";
+import {
+  BALANCER_ROUTER,
+  InitPool,
+  InitPoolInput,
+  PoolState,
+  VAULT_V3,
+  balancerRouterAbi,
+  vaultExtensionAbi_V3,
+} from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { getContract, parseUnits } from "viem";
+import { Address, getContract, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
@@ -23,17 +31,43 @@ export const useInitializePool = () => {
     if (!poolType) throw new Error("Pool type missing");
     if (!walletClient) throw new Error("Wallet client missing");
 
-    console.log("chainId", chainId);
-    console.log("rpcUrl", rpcUrl);
+    // const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+    // const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 
-    const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+    // TEMPORARILY MANUAL FETCH OF POOLSTATE
+    const vaultV3 = getContract({
+      abi: vaultExtensionAbi_V3,
+      address: VAULT_V3[chainId],
+      client: publicClient,
+    });
+    const poolTokens = (await vaultV3.read.getPoolTokens([poolAddress])) as Address[];
 
-    console.log("initPoolDataProvider", initPoolDataProvider);
-    console.log("poolAddress", poolAddress);
-    console.log("poolType", poolType);
-    console.log("protocolVersion", protocolVersion);
+    const tokens = poolTokens.map((token, idx) => {
+      const tokenConfig = tokenConfigs.find(t => {
+        const tokenConfigAddress = t.useBoostedVariant ? boostableWhitelist?.[t.address]?.address : t.address;
+        if (!tokenConfigAddress) throw new Error(`Problem with boosted variant for ${t.address}`);
+        return tokenConfigAddress.toLowerCase() === token.toLowerCase();
+      });
+      const decimals = tokenConfig?.tokenInfo?.decimals;
+      if (!decimals)
+        throw new Error(
+          `Missing decimals for token ${token}. Available tokens: ${tokenConfigs.map(t => t.address).join(", ")}`,
+        );
+      return {
+        address: token as `0x${string}`,
+        decimals,
+        index: idx,
+      };
+    });
 
-    const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
+    const poolState: PoolState = {
+      id: poolAddress as `0x${string}`,
+      address: poolAddress as `0x${string}`,
+      type: poolType,
+      tokens,
+      protocolVersion,
+    };
+    // END TEMPORARY MANUAL FETCH OF POOLSTATE
 
     const initPool = new InitPool();
 

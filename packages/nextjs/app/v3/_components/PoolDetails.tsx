@@ -204,6 +204,7 @@ function DetailSection({ title, isValid, isEmpty, isPreview, content }: DetailSe
 
 function TokenDetails({ token }: { token: TokenConfig }) {
   const { poolType } = usePoolCreationStore();
+  const { targetNetwork } = useTargetNetwork();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
@@ -225,7 +226,18 @@ function TokenDetails({ token }: { token: TokenConfig }) {
       {token.rateProvider && token.rateProvider !== zeroAddress && (
         <div className="flex gap-2 mt-1">
           <i>Rate Provider:</i>
-          <div>{abbreviateAddress(token.rateProvider)}</div>
+          <div>
+            {" "}
+            <a
+              href={getBlockExplorerAddressLink(targetNetwork, token.rateProvider)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-info hover:underline"
+            >
+              {abbreviateAddress(token.rateProvider)}
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+            </a>
+          </div>
         </div>
       )}
     </div>
