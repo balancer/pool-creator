@@ -1,61 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { Address, isAddress, parseAbi } from "viem";
+import { Address, isAddress } from "viem";
 import { usePublicClient } from "wagmi";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
-interface ValidationProps {
-  value?: string;
-  mustBeAddress?: boolean;
-  maxLength?: number;
-  isRateProvider?: boolean;
-  isPoolHooksContract?: boolean;
-}
-
-export interface HookFlags {
-  enableHookAdjustedAmounts: boolean;
-  shouldCallBeforeInitialize: boolean;
-  shouldCallAfterInitialize: boolean;
-  shouldCallComputeDynamicSwapFee: boolean;
-  shouldCallBeforeSwap: boolean;
-  shouldCallAfterSwap: boolean;
-  shouldCallBeforeAddLiquidity: boolean;
-  shouldCallAfterAddLiquidity: boolean;
-  shouldCallBeforeRemoveLiquidity: boolean;
-  shouldCallAfterRemoveLiquidity: boolean;
-}
-
-export function useValidateTextField({
-  value,
-  mustBeAddress,
-  maxLength,
-  isRateProvider,
-  isPoolHooksContract,
-}: ValidationProps) {
+export const useValidateHooksContract = (isPoolHooksContract: boolean | undefined, value: string | undefined) => {
   const publicClient = usePublicClient();
-
   const { updatePool } = usePoolCreationStore();
 
-  const { data: isValidRateProvider = false } = useQuery({
-    queryKey: ["validateRateProvider", value],
-    queryFn: async () => {
-      try {
-        if (!publicClient) throw new Error("No public client for validateRateProvider");
-        const rate = await publicClient.readContract({
-          address: value as Address,
-          abi: parseAbi(["function getRate() external view returns (uint256)"]),
-          functionName: "getRate",
-          args: [],
-        });
-        console.log("getRate()", rate);
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    enabled: isRateProvider && !!value && isAddress(value as string),
-  });
-
-  const { data: isValidPoolHooksContract = false } = useQuery({
+  return useQuery({
     queryKey: ["validatePoolHooks", value],
     queryFn: async (): Promise<HookFlags | false> => {
       try {
@@ -78,26 +30,19 @@ export function useValidateTextField({
     },
     enabled: isPoolHooksContract && !!value && isAddress(value as string),
   });
+};
 
-  const isValidAddress = !mustBeAddress || !value || isAddress(value);
-  const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
-
-  const getErrorMessage = () => {
-    if (!isValidAddress) return "Invalid address";
-    if (isRateProvider && !isValidRateProvider) return "Invalid rate provider";
-    if (isPoolHooksContract && !isValidPoolHooksContract) return "Invalid pool hooks contract";
-    if (maxLength && !isValidLength) return `Pool name is too long: ${value?.length ?? 0}/${maxLength}`;
-    return null;
-  };
-
-  return {
-    isValid:
-      isValidAddress &&
-      (!maxLength || isValidLength) &&
-      (!isRateProvider || isValidRateProvider) &&
-      (!isPoolHooksContract || isValidPoolHooksContract),
-    errorMessage: getErrorMessage(),
-  };
+export interface HookFlags {
+  enableHookAdjustedAmounts: boolean;
+  shouldCallBeforeInitialize: boolean;
+  shouldCallAfterInitialize: boolean;
+  shouldCallComputeDynamicSwapFee: boolean;
+  shouldCallBeforeSwap: boolean;
+  shouldCallAfterSwap: boolean;
+  shouldCallBeforeAddLiquidity: boolean;
+  shouldCallAfterAddLiquidity: boolean;
+  shouldCallBeforeRemoveLiquidity: boolean;
+  shouldCallAfterRemoveLiquidity: boolean;
 }
 
 const HooksAbi = [

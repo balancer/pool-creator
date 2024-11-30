@@ -1,7 +1,8 @@
 "use client";
 
+import { isAddress } from "viem";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { useValidateTextField } from "~~/hooks/v3";
+import { useValidateHooksContract, useValidateRateProvider } from "~~/hooks/v3";
 
 interface TextFieldProps {
   label?: string;
@@ -26,13 +27,24 @@ export const TextField: React.FC<TextFieldProps> = ({
   isRateProvider,
   isPoolHooksContract,
 }) => {
-  const { isValid, errorMessage } = useValidateTextField({
-    value,
-    mustBeAddress,
-    maxLength,
-    isRateProvider,
-    isPoolHooksContract,
-  });
+  const { data: isValidRateProvider = true } = useValidateRateProvider(isRateProvider, value);
+  const { data: isValidPoolHooksContract = true } = useValidateHooksContract(isPoolHooksContract, value);
+  const isValidAddress = !mustBeAddress || !value || isAddress(value);
+  const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
+
+  const getErrorMessage = () => {
+    if (!isValidAddress) return "Invalid address";
+    if (isRateProvider && !isValidRateProvider) return "Invalid rate provider";
+    if (isPoolHooksContract && !isValidPoolHooksContract) return "Invalid pool hooks contract";
+    if (maxLength && !isValidLength) return `Pool name is too long: ${value?.length ?? 0}/${maxLength}`;
+    return null;
+  };
+
+  const isValid =
+    isValidAddress &&
+    (!maxLength || isValidLength) &&
+    (!isRateProvider || isValidRateProvider) &&
+    (!isPoolHooksContract || isValidPoolHooksContract);
 
   return (
     <div className="w-full mb-2">
@@ -53,7 +65,7 @@ export const TextField: React.FC<TextFieldProps> = ({
         {!!value && !isValid && (
           <div className="absolute top-full right-2 text-red-400 flex items-center gap-1">
             <ExclamationTriangleIcon className="w-4 h-4" />
-            {errorMessage}
+            {getErrorMessage()}
           </div>
         )}
       </div>

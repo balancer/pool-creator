@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
-import { TransactionButton } from "~~/components/common";
+import { Alert, TransactionButton } from "~~/components/common";
 import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
 import { bgBeigeGradient } from "~~/utils";
 
@@ -46,6 +46,8 @@ export function PoolConfiguration() {
     if (step > 1) setIsPoolCreationModalOpen(true);
   }, [step]);
 
+  console.log("isTokensValid", isTokensValid);
+
   return (
     <>
       <div className="w-full max-w-[700px] flex flex-col gap-5">
@@ -67,6 +69,7 @@ export function PoolConfiguration() {
             ))}
           </div>
           <div className="py-7 min-h-[500px] flex flex-col">{TAB_CONTENT[selectedTab]}</div>
+
           <div className="grid grid-cols-2 gap-7">
             <button
               onClick={() => handleTabChange("prev")}
@@ -98,6 +101,11 @@ export function PoolConfiguration() {
               </button>
             ) : null}
           </div>
+          {selectedTab === "Information" && !isTokensValid && (
+            <div className="mt-5">
+              <Alert type="error">Tokens configuration is invalid. Please go back to check wallet balances</Alert>
+            </div>
+          )}
         </div>
       </div>
 

@@ -3,7 +3,7 @@ import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { Alert, Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
+import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
 import { type HookFlags, usePoolCreationStore } from "~~/hooks/v3";
 
 const swapFeePercentages = ["0.1", "0.3", "1"];
@@ -246,7 +246,10 @@ export const ChooseParameters = () => {
             </div>
             <div className="mt-1 flex flex-col gap-2">
               {hookFlags?.enableHookAdjustedAmounts ? (
-                <Alert type="warning">This hook requires that unbalanced liquidity operations be disabled</Alert>
+                <div className="flex items-center gap-1 text-lg">
+                  This hook requires unbalanced liquidity operations to be disabled
+                  <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
+                </div>
               ) : (
                 <Checkbox
                   disabled={hookFlags?.enableHookAdjustedAmounts}
