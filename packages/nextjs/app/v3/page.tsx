@@ -13,7 +13,7 @@ const BalancerV3: NextPage = () => {
 
   usePoolStoreDebug();
   const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
-  const { updatePool, clearPoolStore, selectedTab } = usePoolCreationStore();
+  const { updatePool, clearPoolStore } = usePoolCreationStore();
 
   return (
     <div className="flex justify-center">
@@ -54,16 +54,14 @@ const BalancerV3: NextPage = () => {
                 <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
                   <div className="font-bold text-2xl mb-3">Pool Preview</div>
                   <PoolDetails isPreview={true} />
-                  {selectedTab !== "Type" && (
-                    <div className="flex justify-center mt-3">
-                      <div
-                        onClick={() => setIsResetModalOpen(true)}
-                        className="text-center underline cursor-pointer text-lg mt-2"
-                      >
-                        Want help?
-                      </div>
+                  <div className="flex justify-center mt-3">
+                    <div
+                      onClick={() => setIsResetModalOpen(true)}
+                      className="text-center underline cursor-pointer text-lg mt-2"
+                    >
+                      Want help?
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
