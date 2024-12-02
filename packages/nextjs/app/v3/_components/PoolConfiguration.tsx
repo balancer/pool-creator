@@ -11,7 +11,7 @@ export function PoolConfiguration() {
   const { selectedTab, updatePool, step } = usePoolCreationStore();
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
   const { prev, next } = getAdjacentTabs(selectedTab);
-  const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid } =
+  const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights } =
     useValidatePoolCreationInput();
 
   const TAB_CONTENT: Record<TabType, JSX.Element> = {
@@ -101,6 +101,11 @@ export function PoolConfiguration() {
               </button>
             ) : null}
           </div>
+          {selectedTab === "Tokens" && !isValidTokenWeights && (
+            <div className="mt-5">
+              <Alert type="error">Sum of token weights must be 100%</Alert>
+            </div>
+          )}
           {selectedTab === "Information" && !isTokensValid && (
             <div className="mt-5">
               <Alert type="error">Tokens configuration is invalid. Please go back to check wallet balances</Alert>
