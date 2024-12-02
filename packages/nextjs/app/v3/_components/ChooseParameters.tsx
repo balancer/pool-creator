@@ -175,14 +175,12 @@ export const ChooseParameters = () => {
           label="Choose a different swap fee and pause manager"
           checked={
             !isDelegatingManagement &&
-            swapFeeManager !== connectedWalletAddress &&
-            pauseManager !== connectedWalletAddress
+            (swapFeeManager !== connectedWalletAddress || pauseManager !== connectedWalletAddress)
           }
           onChange={() => updatePool({ isDelegatingManagement: false, swapFeeManager: "", pauseManager: "" })}
         />
         {!isDelegatingManagement &&
-          swapFeeManager !== connectedWalletAddress &&
-          pauseManager !== connectedWalletAddress && (
+          (swapFeeManager !== connectedWalletAddress || pauseManager !== connectedWalletAddress) && (
             <div className="flex flex-col gap-3 mt-3">
               <TextField
                 mustBeAddress={true}

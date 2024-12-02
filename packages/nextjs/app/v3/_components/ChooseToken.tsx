@@ -4,7 +4,7 @@ import { zeroAddress } from "viem";
 import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { type BoostedTokenInfo, useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
 
 export function ChooseToken({ index }: { index: number }) {
@@ -22,10 +22,14 @@ export function ChooseToken({ index }: { index: number }) {
   const boostedVariant = boostableWhitelist?.[address];
 
   const handleTokenSelection = (tokenInfo: Token) => {
+    // TODO more testing for rate provider UX
+    const tokenType = tokenInfo.priceRateProviderData ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD;
+    const rateProvider = tokenInfo.priceRateProviderData ? tokenInfo.priceRateProviderData.address : zeroAddress;
+
     updateTokenConfig(index, {
       address: tokenInfo.address,
-      tokenType: TokenType.STANDARD,
-      rateProvider: zeroAddress,
+      tokenType,
+      rateProvider,
       paysYieldFees: false,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
@@ -154,8 +158,7 @@ export function ChooseToken({ index }: { index: number }) {
 
         <div>
           {tokenInfo && (
-            // TODO: auto fill rate provider address if data available from API
-            <div className="flex justify-between items-center mb-1">
+            <div className="flex justify-between items-center mb-1 mt-2">
               <div className="flex gap-1 items-center">
                 <Checkbox
                   label={
@@ -190,7 +193,7 @@ export function ChooseToken({ index }: { index: number }) {
           )}
 
           {tokenType === TokenType.TOKEN_WITH_RATE && (
-            <div className="flex flex-col gap-4 mt-3">
+            <div className="flex flex-col gap-4 mt-5">
               <TextField
                 isRateProvider={true}
                 mustBeAddress={true}
@@ -198,12 +201,27 @@ export function ChooseToken({ index }: { index: number }) {
                 value={rateProvider !== zeroAddress ? rateProvider : ""}
                 onChange={e => handleRateProvider(e.target.value.trim())}
               />
-              <Alert type="warning">
-                Rate provider contracts must be reviewed before pool visibility on{" "}
-                <a href="https://balancer.fi/pools" className="link" target="_blank" rel="noreferrer">
-                  balancer.fi
-                </a>
-              </Alert>
+              {rateProvider.toLowerCase() !== tokenInfo?.priceRateProviderData?.address.toLowerCase() &&
+                !(
+                  useBoostedVariant &&
+                  boostedVariant?.priceRateProviderData?.address.toLowerCase() === rateProvider.toLowerCase()
+                ) && (
+                  <Alert type="warning">
+                    Rate provider contracts{" "}
+                    <a
+                      href="https://docs-v3.balancer.fi/partner-onboarding/onboarding-overview/rate-providers.html"
+                      className="link items-center gap-1 "
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      must be reviewed
+                    </a>{" "}
+                    before pool visibility on{" "}
+                    <a href="https://balancer.fi/pools" className="link" target="_blank" rel="noreferrer">
+                      balancer.fi
+                    </a>
+                  </Alert>
+                )}
 
               {/* 
               <Checkbox
@@ -236,13 +254,21 @@ const BoostOpportunityModal = ({
 }: {
   tokenIndex: number;
   setShowBoostOpportunityModal: Dispatch<SetStateAction<boolean>>;
-  boostedVariant: BoostedTokenInfo;
+  boostedVariant: Token;
   standardVariant: Token;
 }) => {
   const { updateTokenConfig } = usePoolCreationStore();
 
+  const boostedVariantRateProvider = boostedVariant.priceRateProviderData?.address;
+
   const handleBoost = (enableBoost: boolean) => {
-    updateTokenConfig(tokenIndex, { useBoostedVariant: enableBoost });
+    // TODO: more testing for rate provider UX
+    updateTokenConfig(tokenIndex, {
+      useBoostedVariant: enableBoost,
+      rateProvider:
+        enableBoost && boostedVariantRateProvider ? boostedVariantRateProvider : enableBoost ? "" : zeroAddress,
+      tokenType: enableBoost ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD,
+    });
     setShowBoostOpportunityModal(false);
   };
 

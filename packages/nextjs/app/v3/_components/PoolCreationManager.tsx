@@ -13,6 +13,8 @@ import {
 import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
+// TODO: Warn user if pool they are trying to create has similar ones that already exist?
+
 /**
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */

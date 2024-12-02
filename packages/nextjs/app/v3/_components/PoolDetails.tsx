@@ -117,7 +117,21 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <>
                 <div className="flex justify-between">
                   <div className="">Pool Hooks Contract</div>
-                  <div>{poolHooksContract ? abbreviateAddress(poolHooksContract) : "-"}</div>
+                  <div>
+                    {poolHooksContract ? (
+                      <a
+                        className="link text-info no-underline flex gap-1 items-center"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={getBlockExplorerAddressLink(targetNetwork, poolHooksContract)}
+                      >
+                        {abbreviateAddress(poolHooksContract)}
+                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </div>
                 </div>
                 <div className="flex justify-between">
                   <div className="">Disable Unbalanced Liquidity</div>
