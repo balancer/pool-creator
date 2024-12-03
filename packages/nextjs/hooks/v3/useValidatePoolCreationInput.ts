@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { PoolType, TokenType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAddress, parseUnits } from "viem";
@@ -22,7 +21,6 @@ export function useValidatePoolCreationInput() {
     swapFeeManager,
     pauseManager,
     poolHooksContract,
-    updatePool,
   } = usePoolCreationStore();
 
   const isTypeValid = poolType !== undefined && !isWrongNetwork;
@@ -53,9 +51,12 @@ export function useValidatePoolCreationInput() {
           chainId: walletClient.chain.id,
         },
       ];
+      console.log("tokenBalanceQueryKey", tokenBalanceQueryKey);
       const rawUserBalance: bigint = queryClient.getQueryData(tokenBalanceQueryKey) ?? 0n;
       const rawTokenAmount = parseUnits(token.amount, token.tokenInfo.decimals);
 
+      console.log("rawTokenAmount", rawTokenAmount);
+      console.log("rawUserBalance", rawUserBalance);
       // User must have enough token balance
       if (rawTokenAmount > rawUserBalance) return false;
 
@@ -87,13 +88,6 @@ export function useValidatePoolCreationInput() {
   const isInfoValid = !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH;
 
   const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
-
-  // hacky but i wonder if this will work?
-  useEffect(() => {
-    if (!isTokensValid) {
-      updatePool({ selectedTab: "Tokens" });
-    }
-  }, [isTokensValid, updatePool]);
 
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights };
 }

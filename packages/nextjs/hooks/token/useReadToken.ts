@@ -1,11 +1,14 @@
 import { erc20Abi } from "@balancer/sdk";
+// import { createSyncStoragePersister } from "@tanstack/query-sync-storage";
 import { Address, zeroAddress } from "viem";
 import { useReadContract, useWalletClient } from "wagmi";
 
 export const useReadToken = (token: Address | undefined, spender?: Address) => {
   const { data: walletClient } = useWalletClient();
   const connectedAddress = walletClient?.account.address || zeroAddress;
-
+  // const persister = createSyncStoragePersister({
+  //   storage: window.localStorage,
+  // });
   const { data: name, isLoading: isLoadingName } = useReadContract({
     address: token,
     abi: erc20Abi,
@@ -29,6 +32,12 @@ export const useReadToken = (token: Address | undefined, spender?: Address) => {
     abi: erc20Abi,
     functionName: "balanceOf",
     args: [connectedAddress],
+    // query: {
+    //   enabled: !!token && !!connectedAddress,
+    //   gcTime: Infinity,
+    //   staleTime: 30_000, // Consider data fresh for 30 seconds
+    //   persister: persister,
+    // },
   });
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
