@@ -46,8 +46,6 @@ export function PoolConfiguration() {
     if (step > 1) setIsPoolCreationModalOpen(true);
   }, [step]);
 
-  console.log("isTokensValid", isTokensValid);
-
   return (
     <>
       <div className="w-full max-w-[700px] flex flex-col gap-5">
@@ -103,7 +101,7 @@ export function PoolConfiguration() {
           </div>
           {selectedTab === "Tokens" && !isValidTokenWeights && (
             <div className="mt-5">
-              <Alert type="error">Sum of token weights must be 100%</Alert>
+              <Alert type="error">Each token weight must be at least 1% and sum of all weights must be 100%</Alert>
             </div>
           )}
           {selectedTab === "Information" && !isTokensValid && (

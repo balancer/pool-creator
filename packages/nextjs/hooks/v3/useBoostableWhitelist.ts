@@ -72,14 +72,6 @@ export const useBoostableWhitelist = () => {
   });
 };
 
-// TYPES
-export type BoostedTokenInfo = {
-  address: Address;
-  name: string;
-  symbol: string;
-  decimals: number;
-};
-
 type BoostableWhitelist = {
   id: string;
   name: string;

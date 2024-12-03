@@ -159,7 +159,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             </div>
             <div className="flex justify-between">
               <div className="">Symbol</div>
-              <div>{symbol.length > 26 ? `${symbol.slice(0, 26)}...` : symbol}</div>
+              <div>{symbol.length > 26 ? `${symbol.slice(0, 20)}...` : symbol}</div>
             </div>
             <div className="flex justify-between">
               <div className="">Address</div>

@@ -30,7 +30,7 @@ export function ChooseToken({ index }: { index: number }) {
       address: tokenInfo.address,
       tokenType,
       rateProvider,
-      paysYieldFees: false,
+      paysYieldFees: tokenType === TokenType.TOKEN_WITH_RATE ? true : false,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
     });
@@ -134,7 +134,7 @@ export function ChooseToken({ index }: { index: number }) {
                 min="1"
                 max="99"
                 value={weight}
-                onChange={e => handleWeightChange(Number(e.target.value.trim()))}
+                onChange={e => handleWeightChange(Math.max(0, Number(e.target.value.trim())))}
                 className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
               />
               <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
@@ -179,7 +179,7 @@ export function ChooseToken({ index }: { index: number }) {
               {boostedVariant && (
                 <div
                   className={`flex gap-1 items-center cursor-pointer ${
-                    useBoostedVariant ? "text-accent" : "text-base-content"
+                    useBoostedVariant ? "text-info" : "text-base-content"
                   }`}
                   onClick={() => setShowBoostOpportunityModal(true)}
                 >
@@ -268,6 +268,7 @@ const BoostOpportunityModal = ({
       rateProvider:
         enableBoost && boostedVariantRateProvider ? boostedVariantRateProvider : enableBoost ? "" : zeroAddress,
       tokenType: enableBoost ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD,
+      paysYieldFees: enableBoost ? true : false,
     });
     setShowBoostOpportunityModal(false);
   };

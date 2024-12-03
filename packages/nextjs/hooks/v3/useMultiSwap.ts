@@ -118,7 +118,7 @@ export const useMultiSwap = () => {
 
     console.log("logs", logs);
 
-    logs.forEach((log, idx) => {
+    logs.forEach(log => {
       // mintedShares is the amount, underlyingToken is an address
       const { mintedShares, wrappedToken } = log.args;
       console.log("wrappedToken", wrappedToken);
@@ -126,8 +126,14 @@ export const useMultiSwap = () => {
         token => token.address.toLowerCase() === wrappedToken.toLowerCase(),
       );
       if (!boostedToken) throw new Error("Boosted token not found");
+      console.log("boostedToken", boostedToken);
       const amount = formatUnits(mintedShares, boostedToken?.decimals);
-      updateTokenConfig(idx, { amount });
+      // find corresponding token index for tokenConfigs array
+      const tokenIndex = tokenConfigs.findIndex(
+        token => token.address.toLowerCase() === boostedToken?.underlyingTokenAddress?.toLowerCase(),
+      );
+      console.log("amount", amount, "tokenIndex", tokenIndex);
+      updateTokenConfig(tokenIndex, { amount });
     });
 
     updatePool({ step: step + 1, swapTxHash: hash });

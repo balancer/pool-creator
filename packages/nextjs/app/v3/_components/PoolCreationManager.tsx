@@ -121,10 +121,14 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
       <div className="flex flex-col gap-5">
         <div className="flex gap-5">
           <div className="flex flex-col gap-5 relative z-10">
-            <div className="bg-base-300 border-neutral border rounded-lg w-[500px] p-5 flex flex-col gap-5">
+            <div className="bg-base-300 border-neutral border rounded-lg w-[500px] p-5 flex flex-col gap-5 max-h-[90vh]">
               <div className="font-bold text-2xl text-center">Pool Creation</div>
-              <PoolDetails />
+
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <PoolDetails />
+              </div>
               {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
+
               <div className="flex justify-center">
                 <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg">
                   Contact Support
@@ -212,7 +216,9 @@ const PoolCreatedView = () => {
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
         </button>
       </a>
-      <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
+      <Alert type="success">
+        Pool successfully initialized and should be avaiable to view in the Balancer app shortly!
+      </Alert>
     </div>
   );
 };

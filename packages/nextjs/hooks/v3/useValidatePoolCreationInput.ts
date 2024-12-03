@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { PoolType, TokenType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAddress, parseUnits } from "viem";
@@ -21,12 +22,15 @@ export function useValidatePoolCreationInput() {
     swapFeeManager,
     pauseManager,
     poolHooksContract,
+    updatePool,
   } = usePoolCreationStore();
 
   const isTypeValid = poolType !== undefined && !isWrongNetwork;
 
   const isValidTokenWeights =
-    poolType !== PoolType.Weighted || tokenConfigs.reduce((acc, token) => acc + token.weight, 0) === 100;
+    poolType !== PoolType.Weighted ||
+    (tokenConfigs.every(token => token.weight > 0) &&
+      tokenConfigs.reduce((acc, token) => acc + token.weight, 0) === 100);
 
   const isTokensValid =
     tokenConfigs.every(token => {
@@ -83,6 +87,13 @@ export function useValidatePoolCreationInput() {
   const isInfoValid = !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH;
 
   const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
+
+  // hacky but i wonder if this will work?
+  useEffect(() => {
+    if (!isTokensValid) {
+      updatePool({ selectedTab: "Tokens" });
+    }
+  }, [isTokensValid, updatePool]);
 
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights };
 }

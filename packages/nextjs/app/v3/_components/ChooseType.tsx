@@ -2,7 +2,7 @@ import React from "react";
 import { PoolType } from "@balancer/sdk";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { usePoolCreationStore } from "~~/hooks/v3";
-import { AllowedPoolTypes, initialTokenConfig } from "~~/hooks/v3/usePoolCreationStore";
+import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
 const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable];
 
@@ -14,7 +14,7 @@ const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
 };
 
 export function ChooseType() {
-  const { poolType, updatePool } = usePoolCreationStore();
+  const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
 
   return (
     <>
@@ -47,7 +47,7 @@ export function ChooseType() {
                   ? `bg-primary text-primary-content`
                   : `bg-base-100 hover:bg-primary hover:text-primary-content hover:opacity-50`
               } p-7 w-full rounded-xl text-lg text shadow-lg`}
-              onClick={() => updatePool({ poolType: type, tokenConfigs: [initialTokenConfig, initialTokenConfig] })}
+              onClick={() => updatePool({ poolType: type, tokenConfigs: tokenConfigs.slice(0, 4) })}
             >
               <div className="flex flex-col text-center">
                 <div className="font-bold text-xl mb-2 w-full">{type}</div>

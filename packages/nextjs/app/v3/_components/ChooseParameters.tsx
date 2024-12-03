@@ -187,14 +187,14 @@ export const ChooseParameters = () => {
                 label="Swap fee manager"
                 placeholder="Enter address"
                 value={swapFeeManager}
-                onChange={e => updatePool({ swapFeeManager: e.target.value })}
+                onChange={e => updatePool({ swapFeeManager: e.target.value.trim() })}
               />
               <TextField
                 mustBeAddress={true}
                 label="Pause manager"
                 placeholder="Enter address"
                 value={pauseManager}
-                onChange={e => updatePool({ pauseManager: e.target.value })}
+                onChange={e => updatePool({ pauseManager: e.target.value.trim() })}
               />
             </div>
           )}
@@ -239,7 +239,7 @@ export const ChooseParameters = () => {
                 mustBeAddress={true}
                 placeholder="Enter pool hooks contract address"
                 value={poolHooksContract}
-                onChange={e => updatePool({ poolHooksContract: e.target.value })}
+                onChange={e => updatePool({ poolHooksContract: e.target.value.trim() })}
               />
             </div>
             <div className="mt-1 flex flex-col gap-2">
