@@ -11,7 +11,7 @@ type ChainAttributes = {
 
 export type ChainWithAttributes = chains.Chain & Partial<ChainAttributes>;
 
-// Mapping of chainId to RPC chain name an format followed by alchemy and infura
+// Mapping of chainId to RPC chain name an format followed by alchemy
 export const RPC_CHAIN_NAMES: Record<number, string> = {
   [chains.mainnet.id]: "eth-mainnet",
   [chains.goerli.id]: "eth-goerli",
@@ -33,9 +33,21 @@ export const RPC_CHAIN_NAMES: Record<number, string> = {
   [chains.baseSepolia.id]: "base-sepolia",
 };
 
+export const INFURA_CHAIN_NAMES: Record<number, string> = {
+  [chains.mainnet.id]: "mainnet",
+  [chains.sepolia.id]: "sepolia",
+  [chains.arbitrum.id]: "arbitrum-mainnet",
+};
+
 export const getAlchemyHttpUrl = (chainId: number) => {
   return scaffoldConfig.alchemyApiKey && RPC_CHAIN_NAMES[chainId]
     ? `https://${RPC_CHAIN_NAMES[chainId]}.g.alchemy.com/v2/${scaffoldConfig.alchemyApiKey}`
+    : undefined;
+};
+
+export const getInfuraHttpUrl = (chainId: number) => {
+  return scaffoldConfig.infuraApiKey && INFURA_CHAIN_NAMES[chainId]
+    ? `https://${INFURA_CHAIN_NAMES[chainId]}.infura.io/v3/${scaffoldConfig.infuraApiKey}`
     : undefined;
 };
 
