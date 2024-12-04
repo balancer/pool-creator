@@ -9,6 +9,7 @@ import {
   useInitializePool,
   useMultiSwap,
   usePoolCreationStore,
+  useUserDataStore,
 } from "~~/hooks/v3/";
 import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
@@ -20,7 +21,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-
+  const { updateUserData } = useUserDataStore();
   const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash } =
     usePoolCreationStore();
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -109,6 +110,13 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     initializeStep,
   ];
 
+  function resetAllState() {
+    clearPoolStore();
+    setIsModalOpen(false);
+    updatePool({ selectedTab: "Type" });
+    updateUserData({ hasEditedPoolInformation: false });
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">
       <div
@@ -137,11 +145,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
             </div>
             {step > poolCreationSteps.length && (
               <button
-                onClick={() => {
-                  clearPoolStore();
-                  setIsModalOpen(false);
-                  updatePool({ selectedTab: "Type" });
-                }}
+                onClick={resetAllState}
                 className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} ${bgBeigeGradientHover} text-neutral-700`}
               >
                 <div>Create another pool</div>
@@ -155,16 +159,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
         </div>
       </div>
 
-      {isResetModalOpen && (
-        <PoolStateResetModal
-          clearState={() => {
-            clearPoolStore();
-            setIsModalOpen(false);
-            updatePool({ selectedTab: "Type" });
-          }}
-          setIsModalOpen={setIsResetModalOpen}
-        />
-      )}
+      {isResetModalOpen && <PoolStateResetModal clearState={resetAllState} setIsModalOpen={setIsResetModalOpen} />}
     </div>
   );
 }

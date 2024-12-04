@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
-import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 /**
@@ -10,11 +10,11 @@ import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
  */
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
-
+  const { updateUserData, hasEditedPoolInformation } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   useEffect(() => {
-    if (poolType) {
+    if (poolType && !hasEditedPoolInformation) {
       const symbol = tokenConfigs
         .map(token => {
           const { useBoostedVariant, tokenInfo, weight } = token;
@@ -32,7 +32,7 @@ export const ChooseInfo = () => {
         symbol,
       });
     }
-  }, [tokenConfigs, poolType, updatePool, boostableWhitelist]);
+  }, [tokenConfigs, poolType, updatePool, boostableWhitelist, hasEditedPoolInformation]);
 
   return (
     <div>
@@ -44,7 +44,10 @@ export const ChooseInfo = () => {
             placeholder="Enter pool name"
             value={name}
             maxLength={MAX_POOL_NAME_LENGTH}
-            onChange={e => updatePool({ name: e.target.value.trim() })}
+            onChange={e => {
+              updatePool({ name: e.target.value });
+              updateUserData({ hasEditedPoolInformation: true });
+            }}
           />
         </div>
 
@@ -53,7 +56,10 @@ export const ChooseInfo = () => {
             label="Pool symbol"
             placeholder="Enter pool symbol"
             value={symbol}
-            onChange={e => updatePool({ symbol: e.target.value.trim() })}
+            onChange={e => {
+              updatePool({ symbol: e.target.value.trim() });
+              updateUserData({ hasEditedPoolInformation: true });
+            }}
           />
         </div>
       </div>

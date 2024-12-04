@@ -2,13 +2,15 @@ import { PoolType, TokenType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAddress, parseUnits } from "viem";
 import { useWalletClient } from "wagmi";
-import { usePoolCreationStore, useValidateHooksContract, useValidateNetwork } from "~~/hooks/v3";
+import { usePoolCreationStore, useUserDataStore, useValidateHooksContract, useValidateNetwork } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 export function useValidatePoolCreationInput() {
   const { isWrongNetwork } = useValidateNetwork();
   const queryClient = useQueryClient();
   const { data: walletClient } = useWalletClient();
+  const { userTokenBalances } = useUserDataStore();
+
   const {
     poolType,
     tokenConfigs,
@@ -41,22 +43,9 @@ export function useValidatePoolCreationInput() {
       )
         return false;
 
-      // Look up cached user token balance using Wagmi's query key format
-      const tokenBalanceQueryKey = [
-        "readContract",
-        {
-          address: token.address,
-          functionName: "balanceOf",
-          args: [walletClient.account.address],
-          chainId: walletClient.chain.id,
-        },
-      ];
-      console.log("tokenBalanceQueryKey", tokenBalanceQueryKey);
-      const rawUserBalance: bigint = queryClient.getQueryData(tokenBalanceQueryKey) ?? 0n;
+      const rawUserBalance: bigint = userTokenBalances[token.address] ? BigInt(userTokenBalances[token.address]) : 0n;
       const rawTokenAmount = parseUnits(token.amount, token.tokenInfo.decimals);
 
-      console.log("rawTokenAmount", rawTokenAmount);
-      console.log("rawUserBalance", rawUserBalance);
       // User must have enough token balance
       if (rawTokenAmount > rawUserBalance) return false;
 

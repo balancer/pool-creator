@@ -6,12 +6,13 @@ import type { NextPage } from "next";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, PoolStateResetModal } from "~~/components/common";
-import { usePoolCreationStore, usePoolStoreDebug, useValidateNetwork } from "~~/hooks/v3";
+import { usePoolCreationStore, usePoolStoreDebug, useUserDataStoreDebug, useValidateNetwork } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   usePoolStoreDebug();
+  useUserDataStoreDebug();
   const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
   const { updatePool, clearPoolStore } = usePoolCreationStore();
 

@@ -25,10 +25,10 @@ export const TextField: React.FC<TextFieldProps> = ({
   mustBeAddress,
   maxLength,
   isRateProvider,
-  isPoolHooksContract,
+  isPoolHooksContract = false,
 }) => {
-  const { data: isValidRateProvider = true } = useValidateRateProvider(isRateProvider, value);
-  const { data: isValidPoolHooksContract = true } = useValidateHooksContract(isPoolHooksContract, value);
+  const { data: isValidRateProvider } = useValidateRateProvider(isRateProvider, value);
+  const { data: isValidPoolHooksContract } = useValidateHooksContract(isPoolHooksContract, value);
   const isValidAddress = !mustBeAddress || !value || isAddress(value);
   const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
 
@@ -55,6 +55,7 @@ export const TextField: React.FC<TextFieldProps> = ({
           placeholder={placeholder}
           value={value ?? ""}
           onChange={onChange}
+          onBlur={e => onChange?.({ ...e, target: { ...e.target, value: e.target.value.trim() } })}
           disabled={isDisabled}
           className={`
             shadow-inner border-0 rounded-xl w-full input bg-base-300 

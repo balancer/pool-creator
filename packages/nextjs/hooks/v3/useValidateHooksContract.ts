@@ -7,6 +7,8 @@ export const useValidateHooksContract = (isPoolHooksContract: boolean | undefine
   const publicClient = usePublicClient();
   const { updatePool } = usePoolCreationStore();
 
+  const isValidAddress = value ? isAddress(value) : false;
+
   return useQuery({
     queryKey: ["validatePoolHooks", value],
     queryFn: async (): Promise<HookFlags | false> => {
@@ -23,12 +25,12 @@ export const useValidateHooksContract = (isPoolHooksContract: boolean | undefine
           updatePool({ disableUnbalancedLiquidity: true });
         }
         return hookFlags;
-      } catch {
-        updatePool({ disableUnbalancedLiquidity: false });
+      } catch (error) {
+        console.error(error);
         return false;
       }
     },
-    enabled: isPoolHooksContract && !!value && isAddress(value as string),
+    enabled: isPoolHooksContract && !!value && isValidAddress,
   });
 };
 

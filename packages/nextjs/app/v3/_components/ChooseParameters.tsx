@@ -29,6 +29,8 @@ export const ChooseParameters = () => {
   const queryClient = useQueryClient();
   const hookFlags: HookFlags | undefined = queryClient.getQueryData(["validatePoolHooks", poolHooksContract]);
 
+  console.log("hookFlags", hookFlags);
+
   const handleNumberInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: "swapFeePercentage" | "amplificationParameter",

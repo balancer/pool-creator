@@ -1,13 +1,17 @@
-import React, { Dispatch, SetStateAction, useRef, useState } from "react";
-import { PoolType, TokenType } from "@balancer/sdk";
+import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { PoolType, TokenType, erc20Abi } from "@balancer/sdk";
 import { zeroAddress } from "viem";
+import { useAccount, useReadContract } from "wagmi";
 import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
 
 export function ChooseToken({ index }: { index: number }) {
+  const { address: connectedAddress } = useAccount();
+  const { updateUserData, userTokenBalances } = useUserDataStore();
+
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
 
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
@@ -20,6 +24,18 @@ export function ChooseToken({ index }: { index: number }) {
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
   const boostedVariant = boostableWhitelist?.[address];
+
+  const { data: balance } = useReadContract({
+    address,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: connectedAddress ? [connectedAddress] : undefined,
+  });
+
+  useEffect(() => {
+    updateUserData({ userTokenBalances: { ...userTokenBalances, [address]: balance?.toString() ?? "0" } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balance, address]);
 
   const handleTokenSelection = (tokenInfo: Token) => {
     // TODO more testing for rate provider UX
