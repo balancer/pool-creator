@@ -14,6 +14,7 @@ export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted;
 export type TokenConfig = {
   address: Address;
   rateProvider: Address;
+  isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
   weight: number;
@@ -51,6 +52,7 @@ export interface PoolCreationStore {
 export const initialTokenConfig: TokenConfig = {
   address: "",
   rateProvider: zeroAddress,
+  isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
   weight: 50, // only used for weighted pools

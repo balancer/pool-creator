@@ -1,5 +1,4 @@
 import { PoolType, TokenType } from "@balancer/sdk";
-import { useQueryClient } from "@tanstack/react-query";
 import { isAddress, parseUnits } from "viem";
 import { useWalletClient } from "wagmi";
 import { usePoolCreationStore, useUserDataStore, useValidateHooksContract, useValidateNetwork } from "~~/hooks/v3";
@@ -7,7 +6,6 @@ import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 export function useValidatePoolCreationInput() {
   const { isWrongNetwork } = useValidateNetwork();
-  const queryClient = useQueryClient();
   const { data: walletClient } = useWalletClient();
   const { userTokenBalances } = useUserDataStore();
 
@@ -44,6 +42,7 @@ export function useValidatePoolCreationInput() {
         return false;
 
       const rawUserBalance: bigint = userTokenBalances[token.address] ? BigInt(userTokenBalances[token.address]) : 0n;
+
       const rawTokenAmount = parseUnits(token.amount, token.tokenInfo.decimals);
 
       // User must have enough token balance
@@ -57,14 +56,13 @@ export function useValidatePoolCreationInput() {
 
       // Check tanstack query cache for rate provider validity
       if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
-        const isValidRateProvider = queryClient.getQueryData(["validateRateProvider", token.rateProvider]) ?? false;
-        if (!isValidRateProvider) return false;
+        if (!token.isValidRateProvider) return false;
       }
       return true;
     }) && isValidTokenWeights;
 
   // Check tanstack query cache for pool hooks contract validity
-  const { data: isValidPoolHooksContract = false } = useValidateHooksContract(isUsingHooks, poolHooksContract);
+  const { data: isValidPoolHooksContract } = useValidateHooksContract(isUsingHooks, poolHooksContract);
 
   const isParametersValid = [
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,

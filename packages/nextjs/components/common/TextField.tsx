@@ -2,7 +2,7 @@
 
 import { isAddress } from "viem";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { useValidateHooksContract, useValidateRateProvider } from "~~/hooks/v3";
+import { useValidateHooksContract } from "~~/hooks/v3";
 
 interface TextFieldProps {
   label?: string;
@@ -13,6 +13,7 @@ interface TextFieldProps {
   mustBeAddress?: boolean;
   maxLength?: number;
   isRateProvider?: boolean;
+  isValidRateProvider?: boolean;
   isPoolHooksContract?: boolean;
 }
 
@@ -24,10 +25,10 @@ export const TextField: React.FC<TextFieldProps> = ({
   isDisabled,
   mustBeAddress,
   maxLength,
-  isRateProvider,
+  isRateProvider = false,
+  isValidRateProvider = false,
   isPoolHooksContract = false,
 }) => {
-  const { data: isValidRateProvider } = useValidateRateProvider(isRateProvider, value);
   const { data: isValidPoolHooksContract } = useValidateHooksContract(isPoolHooksContract, value);
   const isValidAddress = !mustBeAddress || !value || isAddress(value);
   const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;

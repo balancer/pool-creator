@@ -155,11 +155,23 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           <div>
             <div className="flex justify-between">
               <div className="">Name</div>
-              <div>{name.length > 26 ? `${name.slice(0, 26)}...` : name}</div>
+              {name.length > 26 ? (
+                <div className="tooltip tooltip-primary cursor-pointer" data-tip={name}>
+                  {`${name.slice(0, 26)}...`}
+                </div>
+              ) : (
+                <div>{name}</div>
+              )}
             </div>
             <div className="flex justify-between">
               <div className="">Symbol</div>
-              <div>{symbol.length > 26 ? `${symbol.slice(0, 20)}...` : symbol}</div>
+              {symbol.length > 20 ? (
+                <div className="tooltip tooltip-primary cursor-pointer" data-tip={symbol}>
+                  {`${symbol.slice(0, 20)}...`}
+                </div>
+              ) : (
+                <div>{symbol}</div>
+              )}
             </div>
             <div className="flex justify-between">
               <div className="">Address</div>

@@ -4,20 +4,29 @@ import { zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
-import { type Token, useFetchTokenList, useReadToken } from "~~/hooks/token";
-import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { type Token, useFetchTokenList } from "~~/hooks/token";
+import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
 
 export function ChooseToken({ index }: { index: number }) {
-  const { address: connectedAddress } = useAccount();
-  const { updateUserData, userTokenBalances } = useUserDataStore();
-
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
 
+  const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
-  const { tokenType, weight, rateProvider, tokenInfo, amount, address, useBoostedVariant, isWeightLocked } =
-    tokenConfigs[index];
-  const { balance: userTokenBalance } = useReadToken(tokenInfo?.address);
+  const {
+    tokenType,
+    weight,
+    rateProvider,
+    isValidRateProvider,
+    tokenInfo,
+    amount,
+    address,
+    useBoostedVariant,
+    isWeightLocked,
+  } = tokenConfigs[index];
+  useValidateRateProvider(rateProvider, index); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
+
+  const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();
   const tokenList = data || [];
   const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
@@ -25,7 +34,7 @@ export function ChooseToken({ index }: { index: number }) {
   const { data: boostableWhitelist } = useBoostableWhitelist();
   const boostedVariant = boostableWhitelist?.[address];
 
-  const { data: balance } = useReadContract({
+  const { data: userTokenBalance } = useReadContract({
     address,
     abi: erc20Abi,
     functionName: "balanceOf",
@@ -33,9 +42,9 @@ export function ChooseToken({ index }: { index: number }) {
   });
 
   useEffect(() => {
-    updateUserData({ userTokenBalances: { ...userTokenBalances, [address]: balance?.toString() ?? "0" } });
+    updateUserData({ userTokenBalances: { ...userTokenBalances, [address]: userTokenBalance?.toString() ?? "0" } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [balance, address]);
+  }, [userTokenBalance, address]);
 
   const handleTokenSelection = (tokenInfo: Token) => {
     // TODO more testing for rate provider UX
@@ -67,14 +76,6 @@ export function ChooseToken({ index }: { index: number }) {
       updateTokenConfig(index, { tokenType: TokenType.STANDARD, rateProvider: zeroAddress, paysYieldFees: false });
     }
   };
-
-  const handleRateProvider = (rateProvider: string) => {
-    updateTokenConfig(index, { rateProvider });
-  };
-
-  // const handlePaysYieldFees = () => {
-  //   updateTokenConfig(index, { paysYieldFees: !paysYieldFees });
-  // };
 
   const handleRemoveToken = () => {
     if (tokenConfigs.length > 2) {
@@ -212,10 +213,11 @@ export function ChooseToken({ index }: { index: number }) {
             <div className="flex flex-col gap-4 mt-5">
               <TextField
                 isRateProvider={true}
+                isValidRateProvider={isValidRateProvider}
                 mustBeAddress={true}
                 placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
                 value={rateProvider !== zeroAddress ? rateProvider : ""}
-                onChange={e => handleRateProvider(e.target.value.trim())}
+                onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() })}
               />
               {rateProvider.toLowerCase() !== tokenInfo?.priceRateProviderData?.address.toLowerCase() &&
                 !(

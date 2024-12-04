@@ -21,7 +21,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const { updateUserData } = useUserDataStore();
+  const { clearUserData } = useUserDataStore();
   const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash } =
     usePoolCreationStore();
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -112,9 +112,9 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
 
   function resetAllState() {
     clearPoolStore();
+    clearUserData();
     setIsModalOpen(false);
     updatePool({ selectedTab: "Type" });
-    updateUserData({ hasEditedPoolInformation: false });
   }
 
   return (
@@ -212,7 +212,7 @@ const PoolCreatedView = () => {
         </button>
       </a>
       <Alert type="success">
-        Pool successfully initialized and should be avaiable to view in the Balancer app shortly!
+        Your pool has been successfully initialized and will be avaiable to view in the Balancer app shortly!
       </Alert>
     </div>
   );

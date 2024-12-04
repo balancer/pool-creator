@@ -24,7 +24,7 @@ export const useUserDataStore = create(
       clearUserData: () => set(initialUserDataStore),
     }),
     {
-      name: "v3-user-data-store",
+      name: "v3-pool-creation-user-data",
       getStorage: () => localStorage,
     },
   ),
