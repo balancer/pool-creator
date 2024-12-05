@@ -5,6 +5,7 @@ import { usePublicClient } from "wagmi";
 
 export const useValidateRateProvider = (address: string | undefined, tokenConfigIndex: number) => {
   const publicClient = usePublicClient();
+
   const { updateTokenConfig } = usePoolCreationStore();
 
   const isValidAddress = address ? isAddress(address) : false;

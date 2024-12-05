@@ -14,7 +14,7 @@ export const ChooseInfo = () => {
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   useEffect(() => {
-    if (poolType && !hasEditedPoolInformation) {
+    if (poolType) {
       const symbol = tokenConfigs
         .map(token => {
           const { useBoostedVariant, tokenInfo, weight } = token;
@@ -27,8 +27,11 @@ export const ChooseInfo = () => {
         })
         .join("-");
 
+      if (!hasEditedPoolInformation) {
+        updatePool({ name: symbol.split("-").join(" ") });
+      }
+
       updatePool({
-        name: symbol.split("-").join(" "),
         symbol,
       });
     }

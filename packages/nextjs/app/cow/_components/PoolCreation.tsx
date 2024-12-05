@@ -119,9 +119,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
       <div className="flex flex-wrap justify-center gap-5 lg:relative">
         <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-xl md:w-[555px]">
           <div className="flex flex-col items-center gap-5 w-full">
-            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your poolCreation</h5>
+            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
             <div className="w-full">
-              <div className="ml-1 mb-1">Selected poolCreation tokens:</div>
+              <div className="ml-1 mb-1">Selected pool tokens:</div>
               <div className="w-full flex flex-col gap-3">
                 <TokenField
                   value={poolCreation.token1Amount}

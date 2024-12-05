@@ -3,7 +3,7 @@
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import { TokenImage } from "~~/components/common";
+import { TokenImage, TokenToolTip } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
   type TokenConfig,
@@ -239,13 +239,18 @@ function TokenDetails({ token }: { token: TokenConfig }) {
   return (
     <div>
       <div className="flex justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {poolType === PoolType.Weighted && <span className="font-bold"> {token.weight.toFixed(0)}%</span>}
 
           {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
           <div className="font-bold text-lg">
             {token.useBoostedVariant ? boostedToken?.symbol : token.tokenInfo?.symbol}
           </div>
+          {token.tokenInfo && (
+            <div>
+              <TokenToolTip token={token.tokenInfo} />
+            </div>
+          )}
         </div>
         <div>{token.amount}</div>
       </div>

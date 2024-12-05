@@ -80,9 +80,28 @@ export function ChooseToken({ index }: { index: number }) {
   const handleRemoveToken = () => {
     if (tokenConfigs.length > 2) {
       const remainingTokenConfigs = [...tokenConfigs].filter((_, i) => i !== index);
-      const updatedTokenConfigs = remainingTokenConfigs.map(token => {
-        return { ...token, weight: 100 / remainingTokenConfigs.length };
-      });
+
+      // Calculate total weight of locked tokens
+      const lockedWeight = remainingTokenConfigs.reduce(
+        (sum, token) => (token.isWeightLocked ? sum + token.weight : sum),
+        0,
+      );
+
+      // Count unlocked tokens
+      const unlockedTokenCount = remainingTokenConfigs.reduce(
+        (count, token) => (!token.isWeightLocked ? count + 1 : count),
+        0,
+      );
+
+      // Distribute remaining weight evenly among unlocked tokens
+      const remainingWeight = 100 - lockedWeight;
+      const evenWeight = unlockedTokenCount > 0 ? remainingWeight / unlockedTokenCount : 0;
+
+      const updatedTokenConfigs = remainingTokenConfigs.map(token => ({
+        ...token,
+        weight: token.isWeightLocked ? token.weight : evenWeight,
+      }));
+
       updatePool({ tokenConfigs: updatedTokenConfigs });
     }
   };
@@ -122,7 +141,7 @@ export function ChooseToken({ index }: { index: number }) {
 
   return (
     <>
-      <div className="bg-base-100 border border-neutral p-4 rounded-xl flex flex-col gap-3">
+      <div className="bg-base-100 p-4 rounded-xl flex flex-col gap-3">
         <div className="flex gap-3 w-full items-center">
           <div className="flex flex-col gap-5 justify-between items-center">
             {poolType === PoolType.Weighted &&
