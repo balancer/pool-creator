@@ -55,8 +55,11 @@ const BalancerV3: NextPage = () => {
               <div>
                 <Alert type="warning">
                   <div className="flex items-center gap-2">
-                    Please switch back to {chain.name} to continue with pool creation. You must start over if you wish
-                    to switch networks
+                    You have already begun the pool configuration process. Please switch back to {chain.name} to
+                    continue or if you prefer to switch networks,
+                    <div className="link" onClick={() => setIsResetModalOpen(true)}>
+                      start over
+                    </div>
                   </div>
                 </Alert>
               </div>
@@ -65,7 +68,7 @@ const BalancerV3: NextPage = () => {
             <>
               {!chain && (
                 <div className="flex justify-center">
-                  <div className="w-[1128px]">
+                  <div className="w-[1130px]">
                     <Alert type="warning">
                       <div className="flex items-center gap-2">
                         Make sure you switch to your desired network before beginning pool creation. You cannot switch
@@ -76,6 +79,16 @@ const BalancerV3: NextPage = () => {
                   </div>
                 </div>
               )}
+              <div className="flex justify-center">
+                <div className="w-[1130px]">
+                  <Alert type="info">
+                    <div className="flex items-center gap-2">
+                      Before starting the pool configuration process, we recommend that you review our pool creation
+                      documentation
+                    </div>
+                  </Alert>
+                </div>
+              </div>
 
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />

@@ -248,7 +248,7 @@ function TokenDetails({ token }: { token: TokenConfig }) {
           </div>
           {token.tokenInfo && (
             <div>
-              <TokenToolTip token={token.tokenInfo} />
+              <TokenToolTip token={token.useBoostedVariant && boostedToken ? boostedToken : token.tokenInfo} />
             </div>
           )}
         </div>
