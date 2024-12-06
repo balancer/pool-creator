@@ -1,10 +1,12 @@
 import { useEffect } from "react";
+// import { ALLOWED_NETWORKS } from "./useValidateNetwork";
 import { PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type Token } from "~~/hooks/token";
+import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 export type TabType = (typeof TABS)[number];
@@ -25,6 +27,7 @@ export type TokenConfig = {
 };
 
 export interface PoolCreationStore {
+  chain: ChainWithAttributes | undefined;
   step: number;
   selectedTab: TabType;
   isDelegatingManagement: boolean;
@@ -63,6 +66,7 @@ export const initialTokenConfig: TokenConfig = {
 };
 
 export const initialPoolCreationState = {
+  chain: undefined,
   step: 1,
   isDelegatingManagement: true,
   isUsingHooks: false,

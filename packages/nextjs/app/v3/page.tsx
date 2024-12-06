@@ -6,15 +6,18 @@ import type { NextPage } from "next";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, PoolStateResetModal } from "~~/components/common";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { usePoolCreationStore, usePoolStoreDebug, useUserDataStoreDebug, useValidateNetwork } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
+  const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
+  const { updatePool, clearPoolStore, chain } = usePoolCreationStore();
+  const { targetNetwork: selectedNetwork } = useTargetNetwork();
+
   usePoolStoreDebug();
   useUserDataStoreDebug();
-  const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
-  const { updatePool, clearPoolStore } = usePoolCreationStore();
 
   return (
     <div className="flex justify-center">
@@ -41,26 +44,61 @@ const BalancerV3: NextPage = () => {
               <div>
                 <Alert type="warning">
                   <div className="flex items-center gap-2">
-                    You are connected to an unsupported network. To continue, please switch to Sepolia
+                    You are connected to an unsupported network. To continue, please switch
                     <ArrowUpRightIcon className="w-4 h-4" />
+                  </div>
+                </Alert>
+              </div>
+            </div>
+          ) : chain && selectedNetwork.id !== chain.id ? (
+            <div className="flex justify-center w-full">
+              <div>
+                <Alert type="warning">
+                  <div className="flex items-center gap-2">
+                    Please switch back to {chain.name} to continue with pool creation. You must start over if you wish
+                    to switch networks
                   </div>
                 </Alert>
               </div>
             </div>
           ) : (
             <>
+              {!chain && (
+                <div className="flex justify-center">
+                  <div className="w-[1128px]">
+                    <Alert type="warning">
+                      <div className="flex items-center gap-2">
+                        Make sure you switch to your desired network before beginning pool creation. You cannot switch
+                        after selecting pool type unless you start over
+                        <ArrowUpRightIcon className="w-4 h-4" />
+                      </div>
+                    </Alert>
+                  </div>
+                </div>
+              )}
+
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />
 
                 <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
-                  <div className="font-bold text-2xl mb-3">Pool Preview</div>
+                  <div className="flex justify-between items-center gap-2 mb-3 mr-2">
+                    <div className="font-bold text-2xl">Pool Preview</div>
+                    {chain && (
+                      <div
+                        className="text-xl font-bold"
+                        style={{ color: typeof chain.color === "string" ? chain.color : "rgb(135, 255, 101)" }}
+                      >
+                        {chain?.name}
+                      </div>
+                    )}
+                  </div>
                   <PoolDetails isPreview={true} />
                   <div className="flex justify-center mt-3">
                     <div
                       onClick={() => setIsResetModalOpen(true)}
                       className="text-center underline cursor-pointer text-lg mt-2"
                     >
-                      Want help?
+                      Contact Support / Start Over
                     </div>
                   </div>
                 </div>

@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput } from "~~/hooks/v3";
 import { bgBeigeGradient } from "~~/utils";
 
 export function PoolConfiguration() {
   const { selectedTab, updatePool, step } = usePoolCreationStore();
+  const { targetNetwork } = useTargetNetwork();
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
   const { prev, next } = getAdjacentTabs(selectedTab);
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights } =
@@ -88,7 +90,12 @@ export function PoolConfiguration() {
               />
             ) : selectedTab !== "Information" ? (
               <button
-                onClick={() => handleTabChange("next")}
+                onClick={() => {
+                  if (selectedTab === "Type") {
+                    updatePool({ chain: targetNetwork });
+                  }
+                  handleTabChange("next");
+                }}
                 disabled={isNextDisabled()}
                 className={`btn ${bgBeigeGradient} text-neutral-700 text-lg border-none rounded-xl ${
                   isNextDisabled() ? "invisible" : ""

@@ -15,17 +15,10 @@ const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
 
 export function ChooseType() {
   const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
-
   return (
     <>
-      <div className="flex flex-col flex-grow justify-center h-full gap-5 px-7">
+      <div className="flex flex-col justify-center h-full gap-5 px-7">
         <div className="text-xl flex items-center gap-1">
-          {/* <div
-            className="tooltip tooltip-left tooltip-primary before:text-lg"
-            data-tip="Pool types define how trades affect prices, liquidity, and asset balances"
-          >
-            <InformationCircleIcon className="w-5 h-5" />
-          </div> */}
           Choose a
           <a
             href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/"
@@ -38,7 +31,7 @@ export function ChooseType() {
           </a>
         </div>
 
-        <div className="flex flex-grow flex-col justify-around">
+        <div className="flex gap-4 flex-col justify-around">
           {POOL_TYPES.map(type => (
             <button
               key={type}

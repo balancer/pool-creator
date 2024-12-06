@@ -1,7 +1,7 @@
-import { sepolia } from "viem/chains";
+import { gnosis, mainnet, sepolia } from "viem/chains";
 import { useWalletClient } from "wagmi";
 
-const ALLOWED_NETWORKS = [sepolia.id] as const;
+export const ALLOWED_NETWORKS = [sepolia.id, mainnet.id, gnosis.id] as const;
 
 export function useValidateNetwork() {
   const { data: walletClient } = useWalletClient();
