@@ -1,3 +1,4 @@
+import { blo } from "blo";
 import { type Token } from "~~/hooks/token";
 
 type TokenImageProps = {
@@ -14,7 +15,12 @@ const imageSizeMap = {
 export const TokenImage = ({ token, size }: TokenImageProps) => {
   if (!token.logoURI || token.logoURI === "") {
     return (
-      <div className={`flex flex-col items-center justify-center ${imageSizeMap[size]} rounded-full bg-base-300`}></div>
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={blo(token.address as `0x${string}`)}
+        alt={token.symbol}
+        className={`${imageSizeMap[size]} rounded-full`}
+      />
     );
   } else {
     return (

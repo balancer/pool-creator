@@ -3,7 +3,7 @@ import { Chain, createClient, fallback, http } from "viem";
 import { hardhat, mainnet } from "viem/chains";
 import { createConfig } from "wagmi";
 import scaffoldConfig from "~~/scaffold.config";
-import { getAlchemyHttpUrl, getRpcFallbackUrl } from "~~/utils/scaffold-eth";
+import { getAlchemyHttpUrl, getInfuraHttpUrl, getRpcFallbackUrl } from "~~/utils/scaffold-eth";
 
 const { targetNetworks } = scaffoldConfig;
 
@@ -19,7 +19,12 @@ export const wagmiConfig = createConfig({
   client({ chain }) {
     return createClient({
       chain,
-      transport: fallback([http(getAlchemyHttpUrl(chain.id)), http(), http(getRpcFallbackUrl(chain.id))]),
+      transport: fallback([
+        http(getAlchemyHttpUrl(chain.id)),
+        http(getInfuraHttpUrl(chain.id)),
+        http(getRpcFallbackUrl(chain.id)),
+        http(),
+      ]),
       ...(chain.id !== (hardhat as Chain).id
         ? {
             pollingInterval: scaffoldConfig.pollingInterval,

@@ -25,10 +25,14 @@ export const menuLinks: HeaderMenuLink[] = [
     ),
     href: "/cow",
   },
-  // {
-  //   label: "🐞 Debug Contracts",
-  //   href: "/debug",
-  // },
+  {
+    label: (
+      <div className="flex gap-2">
+        <BalancerLogo width="25px" /> Balancer v3
+      </div>
+    ),
+    href: "/v3",
+  },
 ];
 
 export const HeaderMenuLinks = () => {
@@ -94,7 +98,6 @@ export const Header = () => {
           )}
         </div>
         <Link href="/" passHref className="hidden lg:flex items-center gap-2 ml-4 mr-6 shrink-0">
-          <BalancerLogo width="28px" />
           <div className="flex flex-col">
             <span className="font-semibold text-2xl">Pool Creator</span>
           </div>

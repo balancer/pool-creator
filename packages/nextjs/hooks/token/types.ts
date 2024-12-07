@@ -5,11 +5,14 @@ export type Token = {
   symbol: string;
   decimals: number;
   logoURI: string;
-};
-
-export type TokenPrice = {
-  chain: string;
-  address: string;
-  price: number;
-  updatedAt: number;
+  hasBoostedVariant?: boolean;
+  underlyingTokenAddress: string | null;
+  priceRateProviderData: {
+    address: string;
+    summary: string;
+    name: string;
+    reviewed: boolean;
+    warnings: string[];
+    reviewFile: string;
+  } | null;
 };
