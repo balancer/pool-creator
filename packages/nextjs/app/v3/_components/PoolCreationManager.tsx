@@ -1,8 +1,13 @@
-import { useState } from "react";
 import { ApproveOnTokenManager } from ".";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolDetails } from "~~/app/v3/_components";
-import { Alert, PoolStateResetModal, PoolStepsDisplay, TransactionButton } from "~~/components/common";
+import {
+  Alert,
+  ContactSupportModal,
+  PoolStateResetModal,
+  PoolStepsDisplay,
+  TransactionButton,
+} from "~~/components/common";
 import {
   useBoostableWhitelist,
   useCreatePool,
@@ -14,13 +19,12 @@ import {
 import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
-// TODO: Warn user if pool they are trying to create has similar ones that already exist?
-
 /**
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
+ *
+ * TODO: Warn user if pool they are trying to create has similar ones that already exist
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const { clearUserData } = useUserDataStore();
   const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash } =
     usePoolCreationStore();
@@ -137,10 +141,15 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
               </div>
               {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
 
-              <div className="flex justify-center">
-                <div onClick={() => setIsResetModalOpen(true)} className="text-center underline cursor-pointer text-lg">
-                  Contact Support
-                </div>
+              <div className="flex justify-center mt-2 gap-2 items-center">
+                <ContactSupportModal />
+                <div className="text-xl">·</div>
+                <PoolStateResetModal
+                  clearState={() => {
+                    clearPoolStore();
+                    clearUserData();
+                  }}
+                />
               </div>
             </div>
             {step > poolCreationSteps.length && (
@@ -153,13 +162,11 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
             )}
           </div>
 
-          <div className="relative z-10">
+          <div className="relative z-5">
             <PoolStepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
           </div>
         </div>
       </div>
-
-      {isResetModalOpen && <PoolStateResetModal clearState={resetAllState} setIsModalOpen={setIsResetModalOpen} />}
     </div>
   );
 }

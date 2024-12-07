@@ -11,3 +11,4 @@ export * from "./RadioInput";
 export * from "./NumberInput";
 export * from "./PoolStateResetModal";
 export * from "./PoolStepsDisplay";
+export * from "./ContactSupportModal";

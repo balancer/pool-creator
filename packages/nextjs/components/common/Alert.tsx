@@ -18,7 +18,7 @@ const alertTypeMap = {
     icon: <ExclamationTriangleIcon className="w-6 h-6" />,
   },
   success: { styles: "bg-success", icon: <CheckCircleIcon className="w-6 h-6" /> },
-  info: { styles: "bg-info", icon: <InformationCircleIcon className="w-6 h-6" /> },
+  info: { styles: "bg-[#93c6ff]", icon: <InformationCircleIcon className="w-6 h-6" /> },
 };
 
 export const Alert: React.FC<AlertProps> = ({ children, type, showIcon = true }) => {

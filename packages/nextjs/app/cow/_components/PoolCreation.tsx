@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { PoolCreated } from "./";
 import { parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
 import {
   Alert,
+  ContactSupportModal,
   PoolStateResetModal,
   PoolStepsDisplay,
   TextField,
@@ -48,8 +49,6 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
   const { token1Weight, token2Weight } = getPerTokenWeights(poolCreation.tokenWeights);
-
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const { targetNetwork } = useTargetNetwork();
   const { switchChain } = useSwitchChain();
@@ -346,16 +345,15 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
       )}
 
       {poolCreation.step < 8 && (
-        <div className=" link flex items-center gap-2" onClick={() => setIsResetModalOpen(true)}>
-          Start Over
+        <div className="flex justify-center mt-3 gap-2 items-center">
+          <ContactSupportModal />
+          <div className="text-xl">·</div>
+          <PoolStateResetModal
+            clearState={() => {
+              clearPoolCreation();
+            }}
+          />
         </div>
-      )}
-      {isResetModalOpen && (
-        <PoolStateResetModal
-          setIsModalOpen={setIsResetModalOpen}
-          etherscanURL={etherscanURL}
-          clearState={() => clearPoolCreation()}
-        />
       )}
     </>
   );

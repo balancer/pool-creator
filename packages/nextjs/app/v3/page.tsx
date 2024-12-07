@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { PoolConfiguration, PoolDetails } from "./_components";
 import type { NextPage } from "next";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
-import { Alert, PoolStateResetModal } from "~~/components/common";
+import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { usePoolCreationStore, usePoolStoreDebug, useUserDataStoreDebug, useValidateNetwork } from "~~/hooks/v3";
+import {
+  usePoolCreationStore,
+  usePoolStoreDebug,
+  useUserDataStore,
+  useUserDataStoreDebug,
+  useValidateNetwork,
+} from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-
   const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
-  const { updatePool, clearPoolStore, chain } = usePoolCreationStore();
+  const { clearPoolStore, chain } = usePoolCreationStore();
+  const { clearUserData } = useUserDataStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
 
   usePoolStoreDebug();
@@ -55,11 +60,8 @@ const BalancerV3: NextPage = () => {
               <div>
                 <Alert type="warning">
                   <div className="flex items-center gap-2">
-                    You have already begun the pool configuration process. Please switch back to {chain.name} to
-                    continue or if you prefer to switch networks,
-                    <div className="link" onClick={() => setIsResetModalOpen(true)}>
-                      start over
-                    </div>
+                    You have already begun the pool configuration process. Please switch back to {chain.name}
+                    <ArrowUpRightIcon className="w-4 h-4" />
                   </div>
                 </Alert>
               </div>
@@ -83,8 +85,15 @@ const BalancerV3: NextPage = () => {
                 <div className="w-[1130px]">
                   <Alert type="info">
                     <div className="flex items-center gap-2">
-                      Before starting the pool configuration process, we recommend that you review our pool creation
-                      documentation
+                      For tips and guidance on pool configuration and creation, check out our
+                      <Link
+                        target="_blank"
+                        rel="noreferrer"
+                        href="https://docs-v3.balancer.fi/partner-onboarding/balancer-v3/v3-overview.html"
+                        className="link underline"
+                      >
+                        partner onboarding documentation
+                      </Link>
                     </div>
                   </Alert>
                 </div>
@@ -106,13 +115,15 @@ const BalancerV3: NextPage = () => {
                     )}
                   </div>
                   <PoolDetails isPreview={true} />
-                  <div className="flex justify-center mt-3">
-                    <div
-                      onClick={() => setIsResetModalOpen(true)}
-                      className="text-center underline cursor-pointer text-lg mt-2"
-                    >
-                      Contact Support / Start Over
-                    </div>
+                  <div className="flex justify-center mt-4 gap-2 items-center">
+                    <ContactSupportModal />
+                    <div className="text-xl">·</div>
+                    <PoolStateResetModal
+                      clearState={() => {
+                        clearPoolStore();
+                        clearUserData();
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -126,15 +137,6 @@ const BalancerV3: NextPage = () => {
           )}
         </div>
       </div>
-      {isResetModalOpen && (
-        <PoolStateResetModal
-          setIsModalOpen={setIsResetModalOpen}
-          clearState={() => {
-            clearPoolStore();
-            updatePool({ selectedTab: "Type" });
-          }}
-        />
-      )}
     </div>
   );
 };
