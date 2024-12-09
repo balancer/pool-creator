@@ -26,7 +26,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const { clearUserData } = useUserDataStore();
-  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash } =
+  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash, chain } =
     usePoolCreationStore();
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
@@ -38,11 +38,9 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
-  const chainId = tokenConfigs[0].tokenInfo?.chainId;
-
-  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(chainId, createPoolTxHash) : undefined;
-  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(chainId, initPoolTxHash) : undefined;
-  const multiSwapUrl = swapTxHash ? getBlockExplorerTxLink(chainId, swapTxHash) : undefined;
+  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(chain?.id, createPoolTxHash) : undefined;
+  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(chain?.id, initPoolTxHash) : undefined;
+  const multiSwapUrl = swapTxHash ? getBlockExplorerTxLink(chain?.id, swapTxHash) : undefined;
 
   const deployStep = createTransactionStep({
     label: "Deploy Pool",
@@ -207,16 +205,15 @@ function createTransactionStep({
 }
 
 const PoolCreatedView = () => {
-  const { poolAddress } = usePoolCreationStore();
+  const { poolAddress, chain } = usePoolCreationStore();
+
+  // TODO: Change link from test.balancer.fi to balancer.fi for announcement
+  const balancerPoolURL = `https://test.balancer.fi/pools/${chain?.name.toLowerCase()}/v3/${poolAddress}`;
+  console.log("balancerPoolURL", balancerPoolURL);
 
   return (
     <div className="flex flex-col gap-5">
-      <a
-        href={`https://test.balancer.fi/pools/sepolia/v3/${poolAddress}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className=""
-      >
+      <a href={balancerPoolURL} target="_blank" rel="noopener noreferrer" className="">
         <button className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}>
           <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
