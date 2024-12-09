@@ -3,7 +3,7 @@ import { ChooseToken } from "./ChooseToken";
 import { PoolType } from "@balancer/sdk";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import { Alert } from "~~/components/common";
-import { initialTokenConfig, usePoolCreationStore, useVerifyProportionalInit } from "~~/hooks/v3";
+import { initialTokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 const MAX_TOKENS = {
   [PoolType.Weighted]: 8,
@@ -12,7 +12,8 @@ const MAX_TOKENS = {
 
 export function ChooseTokens() {
   const { tokenConfigs, poolType, updatePool } = usePoolCreationStore();
-  const isProportional = useVerifyProportionalInit();
+  const { hasAgreedToWarning, updateUserData } = useUserDataStore();
+  // const isProportional = useVerifyProportionalInit();
 
   // Beware of javascript floating point precision issues if 100 % number of tokens is not equal to zero
   function handleAddToken() {
@@ -60,7 +61,27 @@ export function ChooseTokens() {
         ))}
       </div>
 
-      {!isProportional && <Alert type="warning">Token USD values are not proportional to selected weights</Alert>}
+      {poolType === PoolType.Weighted && (
+        <Alert type="warning" showIcon={false}>
+          <div className="form-control">
+            <label className="label cursor-pointer flex gap-4 m-0 p-0">
+              <input
+                type="checkbox"
+                className="checkbox rounded-lg border-neutral-700"
+                onChange={() => {
+                  updateUserData({ hasAgreedToWarning: !hasAgreedToWarning });
+                }}
+                checked={hasAgreedToWarning}
+              />
+              <span className="">
+                I understand that assets should be added proportional to the chosen token weights
+              </span>
+            </label>
+          </div>
+        </Alert>
+      )}
+
+      {/* {!isProportional && <Alert type="warning">Token USD values are not proportional to selected weights</Alert>} */}
     </div>
   );
 }

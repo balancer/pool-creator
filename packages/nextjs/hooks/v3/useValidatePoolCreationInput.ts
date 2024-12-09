@@ -7,7 +7,7 @@ import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 export function useValidatePoolCreationInput() {
   const { isWrongNetwork } = useValidateNetwork();
   const { data: walletClient } = useWalletClient();
-  const { userTokenBalances } = useUserDataStore();
+  const { userTokenBalances, hasAgreedToWarning } = useUserDataStore();
 
   const {
     poolType,
@@ -59,7 +59,9 @@ export function useValidatePoolCreationInput() {
         if (!token.isValidRateProvider) return false;
       }
       return true;
-    }) && isValidTokenWeights;
+    }) &&
+    isValidTokenWeights &&
+    (poolType !== PoolType.Weighted || hasAgreedToWarning);
 
   // Check tanstack query cache for pool hooks contract validity
   const { data: isValidPoolHooksContract } = useValidateHooksContract(isUsingHooks, poolHooksContract);
