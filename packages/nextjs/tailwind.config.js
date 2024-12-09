@@ -9,11 +9,11 @@ module.exports = {
     themes: [
       {
         light: {
-          primary: "#ffffff",
-          "primary-content": "rgb(45, 55, 72)",
+          primary: "rgb(45, 55, 72)",
+          "primary-content": "#ffffff",
           secondary: "rgb(251, 250, 249)",
           "secondary-content": "rgb(45, 55, 72)",
-          accent: "#10b981",
+          accent: "#9f95f0",
           "accent-content": "#ffffff",
           neutral: "#d4d4d4",
           "neutral-content": "rgb(45, 55, 72)",
@@ -21,10 +21,10 @@ module.exports = {
           "base-200": "rgb(245, 243, 239)",
           "base-300": "#EBE8E0", // bg color
           "base-content": "rgb(45, 55, 72)",
-          info: "#0e7490",
-          success: "#047857",
-          warning: "#b45309",
-          error: "#b91c1c",
+          info: "#457dff",
+          success: "#00d395",
+          warning: "#fed7aa",
+          error: "#f9b5a8",
 
           "--rounded-btn": "9999rem",
 
@@ -41,22 +41,22 @@ module.exports = {
       },
       {
         dark: {
-          primary: "#ffffffff",
-          "primary-content": "#0f172a",
+          primary: "rgb(251, 250, 249)",
+          "primary-content": "rgb(70, 77, 88)",
           secondary: "rgb(70, 77, 88)",
           "secondary-content": "rgb(229, 211, 190)",
-          accent: "#34d399",
+          accent: "#9f95f0",
           "accent-content": "rgb(45, 55, 72)",
-          neutral: "rgb(229, 211, 190)",
-          "neutral-content": "rgb(70, 77, 88)",
+          neutral: "#525252",
+          "neutral-content": "rgb(229, 211, 190)",
           "base-100": "rgb(70, 77, 88)",
           "base-200": "rgb(63, 70, 80)",
           "base-300": "rgb(56, 62, 71)", // bg color
           "base-content": "rgb(229, 211, 190)",
-          info: "#67e8f9",
-          success: "#34d399",
-          warning: "#fcd34d",
-          error: "#fca5a5",
+          info: "#93c6ff",
+          success: "#25e2a4",
+          warning: "#f6ba74",
+          error: "#f48975",
 
           "--rounded-btn": "9999rem",
 

@@ -197,7 +197,7 @@ export const PoolConfiguration = () => {
             <label className="label cursor-pointer flex gap-4 m-0 p-0">
               <input
                 type="checkbox"
-                className="checkbox rounded-lg"
+                className="checkbox rounded-lg border-neutral-700"
                 onChange={() => {
                   setAgreedToWarning(!hasAgreedToWarning);
                 }}

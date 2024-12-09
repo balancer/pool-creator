@@ -1,12 +1,19 @@
 import Link from "next/link";
 import type { NextPage } from "next";
+import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { CowLogo } from "~~/components/assets/CowLogo";
 
 const PAGES = [
   {
-    emoji: <CowLogo />,
+    emoji: <CowLogo className="h-28" />,
     title: "CoW AMMs",
     href: "/cow",
+    description: "Deploy a CoW AMM pool",
+  },
+  {
+    emoji: <BalancerLogo className="h-28" />,
+    title: "Balancer v3",
+    href: "/v3",
     description: "Deploy a CoW AMM pool",
   },
 ];
@@ -14,26 +21,25 @@ const PAGES = [
 const Home: NextPage = () => {
   return (
     <div className="flex-grow bg-base-300">
-      <div className="max-w-screen-2xl mx-auto">
+      <div className="max-w-screen-xl mx-auto">
         <div className="flex items-center flex-col flex-grow py-10 px-5 lg:px-10">
-          <h1 className="text-5xl md:text-6xl font-bold my-5">Pool Creator</h1>
-          <p className="text-xl md:text-2xl mb-14 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-10">Pool Creator</h1>
+          <div className="text-xl md:text-2xl mb-14 text-center">
             Create and initialize a variety of liquidity pool types with Balancer protocol
-          </p>
+          </div>
 
-          <div className="flex justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 justify-center gap-10 w-full">
             {PAGES.map(item => (
               <Link
-                className="shadow-inner relative bg-base-100 hover:bg-base-200 text-2xl text-center p-8 rounded-3xl"
+                className="shadow-lg relative bg-base-100 hover:bg-base-200 text-2xl text-center p-8 rounded-3xl"
                 key={item.href}
                 href={item.href}
                 passHref
               >
-                <h3 className="text-3xl md:text-4xl font-bold mb-5">{item.title}</h3>
-                <div className="flex justify-center my-7">
-                  <div className="w-1/2">{item.emoji}</div>
+                <div className="flex justify-center mb-5">
+                  <div>{item.emoji}</div>
                 </div>
-                <p className="text-xl mb-0">{item.description}</p>
+                <h3 className="text-3xl md:text-4xl font-bold mb-0">{item.title}</h3>
               </Link>
             ))}
           </div>

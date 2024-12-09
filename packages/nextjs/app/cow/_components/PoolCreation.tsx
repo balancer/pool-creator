@@ -1,9 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { PoolCreated, PoolResetModal, StepsDisplay } from "./";
+import { PoolCreated } from "./";
 import { parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
-import { Alert, TextField, TokenField, TransactionButton } from "~~/components/common/";
+import {
+  Alert,
+  ContactSupportModal,
+  PoolStateResetModal,
+  PoolStepsDisplay,
+  TextField,
+  TokenField,
+  TransactionButton,
+} from "~~/components/common/";
 import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
@@ -41,8 +49,6 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
   const { token1Weight, token2Weight } = getPerTokenWeights(poolCreation.tokenWeights);
-
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   const { targetNetwork } = useTargetNetwork();
   const { switchChain } = useSwitchChain();
@@ -112,9 +118,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
       <div className="flex flex-wrap justify-center gap-5 lg:relative">
         <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-xl md:w-[555px]">
           <div className="flex flex-col items-center gap-5 w-full">
-            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your poolCreation</h5>
+            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
             <div className="w-full">
-              <div className="ml-1 mb-1">Selected poolCreation tokens:</div>
+              <div className="ml-1 mb-1">Selected pool tokens:</div>
               <div className="w-full flex flex-col gap-3">
                 <TokenField
                   value={poolCreation.token1Amount}
@@ -294,7 +300,18 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
           </div>
         </div>
         <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
-          <StepsDisplay state={poolCreation} />
+          <PoolStepsDisplay
+            currentStepNumber={poolCreation.step}
+            steps={[
+              { label: "Create Pool" },
+              { label: `Approve ${poolCreation.token1.symbol}` },
+              { label: `Approve ${poolCreation.token2.symbol}` },
+              { label: `Add ${poolCreation.token1.symbol}` },
+              { label: `Add ${poolCreation.token2.symbol}` },
+              { label: "Set Swap Fee" },
+              { label: "Finalize Pool" },
+            ]}
+          />
         </div>
       </div>
 
@@ -328,16 +345,15 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
       )}
 
       {poolCreation.step < 8 && (
-        <div className=" link flex items-center gap-2" onClick={() => setIsResetModalOpen(true)}>
-          Start Over
+        <div className="flex justify-center mt-3 gap-2 items-center">
+          <ContactSupportModal />
+          <div className="text-xl">·</div>
+          <PoolStateResetModal
+            clearState={() => {
+              clearPoolCreation();
+            }}
+          />
         </div>
-      )}
-      {isResetModalOpen && (
-        <PoolResetModal
-          setIsModalOpen={setIsResetModalOpen}
-          etherscanURL={etherscanURL}
-          clearState={() => clearPoolCreation()}
-        />
       )}
     </>
   );

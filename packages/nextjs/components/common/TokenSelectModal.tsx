@@ -1,60 +1,36 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
 import { isAddress } from "viem";
 import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { type Token, useReadToken } from "~~/hooks/token";
+import { type Token, useExoticToken } from "~~/hooks/token";
 
 type ModalProps = {
   tokenOptions: Token[];
   setToken: (token: Token) => void;
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
+
 export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModalOpen, setToken }) => {
   const [searchText, setSearchText] = useState("");
-  const [exoticTokenAddress, setExoticTokenAddress] = useState<string | undefined>();
   const [showTokenWarning, setShowTokenWarning] = useState(false);
 
-  const { name, symbol, decimals, isLoadingName, isLoadingDecimals, isLoadingSymbol } =
-    useReadToken(exoticTokenAddress);
+  const searchFilteredTokenList = useMemo(
+    () =>
+      tokenOptions.filter(
+        option =>
+          option.symbol.toLowerCase().startsWith(searchText.toLowerCase()) ||
+          option.address.toLowerCase().includes(searchText.toLowerCase()) ||
+          option.name.toLowerCase().includes(searchText.toLowerCase()),
+      ),
+    [tokenOptions, searchText],
+  );
 
-  const { targetNetwork } = useTargetNetwork();
   const networkColor = useNetworkColor();
-
-  const filteredTokenOptions = useMemo(() => {
-    return tokenOptions.filter(
-      option =>
-        (option.symbol && option.symbol.toLowerCase().startsWith(searchText.toLowerCase())) ||
-        (option.address && option.address.toLowerCase().includes(searchText.toLowerCase())) ||
-        (option.name && option.name.toLowerCase().includes(searchText.toLowerCase())),
-    );
-  }, [tokenOptions, searchText]);
-
-  const exoticToken = useMemo(() => {
-    if (exoticTokenAddress && name && symbol && decimals) {
-      return {
-        address: exoticTokenAddress,
-        name,
-        symbol,
-        logoURI: "",
-        decimals,
-        chainId: targetNetwork.id,
-      };
-    }
-  }, [exoticTokenAddress, name, symbol, decimals, targetNetwork.id]);
-
-  useEffect(() => {
-    if (filteredTokenOptions.length === 0 && isAddress(searchText)) {
-      setExoticTokenAddress(searchText);
-    }
-    if (!isAddress(searchText)) {
-      setExoticTokenAddress(undefined);
-    }
-  }, [searchText, filteredTokenOptions]);
-
-  const tokenList = exoticToken ? [exoticToken] : filteredTokenOptions;
-  const isLoadingExoticToken = isLoadingName || isLoadingDecimals || isLoadingSymbol;
+  const { exoticToken, isLoadingExoticToken } = useExoticToken(searchText, searchFilteredTokenList);
+  const { targetNetwork } = useTargetNetwork();
+  const tokenList = exoticToken ? [exoticToken] : searchFilteredTokenList;
 
   return (
     <>
@@ -107,7 +83,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                       key={index}
                       style={style}
                       onClick={() => {
-                        if (exoticTokenAddress) {
+                        if (exoticToken) {
                           setShowTokenWarning(true);
                         } else {
                           setToken(token);
@@ -128,7 +104,7 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
                               {token.name && token.name.length > 40 ? `${token.name.substring(0, 40)}...` : token.name}
                             </div>
                           </div>
-                          {exoticTokenAddress && (
+                          {exoticToken && (
                             <div className="flex flex-col justify-center text-error">
                               <ExclamationTriangleIcon className="w-8 h-8 hover:cursor-pointer " />
                             </div>
@@ -145,32 +121,44 @@ export const TokenSelectModal: React.FC<ModalProps> = ({ tokenOptions, setIsModa
       </div>
 
       {showTokenWarning && exoticToken && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-20">
-          <div className="relative w-[550px] bg-base-300 rounded-lg p-6 flex flex-col items-center text-center">
-            <ExclamationTriangleIcon className="w-10 h-10 hover:cursor-pointer text-error mb-2" />
-            <h3 className="font-bold text-2xl mb-7">Warning</h3>
-            <div className="text-lg mb-10">
-              This token is not included in Balancer&apos;s curated list. Please do your own research and proceed with
-              caution
-            </div>
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <button className="btn btn-primary rounded-lg text-lg" onClick={() => setShowTokenWarning(false)}>
-                Back
-              </button>
-              <button
-                className="btn btn-error mr-2 rounded-lg text-lg"
-                onClick={() => {
-                  setShowTokenWarning(false);
-                  setIsModalOpen(false);
-                  setToken(exoticToken);
-                }}
-              >
-                I understand
-              </button>
-            </div>
-          </div>
-        </div>
+        <ExoticTokenWarning
+          cancelAction={() => setShowTokenWarning(false)}
+          confirmAction={() => {
+            setShowTokenWarning(false);
+            setIsModalOpen(false);
+            setToken(exoticToken);
+          }}
+        />
       )}
     </>
+  );
+};
+
+const ExoticTokenWarning = ({
+  cancelAction,
+  confirmAction,
+}: {
+  cancelAction: () => void;
+  confirmAction: () => void;
+}) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+      <div className="relative w-[550px] bg-base-300 rounded-lg p-6 flex flex-col items-center text-center">
+        <ExclamationTriangleIcon className="w-10 h-10 hover:cursor-pointer text-error mb-2" />
+        <h3 className="font-bold text-2xl mb-7">Warning</h3>
+        <div className="text-lg mb-10">
+          This token is not included in Balancer&apos;s curated list. Please do your own research and proceed with
+          caution
+        </div>
+        <div className="grid grid-cols-2 gap-4 w-full">
+          <button className="btn btn-primary rounded-lg text-lg" onClick={cancelAction}>
+            Back
+          </button>
+          <button className="btn btn-error mr-2 rounded-lg text-lg" onClick={confirmAction}>
+            I understand
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
