@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { PoolConfiguration, PoolDetails } from "./_components";
 import type { NextPage } from "next";
-import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
+import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -20,6 +21,7 @@ const BalancerV3: NextPage = () => {
   const { clearPoolStore, chain } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
+  const [isInfoAlertVisible, setIsInfoAlertVisible] = useState(true);
 
   usePoolStoreDebug();
   useUserDataStoreDebug();
@@ -38,7 +40,7 @@ const BalancerV3: NextPage = () => {
               <div>
                 <Alert type="warning">
                   <div className="flex items-center gap-2">
-                    Please connect a wallet and switch to the Sepolia mainnet network
+                    Please connect a wallet and switch to the network you wish to create a pool
                     <ArrowUpRightIcon className="w-4 h-4" />
                   </div>
                 </Alert>
@@ -74,30 +76,38 @@ const BalancerV3: NextPage = () => {
                     <Alert type="warning">
                       <div className="flex items-center gap-2">
                         Make sure you switch to your desired network before beginning pool creation. You cannot switch
-                        after selecting pool type unless you start over
+                        after selecting pool type unless you reset progress
                         <ArrowUpRightIcon className="w-4 h-4" />
                       </div>
                     </Alert>
                   </div>
                 </div>
               )}
-              <div className="flex justify-center">
-                <div className="w-[1130px]">
-                  <Alert type="info">
-                    <div className="flex items-center gap-2">
-                      For tips and guidance on pool configuration and creation, check out our
-                      <Link
-                        target="_blank"
-                        rel="noreferrer"
-                        href="https://docs-v3.balancer.fi/partner-onboarding/balancer-v3/v3-overview.html"
-                        className="link underline"
-                      >
-                        partner onboarding documentation
-                      </Link>
-                    </div>
-                  </Alert>
+              {isInfoAlertVisible && (
+                <div className="flex justify-center">
+                  <div className="w-[1130px] relative">
+                    <Alert type="info">
+                      <div className="flex items-center gap-2">
+                        For tips and guidance on pool configuration and creation, check out our
+                        <Link
+                          target="_blank"
+                          rel="noreferrer"
+                          href="https://docs-v3.balancer.fi/partner-onboarding/balancer-v3/pool-creation.html"
+                          className="link underline"
+                        >
+                          partner onboarding documentation
+                        </Link>
+                      </div>
+                    </Alert>
+                    <button
+                      onClick={() => setIsInfoAlertVisible(false)}
+                      className="absolute top-3 right-3 p-1  rounded-full transition-colors text-neutral-700"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />

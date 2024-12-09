@@ -55,7 +55,11 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => {
     const { address, amount, tokenInfo } = token;
     const { decimals, symbol } = tokenInfo || {};
-    if (!symbol || !decimals) throw Error("Token symbol or decimals are undefined");
+    if (!symbol || !decimals)
+      return {
+        label: "Token Approval",
+        component: <Alert type="error">Invalid token configuration. Missing symbol or decimals.</Alert>,
+      };
 
     return {
       label: `Approve ${symbol}`,
