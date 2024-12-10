@@ -29,7 +29,7 @@ export const ContactSupportModal = () => {
                 <Link
                   target="_blank"
                   rel="noreferrer"
-                  href="https://docs-v3.balancer.fi/partner-onboarding/balancer-v3/v3-overview.html"
+                  href="https://docs-v3.balancer.fi/partner-onboarding/balancer-v3/pool-creation.html"
                   className="link text-info"
                 >
                   documentation
