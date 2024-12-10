@@ -113,6 +113,6 @@ export function usePoolStoreDebug() {
   const poolState = usePoolCreationStore();
 
   useEffect(() => {
-    console.log("Pool Store State:", poolState);
+    console.log("Persistent Pool Store:", poolState);
   }, [poolState]);
 }

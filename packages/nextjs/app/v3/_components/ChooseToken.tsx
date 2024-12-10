@@ -2,14 +2,24 @@ import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "re
 import { PoolType, TokenType, erc20Abi } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  Cog6ToothIcon,
+  LockClosedIcon,
+  LockOpenIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
 import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 import { bgBeigeGradient, bgPrimaryGradient } from "~~/utils";
+import { abbreviateAddress } from "~~/utils/helpers";
+import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
+  const [showRateProviderModal, setShowRateProviderModal] = useState(false);
 
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
@@ -47,14 +57,18 @@ export function ChooseToken({ index }: { index: number }) {
   }, [userTokenBalance, address]);
 
   const handleTokenSelection = (tokenInfo: Token) => {
-    // TODO more testing for rate provider UX
     const tokenType = tokenInfo.priceRateProviderData ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD;
     const rateProvider = tokenInfo.priceRateProviderData ? tokenInfo.priceRateProviderData.address : zeroAddress;
+
+    // Force user to confirm if Balancer API has rate provider data for selected token
+    if (rateProvider !== zeroAddress) {
+      setShowRateProviderModal(true);
+    }
 
     updateTokenConfig(index, {
       address: tokenInfo.address,
       tokenType,
-      rateProvider,
+      // rateProvider,
       paysYieldFees: tokenType === TokenType.TOKEN_WITH_RATE ? true : false,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
@@ -271,6 +285,13 @@ export function ChooseToken({ index }: { index: number }) {
           )}
         </div>
       </div>
+      {showRateProviderModal && tokenInfo && (
+        <RateProviderModal
+          setShowRateProviderModal={setShowRateProviderModal}
+          tokenInfo={tokenInfo}
+          tokenIndex={index}
+        />
+      )}
       {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal
           tokenIndex={index}
@@ -325,6 +346,101 @@ const BoostOpportunityModal = ({
           </button>
           <button className={`btn ${bgPrimaryGradient} rounded-xl text-lg`} onClick={() => handleBoost(true)}>
             {boostedVariant.symbol}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RateProviderModal = ({
+  tokenIndex,
+  tokenInfo,
+  setShowRateProviderModal,
+}: {
+  tokenIndex: number;
+  tokenInfo: Token;
+  setShowRateProviderModal: Dispatch<SetStateAction<boolean>>;
+}) => {
+  const { targetNetwork } = useTargetNetwork();
+  const { updateTokenConfig } = usePoolCreationStore();
+
+  const rateProviderData = tokenInfo.priceRateProviderData;
+
+  const rateProviderLink = rateProviderData
+    ? getBlockExplorerAddressLink(targetNetwork, rateProviderData.address)
+    : undefined;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
+      <div className="w-[650px] min-h-[333px] bg-base-300 rounded-lg p-7 flex flex-col gap-5 justify-around">
+        <h3 className="font-bold text-3xl text-center">Rate Provider</h3>
+
+        <div className="flex flex-col gap-5">
+          <div className="text-xl">
+            The Balancer API offers the following option for <span className="font-bold">{tokenInfo.symbol}</span>
+          </div>
+          {rateProviderData ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xl table border border-base-100">
+                <tbody>
+                  <tr className="border-b border-base-100">
+                    <td className="py-2 w-32 font-bold">Name</td>
+                    <td className="py-2 text-left">{rateProviderData.name}</td>
+                  </tr>
+                  <tr className="border-b border-base-200">
+                    <td className="py-2 w-32 font-bold">Address</td>
+                    <td className="py-2 text-left">
+                      <a
+                        href={rateProviderLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-info hover:underline flex items-center gap-1"
+                      >
+                        {abbreviateAddress(rateProviderData.address)}
+                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </a>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-base-200">
+                    <td className="py-2 font-bold">Reviewed</td>
+                    <td className="py-2 text-left">{rateProviderData.reviewed ? "Yes" : "No"}</td>
+                  </tr>
+                  <tr className="border-b border-base-200">
+                    <td className="py-2 font-bold ">Summary</td>
+                    <td className="py-2 text-left">{rateProviderData.summary}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div>No rate provider data</div>
+          )}
+          <div className="text-xl">If you wish to use this rate provider, please click confirm</div>
+          <div className="text-xl"> Otherwise, choose deny and paste in a rate provider address</div>
+        </div>
+        <div className="w-full flex gap-4 justify-end mt-3">
+          <button
+            className={`btn btn-error rounded-xl text-lg w-28`}
+            onClick={() => {
+              setShowRateProviderModal(false);
+              updateTokenConfig(tokenIndex, {
+                rateProvider: "",
+              });
+            }}
+          >
+            Deny
+          </button>
+          <button
+            className={`btn btn-success rounded-xl text-lg w-28`}
+            onClick={() => {
+              setShowRateProviderModal(false);
+              updateTokenConfig(tokenIndex, {
+                rateProvider: rateProviderData?.address ?? "",
+              });
+            }}
+          >
+            Confirm
           </button>
         </div>
       </div>
