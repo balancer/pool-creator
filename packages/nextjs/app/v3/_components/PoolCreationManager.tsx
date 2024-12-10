@@ -25,9 +25,11 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
  * TODO: Warn user if pool they are trying to create has similar ones that already exist
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const { clearUserData } = useUserDataStore();
-  const { step, tokenConfigs, clearPoolStore, updatePool, createPoolTxHash, swapTxHash, initPoolTxHash, chain } =
+  const { step, tokenConfigs, clearPoolStore, createPoolTxHash, swapTxHash, initPoolTxHash, chain } =
     usePoolCreationStore();
+  const { clearUserData } = useUserDataStore();
+  const { data: boostableWhitelist } = useBoostableWhitelist();
+
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
   const {
@@ -35,8 +37,6 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     isPending: isInitializePoolPending,
     error: initializePoolError,
   } = useInitializePool();
-
-  const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(chain?.id, createPoolTxHash) : undefined;
   const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(chain?.id, initPoolTxHash) : undefined;
@@ -120,7 +120,6 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     clearPoolStore();
     clearUserData();
     setIsModalOpen(false);
-    updatePool({ selectedTab: "Type" });
   }
 
   return (
@@ -146,12 +145,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
               <div className="flex justify-center mt-2 gap-2 items-center">
                 <ContactSupportModal />
                 <div className="text-xl">·</div>
-                <PoolStateResetModal
-                  clearState={() => {
-                    clearPoolStore();
-                    clearUserData();
-                  }}
-                />
+                <PoolStateResetModal clearState={resetAllState} />
               </div>
             </div>
             {step > poolCreationSteps.length && (
