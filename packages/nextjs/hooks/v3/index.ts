@@ -9,3 +9,4 @@ export * from "./useBoostableWhitelist";
 export * from "./useValidateHooksContract";
 export * from "./useValidateRateProvider";
 export * from "./useUserDataStore";
+export * from "./useCheckIfV3PoolExists";
