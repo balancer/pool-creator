@@ -74,7 +74,11 @@ export function ChooseToken({ index }: { index: number }) {
       useBoostedVariant: false,
     });
 
-    if (boostableWhitelist?.[tokenInfo.address]) {
+    // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
+    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false });
+
+    const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];
+    if (hasBoostedVariant) {
       setShowBoostOpportunityModal(true);
     }
   };
@@ -333,12 +337,15 @@ const BoostOpportunityModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="w-[625px] min-h-[333px] bg-base-300 rounded-lg p-7 flex flex-col gap-5 items-center">
+      <div className="w-[625px] min-h-[333px] bg-base-200 rounded-lg p-7 flex flex-col gap-5 items-center">
         <h3 className="font-bold text-3xl mb-5">{boostedVariant.name}</h3>
         <div className="text-xl mb-7 px-5">
           Boosted tokens provide your liquidity pool with a layer of sustainable yield. If you select{" "}
           <b>{boostedVariant.symbol}</b>, all <b>{standardVariant.symbol}</b> in this pool will be supplied to
           Aave&apos;s lending market to earn additional yield.
+          <div className="mt-5">
+            Note that if you choose the boosted variant, the necessary rate provider address will be auto-filled for you
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4 w-full">
           <button className={`btn ${bgBeigeGradient} rounded-xl text-lg`} onClick={() => handleBoost(false)}>
@@ -373,22 +380,22 @@ const RateProviderModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="w-[650px] min-h-[333px] bg-base-300 rounded-lg p-7 flex flex-col gap-5 justify-around">
+      <div className="w-[650px] min-h-[333px] bg-base-200 rounded-lg p-7 flex flex-col gap-5 justify-around">
         <h3 className="font-bold text-3xl text-center">Rate Provider</h3>
 
         <div className="flex flex-col gap-5">
           <div className="text-xl">
-            The Balancer API offers the following option for <span className="font-bold">{tokenInfo.symbol}</span>
+            Consider using the following rate provider for <b>{tokenInfo.symbol}</b>
           </div>
           {rateProviderData ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-xl table border border-base-100">
+              <table className="w-full text-xl table border border-neutral-500">
                 <tbody>
-                  <tr className="border-b border-base-100">
+                  <tr className="border-b border-neutral-500">
                     <td className="py-2 w-32 font-bold">Name</td>
                     <td className="py-2 text-left">{rateProviderData.name}</td>
                   </tr>
-                  <tr className="border-b border-base-200">
+                  <tr className="border-b border-neutral-500">
                     <td className="py-2 w-32 font-bold">Address</td>
                     <td className="py-2 text-left">
                       <a
@@ -402,14 +409,22 @@ const RateProviderModal = ({
                       </a>
                     </td>
                   </tr>
-                  <tr className="border-b border-base-200">
+                  <tr className="border-b border-neutral-500">
                     <td className="py-2 font-bold">Reviewed</td>
                     <td className="py-2 text-left">{rateProviderData.reviewed ? "Yes" : "No"}</td>
                   </tr>
-                  <tr className="border-b border-base-200">
+                  <tr className="border-b border-neutral-500">
                     <td className="py-2 font-bold ">Summary</td>
                     <td className="py-2 text-left">{rateProviderData.summary}</td>
                   </tr>
+                  {/* <tr className="border-b border-neutral-500">
+                    <td className="py-2 font-bold ">Warnings</td>
+                    <td className="py-2 text-left">
+                      {rateProviderData.warnings.length > 0
+                        ? rateProviderData.warnings.map(message => message).join(", ")
+                        : "none"}
+                    </td>
+                  </tr> */}
                 </tbody>
               </table>
             </div>

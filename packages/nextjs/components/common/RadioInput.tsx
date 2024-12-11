@@ -10,11 +10,11 @@ interface RadioInputProps {
 export function RadioInput({ name, checked, onChange, label }: RadioInputProps) {
   return (
     <div className="">
-      <label className="label cursor-pointer justify-start gap-2">
+      <label className="label cursor-pointer justify-start gap-2 p-1">
         <input
           type="radio"
           name={name}
-          className="radio checked:bg-base-content"
+          className="radio checked:bg-base-content p-0"
           checked={checked}
           onChange={onChange}
         />

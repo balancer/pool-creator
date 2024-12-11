@@ -5,7 +5,8 @@ import { persist } from "zustand/middleware";
 
 export type UserDataStore = {
   userTokenBalances: Record<Address, string>;
-  hasEditedPoolInformation: boolean;
+  hasEditedPoolName: boolean;
+  hasEditedPoolSymbol: boolean;
   hasAgreedToWarning: boolean;
   updateUserData: (updates: Partial<UserDataStore>) => void;
   clearUserData: () => void;
@@ -13,8 +14,9 @@ export type UserDataStore = {
 
 export const initialUserDataStore = {
   userTokenBalances: {},
-  hasEditedPoolInformation: false,
   hasAgreedToWarning: false,
+  hasEditedPoolName: false,
+  hasEditedPoolSymbol: false,
 };
 
 // Stores all the data that will be used for pool creation

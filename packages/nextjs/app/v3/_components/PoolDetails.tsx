@@ -31,6 +31,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     symbol,
     amplificationParameter,
     poolAddress,
+    isDelegatingPauseManagement,
+    isDelegatingSwapFeeManagement,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
@@ -89,8 +91,10 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {abbreviateAddress(swapFeeManager)}
                     <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </a>
-                ) : (
+                ) : isDelegatingSwapFeeManagement ? (
                   "Balancer"
+                ) : (
+                  "-"
                 )}
               </div>
             </div>
@@ -107,8 +111,10 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {abbreviateAddress(pauseManager)}
                     <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </a>
-                ) : (
+                ) : isDelegatingPauseManagement ? (
                   "Balancer"
+                ) : (
+                  "-"
                 )}
               </div>
             </div>

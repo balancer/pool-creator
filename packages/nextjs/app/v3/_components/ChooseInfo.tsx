@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
-import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useBoostableWhitelist, useCheckIfV3PoolExists, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
@@ -11,7 +11,7 @@ import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
  */
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
-  const { updateUserData, hasEditedPoolInformation } = useUserDataStore();
+  const { updateUserData, hasEditedPoolName, hasEditedPoolSymbol } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { existingPools } = useCheckIfV3PoolExists(
@@ -33,21 +33,16 @@ export const ChooseInfo = () => {
         })
         .join("-");
 
-      if (!hasEditedPoolInformation) {
-        updatePool({ name: symbol.split("-").join(" ") });
-      }
-
-      updatePool({
-        symbol,
-      });
+      if (!hasEditedPoolName) updatePool({ name: symbol.split("-").join(" ") });
+      if (!hasEditedPoolSymbol) updatePool({ symbol });
     }
-  }, [tokenConfigs, poolType, updatePool, boostableWhitelist, hasEditedPoolInformation]);
+  }, [tokenConfigs, poolType, updatePool, boostableWhitelist, hasEditedPoolName, hasEditedPoolSymbol]);
 
   return (
     <div>
       <div className="text-xl mb-5">Choose pool information:</div>
       <div className="mb-5 flex flex-col gap-4">
-        <div className="bg-base-100 p-5 rounded-xl">
+        <div className="bg-base-100 p-3 rounded-xl">
           <TextField
             label="Pool name"
             placeholder="Enter pool name"
@@ -55,46 +50,50 @@ export const ChooseInfo = () => {
             maxLength={MAX_POOL_NAME_LENGTH}
             onChange={e => {
               updatePool({ name: e.target.value });
-              updateUserData({ hasEditedPoolInformation: true });
+              updateUserData({ hasEditedPoolName: true });
             }}
           />
         </div>
 
-        <div className="bg-base-100 p-5 rounded-xl">
+        <div className="bg-base-100 p-3 rounded-xl">
           <TextField
             label="Pool symbol"
             placeholder="Enter pool symbol"
             value={symbol}
             onChange={e => {
               updatePool({ symbol: e.target.value.trim() });
-              updateUserData({ hasEditedPoolInformation: true });
+              updateUserData({ hasEditedPoolSymbol: true });
             }}
           />
         </div>
       </div>
       {existingPools && existingPools.length > 0 && (
-        <Alert showIcon={false} type="warning">
-          <div className="mb-3 flex items-center gap-2">
-            <ExclamationTriangleIcon className="w-5 h-5" /> Warning: The following pools have already been created with
-            a similar configuration
+        <div>
+          <Alert type="warning">Warning: Pools with a similar configuration have already been created</Alert>
+          <div className="overflow-x-auto mt-5">
+            <table className="table w-full text-lg border border-neutral-500">
+              <tbody>
+                {existingPools.map(pool => (
+                  <tr key={pool.address}>
+                    <td className="border border-neutral-500 px-2 py-1">{pool.name}</td>
+                    <td className="border border-neutral-500 px-2 py-1">{pool.symbol}</td>
+                    <td className="text-right border border-neutral-500 px-2 py-1">
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline text-info flex items-center gap-2 justify-end"
+                        href={`https://test.balancer.fi/pools/${pool.chain.toLowerCase()}/v3/${pool.address}`}
+                      >
+                        See Details
+                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <ol className="">
-            {/* TODO: Replace with production link instead of test.balancer.fi */}
-            {existingPools.map(pool => (
-              <li key={pool.address}>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline text-blue-500 flex justify-end items-center gap-2"
-                  href={`https://test.balancer.fi/pools/${pool.chain.toLowerCase()}/v3/${pool.address}`}
-                >
-                  {pool.symbol}
-                  <ArrowTopRightOnSquareIcon className="w-4 h-4 mt-0.5" />
-                </a>
-              </li>
-            ))}
-          </ol>
-        </Alert>
+        </div>
       )}
     </div>
   );
