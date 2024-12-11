@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
-import { TextField } from "~~/components/common";
-import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { Alert, TextField } from "~~/components/common";
+import { useBoostableWhitelist, useCheckIfV3PoolExists, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
 
 /**
@@ -12,6 +13,11 @@ export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
   const { updateUserData, hasEditedPoolInformation } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
+
+  const { existingPools } = useCheckIfV3PoolExists(
+    poolType,
+    tokenConfigs.map(token => token.address),
+  );
 
   useEffect(() => {
     if (poolType) {
@@ -66,6 +72,30 @@ export const ChooseInfo = () => {
           />
         </div>
       </div>
+      {existingPools && existingPools.length > 0 && (
+        <Alert showIcon={false} type="warning">
+          <div className="mb-3 flex items-center gap-2">
+            <ExclamationTriangleIcon className="w-5 h-5" /> Warning: The following pools have already been created with
+            a similar configuration
+          </div>
+          <ol className="">
+            {/* TODO: Replace with production link instead of test.balancer.fi */}
+            {existingPools.map(pool => (
+              <li key={pool.address}>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline text-blue-500 flex justify-end items-center gap-2"
+                  href={`https://test.balancer.fi/pools/${pool.chain.toLowerCase()}/v3/${pool.address}`}
+                >
+                  {pool.symbol}
+                  <ArrowTopRightOnSquareIcon className="w-4 h-4 mt-0.5" />
+                </a>
+              </li>
+            ))}
+          </ol>
+        </Alert>
+      )}
     </div>
   );
 };
