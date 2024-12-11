@@ -21,9 +21,16 @@ export const useBoostableWhitelist = () => {
 
       const boostableWhitelist: BoostableWhitelist = await response.json();
 
-      const boostableAddresses = boostableWhitelist.map(list => {
-        return list.addresses[targetNetwork.id].map(address => `"${address}"`).join(",");
-      });
+      const boostableAddresses = boostableWhitelist
+        .map(list => list.addresses[targetNetwork.id] || [])
+        .flat()
+        .map(address => `"${address}"`)
+        .join(",");
+
+      if (!boostableAddresses) {
+        console.log("No boostable addresses found for network:", targetNetwork.id);
+        return {};
+      }
 
       const query = `
             {
@@ -60,6 +67,8 @@ export const useBoostableWhitelist = () => {
       const json = await res.json();
 
       const data = json.data.tokenGetTokens;
+
+      console.log("data", data);
 
       // Create map of underlying token address to matching boosted variant info
       const boostableTokensMap = data.reduce((acc: Record<Address, Token>, token: Token) => {

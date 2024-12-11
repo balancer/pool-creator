@@ -22,7 +22,8 @@ export const ChooseParameters = () => {
     poolHooksContract,
     enableDonation,
     disableUnbalancedLiquidity,
-    isDelegatingManagement,
+    isDelegatingPauseManagement,
+    isDelegatingSwapFeeManagement,
     updatePool,
   } = usePoolCreationStore();
 
@@ -142,62 +143,92 @@ export const ChooseParameters = () => {
             target="_blank"
             rel="noreferrer"
           >
-            Pool management
+            Swap fee manager
             <InformationCircleIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
         <RadioInput
-          name="pool-management"
-          label="Delegate swap fee and pause management to the Balancer DAO"
-          checked={isDelegatingManagement}
+          name="swap-fee-manager"
+          label="Delegate swap fee management to the Balancer DAO"
+          checked={isDelegatingSwapFeeManagement}
           onChange={() => {
-            updatePool({ isDelegatingManagement: true, swapFeeManager: "", pauseManager: "" });
+            updatePool({ isDelegatingSwapFeeManagement: true, swapFeeManager: "" });
           }}
         />
         <RadioInput
-          name="pool-management"
-          label="I want my wallet to control swap fee and pause management"
-          checked={
-            !isDelegatingManagement &&
-            swapFeeManager === connectedWalletAddress &&
-            pauseManager === connectedWalletAddress
-          }
+          name="swap-fee-manager"
+          label="I want my wallet to be the swap fee manager"
+          checked={!isDelegatingSwapFeeManagement && swapFeeManager === connectedWalletAddress}
           onChange={() =>
             updatePool({
-              isDelegatingManagement: false,
+              isDelegatingSwapFeeManagement: false,
               swapFeeManager: connectedWalletAddress,
+            })
+          }
+        />
+        <RadioInput
+          name="swap-fee-manager"
+          label="Choose a different swap fee manager"
+          checked={!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress}
+          onChange={() => updatePool({ isDelegatingSwapFeeManagement: false, swapFeeManager: "" })}
+        />
+        {!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress && (
+          <TextField
+            mustBeAddress={true}
+            placeholder="Enter swap fee manager address"
+            value={swapFeeManager}
+            onChange={e => updatePool({ swapFeeManager: e.target.value.trim() })}
+          />
+        )}
+      </div>
+
+      <div className="bg-base-100 p-5 rounded-xl">
+        <label className="text-lg font-bold inline-flex">
+          <a
+            className="flex items-center gap-2 link no-underline hover:underline"
+            href="https://docs-v3.balancer.fi/concepts/core-concepts/pool-role-accounts.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Pause manager
+            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
+          </a>
+        </label>
+        <RadioInput
+          name="pause-manager"
+          label="Delegate pause management to the Balancer DAO"
+          checked={isDelegatingPauseManagement}
+          onChange={() => {
+            updatePool({ isDelegatingPauseManagement: true, pauseManager: "" });
+          }}
+        />
+        <RadioInput
+          name="pause-manager"
+          label="I want my wallet to be the pause manager"
+          checked={!isDelegatingPauseManagement && pauseManager === connectedWalletAddress}
+          onChange={() =>
+            updatePool({
+              isDelegatingPauseManagement: false,
               pauseManager: connectedWalletAddress,
             })
           }
         />
         <RadioInput
-          name="pool-management"
-          label="Choose a different swap fee and pause manager"
-          checked={
-            !isDelegatingManagement &&
-            (swapFeeManager !== connectedWalletAddress || pauseManager !== connectedWalletAddress)
-          }
-          onChange={() => updatePool({ isDelegatingManagement: false, swapFeeManager: "", pauseManager: "" })}
+          name="pause-manager"
+          label="Choose a different pause manager"
+          checked={!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress}
+          onChange={() => updatePool({ isDelegatingPauseManagement: false, pauseManager: "" })}
         />
-        {!isDelegatingManagement &&
-          (swapFeeManager !== connectedWalletAddress || pauseManager !== connectedWalletAddress) && (
-            <div className="flex flex-col gap-3 mt-3">
-              <TextField
-                mustBeAddress={true}
-                label="Swap fee manager"
-                placeholder="Enter address"
-                value={swapFeeManager}
-                onChange={e => updatePool({ swapFeeManager: e.target.value.trim() })}
-              />
-              <TextField
-                mustBeAddress={true}
-                label="Pause manager"
-                placeholder="Enter address"
-                value={pauseManager}
-                onChange={e => updatePool({ pauseManager: e.target.value.trim() })}
-              />
-            </div>
-          )}
+        {!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress && (
+          <div className="flex flex-col gap-3 mt-3">
+            <TextField
+              mustBeAddress={true}
+              placeholder="Enter pause manager address"
+              value={pauseManager}
+              onChange={e => updatePool({ pauseManager: e.target.value.trim() })}
+            />
+          </div>
+        )}
       </div>
 
       <div className="bg-base-100 p-5 rounded-xl">

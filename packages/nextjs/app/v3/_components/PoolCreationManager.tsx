@@ -21,8 +21,6 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
 
 /**
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
- *
- * TODO: Warn user if pool they are trying to create has similar ones that already exist
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const { step, tokenConfigs, clearPoolStore, createPoolTxHash, swapTxHash, initPoolTxHash, chain } =
@@ -116,12 +114,6 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     initializeStep,
   ];
 
-  function resetAllState() {
-    clearPoolStore();
-    clearUserData();
-    setIsModalOpen(false);
-  }
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">
       <div
@@ -145,15 +137,25 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
               <div className="flex justify-center mt-2 gap-2 items-center">
                 <ContactSupportModal />
                 <div className="text-xl">·</div>
-                <PoolStateResetModal clearState={resetAllState} />
+                <PoolStateResetModal
+                  clearState={() => {
+                    clearPoolStore();
+                    clearUserData();
+                    setIsModalOpen(false);
+                  }}
+                />
               </div>
             </div>
             {step > poolCreationSteps.length && (
               <button
-                onClick={resetAllState}
+                onClick={() => {
+                  clearPoolStore();
+                  clearUserData();
+                  setIsModalOpen(false);
+                }}
                 className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} ${bgBeigeGradientHover} text-neutral-700`}
               >
-                <div>Create another pool</div>
+                Create another pool
               </button>
             )}
           </div>

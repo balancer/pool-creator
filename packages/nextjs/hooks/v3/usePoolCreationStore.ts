@@ -30,7 +30,8 @@ export interface PoolCreationStore {
   chain: ChainWithAttributes | undefined;
   step: number;
   selectedTab: TabType;
-  isDelegatingManagement: boolean;
+  isDelegatingPauseManagement: boolean;
+  isDelegatingSwapFeeManagement: boolean;
   isUsingHooks: boolean;
   poolAddress: Address | undefined;
   poolType: AllowedPoolTypes | undefined;
@@ -68,7 +69,8 @@ export const initialTokenConfig: TokenConfig = {
 export const initialPoolCreationState = {
   chain: undefined,
   step: 1,
-  isDelegatingManagement: true,
+  isDelegatingPauseManagement: true,
+  isDelegatingSwapFeeManagement: true,
   isUsingHooks: false,
   poolAddress: undefined, // set after pool deployment
   selectedTab: TABS[0],

@@ -17,7 +17,8 @@ export function useValidatePoolCreationInput() {
     symbol,
     amplificationParameter,
     isUsingHooks,
-    isDelegatingManagement,
+    isDelegatingSwapFeeManagement,
+    isDelegatingPauseManagement,
     swapFeeManager,
     pauseManager,
     poolHooksContract,
@@ -70,7 +71,8 @@ export function useValidatePoolCreationInput() {
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
     poolType !== PoolType.Stable ||
       (!!amplificationParameter && Number(amplificationParameter) >= 1 && Number(amplificationParameter) <= 5000),
-    isDelegatingManagement || (isAddress(swapFeeManager) && isAddress(pauseManager)),
+    isDelegatingSwapFeeManagement || isAddress(swapFeeManager),
+    isDelegatingPauseManagement || isAddress(pauseManager),
     !isUsingHooks || isValidPoolHooksContract,
   ].every(Boolean);
 

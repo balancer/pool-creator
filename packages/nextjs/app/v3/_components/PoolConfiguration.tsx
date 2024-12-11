@@ -84,7 +84,7 @@ export function PoolConfiguration() {
             {isPoolCreationInputValid && selectedTab === "Information" ? (
               <TransactionButton
                 onClick={() => setIsPoolCreationModalOpen(true)}
-                title="Preview Pool"
+                title="Create Pool"
                 isDisabled={false}
                 isPending={false}
               />
