@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { ApproveOnTokenManager } from ".";
+import { usePublicClient } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolDetails } from "~~/app/v3/_components";
 import {
@@ -23,11 +25,12 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const { step, tokenConfigs, clearPoolStore, createPoolTxHash, swapTxHash, initPoolTxHash, chain } =
+  const { step, tokenConfigs, clearPoolStore, createPoolTxHash, swapTxHash, initPoolTxHash, chain, updatePool } =
     usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
+  const publicClient = usePublicClient();
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
   const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
   const {
@@ -113,6 +116,18 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     ...approveOnBoostedVariantSteps,
     initializeStep,
   ];
+
+  // Handle edge case where user disconnects while pool init tx is pending
+  useEffect(() => {
+    async function getTxReceipt() {
+      if (!publicClient || !initPoolTxHash || step < poolCreationSteps.length) return;
+      const txReceipt = await publicClient.waitForTransactionReceipt({ hash: initPoolTxHash });
+      if (txReceipt.status === "success") {
+        updatePool({ step: poolCreationSteps.length + 1 });
+      }
+    }
+    getTxReceipt();
+  }, [initPoolTxHash, publicClient, updatePool]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">

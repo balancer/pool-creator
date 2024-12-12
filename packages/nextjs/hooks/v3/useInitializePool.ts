@@ -1,20 +1,25 @@
+import { useEffect } from "react";
 import { BALANCER_ROUTER, InitPool, InitPoolDataProvider, InitPoolInput, balancerRouterAbi } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { getContract, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useTransactor } from "~~/hooks/scaffold-eth";
+// import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { createPermit2 } from "~~/utils/permit2Helper";
 
 export const useInitializePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  const writeTx = useTransactor();
+  // const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
   const rpcUrl = publicClient?.transport.transports[0].value.url;
   const protocolVersion = 3;
   const { poolAddress, poolType, tokenConfigs, updatePool, step } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
+
+  useEffect(() => {
+    console.log("init pool useEffect");
+  }, []);
 
   async function initializePool() {
     if (!poolAddress) throw new Error("Pool address missing");
@@ -23,46 +28,8 @@ export const useInitializePool = () => {
     if (!poolType) throw new Error("Pool type missing");
     if (!walletClient) throw new Error("Wallet client missing");
 
-    // TODO test this!
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
     const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
-    console.log("poolState", poolState);
-
-    // TEMPORARILY MANUAL FETCH OF POOLSTATE
-    // const vaultV3 = getContract({
-    //   abi: vaultExtensionAbi_V3,
-    //   address: VAULT_V3[chainId],
-    //   client: publicClient,
-    // });
-    // const poolTokens = (await vaultV3.read.getPoolTokens([poolAddress])) as Address[];
-
-    // const tokens = poolTokens.map((token, idx) => {
-    //   const tokenConfig = tokenConfigs.find(t => {
-    //     const tokenConfigAddress = t.useBoostedVariant ? boostableWhitelist?.[t.address]?.address : t.address;
-    //     if (!tokenConfigAddress) throw new Error(`Problem with boosted variant for ${t.address}`);
-    //     return tokenConfigAddress.toLowerCase() === token.toLowerCase();
-    //   });
-    //   const decimals = tokenConfig?.tokenInfo?.decimals;
-    //   if (!decimals)
-    //     throw new Error(
-    //       `Missing decimals for token ${token}. Available tokens: ${tokenConfigs.map(t => t.address).join(", ")}`,
-    //     );
-    //   return {
-    //     address: token as `0x${string}`,
-    //     decimals,
-    //     index: idx,
-    //   };
-    // });
-
-    // const poolState: PoolState = {
-    //   id: poolAddress as `0x${string}`,
-    //   address: poolAddress as `0x${string}`,
-    //   type: poolType,
-    //   tokens,
-    //   protocolVersion,
-    // };
-    // END TEMPORARY MANUAL FETCH OF POOLSTATE
-
     const initPool = new InitPool();
 
     // Make sure all tokenConfigs have decimals and address
@@ -116,15 +83,16 @@ export const useInitializePool = () => {
     console.log("router.permitBatchAndCall args for initialize pool", args);
 
     // Execute the transaction
-    const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
-      blockConfirmations: 1,
-      onBlockConfirmation: () => {
-        console.log("Successfully initialized pool!", poolAddress);
-      },
-    });
+    const hash = await router.write.permitBatchAndCall(args);
     if (!hash) throw new Error("No pool initialization transaction hash");
+    updatePool({ initPoolTxHash: hash });
 
-    updatePool({ step: step + 1, initPoolTxHash: hash });
+    // Move the step forward if the transaction is successful
+    const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
+    if (txReceipt.status === "success") {
+      updatePool({ step: step + 1 });
+    }
+
     return hash;
   }
 
