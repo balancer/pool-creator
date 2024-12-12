@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   CreatePool,
   CreatePoolV3BaseInput,
@@ -14,7 +13,7 @@ import { usePublicClient, useWalletClient } from "wagmi";
 // import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
-const poolFactoryAbi = {
+export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
   [PoolType.Stable]: stablePoolFactoryAbi_V3,
 };
@@ -40,33 +39,9 @@ export const useCreatePool = () => {
     disableUnbalancedLiquidity,
     amplificationParameter,
     updatePool,
-    createPoolTxHash,
-    step,
   } = usePoolCreationStore();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
-
-  // If user disconnects during pending tx state, this will look up tx receipt based on tx hash saved in local storage immediately after tx is sent (i.e. right after button is clicked)
-  useEffect(() => {
-    async function getTxReceipt() {
-      if (!publicClient || !createPoolTxHash || poolType === undefined || step !== 1) return;
-
-      const txReceipt = await publicClient.waitForTransactionReceipt({ hash: createPoolTxHash });
-
-      const logs = parseEventLogs({
-        abi: poolFactoryAbi[poolType],
-        logs: txReceipt.logs,
-      });
-
-      if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
-        const newPool = logs[0].args.pool;
-        updatePool({ poolAddress: newPool, step: 2 });
-      } else {
-        throw new Error("Expected pool address not found in event logs");
-      }
-    }
-    getTxReceipt();
-  }, [createPoolTxHash, publicClient, poolType, updatePool, step]);
 
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
     if (poolType === undefined) throw new Error("No pool type provided!");

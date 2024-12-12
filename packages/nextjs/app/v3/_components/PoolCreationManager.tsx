@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ApproveOnTokenManager } from ".";
+import { parseEventLogs } from "viem";
 import { usePublicClient } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolDetails } from "~~/app/v3/_components";
@@ -11,6 +12,7 @@ import {
   TransactionButton,
 } from "~~/components/common";
 import {
+  poolFactoryAbi,
   useBoostableWhitelist,
   useCreatePool,
   useInitializePool,
@@ -25,8 +27,20 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth/";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const { step, tokenConfigs, clearPoolStore, createPoolTxHash, swapTxHash, initPoolTxHash, chain, updatePool } =
-    usePoolCreationStore();
+  const [isCreatePoolReceiptLoading, setIsCreatePoolReceiptLoading] = useState(false);
+  const [isInitPoolReceiptLoading, setIsInitPoolReceiptLoading] = useState(false);
+
+  const {
+    step,
+    tokenConfigs,
+    clearPoolStore,
+    createPoolTxHash,
+    swapTxHash,
+    initPoolTxHash,
+    chain,
+    updatePool,
+    poolType,
+  } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
@@ -47,7 +61,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     label: "Deploy Pool",
     blockExplorerUrl: poolDeploymentUrl,
     onSubmit: createPool,
-    isPending: isCreatePoolPending,
+    isPending: isCreatePoolPending || isCreatePoolReceiptLoading,
     error: createPoolError,
   });
 
@@ -104,7 +118,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const initializeStep = createTransactionStep({
     label: "Initialize Pool",
     onSubmit: initializePool,
-    isPending: isInitializePoolPending,
+    isPending: isInitializePoolPending || isInitPoolReceiptLoading,
     error: initializePoolError,
     blockExplorerUrl: poolInitializationUrl,
   });
@@ -117,17 +131,48 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     initializeStep,
   ];
 
+  // If user disconnects during pending tx state, this will look up tx receipt based on tx hash saved in local storage immediately after tx is sent (i.e. right after button is clicked)
+  useEffect(() => {
+    async function getTxReceipt() {
+      if (!publicClient || !createPoolTxHash || poolType === undefined || step !== 1) return;
+      setIsCreatePoolReceiptLoading(true);
+      try {
+        const txReceipt = await publicClient.waitForTransactionReceipt({ hash: createPoolTxHash });
+        const logs = parseEventLogs({
+          abi: poolFactoryAbi[poolType],
+          logs: txReceipt.logs,
+        });
+        if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
+          const newPool = logs[0].args.pool;
+          updatePool({ poolAddress: newPool, step: 2 });
+        } else {
+          throw new Error("Expected pool address not found in event logs");
+        }
+      } catch (error) {
+        console.error("Error getting create pool transaction receipt:", error);
+      } finally {
+        setIsCreatePoolReceiptLoading(false);
+      }
+    }
+    getTxReceipt();
+  }, [createPoolTxHash, publicClient, poolType, updatePool, step]);
+
   // Handle edge case where user disconnects while pool init tx is pending
   useEffect(() => {
     async function getTxReceipt() {
       if (!publicClient || !initPoolTxHash || step < poolCreationSteps.length) return;
-      const txReceipt = await publicClient.waitForTransactionReceipt({ hash: initPoolTxHash });
-      if (txReceipt.status === "success") {
-        updatePool({ step: poolCreationSteps.length + 1 });
+      try {
+        setIsInitPoolReceiptLoading(true);
+        const txReceipt = await publicClient.waitForTransactionReceipt({ hash: initPoolTxHash });
+        if (txReceipt.status === "success") updatePool({ step: poolCreationSteps.length + 1 });
+      } catch (error) {
+        console.error("Error getting init pool transaction receipt:", error);
+      } finally {
+        setIsInitPoolReceiptLoading(false);
       }
     }
     getTxReceipt();
-  }, [initPoolTxHash, publicClient, updatePool]);
+  }, [initPoolTxHash, publicClient, updatePool, step]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">

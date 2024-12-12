@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { BALANCER_ROUTER, InitPool, InitPoolDataProvider, InitPoolInput, balancerRouterAbi } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { getContract, parseUnits } from "viem";
@@ -16,10 +15,6 @@ export const useInitializePool = () => {
   const protocolVersion = 3;
   const { poolAddress, poolType, tokenConfigs, updatePool, step } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
-
-  useEffect(() => {
-    console.log("init pool useEffect");
-  }, []);
 
   async function initializePool() {
     if (!poolAddress) throw new Error("Pool address missing");
