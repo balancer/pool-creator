@@ -68,8 +68,6 @@ export const useBoostableWhitelist = () => {
 
       const data = json.data.tokenGetTokens;
 
-      console.log("data", data);
-
       // Create map of underlying token address to matching boosted variant info
       const boostableTokensMap = data.reduce((acc: Record<Address, Token>, token: Token) => {
         if (token.underlyingTokenAddress) acc[token.underlyingTokenAddress] = token;

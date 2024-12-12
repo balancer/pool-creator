@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   CreatePool,
   CreatePoolV3BaseInput,
@@ -10,7 +11,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseEventLogs, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useTransactor } from "~~/hooks/scaffold-eth";
+// import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
 const poolFactoryAbi = {
@@ -24,7 +25,8 @@ const TOKEN_WEIGHT_DECIMALS = 16;
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  const writeTx = useTransactor();
+  // const writeTx = useTransactor();
+
   const {
     tokenConfigs,
     name,
@@ -38,8 +40,34 @@ export const useCreatePool = () => {
     disableUnbalancedLiquidity,
     amplificationParameter,
     updatePool,
+    createPoolTxHash,
+    step,
   } = usePoolCreationStore();
+
   const { data: boostableWhitelist } = useBoostableWhitelist();
+
+  // If user disconnects during pending tx state, this will look up tx receipt based on tx hash saved in local storage immediately after tx is sent (i.e. right after button is clicked)
+  useEffect(() => {
+    async function getTxReceipt() {
+      if (!publicClient || !createPoolTxHash || poolType === undefined || step !== 1) return;
+
+      const txReceipt = await publicClient.waitForTransactionReceipt({ hash: createPoolTxHash });
+
+      const logs = parseEventLogs({
+        abi: poolFactoryAbi[poolType],
+        logs: txReceipt.logs,
+      });
+
+      if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
+        const newPool = logs[0].args.pool;
+        updatePool({ poolAddress: newPool, step: 2 });
+      } else {
+        throw new Error("Expected pool address not found in event logs");
+      }
+    }
+    getTxReceipt();
+  }, [createPoolTxHash, publicClient, poolType, updatePool, step]);
+
   function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
     if (!publicClient) throw new Error("Public client must be available!");
@@ -88,30 +116,26 @@ export const useCreatePool = () => {
     const input = createPoolInput(poolType);
     const call = createPool.buildCall(input);
 
-    const hash = await writeTx(
-      () =>
-        walletClient.sendTransaction({
-          account: walletClient.account,
-          data: call.callData,
-          to: call.to,
-        }),
-      {
-        blockConfirmations: 1,
-        onBlockConfirmation: () => {
-          console.log("Successfully deployed and registered a balancer v3 pool!");
-        },
-      },
-    );
+    // Not using transactor here because we need to immediately save tx hash to local storage for zen dragon edge case
+    // He sends transactions with low gas limit which means they stay pending for hours
+    const hash = await walletClient.sendTransaction({
+      account: walletClient.account,
+      data: call.callData,
+      to: call.to,
+    });
+    if (!hash) throw new Error("Failed to generate pool creation transaction hash");
 
-    if (!hash) throw new Error("No pool creation transaction hash");
-    const txReceipt = await publicClient.getTransactionReceipt({ hash });
+    updatePool({ createPoolTxHash: hash });
+
+    const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
     const logs = parseEventLogs({
       abi: poolFactoryAbi[poolType],
       logs: txReceipt.logs,
     });
+
     if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
       const newPool = logs[0].args.pool;
-      updatePool({ poolAddress: newPool, createPoolTxHash: hash, step: 2 });
+      updatePool({ poolAddress: newPool, step: 2 });
     } else {
       throw new Error("Expected pool address not found in event logs");
     }

@@ -45,9 +45,9 @@ export interface PoolCreationStore {
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
-  createPoolTxHash: string | undefined;
-  swapTxHash: string | undefined;
-  initPoolTxHash: string | undefined;
+  createPoolTxHash: `0x${string}` | undefined;
+  swapTxHash: `0x${string}` | undefined;
+  initPoolTxHash: `0x${string}` | undefined;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
   clearPoolStore: () => void;

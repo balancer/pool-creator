@@ -9,7 +9,7 @@ import { TABS, type TabType, usePoolCreationStore, useValidatePoolCreationInput 
 import { bgBeigeGradient } from "~~/utils";
 
 export function PoolConfiguration() {
-  const { selectedTab, updatePool, step } = usePoolCreationStore();
+  const { selectedTab, updatePool, createPoolTxHash } = usePoolCreationStore();
   const { targetNetwork } = useTargetNetwork();
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
   const { prev, next } = getAdjacentTabs(selectedTab);
@@ -44,9 +44,10 @@ export function PoolConfiguration() {
     };
   }
 
+  // Force modal to open if user has already sent "Deploy Pool" transaction (always step 1)
   useEffect(() => {
-    if (step > 1) setIsPoolCreationModalOpen(true);
-  }, [step]);
+    if (createPoolTxHash) setIsPoolCreationModalOpen(true);
+  }, [createPoolTxHash]);
 
   return (
     <>
