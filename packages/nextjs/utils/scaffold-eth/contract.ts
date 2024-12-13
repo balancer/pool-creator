@@ -196,6 +196,7 @@ type WriteVariables = WriteContractVariables<Abi, string, any[], Config, number>
 export type TransactorFuncOptions = {
   onBlockConfirmation?: (txnReceipt: TransactionReceipt) => void;
   blockConfirmations?: number;
+  onTransactionHash?: (txnHash: `0x${string}`) => void; // Matt added this to save tx hash to local storage incase user disconnects while tx pending
 };
 
 export type ScaffoldWriteContractOptions = MutateOptions<

@@ -380,15 +380,15 @@ const RateProviderModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="w-[650px] min-h-[333px] bg-base-200 rounded-lg p-7 flex flex-col gap-5 justify-around">
-        <h3 className="font-bold text-3xl text-center">Rate Provider</h3>
+      <div className="w-[650px] min-h-[333px] bg-base-200 rounded-lg py-7 px-10 flex flex-col gap-5 justify-around">
+        <h3 className="font-bold text-3xl text-center">Confirm Rate Provider</h3>
 
         <div className="flex flex-col gap-5">
           <div className="text-xl">
             Consider using the following rate provider for <b>{tokenInfo.symbol}</b>
           </div>
           {rateProviderData ? (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto px-5">
               <table className="w-full text-xl table border border-neutral-500">
                 <tbody>
                   <tr className="border-b border-neutral-500">
@@ -431,8 +431,10 @@ const RateProviderModal = ({
           ) : (
             <div>No rate provider data</div>
           )}
-          <div className="text-xl">If you wish to use this rate provider, please click confirm</div>
-          <div className="text-xl"> Otherwise, choose deny and paste in a rate provider address</div>
+          <div className="text-xl">
+            If you wish to use this rate provider, click confirm. Otherwise, choose deny and paste in a rate provider
+            address
+          </div>
         </div>
         <div className="w-full flex gap-4 justify-end mt-3">
           <button
