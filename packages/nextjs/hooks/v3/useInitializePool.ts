@@ -2,14 +2,14 @@ import { BALANCER_ROUTER, InitPool, InitPoolDataProvider, InitPoolInput, balance
 import { useMutation } from "@tanstack/react-query";
 import { getContract, parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-// import { useTransactor } from "~~/hooks/scaffold-eth";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { createPermit2 } from "~~/utils/permit2Helper";
 
 export const useInitializePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  // const writeTx = useTransactor();
+  const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
   const rpcUrl = publicClient?.transport.transports[0].value.url;
   const protocolVersion = 3;
@@ -78,14 +78,15 @@ export const useInitializePool = () => {
     console.log("router.permitBatchAndCall args for initialize pool", args);
 
     // Execute the transaction
-    const hash = await router.write.permitBatchAndCall(args);
+    const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
+      onTransactionHash: txHash => updatePool({ initPoolTxHash: txHash }),
+    });
     if (!hash) throw new Error("No pool initialization transaction hash");
-    updatePool({ initPoolTxHash: hash });
 
     // Move the step forward if the transaction is successful
     const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
     if (txReceipt.status === "success") {
-      updatePool({ step: step + 1 });
+      updatePool({ step: step + 1, hasBeenInitialized: true });
     }
 
     return hash;

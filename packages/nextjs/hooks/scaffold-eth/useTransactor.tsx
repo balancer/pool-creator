@@ -14,7 +14,7 @@ type TransactionFunc = (
 /**
  * Custom notification content for TXs.
  */
-const TxnNotification = ({ message, blockExplorerLink }: { message: string; blockExplorerLink?: string }) => {
+export const TxnNotification = ({ message, blockExplorerLink }: { message: string; blockExplorerLink?: string }) => {
   return (
     <div className={`flex flex-col ml-1 cursor-default`}>
       <p className="my-0">{message}</p>
@@ -70,6 +70,10 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       notificationId = notification.loading(
         <TxnNotification message="Waiting for transaction to complete." blockExplorerLink={blockExplorerTxURL} />,
       );
+      // Matt added this callback to save tx hash to local storage incase user disconnects while tx pending
+      if (options?.onTransactionHash && transactionHash) {
+        options.onTransactionHash(transactionHash);
+      }
 
       const transactionReceipt = await publicClient.waitForTransactionReceipt({
         hash: transactionHash,

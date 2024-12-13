@@ -2,7 +2,7 @@ import React from "react";
 import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
 import { type HookFlags, usePoolCreationStore } from "~~/hooks/v3";
 
@@ -58,6 +58,12 @@ export const ChooseParameters = () => {
     }
   };
 
+  const MIN_SWAP_FEE_PERCENTAGE = poolType === PoolType.Stable ? 0.0001 : 0.001;
+  const SWAP_FEE_LINK =
+    poolType === PoolType.Stable
+      ? "https://docs-v3.balancer.fi/developer-reference/contracts/vault-config.html#minimum-swap-fee-percentage-1"
+      : "https://docs-v3.balancer.fi/developer-reference/contracts/vault-config.html#minimum-swap-fee-percentage";
+
   return (
     <div className="flex flex-col gap-4">
       <div className="text-xl">Choose pool parameters:</div>
@@ -65,12 +71,12 @@ export const ChooseParameters = () => {
         <div className="text-lg font-bold mb-3 inline-flex">
           <a
             className="flex items-center gap-2 link no-underline hover:underline"
-            href="https://docs-v3.balancer.fi/concepts/vault/swap-fee.html"
+            href={SWAP_FEE_LINK}
             target="_blank"
             rel="noreferrer"
           >
             Swap fee percentage
-            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
           </a>
         </div>
         <div className="flex gap-2">
@@ -85,12 +91,12 @@ export const ChooseParameters = () => {
           ))}
           <div>
             <NumberInput
-              placeholder=".001 - 10"
+              placeholder={`${MIN_SWAP_FEE_PERCENTAGE} - 10`}
               value={swapFeePercentage}
-              onChange={e => handleNumberInputChange(e, "swapFeePercentage", 0.001, 10)}
-              min={0.001}
+              onChange={e => handleNumberInputChange(e, "swapFeePercentage", MIN_SWAP_FEE_PERCENTAGE, 10)}
+              min={MIN_SWAP_FEE_PERCENTAGE}
               max={10}
-              step={0.001}
+              step={MIN_SWAP_FEE_PERCENTAGE}
               isPercentage={true}
             />
           </div>
@@ -102,12 +108,12 @@ export const ChooseParameters = () => {
           <div className="text-lg font-bold mb-3 inline-flex">
             <a
               className="flex items-center gap-2 link no-underline hover:underline"
-              href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/stable-pool/stable-math.html"
+              href="https://docs-v3.balancer.fi/developer-reference/contracts/vault-config.html#minimum-maximum-amplification-parameter"
               target="_blank"
               rel="noreferrer"
             >
               Amplification Parameter
-              <InformationCircleIcon className="w-5 h-5 mt-0.5" />
+              <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
             </a>
           </div>
 
@@ -144,7 +150,7 @@ export const ChooseParameters = () => {
             rel="noreferrer"
           >
             Swap fee manager
-            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
         <RadioInput
@@ -191,7 +197,7 @@ export const ChooseParameters = () => {
             rel="noreferrer"
           >
             Pause manager
-            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
         <RadioInput
@@ -240,7 +246,7 @@ export const ChooseParameters = () => {
             rel="noreferrer"
           >
             Pool hooks
-            <InformationCircleIcon className="w-5 h-5 mt-0.5" />
+            <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
         <RadioInput

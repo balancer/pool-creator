@@ -10,7 +10,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseEventLogs, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-// import { useTransactor } from "~~/hooks/scaffold-eth";
+import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
 export const poolFactoryAbi = {
@@ -24,7 +24,7 @@ const TOKEN_WEIGHT_DECIMALS = 16;
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
-  // const writeTx = useTransactor();
+  const writeTx = useTransactor();
 
   const {
     tokenConfigs,
@@ -91,16 +91,18 @@ export const useCreatePool = () => {
     const input = createPoolInput(poolType);
     const call = createPool.buildCall(input);
 
-    // Not using transactor here because we need to immediately save tx hash to local storage for zen dragon edge case
-    // He sends transactions with low gas limit which means they stay pending for hours
-    const hash = await walletClient.sendTransaction({
-      account: walletClient.account,
-      data: call.callData,
-      to: call.to,
-    });
+    const hash = await writeTx(
+      () =>
+        walletClient.sendTransaction({
+          account: walletClient.account,
+          data: call.callData,
+          to: call.to,
+        }),
+      {
+        onTransactionHash: txHash => updatePool({ createPoolTxHash: txHash }),
+      },
+    );
     if (!hash) throw new Error("Failed to generate pool creation transaction hash");
-
-    updatePool({ createPoolTxHash: hash });
 
     const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
     const logs = parseEventLogs({

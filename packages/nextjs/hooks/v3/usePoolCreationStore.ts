@@ -48,6 +48,7 @@ export interface PoolCreationStore {
   createPoolTxHash: `0x${string}` | undefined;
   swapTxHash: `0x${string}` | undefined;
   initPoolTxHash: `0x${string}` | undefined;
+  hasBeenInitialized: boolean;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
   clearPoolStore: () => void;
@@ -88,6 +89,7 @@ export const initialPoolCreationState = {
   createPoolTxHash: undefined,
   initPoolTxHash: undefined,
   swapTxHash: undefined,
+  hasBeenInitialized: false,
 };
 
 // Stores all the data that will be used for pool creation
