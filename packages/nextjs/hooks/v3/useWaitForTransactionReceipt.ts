@@ -4,15 +4,16 @@ import { usePublicClient } from "wagmi";
 import { poolFactoryAbi, usePoolCreationStore } from "~~/hooks/v3/";
 
 /**
- * Fetches tx receipt from tx hash if user disconnects during pending tx state
+ * If user disconnects during pending tx state, these useEffect hooks will attempt to get tx receipt based on tx hash already saved in local storage
  * @returns Flag to indicate if tx receipt is being fetched
  */
 export const useWaitForTransactionReceipt = () => {
   const [isLoadingTxReceipt, setIsLoadingTxReceipt] = useState(false);
+
   const publicClient = usePublicClient();
   const { createPoolTxHash, initPoolTxHash, poolType, step, updatePool, hasBeenInitialized } = usePoolCreationStore();
 
-  // If user disconnects during pending tx state, these useEffect hooks will attempt to get tx receipt based on tx hash already saved in local storage
+  // Handle edge case where user disconnects while create pool tx is pending
   useEffect(() => {
     async function getPoolCreationTxReceipt() {
       if (!publicClient || !createPoolTxHash || poolType === undefined || step !== 1) return;

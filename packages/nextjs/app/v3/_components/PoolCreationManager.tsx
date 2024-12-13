@@ -205,13 +205,12 @@ function createTransactionStep({
 const PoolCreatedView = () => {
   const { poolAddress, chain } = usePoolCreationStore();
 
-  // TODO: Change link from test.balancer.fi to balancer.fi for announcement
-  const balancerPoolURL = `https://test.balancer.fi/pools/${chain?.name.toLowerCase()}/v3/${poolAddress}`;
-  console.log("balancerPoolURL", balancerPoolURL);
+  const baseURL = chain?.id === 11155111 ? "https://test.balancer.fi" : "https://balancer.fi";
+  const poolURL = `${baseURL}/pools/${chain?.name.toLowerCase()}/v3/${poolAddress}`;
 
   return (
     <div className="flex flex-col gap-5">
-      <a href={balancerPoolURL} target="_blank" rel="noopener noreferrer" className="">
+      <a href={poolURL} target="_blank" rel="noopener noreferrer" className="">
         <button className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}>
           <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />

@@ -73,23 +73,28 @@ export const ChooseInfo = () => {
           <div className="overflow-x-auto mt-5">
             <table className="table w-full text-lg border border-neutral-500">
               <tbody>
-                {existingPools.map(pool => (
-                  <tr key={pool.address}>
-                    <td className="border border-neutral-500 px-2 py-1">{pool.name}</td>
-                    <td className="border border-neutral-500 px-2 py-1">{pool.symbol}</td>
-                    <td className="text-right border border-neutral-500 px-2 py-1">
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline text-info flex items-center gap-2 justify-end"
-                        href={`https://test.balancer.fi/pools/${pool.chain.toLowerCase()}/v3/${pool.address}`}
-                      >
-                        See Details
-                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                      </a>
-                    </td>
-                  </tr>
-                ))}
+                {existingPools.map(pool => {
+                  const chainName = pool.chain.toLowerCase();
+                  const baseURL = chainName === "sepolia" ? "https://test.balancer.fi" : "https://balancer.fi";
+                  const poolURL = `${baseURL}/pools/${chainName}/v3/${pool.address}`;
+                  return (
+                    <tr key={pool.address}>
+                      <td className="border border-neutral-500 px-2 py-1">{pool.name.slice(0, 20)}</td>
+                      <td className="border border-neutral-500 px-2 py-1">{pool.symbol.slice(0, 20)}</td>
+                      <td className="text-right border border-neutral-500 px-2 py-1">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline text-info flex items-center gap-2 justify-end"
+                          href={poolURL}
+                        >
+                          See Details
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
