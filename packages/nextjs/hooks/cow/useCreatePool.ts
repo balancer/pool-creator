@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { Address, parseEventLogs } from "viem";
-import { usePublicClient } from "wagmi";
+import { usePublicClient, useWalletClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
+import { useScaffoldContract, useTransactor } from "~~/hooks/scaffold-eth";
 
 type CreatePoolPayload = {
   name: string;
@@ -10,14 +11,25 @@ type CreatePoolPayload = {
 };
 
 export const useCreatePool = () => {
-  const { writeContractAsync: bCoWFactory } = useScaffoldWriteContract("BCoWFactory");
+  const { data: bCoWFactory } = useScaffoldContract({ contractName: "BCoWFactory" });
   const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+  const writeTx = useTransactor();
+  const { updatePoolCreation } = usePoolCreationStore();
 
   const createPool = async ({ name, symbol }: CreatePoolPayload): Promise<Address> => {
-    if (!publicClient) throw new Error("No public client");
-    const hash = await bCoWFactory({
+    if (!publicClient || !bCoWFactory || !walletClient) throw new Error("useCreatePool missing required setup");
+
+    const { request } = await publicClient.simulateContract({
+      account: walletClient.account,
+      address: bCoWFactory.address,
+      abi: bCoWFactory.abi,
       functionName: "newBPool",
       args: [name, symbol],
+    });
+
+    const hash = await writeTx(() => walletClient.writeContract(request), {
+      onTransactionHash: txHash => updatePoolCreation({ createPoolTxHash: txHash }),
     });
     if (!hash) throw new Error("No pool creation transaction hash");
     const txReceipt = await publicClient.getTransactionReceipt({ hash });
