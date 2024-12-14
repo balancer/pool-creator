@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import { PoolCreated } from "./";
 import { parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
@@ -16,15 +15,16 @@ import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
   useBindToken,
-  useCowFactoryEvents,
   useCreatePool,
   useFinalizePool,
   useReadPool,
   useSetSwapFee,
+  useWaitForTransactionReceipt,
 } from "~~/hooks/cow/";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
+import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 import { getPerTokenWeights } from "~~/utils/token-weights";
 
 interface ManagePoolCreationProps {
@@ -34,17 +34,10 @@ interface ManagePoolCreationProps {
 }
 
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
-  useCowFactoryEvents();
+  const { address: poolAddress, createPoolTxHash } = poolCreation;
 
-  const searchParams = useSearchParams();
-  const poolAddress = searchParams.get("address") || poolCreation.address;
-
-  useEffect(() => {
-    const addressParam = searchParams.get("address");
-    if (addressParam && addressParam !== poolCreation.address) {
-      updatePoolCreation({ address: addressParam });
-    }
-  }, [searchParams, poolCreation.address, updatePoolCreation]);
+  const { error: poolCreationTxReceiptError, isPending: isPoolCreationTxReceiptPending } =
+    useWaitForTransactionReceipt();
 
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
@@ -74,11 +67,19 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
   } = useBindToken(poolCreation.tokenWeights, false);
   const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
   const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
+
   const txError =
-    createPoolError || approve1Error || approve2Error || bind1Error || bind2Error || setSwapFeeError || finalizeError;
+    createPoolError ||
+    poolCreationTxReceiptError ||
+    approve1Error ||
+    approve2Error ||
+    bind1Error ||
+    bind2Error ||
+    setSwapFeeError ||
+    finalizeError;
 
   useEffect(() => {
-    if (!poolData || poolCreation.isInitialState) return;
+    if (!poolData || !poolAddress) return;
 
     if (poolData.isFinalized) {
       updatePoolCreation({ step: 8 });
@@ -144,12 +145,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                   return (
                     <TransactionButton
                       title="Create Pool"
-                      isPending={isCreatePending}
-                      isDisabled={isCreatePending || isWrongNetwork}
+                      isPending={isCreatePending || isPoolCreationTxReceiptPending}
+                      isDisabled={isCreatePending || isPoolCreationTxReceiptPending || isWrongNetwork}
                       onClick={() => {
-                        // user has officially begun the pool creation process
-                        updatePoolCreation({ isInitialState: false });
-
                         createPool(
                           { name: poolCreation.name, symbol: poolCreation.symbol },
                           {
@@ -303,7 +301,12 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
           <PoolStepsDisplay
             currentStepNumber={poolCreation.step}
             steps={[
-              { label: "Create Pool" },
+              {
+                label: "Create Pool",
+                blockExplorerUrl: createPoolTxHash
+                  ? getBlockExplorerTxLink(poolCreation.chainId, createPoolTxHash)
+                  : undefined,
+              },
               { label: `Approve ${poolCreation.token1.symbol}` },
               { label: `Approve ${poolCreation.token2.symbol}` },
               { label: `Add ${poolCreation.token1.symbol}` },
