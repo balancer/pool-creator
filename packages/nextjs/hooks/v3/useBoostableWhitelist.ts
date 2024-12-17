@@ -46,6 +46,7 @@ export const useBoostableWhitelist = () => {
                 logoURI
                 isErc4626
                 underlyingTokenAddress
+                isBufferAllowed
                 priceRateProviderData {
                   address
                   summary
@@ -69,8 +70,9 @@ export const useBoostableWhitelist = () => {
       const data = json.data.tokenGetTokens;
 
       // Create map of underlying token address to matching boosted variant info
+      // If the token has an underlyingTokenAddress and isBufferAllowed
       const boostableTokensMap = data.reduce((acc: Record<Address, Token>, token: Token) => {
-        if (token.underlyingTokenAddress) acc[token.underlyingTokenAddress] = token;
+        if (token.underlyingTokenAddress && token.isBufferAllowed) acc[token.underlyingTokenAddress] = token;
         return acc;
       }, {});
 
@@ -83,6 +85,7 @@ type BoostableWhitelist = {
   id: string;
   name: string;
   description: string;
+  icon: string;
   addresses: {
     [key: string]: Address[];
   };

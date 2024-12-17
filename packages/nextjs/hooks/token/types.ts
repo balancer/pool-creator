@@ -7,6 +7,7 @@ export type Token = {
   logoURI: string;
   hasBoostedVariant?: boolean;
   underlyingTokenAddress: string | null;
+  isBufferAllowed: boolean;
   priceRateProviderData: {
     address: string;
     summary: string;
