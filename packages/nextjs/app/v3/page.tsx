@@ -51,7 +51,8 @@ const BalancerV3: NextPage = () => {
               <div>
                 <Alert type="warning">
                   <div className="flex items-center gap-2">
-                    You are connected to an unsupported network. To continue, please switch
+                    You are connected to an unsupported network. To continue, please switch to Sepolia, Ethereum, or
+                    Gnosis
                     <ArrowUpRightIcon className="w-4 h-4" />
                   </div>
                 </Alert>
