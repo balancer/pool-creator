@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import { PoolConfiguration, PoolCreation } from "./_components";
 import type { NextPage } from "next";
 import { CowAMM } from "~~/components/assets/CowAMM";
+import { SafeWalletAlert } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
+import { useIsSafeWallet } from "~~/hooks/safe";
 
 const CowAmm: NextPage = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const { poolCreation, updatePoolCreation, clearPoolCreation } = usePoolCreationStore();
+
+  const isSafeWallet = useIsSafeWallet();
 
   useEffect(() => {
     setIsMounted(true);
@@ -23,6 +27,8 @@ const CowAmm: NextPage = () => {
             <CowAMM width="333" />
             {!isMounted ? (
               <CowLoadingSkeleton />
+            ) : isSafeWallet ? (
+              <SafeWalletAlert />
             ) : !poolCreation ? (
               <PoolConfiguration />
             ) : (
