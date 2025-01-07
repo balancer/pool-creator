@@ -6,15 +6,10 @@ import { PoolConfiguration, PoolDetails } from "./_components";
 import type { NextPage } from "next";
 import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
-import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
+import { Alert, ContactSupportModal, PoolStateResetModal, SafeWalletAlert } from "~~/components/common";
+import { useIsSafeWallet } from "~~/hooks/safe";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import {
-  usePoolCreationStore,
-  usePoolStoreDebug,
-  useUserDataStore,
-  useUserDataStoreDebug,
-  useValidateNetwork,
-} from "~~/hooks/v3";
+import { usePoolCreationStore, useUserDataStore, useValidateNetwork } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
   const { isWrongNetwork, isWalletConnected } = useValidateNetwork();
@@ -23,14 +18,13 @@ const BalancerV3: NextPage = () => {
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
   const [isInfoAlertVisible, setIsInfoAlertVisible] = useState(true);
 
-  usePoolStoreDebug();
-  useUserDataStoreDebug();
+  const isSafeWallet = useIsSafeWallet();
 
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
         <div className="flex flex-col justify-center gap-5 w-full">
-          <div className="flex gap-4 justify-center mb-5">
+          <div className="flex gap-4 justify-center">
             <BalancerLogo width="55px" />
             <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer v3</h1>
           </div>
@@ -45,6 +39,10 @@ const BalancerV3: NextPage = () => {
                   </div>
                 </Alert>
               </div>
+            </div>
+          ) : isSafeWallet ? (
+            <div>
+              <SafeWalletAlert />
             </div>
           ) : isWrongNetwork ? (
             <div className="flex justify-center w-full">

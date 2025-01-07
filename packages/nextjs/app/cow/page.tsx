@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { PoolConfiguration, PoolCreation } from "./_components";
 import type { NextPage } from "next";
 import { CowAMM } from "~~/components/assets/CowAMM";
-import { Alert } from "~~/components/common/Alert";
+import { SafeWalletAlert } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
 import { useIsSafeWallet } from "~~/hooks/safe";
 
@@ -28,10 +28,7 @@ const CowAmm: NextPage = () => {
             {!isMounted ? (
               <CowLoadingSkeleton />
             ) : isSafeWallet ? (
-              <Alert type="warning">
-                Safe wallets are not yet supported for CoW AMM pool creation. Please create the pool with an externally
-                owned account, and then add liquidity on balancer.fi with your Safe wallet.
-              </Alert>
+              <SafeWalletAlert />
             ) : !poolCreation ? (
               <PoolConfiguration />
             ) : (
