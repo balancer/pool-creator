@@ -1,5 +1,15 @@
 {
-  "name": "Scaffold-ETH 2 DApp",
-  "description": "A DApp built with Scaffold-ETH",
-  "iconPath": "logo.svg"
+  "short_name": "Balancer pool creator",
+  "name": "Balancer pool creator",
+  "description": "Create and initialize a variety of liquidity pool types with Balancer protocol",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
 }
