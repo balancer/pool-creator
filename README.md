@@ -35,6 +35,7 @@ SEPOLIA_RPC_URL=
 MAINNET_RPC_URL=
 GNOSIS_RPC_URL=
 ARBITRUM_RPC_URL=
+BASE_RPC_URL=
 ```
 
 2. Add `chains.foundry` as the first item of `targetNetworks` in the `scaffold.config.ts` file
@@ -56,6 +57,7 @@ make fork-sepolia
 make fork-mainnet
 make fork-gnosis
 make fork-arbitrum
+make fork-base
 ```
 
 5. Start the frontend
