@@ -16,10 +16,10 @@ import {
   type PoolCreationState,
   useBindToken,
   useCreatePool,
+  useFetchPoolAddress,
   useFinalizePool,
   useReadPool,
   useSetSwapFee,
-  useWaitForTransactionReceipt,
 } from "~~/hooks/cow/";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
@@ -36,8 +36,7 @@ interface ManagePoolCreationProps {
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
   const { address: poolAddress, createPoolTxHash } = poolCreation;
 
-  const { error: poolCreationTxReceiptError, isPending: isPoolCreationTxReceiptPending } =
-    useWaitForTransactionReceipt();
+  const { error: fetchPoolAddressError, isPending: isFetchPoolAddressPending } = useFetchPoolAddress();
 
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
@@ -70,7 +69,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
 
   const txError =
     createPoolError ||
-    poolCreationTxReceiptError ||
+    fetchPoolAddressError ||
     approve1Error ||
     approve2Error ||
     bind1Error ||
@@ -145,8 +144,8 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                   return (
                     <TransactionButton
                       title="Create Pool"
-                      isPending={isCreatePending || isPoolCreationTxReceiptPending}
-                      isDisabled={isCreatePending || isPoolCreationTxReceiptPending || isWrongNetwork}
+                      isPending={isCreatePending || isFetchPoolAddressPending}
+                      isDisabled={isCreatePending || isFetchPoolAddressPending || isWrongNetwork}
                       onClick={() => {
                         createPool(
                           { name: poolCreation.name, symbol: poolCreation.symbol },
