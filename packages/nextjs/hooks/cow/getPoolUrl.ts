@@ -8,6 +8,8 @@ export function getPoolUrl(chainId: number, poolAddress: string) {
       return `https://test.balancer.fi/pools/sepolia/cow/${poolAddress}`;
     case 42161:
       return `https://balancer.fi/pools/arbitrum/cow/${poolAddress}`;
+    case 8453:
+      return `https://balancer.fi/pools/base/cow/${poolAddress}`;
     default:
       return "unknown";
   }
