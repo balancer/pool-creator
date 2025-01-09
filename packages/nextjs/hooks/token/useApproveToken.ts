@@ -29,13 +29,9 @@ export const useApproveToken = () => {
       args: [spender, rawAmount],
     });
 
-    const hash = await writeTx(() => walletClient.writeContract(approveSpenderOnToken), {
-      blockConfirmations: 1,
-      onBlockConfirmation: () => {
-        console.log("Approved pool contract to spend amount:", rawAmount, " of token:", token);
-      },
-    });
-    return hash;
+    const txHash = await writeTx(() => walletClient.writeContract(approveSpenderOnToken));
+    console.log("Approved pool contract to spend token, txHash:", txHash);
+    return txHash;
   };
 
   return useMutation({ mutationFn: (payload: ApproveOnTokenPayload) => approve(payload) });

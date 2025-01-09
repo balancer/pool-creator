@@ -1,1 +1,1 @@
-export * from "./useSafe";
+export * from "./useIsSafeWallet";

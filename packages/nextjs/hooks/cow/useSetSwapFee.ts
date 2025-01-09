@@ -28,12 +28,13 @@ export const useSetSwapFee = () => {
       args: [rawAmount],
     });
 
-    await writeTx(() => walletClient.writeContract(setSwapFee), {
+    const txHash = await writeTx(() => walletClient.writeContract(setSwapFee), {
       blockConfirmations: 1,
       onBlockConfirmation: () => {
         console.log("Set swap fee to", rawAmount, "for pool:", pool);
       },
     });
+    return txHash;
   };
 
   return useMutation({

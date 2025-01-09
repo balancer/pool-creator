@@ -17,6 +17,8 @@
     "@balancer/sdk": "^0.33.3",
     "@heroicons/react": "^2.0.11",
     "@rainbow-me/rainbowkit": "2.1.2",
+    "@safe-global/safe-apps-provider": "^0.18.5",
+    "@safe-global/safe-apps-react-sdk": "^4.7.2",
     "@tanstack/react-query": "^5.28.6",
     "@uniswap/sdk-core": "^4.0.1",
     "@uniswap/v2-sdk": "^3.0.1",

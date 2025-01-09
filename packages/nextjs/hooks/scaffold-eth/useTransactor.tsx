@@ -1,8 +1,12 @@
+import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
 import { getPublicClient } from "@wagmi/core";
 import { Hash, SendTransactionParameters, WalletClient } from "viem";
 import { Config, useWalletClient } from "wagmi";
 import { SendTransactionMutate } from "wagmi/query";
+import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
+import { useIsSafeWallet } from "~~/hooks/safe/useIsSafeWallet";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+import { pollSafeTxStatus } from "~~/utils/safe";
 import { getBlockExplorerTxLink, getParsedError, notification } from "~~/utils/scaffold-eth";
 import { TransactorFuncOptions } from "~~/utils/scaffold-eth/contract";
 
@@ -38,6 +42,9 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
   if (walletClient === undefined && data) {
     walletClient = data;
   }
+  const isSafeWallet = useIsSafeWallet();
+  const { sdk } = useSafeAppsSDK();
+  const { updatePoolCreation } = usePoolCreationStore();
 
   const result: TransactionFunc = async (tx, options) => {
     if (!walletClient) {
@@ -63,6 +70,19 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       } else {
         throw new Error("Incorrect transaction passed to transactor");
       }
+      notification.remove(notificationId);
+
+      notificationId = notification.loading(<TxnNotification message="Waiting for safe to process" />);
+
+      // if safe wallet, the transaction hash will be off-chain for safe infra, not on chain
+      if (isSafeWallet) {
+        const pendingSafeTxHash = transactionHash;
+        // save to state in case of user disconnection
+        updatePoolCreation({ pendingSafeTxHash });
+        // update transactionHash to the on chain tx hash
+        transactionHash = await pollSafeTxStatus(sdk, pendingSafeTxHash);
+      }
+
       notification.remove(notificationId);
 
       const blockExplorerTxURL = network ? getBlockExplorerTxLink(network, transactionHash) : "";
