@@ -8,7 +8,7 @@ export type Step = { label: string; blockExplorerUrl?: string };
 
 export function PoolStepsDisplay({ currentStepNumber, steps }: PoolStepsDisplayProps) {
   return (
-    <div className="bg-base-200 border border-neutral px-5 pt-7 rounded-xl shadow-xl max-h-[90vh] flex flex-col">
+    <div className="bg-base-200 border border-neutral px-5 pt-7 rounded-xl shadow-xl max-h-[90vh] flex flex-col min-w-fit">
       <h5 className="text-2xl font-bold text-center">Steps</h5>
       <div className="overflow-y-auto">
         <ul className="steps steps-vertical text-lg pb-3">
@@ -22,7 +22,7 @@ export function PoolStepsDisplay({ currentStepNumber, steps }: PoolStepsDisplayP
                   currentStepNumber == stepNumber && "step-primary"
                 }`}
               >
-                <div>
+                <div className="whitespace-nowrap">
                   {step.blockExplorerUrl ? (
                     <div>
                       <a

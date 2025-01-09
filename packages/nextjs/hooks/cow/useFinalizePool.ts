@@ -21,12 +21,13 @@ export const useFinalizePool = () => {
       account: walletClient.account,
     });
 
-    await writeTx(() => walletClient.writeContract(finalizePool), {
+    const txHash = await writeTx(() => walletClient.writeContract(finalizePool), {
       blockConfirmations: 1,
       onBlockConfirmation: () => {
         console.log("Successfully finalized pool:", pool);
       },
     });
+    return txHash;
   };
 
   return useMutation({ mutationFn: (pool: Address | undefined) => finalize(pool) });

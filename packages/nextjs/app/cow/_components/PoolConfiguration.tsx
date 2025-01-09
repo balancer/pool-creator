@@ -93,7 +93,7 @@ export const PoolConfiguration = () => {
     sufficientAmount2;
 
   return (
-    <>
+    <div className="flex flex-col gap-5 md:w-[555px]">
       <div className="bg-base-200 p-5 rounded-xl w-full sm:w-[555px] flex flex-grow shadow-xl">
         <div className="flex flex-col items-center gap-5 w-full">
           <h5 className="text-xl md:text-2xl font-bold">Configure your pool</h5>
@@ -167,10 +167,17 @@ export const PoolConfiguration = () => {
                 token2Amount,
                 name: poolName.trim(),
                 symbol: poolSymbol.trim(),
-                address: undefined,
+                poolAddress: undefined,
                 step: 1,
                 tokenWeights,
                 createPoolTxHash: undefined,
+                pendingSafeTxHash: undefined,
+                approveToken1TxHash: undefined,
+                approveToken2TxHash: undefined,
+                bindToken1TxHash: undefined,
+                bindToken2TxHash: undefined,
+                setSwapFeeTxHash: undefined,
+                finalizePoolTxHash: undefined,
               });
             }}
           />
@@ -210,6 +217,6 @@ export const PoolConfiguration = () => {
           </div>
         </Alert>
       )}
-    </>
+    </div>
   );
 };

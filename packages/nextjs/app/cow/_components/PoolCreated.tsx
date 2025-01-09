@@ -66,7 +66,7 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
         </div>
         <Alert type="warning">It may take a few minutes to appear in the Balancer app</Alert>
       </div>
-      <div className="w-80">
+      <div className="w-full">
         <TransactionButton
           title="Create Another Pool"
           onClick={() => clearState()}

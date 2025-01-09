@@ -16,10 +16,10 @@ import {
   type PoolCreationState,
   useBindToken,
   useCreatePool,
+  useFetchPoolAddress,
   useFinalizePool,
   useReadPool,
   useSetSwapFee,
-  useWaitForTransactionReceipt,
 } from "~~/hooks/cow/";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
@@ -34,10 +34,18 @@ interface ManagePoolCreationProps {
 }
 
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
-  const { address: poolAddress, createPoolTxHash } = poolCreation;
+  const {
+    poolAddress,
+    createPoolTxHash,
+    approveToken1TxHash,
+    approveToken2TxHash,
+    bindToken1TxHash,
+    bindToken2TxHash,
+    setSwapFeeTxHash,
+    finalizePoolTxHash,
+  } = poolCreation;
 
-  const { error: poolCreationTxReceiptError, isPending: isPoolCreationTxReceiptPending } =
-    useWaitForTransactionReceipt();
+  const { isFetching: isFetchPoolAddressPending, error: fetchPoolAddressError } = useFetchPoolAddress();
 
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
@@ -70,7 +78,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
 
   const txError =
     createPoolError ||
-    poolCreationTxReceiptError ||
+    fetchPoolAddressError ||
     approve1Error ||
     approve2Error ||
     bind1Error ||
@@ -116,248 +124,265 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
 
   return (
     <>
-      <div className="flex flex-wrap justify-center gap-5 lg:relative">
-        <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-xl md:w-[555px]">
-          <div className="flex flex-col items-center gap-5 w-full">
-            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
-            <div className="w-full">
-              <div className="ml-1 mb-1">Selected pool tokens:</div>
-              <div className="w-full flex flex-col gap-3">
-                <TokenField
-                  value={poolCreation.token1Amount}
-                  selectedToken={poolCreation.token1}
-                  isDisabled={true}
-                  tokenWeight={token1Weight}
-                />
-                <TokenField
-                  value={poolCreation.token2Amount}
-                  selectedToken={poolCreation.token2}
-                  isDisabled={true}
-                  tokenWeight={token2Weight}
-                />
+      <div className="flex flex-wrap justify-center gap-5 ">
+        <div className="flex flex-col gap-5">
+          <div className="bg-base-200 p-6 rounded-xl shadow-xl w-[555px]">
+            <div className="flex flex-col items-center gap-5 w-full min-w-[333px]">
+              <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
+              <div className="w-full">
+                <div className="ml-1 mb-1">Selected pool tokens:</div>
+                <div className="w-full flex flex-col gap-3">
+                  <TokenField
+                    value={poolCreation.token1Amount}
+                    selectedToken={poolCreation.token1}
+                    isDisabled={true}
+                    tokenWeight={token1Weight}
+                  />
+                  <TokenField
+                    value={poolCreation.token2Amount}
+                    selectedToken={poolCreation.token2}
+                    isDisabled={true}
+                    tokenWeight={token2Weight}
+                  />
+                </div>
               </div>
-            </div>
-            <TextField label="Pool name:" value={poolCreation.name} isDisabled={true} />
-            <TextField label="Pool symbol:" value={poolCreation.symbol} isDisabled={true} />
-            {(() => {
-              switch (poolCreation.step) {
-                case 1:
-                  return (
-                    <TransactionButton
-                      title="Create Pool"
-                      isPending={isCreatePending || isPoolCreationTxReceiptPending}
-                      isDisabled={isCreatePending || isPoolCreationTxReceiptPending || isWrongNetwork}
-                      onClick={() => {
-                        createPool(
-                          { name: poolCreation.name, symbol: poolCreation.symbol },
-                          {
-                            onSuccess: newPoolAddress => {
-                              updatePoolCreation({ address: newPoolAddress, step: 2 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 2:
-                  return (
-                    <TransactionButton
-                      title={`Approve ${poolCreation.token1.symbol}`}
-                      isPending={isApprove1Pending}
-                      isDisabled={isApprove1Pending || isWrongNetwork}
-                      onClick={() => {
-                        approve1(
-                          {
-                            token: poolCreation.token1.address,
-                            spender: poolData?.address,
-                            rawAmount: token1RawAmount,
-                          },
-                          {
-                            onSuccess: () => {
-                              refetchAllowance1();
-                              if (allowance1 >= token1RawAmount) updatePoolCreation({ step: 3 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 3:
-                  return (
-                    <TransactionButton
-                      title={`Approve ${poolCreation.token2.symbol}`}
-                      isPending={isApprove2Pending}
-                      isDisabled={isApprove2Pending || isWrongNetwork}
-                      onClick={() => {
-                        approve2(
-                          {
-                            token: poolCreation.token2.address,
-                            spender: poolData?.address,
-                            rawAmount: token2RawAmount,
-                          },
-                          {
-                            onSuccess: () => {
-                              refetchAllowance2();
-                              if (allowance2 >= token2RawAmount) updatePoolCreation({ step: 4 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-
-                case 4:
-                  return (
-                    <TransactionButton
-                      title={`Add ${poolCreation.token1.symbol}`}
-                      isPending={isBind1Pending}
-                      isDisabled={isBind1Pending || isWrongNetwork}
-                      onClick={() => {
-                        bind1(
-                          {
-                            pool: poolData?.address,
-                            token: poolCreation.token1.address,
-                            rawAmount: token1RawAmount,
-                          },
-                          {
-                            onSuccess: () => {
-                              refetchPool();
-                              updatePoolCreation({ step: 5 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 5:
-                  return (
-                    <TransactionButton
-                      title={`Add ${poolCreation.token2.symbol}`}
-                      isPending={isBind2Pending}
-                      isDisabled={isBind2Pending || isWrongNetwork}
-                      onClick={() => {
-                        bind2(
-                          {
-                            pool: poolData?.address,
-                            token: poolCreation.token2.address,
-                            rawAmount: token2RawAmount,
-                          },
-                          {
-                            onSuccess: () => {
-                              refetchPool();
-                              updatePoolCreation({ step: 6 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 6:
-                  return (
-                    <>
+              <TextField label="Pool name:" value={poolCreation.name} isDisabled={true} />
+              <TextField label="Pool symbol:" value={poolCreation.symbol} isDisabled={true} />
+              {(() => {
+                switch (poolCreation.step) {
+                  case 1:
+                    return (
                       <TransactionButton
-                        title="Set Swap Fee"
-                        isPending={isSetSwapFeePending}
-                        isDisabled={isSetSwapFeePending || isWrongNetwork}
+                        title="Create Pool"
+                        isPending={isCreatePending || isFetchPoolAddressPending}
+                        isDisabled={isCreatePending || isFetchPoolAddressPending || isWrongNetwork}
                         onClick={() => {
-                          setSwapFee(
-                            { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
+                          createPool({ name: poolCreation.name, symbol: poolCreation.symbol });
+                        }}
+                      />
+                    );
+                  case 2:
+                    return (
+                      <TransactionButton
+                        title={`Approve ${poolCreation.token1.symbol}`}
+                        isPending={isApprove1Pending}
+                        isDisabled={isApprove1Pending || isWrongNetwork}
+                        onClick={() => {
+                          approve1(
                             {
-                              onSuccess: () => {
-                                refetchPool();
-                                updatePoolCreation({ step: 7 });
+                              token: poolCreation.token1.address,
+                              spender: poolData?.address,
+                              rawAmount: token1RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchAllowance1();
+
+                                if (allowance1 >= token1RawAmount)
+                                  updatePoolCreation({ approveToken1TxHash: hash, step: 3 });
                               },
                             },
                           );
                         }}
                       />
-                    </>
-                  );
-                case 7:
-                  return (
-                    <TransactionButton
-                      title="Finalize"
-                      isPending={isFinalizePending}
-                      isDisabled={isFinalizePending || isWrongNetwork}
-                      onClick={() => {
-                        finalizePool(poolData?.address, {
-                          onSuccess: () => {
-                            refetchPool();
-                            updatePoolCreation({ step: 8 });
-                          },
-                        });
-                      }}
-                    />
-                  );
-                case 8:
-                  return <Alert type="success">Your CoW AMM poolCreation was successfully created!</Alert>;
-                default:
-                  return null;
-              }
-            })()}
+                    );
+                  case 3:
+                    return (
+                      <TransactionButton
+                        title={`Approve ${poolCreation.token2.symbol}`}
+                        isPending={isApprove2Pending}
+                        isDisabled={isApprove2Pending || isWrongNetwork}
+                        onClick={() => {
+                          approve2(
+                            {
+                              token: poolCreation.token2.address,
+                              spender: poolData?.address,
+                              rawAmount: token2RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchAllowance2();
+                                if (allowance2 >= token2RawAmount)
+                                  updatePoolCreation({ approveToken2TxHash: hash, step: 4 });
+                              },
+                            },
+                          );
+                        }}
+                      />
+                    );
+
+                  case 4:
+                    return (
+                      <TransactionButton
+                        title={`Add ${poolCreation.token1.symbol}`}
+                        isPending={isBind1Pending}
+                        isDisabled={isBind1Pending || isWrongNetwork}
+                        onClick={() => {
+                          bind1(
+                            {
+                              pool: poolData?.address,
+                              token: poolCreation.token1.address,
+                              rawAmount: token1RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchPool();
+                                updatePoolCreation({ bindToken1TxHash: hash, step: 5 });
+                              },
+                            },
+                          );
+                        }}
+                      />
+                    );
+                  case 5:
+                    return (
+                      <TransactionButton
+                        title={`Add ${poolCreation.token2.symbol}`}
+                        isPending={isBind2Pending}
+                        isDisabled={isBind2Pending || isWrongNetwork}
+                        onClick={() => {
+                          bind2(
+                            {
+                              pool: poolData?.address,
+                              token: poolCreation.token2.address,
+                              rawAmount: token2RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchPool();
+                                updatePoolCreation({ bindToken2TxHash: hash, step: 6 });
+                              },
+                            },
+                          );
+                        }}
+                      />
+                    );
+                  case 6:
+                    return (
+                      <>
+                        <TransactionButton
+                          title="Set Swap Fee"
+                          isPending={isSetSwapFeePending}
+                          isDisabled={isSetSwapFeePending || isWrongNetwork}
+                          onClick={() => {
+                            setSwapFee(
+                              { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
+                              {
+                                onSuccess: hash => {
+                                  refetchPool();
+                                  updatePoolCreation({ setSwapFeeTxHash: hash, step: 7 });
+                                },
+                              },
+                            );
+                          }}
+                        />
+                      </>
+                    );
+                  case 7:
+                    return (
+                      <TransactionButton
+                        title="Finalize"
+                        isPending={isFinalizePending}
+                        isDisabled={isFinalizePending || isWrongNetwork}
+                        onClick={() => {
+                          finalizePool(poolData?.address, {
+                            onSuccess: hash => {
+                              refetchPool();
+                              updatePoolCreation({ finalizePoolTxHash: hash, step: 8 });
+                            },
+                          });
+                        }}
+                      />
+                    );
+                  case 8:
+                    return <Alert type="success">Your CoW AMM poolCreation was successfully created!</Alert>;
+                  default:
+                    return null;
+                }
+              })()}
+            </div>
           </div>
+
+          {poolCreation.step === 6 && (
+            <Alert type="info">CoW AMMs built on Balancer v1 set the swap fee to the maximum value</Alert>
+          )}
+
+          {txError && (
+            <Alert type="error">
+              <div className="flex items-center gap-2">
+                {" "}
+                Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
+              </div>
+            </Alert>
+          )}
+
+          {isWrongNetwork && (
+            <Alert type="error">
+              You&apos;re connected to the wrong network, switch to{" "}
+              <span onClick={() => switchChain?.({ chainId: poolCreation.chainId })} className="link">
+                {CHAIN_NAMES[poolCreation.chainId]}
+              </span>{" "}
+              to finish creating your poolCreation, or start over.
+            </Alert>
+          )}
+
+          {poolCreation.step < 8 && (
+            <div className="flex justify-center gap-2 items-center">
+              <ContactSupportModal />
+              <div className="text-xl">·</div>
+              <PoolStateResetModal
+                clearState={() => {
+                  clearPoolCreation();
+                }}
+              />
+            </div>
+          )}
+
+          {poolCreation.step === 8 && (
+            <PoolCreated
+              clearState={clearPoolCreation}
+              etherscanURL={etherscanURL}
+              poolAddress={poolData?.address}
+              chainId={poolCreation.chainId}
+            />
+          )}
         </div>
-        <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
+        <div className="min-w-fit">
           <PoolStepsDisplay
             currentStepNumber={poolCreation.step}
             steps={[
               {
                 label: "Create Pool",
-                blockExplorerUrl: createPoolTxHash
-                  ? getBlockExplorerTxLink(poolCreation.chainId, createPoolTxHash)
-                  : undefined,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, createPoolTxHash),
               },
-              { label: `Approve ${poolCreation.token1.symbol}` },
-              { label: `Approve ${poolCreation.token2.symbol}` },
-              { label: `Add ${poolCreation.token1.symbol}` },
-              { label: `Add ${poolCreation.token2.symbol}` },
-              { label: "Set Swap Fee" },
-              { label: "Finalize Pool" },
+              {
+                label: `Approve ${poolCreation.token1.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken1TxHash),
+              },
+              {
+                label: `Approve ${poolCreation.token2.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken2TxHash),
+              },
+              {
+                label: `Add ${poolCreation.token1.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken1TxHash),
+              },
+              {
+                label: `Add ${poolCreation.token2.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken2TxHash),
+              },
+              {
+                label: "Set Swap Fee",
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, setSwapFeeTxHash),
+              },
+              {
+                label: "Finalize Pool",
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, finalizePoolTxHash),
+              },
             ]}
           />
         </div>
       </div>
-
-      {poolCreation.step === 6 && <Alert type="info">All CoW AMMs should set the swap fee to the maximum value</Alert>}
-      {poolCreation.step === 8 && (
-        <PoolCreated
-          clearState={clearPoolCreation}
-          etherscanURL={etherscanURL}
-          poolAddress={poolData?.address}
-          chainId={poolCreation.chainId}
-        />
-      )}
-
-      {isWrongNetwork && (
-        <Alert type="error">
-          You&apos;re connected to the wrong network, switch to{" "}
-          <span onClick={() => switchChain?.({ chainId: poolCreation.chainId })} className="link">
-            {CHAIN_NAMES[poolCreation.chainId]}
-          </span>{" "}
-          to finish creating your poolCreation, or start over.
-        </Alert>
-      )}
-
-      {txError && (
-        <Alert type="error">
-          <div className="flex items-center gap-2">
-            {" "}
-            Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
-          </div>
-        </Alert>
-      )}
-
-      {poolCreation.step < 8 && (
-        <div className="flex justify-center mt-3 gap-2 items-center">
-          <ContactSupportModal />
-          <div className="text-xl">·</div>
-          <PoolStateResetModal
-            clearState={() => {
-              clearPoolCreation();
-            }}
-          />
-        </div>
-      )}
     </>
   );
 };
