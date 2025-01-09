@@ -126,7 +126,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
     <>
       <div className="flex flex-wrap justify-center gap-5 ">
         <div className="flex flex-col gap-5">
-          <div className="bg-base-200 p-6 rounded-xl shadow-xl md:w-[500px]">
+          <div className="bg-base-200 p-6 rounded-xl shadow-xl w-[555px]">
             <div className="flex flex-col items-center gap-5 w-full min-w-[333px]">
               <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
               <div className="w-full">
@@ -303,12 +303,26 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             </div>
           </div>
 
+          {poolCreation.step === 6 && (
+            <Alert type="info">CoW AMMs built on Balancer v1 set the swap fee to the maximum value</Alert>
+          )}
+
           {txError && (
             <Alert type="error">
               <div className="flex items-center gap-2">
                 {" "}
                 Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
               </div>
+            </Alert>
+          )}
+
+          {isWrongNetwork && (
+            <Alert type="error">
+              You&apos;re connected to the wrong network, switch to{" "}
+              <span onClick={() => switchChain?.({ chainId: poolCreation.chainId })} className="link">
+                {CHAIN_NAMES[poolCreation.chainId]}
+              </span>{" "}
+              to finish creating your poolCreation, or start over.
             </Alert>
           )}
 
@@ -322,6 +336,15 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                 }}
               />
             </div>
+          )}
+
+          {poolCreation.step === 8 && (
+            <PoolCreated
+              clearState={clearPoolCreation}
+              etherscanURL={etherscanURL}
+              poolAddress={poolData?.address}
+              chainId={poolCreation.chainId}
+            />
           )}
         </div>
         <div className="min-w-fit">
@@ -360,26 +383,6 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
           />
         </div>
       </div>
-
-      {poolCreation.step === 6 && <Alert type="info">All CoW AMMs should set the swap fee to the maximum value</Alert>}
-      {poolCreation.step === 8 && (
-        <PoolCreated
-          clearState={clearPoolCreation}
-          etherscanURL={etherscanURL}
-          poolAddress={poolData?.address}
-          chainId={poolCreation.chainId}
-        />
-      )}
-
-      {isWrongNetwork && (
-        <Alert type="error">
-          You&apos;re connected to the wrong network, switch to{" "}
-          <span onClick={() => switchChain?.({ chainId: poolCreation.chainId })} className="link">
-            {CHAIN_NAMES[poolCreation.chainId]}
-          </span>{" "}
-          to finish creating your poolCreation, or start over.
-        </Alert>
-      )}
     </>
   );
 };
