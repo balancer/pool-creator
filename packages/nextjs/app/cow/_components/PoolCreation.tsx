@@ -125,7 +125,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
   return (
     <>
       <div className="flex flex-wrap justify-center gap-5 ">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-5">
           <div className="bg-base-200 p-6 rounded-xl shadow-xl md:w-[500px]">
             <div className="flex flex-col items-center gap-5 w-full min-w-[333px]">
               <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
@@ -302,8 +302,18 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
               })()}
             </div>
           </div>
+
+          {txError && (
+            <Alert type="error">
+              <div className="flex items-center gap-2">
+                {" "}
+                Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
+              </div>
+            </Alert>
+          )}
+
           {poolCreation.step < 8 && (
-            <div className="flex justify-center mt-3 gap-2 items-center">
+            <div className="flex justify-center gap-2 items-center">
               <ContactSupportModal />
               <div className="text-xl">·</div>
               <PoolStateResetModal
@@ -368,15 +378,6 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             {CHAIN_NAMES[poolCreation.chainId]}
           </span>{" "}
           to finish creating your poolCreation, or start over.
-        </Alert>
-      )}
-
-      {txError && (
-        <Alert type="error">
-          <div className="flex items-center gap-2">
-            {" "}
-            Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
-          </div>
         </Alert>
       )}
     </>
