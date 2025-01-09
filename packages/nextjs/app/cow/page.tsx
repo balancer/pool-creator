@@ -44,10 +44,10 @@ export default CowAmm;
 const CowLoadingSkeleton = () => {
   return (
     <>
-      <div className="w-full h-[562px]">
+      <div className="w-[555px] h-[562px]">
         <div className="animate-pulse bg-base-200 rounded-xl w-full h-full"></div>
       </div>
-      <div className="w-full h-[75px]">
+      <div className="w-[555px] h-[75px]">
         <div className="animate-pulse bg-base-200 rounded-xl w-full h-full"></div>
       </div>
     </>
