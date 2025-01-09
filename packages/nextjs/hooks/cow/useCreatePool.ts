@@ -1,6 +1,5 @@
 import { SafeAppProvider } from "@safe-global/safe-apps-provider";
 import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
-// import { TransactionStatus } from "@safe-global/safe-apps-sdk";
 import { useMutation } from "@tanstack/react-query";
 import { Address, createWalletClient, custom, parseEventLogs } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
@@ -53,8 +52,6 @@ export const useCreatePool = () => {
           onTransactionHash: txHash => updatePoolCreation({ createPoolTxHash: txHash }),
         },
       );
-
-      // QUESTION: from here the safe app takes over and nothing else in this hook runs??
     } else {
       // Regular EOA flow
       hash = await writeTx(() => walletClient.writeContract(request), {
@@ -63,7 +60,6 @@ export const useCreatePool = () => {
     }
 
     if (!hash) throw new Error("No pool creation transaction hash");
-    console.log("FINDING POOL ADDRESS FROM TX RECEIPT IN USECREATEPOOL");
     const txReceipt = await publicClient.getTransactionReceipt({ hash });
     const logs = parseEventLogs({
       abi: abis.CoW.BCoWFactory,

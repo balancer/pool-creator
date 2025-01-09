@@ -1,11 +1,12 @@
 import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
-import { TransactionStatus } from "@safe-global/safe-apps-sdk";
 import { getPublicClient } from "@wagmi/core";
 import { Hash, SendTransactionParameters, WalletClient } from "viem";
 import { Config, useWalletClient } from "wagmi";
 import { SendTransactionMutate } from "wagmi/query";
+import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
 import { useIsSafeWallet } from "~~/hooks/safe/useIsSafeWallet";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
+import { pollSafeTxStatus } from "~~/utils/safe";
 import { getBlockExplorerTxLink, getParsedError, notification } from "~~/utils/scaffold-eth";
 import { TransactorFuncOptions } from "~~/utils/scaffold-eth/contract";
 
@@ -30,30 +31,6 @@ export const TxnNotification = ({ message, blockExplorerLink }: { message: strin
   );
 };
 
-const MAX_POLLING_ATTEMPTS = 100; // 100 * 3s = 5 minutes
-const POLLING_INTERVAL = 3000; // 3 seconds
-
-const pollSafeTxStatus = async (sdk: any, transactionHash: string): Promise<`0x${string}`> => {
-  let attempts = 0;
-
-  while (attempts < MAX_POLLING_ATTEMPTS) {
-    const safeTxDetails = await sdk.txs.getBySafeTxHash(transactionHash);
-
-    console.log("safeTxDetails", safeTxDetails);
-
-    if (safeTxDetails?.txStatus === TransactionStatus.SUCCESS && safeTxDetails.txHash) {
-      return safeTxDetails.txHash as `0x${string}`;
-    }
-
-    if (safeTxDetails?.txStatus === TransactionStatus.FAILED) throw new Error("Safe transaction failed");
-
-    attempts++;
-    await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL));
-  }
-
-  throw new Error("Timeout waiting for Safe transaction to complete");
-};
-
 /**
  * Runs Transaction passed in to returned function showing UI feedback.
  * @param _walletClient - Optional wallet client to use. If not provided, will use the one from useWalletClient.
@@ -67,6 +44,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
   }
   const isSafeWallet = useIsSafeWallet();
   const { sdk } = useSafeAppsSDK();
+  const { updatePoolCreation } = usePoolCreationStore();
 
   const result: TransactionFunc = async (tx, options) => {
     if (!walletClient) {
@@ -96,8 +74,13 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
 
       notificationId = notification.loading(<TxnNotification message="Waiting for safe to process" />);
 
+      // if safe wallet, the transaction hash will be off-chain for safe infra, not on chain
       if (isSafeWallet) {
-        transactionHash = await pollSafeTxStatus(sdk, transactionHash);
+        const pendingSafeTxHash = transactionHash;
+        // save to state in case of user disconnection
+        updatePoolCreation({ pendingSafeTxHash });
+        // update transactionHash to the on chain tx hash returned by polling helper
+        transactionHash = await pollSafeTxStatus(sdk, pendingSafeTxHash);
       }
 
       notification.remove(notificationId);

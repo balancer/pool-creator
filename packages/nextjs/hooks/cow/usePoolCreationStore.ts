@@ -15,6 +15,13 @@ export interface PoolCreationState {
   step: number;
   tokenWeights: "5050" | "8020";
   createPoolTxHash: `0x${string}` | undefined;
+  pendingSafeTxHash: `0x${string}` | undefined;
+  approveToken1TxHash: `0x${string}` | undefined;
+  approveToken2TxHash: `0x${string}` | undefined;
+  bindToken1TxHash: `0x${string}` | undefined;
+  bindToken2TxHash: `0x${string}` | undefined;
+  setSwapFeeTxHash: `0x${string}` | undefined;
+  finalizePoolTxHash: `0x${string}` | undefined;
 }
 
 export const usePoolCreationStore = create(

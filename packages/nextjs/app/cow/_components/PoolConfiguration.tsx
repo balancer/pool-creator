@@ -171,6 +171,13 @@ export const PoolConfiguration = () => {
                 step: 1,
                 tokenWeights,
                 createPoolTxHash: undefined,
+                pendingSafeTxHash: undefined,
+                approveToken1TxHash: undefined,
+                approveToken2TxHash: undefined,
+                bindToken1TxHash: undefined,
+                bindToken2TxHash: undefined,
+                setSwapFeeTxHash: undefined,
+                finalizePoolTxHash: undefined,
               });
             }}
           />

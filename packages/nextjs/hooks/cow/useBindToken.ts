@@ -30,12 +30,14 @@ export const useBindToken = (tokenWeights: SupportedTokenWeight, isToken1: boole
       args: [token, rawAmount, denormalizedTokenWeight],
     });
 
-    await writeTx(() => walletClient.writeContract(bind), {
+    const txHash = await writeTx(() => walletClient.writeContract(bind), {
       blockConfirmations: 1,
       onBlockConfirmation: () => {
         console.log("Bound token:", token, "to pool:", pool);
       },
     });
+
+    return txHash;
   };
 
   return useMutation({ mutationFn: (payload: BindPayload) => bind(payload) });

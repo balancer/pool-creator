@@ -34,7 +34,16 @@ interface ManagePoolCreationProps {
 }
 
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
-  const { address: poolAddress, createPoolTxHash } = poolCreation;
+  const {
+    address: poolAddress,
+    createPoolTxHash,
+    approveToken1TxHash,
+    approveToken2TxHash,
+    bindToken1TxHash,
+    bindToken2TxHash,
+    setSwapFeeTxHash,
+    finalizePoolTxHash,
+  } = poolCreation;
 
   const { error: fetchPoolAddressError, isPending: isFetchPoolAddressPending } = useFetchPoolAddress();
 
@@ -172,9 +181,11 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                             rawAmount: token1RawAmount,
                           },
                           {
-                            onSuccess: () => {
+                            onSuccess: hash => {
                               refetchAllowance1();
-                              if (allowance1 >= token1RawAmount) updatePoolCreation({ step: 3 });
+
+                              if (allowance1 >= token1RawAmount)
+                                updatePoolCreation({ approveToken1TxHash: hash, step: 3 });
                             },
                           },
                         );
@@ -195,9 +206,10 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                             rawAmount: token2RawAmount,
                           },
                           {
-                            onSuccess: () => {
+                            onSuccess: hash => {
                               refetchAllowance2();
-                              if (allowance2 >= token2RawAmount) updatePoolCreation({ step: 4 });
+                              if (allowance2 >= token2RawAmount)
+                                updatePoolCreation({ approveToken2TxHash: hash, step: 4 });
                             },
                           },
                         );
@@ -219,9 +231,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                             rawAmount: token1RawAmount,
                           },
                           {
-                            onSuccess: () => {
+                            onSuccess: hash => {
                               refetchPool();
-                              updatePoolCreation({ step: 5 });
+                              updatePoolCreation({ bindToken1TxHash: hash, step: 5 });
                             },
                           },
                         );
@@ -242,9 +254,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                             rawAmount: token2RawAmount,
                           },
                           {
-                            onSuccess: () => {
+                            onSuccess: hash => {
                               refetchPool();
-                              updatePoolCreation({ step: 6 });
+                              updatePoolCreation({ bindToken2TxHash: hash, step: 6 });
                             },
                           },
                         );
@@ -262,9 +274,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                           setSwapFee(
                             { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
                             {
-                              onSuccess: () => {
+                              onSuccess: hash => {
                                 refetchPool();
-                                updatePoolCreation({ step: 7 });
+                                updatePoolCreation({ setSwapFeeTxHash: hash, step: 7 });
                               },
                             },
                           );
@@ -280,9 +292,9 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                       isDisabled={isFinalizePending || isWrongNetwork}
                       onClick={() => {
                         finalizePool(poolData?.address, {
-                          onSuccess: () => {
+                          onSuccess: hash => {
                             refetchPool();
-                            updatePoolCreation({ step: 8 });
+                            updatePoolCreation({ finalizePoolTxHash: hash, step: 8 });
                           },
                         });
                       }}
@@ -302,16 +314,32 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             steps={[
               {
                 label: "Create Pool",
-                blockExplorerUrl: createPoolTxHash
-                  ? getBlockExplorerTxLink(poolCreation.chainId, createPoolTxHash)
-                  : undefined,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, createPoolTxHash),
               },
-              { label: `Approve ${poolCreation.token1.symbol}` },
-              { label: `Approve ${poolCreation.token2.symbol}` },
-              { label: `Add ${poolCreation.token1.symbol}` },
-              { label: `Add ${poolCreation.token2.symbol}` },
-              { label: "Set Swap Fee" },
-              { label: "Finalize Pool" },
+              {
+                label: `Approve ${poolCreation.token1.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken1TxHash),
+              },
+              {
+                label: `Approve ${poolCreation.token2.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken2TxHash),
+              },
+              {
+                label: `Add ${poolCreation.token1.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken1TxHash),
+              },
+              {
+                label: `Add ${poolCreation.token2.symbol}`,
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken2TxHash),
+              },
+              {
+                label: "Set Swap Fee",
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, setSwapFeeTxHash),
+              },
+              {
+                label: "Finalize Pool",
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, finalizePoolTxHash),
+              },
             ]}
           />
         </div>
