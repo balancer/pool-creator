@@ -124,184 +124,197 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
 
   return (
     <>
-      <div className="flex flex-wrap justify-center gap-5 lg:relative">
-        <div className="bg-base-200 p-6 rounded-xl w-full flex flex-grow shadow-xl md:w-[555px]">
-          <div className="flex flex-col items-center gap-5 w-full">
-            <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
-            <div className="w-full">
-              <div className="ml-1 mb-1">Selected pool tokens:</div>
-              <div className="w-full flex flex-col gap-3">
-                <TokenField
-                  value={poolCreation.token1Amount}
-                  selectedToken={poolCreation.token1}
-                  isDisabled={true}
-                  tokenWeight={token1Weight}
-                />
-                <TokenField
-                  value={poolCreation.token2Amount}
-                  selectedToken={poolCreation.token2}
-                  isDisabled={true}
-                  tokenWeight={token2Weight}
-                />
+      <div className="flex flex-wrap justify-center gap-5 ">
+        <div className="flex flex-col gap-3">
+          <div className="bg-base-200 p-6 rounded-xl shadow-xl md:w-[500px]">
+            <div className="flex flex-col items-center gap-5 w-full min-w-[333px]">
+              <h5 className="text-xl md:text-2xl font-bold text-center">Preview your pool</h5>
+              <div className="w-full">
+                <div className="ml-1 mb-1">Selected pool tokens:</div>
+                <div className="w-full flex flex-col gap-3">
+                  <TokenField
+                    value={poolCreation.token1Amount}
+                    selectedToken={poolCreation.token1}
+                    isDisabled={true}
+                    tokenWeight={token1Weight}
+                  />
+                  <TokenField
+                    value={poolCreation.token2Amount}
+                    selectedToken={poolCreation.token2}
+                    isDisabled={true}
+                    tokenWeight={token2Weight}
+                  />
+                </div>
               </div>
-            </div>
-            <TextField label="Pool name:" value={poolCreation.name} isDisabled={true} />
-            <TextField label="Pool symbol:" value={poolCreation.symbol} isDisabled={true} />
-            {(() => {
-              switch (poolCreation.step) {
-                case 1:
-                  return (
-                    <TransactionButton
-                      title="Create Pool"
-                      isPending={isCreatePending || isFetchPoolAddressPending}
-                      isDisabled={isCreatePending || isFetchPoolAddressPending || isWrongNetwork}
-                      onClick={() => {
-                        createPool({ name: poolCreation.name, symbol: poolCreation.symbol });
-                      }}
-                    />
-                  );
-                case 2:
-                  return (
-                    <TransactionButton
-                      title={`Approve ${poolCreation.token1.symbol}`}
-                      isPending={isApprove1Pending}
-                      isDisabled={isApprove1Pending || isWrongNetwork}
-                      onClick={() => {
-                        approve1(
-                          {
-                            token: poolCreation.token1.address,
-                            spender: poolData?.address,
-                            rawAmount: token1RawAmount,
-                          },
-                          {
-                            onSuccess: hash => {
-                              refetchAllowance1();
-
-                              if (allowance1 >= token1RawAmount)
-                                updatePoolCreation({ approveToken1TxHash: hash, step: 3 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 3:
-                  return (
-                    <TransactionButton
-                      title={`Approve ${poolCreation.token2.symbol}`}
-                      isPending={isApprove2Pending}
-                      isDisabled={isApprove2Pending || isWrongNetwork}
-                      onClick={() => {
-                        approve2(
-                          {
-                            token: poolCreation.token2.address,
-                            spender: poolData?.address,
-                            rawAmount: token2RawAmount,
-                          },
-                          {
-                            onSuccess: hash => {
-                              refetchAllowance2();
-                              if (allowance2 >= token2RawAmount)
-                                updatePoolCreation({ approveToken2TxHash: hash, step: 4 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-
-                case 4:
-                  return (
-                    <TransactionButton
-                      title={`Add ${poolCreation.token1.symbol}`}
-                      isPending={isBind1Pending}
-                      isDisabled={isBind1Pending || isWrongNetwork}
-                      onClick={() => {
-                        bind1(
-                          {
-                            pool: poolData?.address,
-                            token: poolCreation.token1.address,
-                            rawAmount: token1RawAmount,
-                          },
-                          {
-                            onSuccess: hash => {
-                              refetchPool();
-                              updatePoolCreation({ bindToken1TxHash: hash, step: 5 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 5:
-                  return (
-                    <TransactionButton
-                      title={`Add ${poolCreation.token2.symbol}`}
-                      isPending={isBind2Pending}
-                      isDisabled={isBind2Pending || isWrongNetwork}
-                      onClick={() => {
-                        bind2(
-                          {
-                            pool: poolData?.address,
-                            token: poolCreation.token2.address,
-                            rawAmount: token2RawAmount,
-                          },
-                          {
-                            onSuccess: hash => {
-                              refetchPool();
-                              updatePoolCreation({ bindToken2TxHash: hash, step: 6 });
-                            },
-                          },
-                        );
-                      }}
-                    />
-                  );
-                case 6:
-                  return (
-                    <>
+              <TextField label="Pool name:" value={poolCreation.name} isDisabled={true} />
+              <TextField label="Pool symbol:" value={poolCreation.symbol} isDisabled={true} />
+              {(() => {
+                switch (poolCreation.step) {
+                  case 1:
+                    return (
                       <TransactionButton
-                        title="Set Swap Fee"
-                        isPending={isSetSwapFeePending}
-                        isDisabled={isSetSwapFeePending || isWrongNetwork}
+                        title="Create Pool"
+                        isPending={isCreatePending || isFetchPoolAddressPending}
+                        isDisabled={isCreatePending || isFetchPoolAddressPending || isWrongNetwork}
                         onClick={() => {
-                          setSwapFee(
-                            { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
+                          createPool({ name: poolCreation.name, symbol: poolCreation.symbol });
+                        }}
+                      />
+                    );
+                  case 2:
+                    return (
+                      <TransactionButton
+                        title={`Approve ${poolCreation.token1.symbol}`}
+                        isPending={isApprove1Pending}
+                        isDisabled={isApprove1Pending || isWrongNetwork}
+                        onClick={() => {
+                          approve1(
+                            {
+                              token: poolCreation.token1.address,
+                              spender: poolData?.address,
+                              rawAmount: token1RawAmount,
+                            },
                             {
                               onSuccess: hash => {
-                                refetchPool();
-                                updatePoolCreation({ setSwapFeeTxHash: hash, step: 7 });
+                                refetchAllowance1();
+
+                                if (allowance1 >= token1RawAmount)
+                                  updatePoolCreation({ approveToken1TxHash: hash, step: 3 });
                               },
                             },
                           );
                         }}
                       />
-                    </>
-                  );
-                case 7:
-                  return (
-                    <TransactionButton
-                      title="Finalize"
-                      isPending={isFinalizePending}
-                      isDisabled={isFinalizePending || isWrongNetwork}
-                      onClick={() => {
-                        finalizePool(poolData?.address, {
-                          onSuccess: hash => {
-                            refetchPool();
-                            updatePoolCreation({ finalizePoolTxHash: hash, step: 8 });
-                          },
-                        });
-                      }}
-                    />
-                  );
-                case 8:
-                  return <Alert type="success">Your CoW AMM poolCreation was successfully created!</Alert>;
-                default:
-                  return null;
-              }
-            })()}
+                    );
+                  case 3:
+                    return (
+                      <TransactionButton
+                        title={`Approve ${poolCreation.token2.symbol}`}
+                        isPending={isApprove2Pending}
+                        isDisabled={isApprove2Pending || isWrongNetwork}
+                        onClick={() => {
+                          approve2(
+                            {
+                              token: poolCreation.token2.address,
+                              spender: poolData?.address,
+                              rawAmount: token2RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchAllowance2();
+                                if (allowance2 >= token2RawAmount)
+                                  updatePoolCreation({ approveToken2TxHash: hash, step: 4 });
+                              },
+                            },
+                          );
+                        }}
+                      />
+                    );
+
+                  case 4:
+                    return (
+                      <TransactionButton
+                        title={`Add ${poolCreation.token1.symbol}`}
+                        isPending={isBind1Pending}
+                        isDisabled={isBind1Pending || isWrongNetwork}
+                        onClick={() => {
+                          bind1(
+                            {
+                              pool: poolData?.address,
+                              token: poolCreation.token1.address,
+                              rawAmount: token1RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchPool();
+                                updatePoolCreation({ bindToken1TxHash: hash, step: 5 });
+                              },
+                            },
+                          );
+                        }}
+                      />
+                    );
+                  case 5:
+                    return (
+                      <TransactionButton
+                        title={`Add ${poolCreation.token2.symbol}`}
+                        isPending={isBind2Pending}
+                        isDisabled={isBind2Pending || isWrongNetwork}
+                        onClick={() => {
+                          bind2(
+                            {
+                              pool: poolData?.address,
+                              token: poolCreation.token2.address,
+                              rawAmount: token2RawAmount,
+                            },
+                            {
+                              onSuccess: hash => {
+                                refetchPool();
+                                updatePoolCreation({ bindToken2TxHash: hash, step: 6 });
+                              },
+                            },
+                          );
+                        }}
+                      />
+                    );
+                  case 6:
+                    return (
+                      <>
+                        <TransactionButton
+                          title="Set Swap Fee"
+                          isPending={isSetSwapFeePending}
+                          isDisabled={isSetSwapFeePending || isWrongNetwork}
+                          onClick={() => {
+                            setSwapFee(
+                              { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
+                              {
+                                onSuccess: hash => {
+                                  refetchPool();
+                                  updatePoolCreation({ setSwapFeeTxHash: hash, step: 7 });
+                                },
+                              },
+                            );
+                          }}
+                        />
+                      </>
+                    );
+                  case 7:
+                    return (
+                      <TransactionButton
+                        title="Finalize"
+                        isPending={isFinalizePending}
+                        isDisabled={isFinalizePending || isWrongNetwork}
+                        onClick={() => {
+                          finalizePool(poolData?.address, {
+                            onSuccess: hash => {
+                              refetchPool();
+                              updatePoolCreation({ finalizePoolTxHash: hash, step: 8 });
+                            },
+                          });
+                        }}
+                      />
+                    );
+                  case 8:
+                    return <Alert type="success">Your CoW AMM poolCreation was successfully created!</Alert>;
+                  default:
+                    return null;
+                }
+              })()}
+            </div>
           </div>
+          {poolCreation.step < 8 && (
+            <div className="flex justify-center mt-3 gap-2 items-center">
+              <ContactSupportModal />
+              <div className="text-xl">·</div>
+              <PoolStateResetModal
+                clearState={() => {
+                  clearPoolCreation();
+                }}
+              />
+            </div>
+          )}
         </div>
-        <div className="flex lg:absolute lg:top-0 lg:-right-[225px]">
+        <div className="min-w-fit">
           <PoolStepsDisplay
             currentStepNumber={poolCreation.step}
             steps={[
@@ -365,18 +378,6 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
           </div>
         </Alert>
-      )}
-
-      {poolCreation.step < 8 && (
-        <div className="flex justify-center mt-3 gap-2 items-center">
-          <ContactSupportModal />
-          <div className="text-xl">·</div>
-          <PoolStateResetModal
-            clearState={() => {
-              clearPoolCreation();
-            }}
-          />
-        </div>
       )}
     </>
   );

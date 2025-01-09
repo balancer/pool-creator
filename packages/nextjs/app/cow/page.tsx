@@ -18,7 +18,7 @@ const CowAmm: NextPage = () => {
   return (
     <div className="flex-grow bg-base-300">
       <div className="flex justify-center px-5">
-        <div className="w-full md:w-[555px]">
+        <div className="w-full">
           <div className="flex items-center flex-col flex-grow py-14 gap-6">
             <CowAMM width="333" />
             {!isMounted ? (
