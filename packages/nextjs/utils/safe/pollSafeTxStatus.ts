@@ -14,6 +14,6 @@ export async function pollSafeTxStatus(sdk: SafeAppsSDK, txHash: `0x${string}`):
 
     if (safeTxDetails?.txStatus === TransactionStatus.CANCELLED) throw new Error("Safe transaction was cancelled");
 
-    await new Promise(resolve => setTimeout(resolve, 5000)); // poll every 5 seconds
+    await new Promise(resolve => setTimeout(resolve, 3000)); // poll every 3 seconds
   }
 }

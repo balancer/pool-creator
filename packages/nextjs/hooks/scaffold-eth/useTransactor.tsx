@@ -79,7 +79,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
         const pendingSafeTxHash = transactionHash;
         // save to state in case of user disconnection
         updatePoolCreation({ pendingSafeTxHash });
-        // update transactionHash to the on chain tx hash returned by polling helper
+        // update transactionHash to the on chain tx hash
         transactionHash = await pollSafeTxStatus(sdk, pendingSafeTxHash);
       }
 

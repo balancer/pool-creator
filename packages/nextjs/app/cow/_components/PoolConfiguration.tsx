@@ -167,7 +167,7 @@ export const PoolConfiguration = () => {
                 token2Amount,
                 name: poolName.trim(),
                 symbol: poolSymbol.trim(),
-                address: undefined,
+                poolAddress: undefined,
                 step: 1,
                 tokenWeights,
                 createPoolTxHash: undefined,

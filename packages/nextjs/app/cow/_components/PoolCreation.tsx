@@ -35,7 +35,7 @@ interface ManagePoolCreationProps {
 
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
   const {
-    address: poolAddress,
+    poolAddress,
     createPoolTxHash,
     approveToken1TxHash,
     approveToken2TxHash,
@@ -45,7 +45,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
     finalizePoolTxHash,
   } = poolCreation;
 
-  const { error: fetchPoolAddressError, isPending: isFetchPoolAddressPending } = useFetchPoolAddress();
+  const { isFetching: isFetchPoolAddressPending, error: fetchPoolAddressError } = useFetchPoolAddress();
 
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
@@ -156,14 +156,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                       isPending={isCreatePending || isFetchPoolAddressPending}
                       isDisabled={isCreatePending || isFetchPoolAddressPending || isWrongNetwork}
                       onClick={() => {
-                        createPool(
-                          { name: poolCreation.name, symbol: poolCreation.symbol },
-                          {
-                            onSuccess: newPoolAddress => {
-                              updatePoolCreation({ address: newPoolAddress, step: 2 });
-                            },
-                          },
-                        );
+                        createPool({ name: poolCreation.name, symbol: poolCreation.symbol });
                       }}
                     />
                   );

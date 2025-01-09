@@ -1,11 +1,6 @@
-import { SafeAppProvider } from "@safe-global/safe-apps-provider";
-import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
 import { useMutation } from "@tanstack/react-query";
-import { Address, createWalletClient, custom, parseEventLogs } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { abis } from "~~/contracts/abis";
 import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
-import { useIsSafeWallet } from "~~/hooks/safe";
 import { useScaffoldContract, useTransactor } from "~~/hooks/scaffold-eth";
 
 type CreatePoolPayload = {
@@ -20,10 +15,7 @@ export const useCreatePool = () => {
   const writeTx = useTransactor();
   const { updatePoolCreation } = usePoolCreationStore();
 
-  const { sdk, safe } = useSafeAppsSDK();
-  const isSafeWallet = useIsSafeWallet();
-
-  const createPool = async ({ name, symbol }: CreatePoolPayload): Promise<Address> => {
+  const createPool = async ({ name, symbol }: CreatePoolPayload) => {
     if (!publicClient || !bCoWFactory || !walletClient) throw new Error("useCreatePool missing required setup");
 
     const { request } = await publicClient.simulateContract({
@@ -34,42 +26,11 @@ export const useCreatePool = () => {
       args: [name, symbol],
     });
 
-    let hash: `0x${string}` | undefined;
-
-    if (isSafeWallet) {
-      const safeProvider = new SafeAppProvider(safe, sdk);
-      const safeWalletClient = createWalletClient({
-        transport: custom(safeProvider),
-      });
-
-      hash = await writeTx(
-        () =>
-          safeWalletClient.writeContract({
-            ...request,
-            chain: walletClient.chain,
-          }),
-        {
-          onTransactionHash: txHash => updatePoolCreation({ createPoolTxHash: txHash }),
-        },
-      );
-    } else {
-      // Regular EOA flow
-      hash = await writeTx(() => walletClient.writeContract(request), {
-        onTransactionHash: txHash => updatePoolCreation({ createPoolTxHash: txHash }),
-      });
-    }
-
-    if (!hash) throw new Error("No pool creation transaction hash");
-    const txReceipt = await publicClient.getTransactionReceipt({ hash });
-    const logs = parseEventLogs({
-      abi: abis.CoW.BCoWFactory,
-      logs: txReceipt.logs,
+    const txHash = await writeTx(() => walletClient.writeContract(request), {
+      onTransactionHash: txHash => updatePoolCreation({ createPoolTxHash: txHash }),
     });
-    const newPool = (logs[0].args as { caller: string; bPool: string }).bPool;
-    if (!newPool) throw new Error("No new pool address from pool creation tx receipt");
-    console.log("New pool address from txReceipt logs:", newPool);
 
-    return newPool;
+    return txHash;
   };
 
   return useMutation({

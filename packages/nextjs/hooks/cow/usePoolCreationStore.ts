@@ -11,7 +11,7 @@ export interface PoolCreationState {
   token2Amount: string;
   name: string;
   symbol: string;
-  address: Address | undefined; // updated by tx receipt from completion of step 1
+  poolAddress: Address | undefined; // updated by tx receipt from completion of step 1
   step: number;
   tokenWeights: "5050" | "8020";
   createPoolTxHash: `0x${string}` | undefined;
