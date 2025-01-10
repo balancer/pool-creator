@@ -56,6 +56,7 @@ export const RPC_FALLBACKS: Record<number, string> = {
   [chains.arbitrum.id]: "https://arbitrum.llamarpc.com",
   [chains.gnosis.id]: "https://gnosis.drpc.org",
   [chains.sepolia.id]: "https://sepolia.gateway.tenderly.co",
+  [chains.base.id]: "https://base.llamarpc.com",
 };
 
 export const getRpcFallbackUrl = (chainId: number) => {
