@@ -26,6 +26,10 @@ export type TokenConfig = {
   useBoostedVariant: boolean;
 };
 
+export interface TransactionHashes {
+  safeHash: `0x${string}` | undefined;
+  wagmiHash: `0x${string}` | undefined;
+}
 export interface PoolCreationStore {
   chain: ChainWithAttributes | undefined;
   step: number;
@@ -45,9 +49,9 @@ export interface PoolCreationStore {
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
-  createPoolTxHash: `0x${string}` | undefined;
+  createPoolTx: TransactionHashes;
+  initPoolTx: TransactionHashes;
   swapTxHash: `0x${string}` | undefined;
-  initPoolTxHash: `0x${string}` | undefined;
   hasBeenInitialized: boolean;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
@@ -86,8 +90,8 @@ export const initialPoolCreationState = {
   poolHooksContract: "",
   disableUnbalancedLiquidity: false,
   enableDonation: false,
-  createPoolTxHash: undefined,
-  initPoolTxHash: undefined,
+  createPoolTx: { safeHash: undefined, wagmiHash: undefined },
+  initPoolTx: { safeHash: undefined, wagmiHash: undefined },
   swapTxHash: undefined,
   hasBeenInitialized: false,
 };

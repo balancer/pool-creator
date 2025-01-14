@@ -8,7 +8,7 @@ import {
   weightedPoolFactoryAbi_V3,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { parseEventLogs, parseUnits, zeroAddress } from "viem";
+import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
@@ -99,23 +99,10 @@ export const useCreatePool = () => {
           to: call.to,
         }),
       {
-        onTransactionHash: txHash => updatePool({ createPoolTxHash: txHash }),
+        // I think it's safe to make safeHash undefined once wagmiHash is available
+        onTransactionHash: txHash => updatePool({ createPoolTx: { wagmiHash: txHash, safeHash: undefined } }),
       },
     );
-    if (!hash) throw new Error("Failed to generate pool creation transaction hash");
-
-    const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
-    const logs = parseEventLogs({
-      abi: poolFactoryAbi[poolType],
-      logs: txReceipt.logs,
-    });
-
-    if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
-      const newPool = logs[0].args.pool;
-      updatePool({ poolAddress: newPool, step: 2 });
-    } else {
-      throw new Error("Expected pool address not found in event logs");
-    }
 
     return hash;
   }

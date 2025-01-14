@@ -11,11 +11,12 @@ import {
 import {
   useBoostableWhitelist,
   useCreatePool,
+  useCreatePoolTxHash,
   useInitializePool,
+  useInitializePoolTxHash,
   useMultiSwap,
   usePoolCreationStore,
   useUserDataStore,
-  useWaitForTransactionReceipt,
 } from "~~/hooks/v3/";
 import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
@@ -24,30 +25,35 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const { step, tokenConfigs, clearPoolStore, createPoolTxHash, swapTxHash, initPoolTxHash, chain } =
-    usePoolCreationStore();
+  const { step, tokenConfigs, clearPoolStore, createPoolTx, swapTxHash, initPoolTx, chain } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
+  const { isFetching: isFetchPoolAddressPending, error: fetchPoolAddressError } = useCreatePoolTxHash();
+
   const { mutate: multiSwap, isPending: isMultiSwapPending, error: multiSwapError } = useMultiSwap();
   const {
     mutate: initializePool,
     isPending: isInitializePoolPending,
     error: initializePoolError,
   } = useInitializePool();
-  const { isLoadingTxReceipt } = useWaitForTransactionReceipt(); // Fetches tx from tx hash if user disconnects during pending tx state
+  const { isFetching: isInitPoolTxHashPending, error: initPoolTxHashError } = useInitializePoolTxHash();
 
-  const poolDeploymentUrl = createPoolTxHash ? getBlockExplorerTxLink(chain?.id, createPoolTxHash) : undefined;
-  const poolInitializationUrl = initPoolTxHash ? getBlockExplorerTxLink(chain?.id, initPoolTxHash) : undefined;
+  const poolDeploymentUrl = createPoolTx.wagmiHash
+    ? getBlockExplorerTxLink(chain?.id, createPoolTx.wagmiHash)
+    : undefined;
+  const poolInitializationUrl = initPoolTx.wagmiHash
+    ? getBlockExplorerTxLink(chain?.id, initPoolTx.wagmiHash)
+    : undefined;
   const multiSwapUrl = swapTxHash ? getBlockExplorerTxLink(chain?.id, swapTxHash) : undefined;
 
   const deployStep = createTransactionStep({
     label: "Deploy Pool",
     blockExplorerUrl: poolDeploymentUrl,
     onSubmit: createPool,
-    isPending: isCreatePoolPending || isLoadingTxReceipt,
-    error: createPoolError,
+    isPending: isCreatePoolPending || isFetchPoolAddressPending,
+    error: createPoolError || fetchPoolAddressError,
   });
 
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => {
@@ -103,8 +109,8 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const initializeStep = createTransactionStep({
     label: "Initialize Pool",
     onSubmit: initializePool,
-    isPending: isInitializePoolPending || isLoadingTxReceipt,
-    error: initializePoolError,
+    isPending: isInitializePoolPending || isInitPoolTxHashPending,
+    error: initializePoolError || initPoolTxHashError,
     blockExplorerUrl: poolInitializationUrl,
   });
 
