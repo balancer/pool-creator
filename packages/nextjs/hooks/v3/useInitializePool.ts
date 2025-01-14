@@ -79,7 +79,8 @@ export const useInitializePool = () => {
 
     // Execute the transaction
     const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
-      onTransactionHash: txHash => updatePool({ initPoolTxHash: txHash }),
+      // Should be okay to set off-chain safeHash undefined once we have on chain wagmiHash
+      onTransactionHash: txHash => updatePool({ initPoolTx: { wagmiHash: txHash, safeHash: undefined } }),
     });
     if (!hash) throw new Error("No pool initialization transaction hash");
 
