@@ -72,7 +72,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       }
       notification.remove(notificationId);
 
-      notificationId = notification.loading(<TxnNotification message="Waiting for safe to process" />);
+      notificationId = notification.loading(<TxnNotification message="Waiting for safe to process the transaction" />);
 
       // if safe wallet, the transaction hash will be off-chain for safe infra, not on chain
       if (isSafeWallet) {

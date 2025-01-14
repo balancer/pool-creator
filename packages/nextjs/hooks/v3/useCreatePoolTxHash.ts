@@ -7,10 +7,10 @@ import { poolFactoryAbi, usePoolCreationStore } from "~~/hooks/v3/";
 import { pollSafeTxStatus } from "~~/utils/safe";
 
 /**
- * Use create pool tx hash to fetch pool address and save to store
+ * Parses the create pool tx hash to fetch pool address and save to store
  */
 export function useCreatePoolTxHash() {
-  const { createPoolTx, updatePool, poolType, poolAddress } = usePoolCreationStore();
+  const { createPoolTx, updatePool, poolType } = usePoolCreationStore();
   const { wagmiHash, safeHash } = createPoolTx;
 
   const publicClient = usePublicClient();
@@ -18,14 +18,14 @@ export function useCreatePoolTxHash() {
   const { sdk } = useSafeAppsSDK();
 
   return useQuery({
-    queryKey: ["v3PoolAddress", wagmiHash, safeHash],
+    queryKey: ["createPoolTx", wagmiHash, safeHash],
     queryFn: async () => {
       if (!publicClient) throw new Error("No public client for fetching pool address");
       if (poolType === undefined) throw new Error("Pool type is undefined");
 
       if (isSafeWallet && safeHash && !wagmiHash) {
         const wagmiHash = await pollSafeTxStatus(sdk, safeHash);
-        updatePool({ createPoolTx: { safeHash, wagmiHash } });
+        updatePool({ createPoolTx: { safeHash, wagmiHash, isSuccess: false } });
         return null; // Trigger a re-query with the new wagmiHash
       }
 
@@ -41,7 +41,9 @@ export function useCreatePoolTxHash() {
 
         if (logs.length > 0 && "args" in logs[0] && "pool" in logs[0].args) {
           const newPoolAddress = logs[0].args.pool;
-          updatePool({ poolAddress: newPoolAddress, step: 2 });
+          if (!newPoolAddress) throw new Error("Pool address not found in PoolCreated event logs");
+
+          updatePool({ poolAddress: newPoolAddress, step: 2, createPoolTx: { safeHash, wagmiHash, isSuccess: true } });
           return newPoolAddress;
         } else {
           throw new Error("Pool address not found in PoolCreated event logs");
@@ -50,6 +52,6 @@ export function useCreatePoolTxHash() {
         throw new Error("Create pool transaction reverted");
       }
     },
-    enabled: Boolean(!poolAddress && (safeHash || wagmiHash)),
+    enabled: Boolean(!createPoolTx.isSuccess && (safeHash || wagmiHash)),
   });
 }

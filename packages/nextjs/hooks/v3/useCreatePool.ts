@@ -21,6 +21,9 @@ export const poolFactoryAbi = {
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
 const TOKEN_WEIGHT_DECIMALS = 16;
 
+/**
+ * Handles sending the create pool transaction
+ */
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -99,8 +102,9 @@ export const useCreatePool = () => {
           to: call.to,
         }),
       {
-        // I think it's safe to make safeHash undefined once wagmiHash is available
-        onTransactionHash: txHash => updatePool({ createPoolTx: { wagmiHash: txHash, safeHash: undefined } }),
+        // tx not considered successful until tx receipt is parsed
+        onTransactionHash: txHash =>
+          updatePool({ createPoolTx: { wagmiHash: txHash, safeHash: undefined, isSuccess: false } }),
       },
     );
 

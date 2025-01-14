@@ -6,6 +6,9 @@ import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { createPermit2 } from "~~/utils/permit2Helper";
 
+/**
+ * Handles sending the init pool transaction
+ */
 export const useInitializePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
@@ -13,7 +16,7 @@ export const useInitializePool = () => {
   const chainId = publicClient?.chain.id;
   const rpcUrl = publicClient?.transport.transports[0].value.url;
   const protocolVersion = 3;
-  const { poolAddress, poolType, tokenConfigs, updatePool, step } = usePoolCreationStore();
+  const { poolAddress, poolType, tokenConfigs, updatePool } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   async function initializePool() {
@@ -77,18 +80,12 @@ export const useInitializePool = () => {
     const args = [[], [], batch, signature, [encodedInitData]] as const;
     console.log("router.permitBatchAndCall args for initialize pool", args);
 
-    // Execute the transaction
     const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
       // Should be okay to set off-chain safeHash undefined once we have on chain wagmiHash
-      onTransactionHash: txHash => updatePool({ initPoolTx: { wagmiHash: txHash, safeHash: undefined } }),
+      onTransactionHash: txHash =>
+        updatePool({ initPoolTx: { wagmiHash: txHash, safeHash: undefined, isSuccess: false } }),
     });
-    if (!hash) throw new Error("No pool initialization transaction hash");
-
-    // Move the step forward if the transaction is successful
-    const txReceipt = await publicClient.waitForTransactionReceipt({ hash });
-    if (txReceipt.status === "success") {
-      updatePool({ step: step + 1, hasBeenInitialized: true });
-    }
+    if (!hash) throw new Error("Missing init pool transaction hash");
 
     return hash;
   }

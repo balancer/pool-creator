@@ -26,9 +26,10 @@ export type TokenConfig = {
   useBoostedVariant: boolean;
 };
 
-export interface TransactionHashes {
+export interface TransactionDetails {
   safeHash: `0x${string}` | undefined;
   wagmiHash: `0x${string}` | undefined;
+  isSuccess: boolean;
 }
 export interface PoolCreationStore {
   chain: ChainWithAttributes | undefined;
@@ -49,10 +50,9 @@ export interface PoolCreationStore {
   disableUnbalancedLiquidity: boolean;
   enableDonation: boolean;
   amplificationParameter: string;
-  createPoolTx: TransactionHashes;
-  initPoolTx: TransactionHashes;
-  swapTxHash: `0x${string}` | undefined;
-  hasBeenInitialized: boolean;
+  createPoolTx: TransactionDetails;
+  initPoolTx: TransactionDetails;
+  swapToBoostedTx: TransactionDetails;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
   clearPoolStore: () => void;
@@ -77,7 +77,7 @@ export const initialPoolCreationState = {
   isDelegatingPauseManagement: true,
   isDelegatingSwapFeeManagement: true,
   isUsingHooks: false,
-  poolAddress: undefined, // set after pool deployment
+  poolAddress: undefined, // set after pool deployment by parsing the tx hash
   selectedTab: TABS[0],
   name: "",
   symbol: "",
@@ -90,10 +90,10 @@ export const initialPoolCreationState = {
   poolHooksContract: "",
   disableUnbalancedLiquidity: false,
   enableDonation: false,
-  createPoolTx: { safeHash: undefined, wagmiHash: undefined },
-  initPoolTx: { safeHash: undefined, wagmiHash: undefined },
-  swapTxHash: undefined,
-  hasBeenInitialized: false,
+  // isSuccess is only flipped to true after parsing tx receipt for status
+  createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
 };
 
 // Stores all the data that will be used for pool creation

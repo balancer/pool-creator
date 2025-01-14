@@ -9,7 +9,7 @@ import { pollSafeTxStatus } from "~~/utils/safe";
  * Use init pool tx hash to move step progression forward
  */
 export function useInitializePoolTxHash() {
-  const { initPoolTx, updatePool, poolType, poolAddress, step } = usePoolCreationStore();
+  const { initPoolTx, updatePool, poolType, step } = usePoolCreationStore();
   const { wagmiHash, safeHash } = initPoolTx;
 
   const publicClient = usePublicClient();
@@ -24,7 +24,7 @@ export function useInitializePoolTxHash() {
 
       if (isSafeWallet && safeHash && !wagmiHash) {
         const wagmiHash = await pollSafeTxStatus(sdk, safeHash);
-        updatePool({ createPoolTx: { safeHash, wagmiHash } });
+        updatePool({ initPoolTx: { safeHash, wagmiHash, isSuccess: false } });
         return null; // Trigger a re-query with the new wagmiHash
       }
 
@@ -33,11 +33,11 @@ export function useInitializePoolTxHash() {
       const txReceipt = await publicClient.waitForTransactionReceipt({ hash: wagmiHash });
 
       if (txReceipt.status === "success") {
-        updatePool({ step: step + 1, hasBeenInitialized: true });
+        updatePool({ step: step + 1, initPoolTx: { safeHash, wagmiHash, isSuccess: true } });
       } else {
         throw new Error("Init pool transaction reverted");
       }
     },
-    enabled: Boolean(!poolAddress && (safeHash || wagmiHash)),
+    enabled: Boolean(!initPoolTx.isSuccess && (safeHash || wagmiHash)),
   });
 }
