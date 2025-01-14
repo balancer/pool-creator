@@ -28,6 +28,8 @@ yarn start
 
 ## Run on Fork
 
+> ⚠️ **Note:** Fork development is only supported for CoW AMMs
+
 1. Add the following ENV vars to a `.env` file located in the root directory
 
 ```
