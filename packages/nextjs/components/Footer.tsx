@@ -72,7 +72,7 @@ export const Footer = () => {
                 rel="noreferrer"
                 className="link no-underline hover:underline"
               >
-                Github
+                Pool Creator Github
               </a>
             </div>
             <span>·</span>
@@ -83,7 +83,18 @@ export const Footer = () => {
                 rel="noreferrer"
                 className="link no-underline hover:underline"
               >
-                Contracts
+                CoW Contracts
+              </a>
+            </div>
+            <span>·</span>
+            <div className="text-center">
+              <a
+                href="https://github.com/balancer/balancer-v3-monorepo"
+                target="_blank"
+                rel="noreferrer"
+                className="link no-underline hover:underline"
+              >
+                v3 Contracts
               </a>
             </div>
           </div>
