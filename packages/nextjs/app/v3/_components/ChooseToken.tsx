@@ -341,8 +341,8 @@ const BoostOpportunityModal = ({
         <h3 className="font-bold text-3xl mb-5">{boostedVariant.name}</h3>
         <div className="text-xl mb-7 px-5">
           Boosted tokens provide your liquidity pool with a layer of sustainable yield. If you select{" "}
-          <b>{boostedVariant.symbol}</b>, all <b>{standardVariant.symbol}</b> in this pool will be supplied to
-          Aave&apos;s lending market to earn additional yield.
+          <b>{boostedVariant.symbol}</b>, all <b>{standardVariant.symbol}</b> in this pool will be supplied to earn
+          additional yield.
           <div className="mt-5">
             Note that if you choose the boosted variant, the necessary rate provider address will be auto-filled for you
           </div>

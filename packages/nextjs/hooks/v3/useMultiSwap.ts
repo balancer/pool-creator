@@ -8,19 +8,21 @@ import {
   vaultV3Abi,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { encodeFunctionData, formatUnits, getContract, parseEventLogs, parseUnits, zeroAddress } from "viem";
+import { encodeFunctionData, getContract, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { createPermit2 } from "~~/utils/permit2Helper";
 
-// This hook only used if creating boosted pool using standard tokens
+/**
+ * For creating boosted pool using standard tokens
+ */
 export const useMultiSwap = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
-  const { tokenConfigs, updatePool, step, updateTokenConfig } = usePoolCreationStore();
+  const { tokenConfigs, updatePool } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const userData = "0x";
@@ -101,48 +103,21 @@ export const useMultiSwap = () => {
     console.log("batchRouter.permitBatchAndCall args", args);
 
     const hash = await writeTx(() => batchRouterContract.write.permitBatchAndCall(args), {
-      blockConfirmations: 1,
-      onBlockConfirmation: () => {
-        console.log("Successfully multi swapped bitches!");
-      },
+      // tx not considered successful until tx receipt is parsed
+      onTransactionHash: txHash =>
+        updatePool({ swapToBoostedTx: { wagmiHash: txHash, safeHash: undefined, isSuccess: false } }),
     });
 
     if (!hash) throw new Error("No multi swap transaction hash");
-
-    const txReceipt = await publicClient.getTransactionReceipt({ hash });
-    const logs = parseEventLogs({
-      abi: vaultV3Abi,
-      eventName: "Wrap",
-      logs: txReceipt.logs,
-    });
-
-    console.log("logs", logs);
-
-    logs.forEach(log => {
-      // mintedShares is the amount, underlyingToken is an address
-      const { mintedShares, wrappedToken } = log.args;
-      console.log("wrappedToken", wrappedToken);
-      const boostedToken = Object.values(boostableWhitelist ?? {}).find(
-        token => token.address.toLowerCase() === wrappedToken.toLowerCase(),
-      );
-      if (!boostedToken) throw new Error("Boosted token not found");
-      console.log("boostedToken", boostedToken);
-      const amount = formatUnits(mintedShares, boostedToken?.decimals);
-      // find corresponding token index for tokenConfigs array
-      const tokenIndex = tokenConfigs.findIndex(
-        token => token.address.toLowerCase() === boostedToken?.underlyingTokenAddress?.toLowerCase(),
-      );
-      console.log("amount", amount, "tokenIndex", tokenIndex);
-      updateTokenConfig(tokenIndex, { amount });
-    });
-
-    updatePool({ step: step + 1, swapTxHash: hash });
+    return hash;
   }
 
   return useMutation({ mutationFn: () => multiSwap() });
 };
 
-// ATTEMPT USING SDK BLOCKED BY SDK NOT ALLOWING MULTI SWAP PATHS
+/**
+ * ATTEMPT USING SDK BLOCKED BY SDK NOT ALLOWING MULTI SWAP PATHS
+ */
 
 // const paths = tokenConfigs.map(token => {
 //   const boostedToken = standardToBoosted[token.address];
