@@ -22,7 +22,7 @@ export const useMultiSwap = () => {
   const publicClient = usePublicClient();
   const writeTx = useTransactor();
   const chainId = publicClient?.chain.id;
-  const { tokenConfigs, updatePool } = usePoolCreationStore();
+  const { tokenConfigs, updatePool, swapToBoostedTx } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const userData = "0x";
@@ -103,9 +103,8 @@ export const useMultiSwap = () => {
     console.log("batchRouter.permitBatchAndCall args", args);
 
     const hash = await writeTx(() => batchRouterContract.write.permitBatchAndCall(args), {
-      // tx not considered successful until tx receipt is parsed
-      onTransactionHash: txHash =>
-        updatePool({ swapToBoostedTx: { wagmiHash: txHash, safeHash: undefined, isSuccess: false } }),
+      onSafeTxHash: safeHash => updatePool({ swapToBoostedTx: { ...swapToBoostedTx, safeHash } }),
+      onWagmiTxHash: wagmiHash => updatePool({ swapToBoostedTx: { ...swapToBoostedTx, wagmiHash } }),
     });
 
     if (!hash) throw new Error("No multi swap transaction hash");

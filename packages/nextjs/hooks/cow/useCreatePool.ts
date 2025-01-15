@@ -27,7 +27,10 @@ export const useCreatePool = () => {
     });
 
     const txHash = await writeTx(() => walletClient.writeContract(request), {
-      onTransactionHash: txHash => updatePoolCreation({ createPoolTxHash: txHash }),
+      onSafeTxHash: safeHash =>
+        updatePoolCreation({ createPoolTx: { safeHash, wagmiHash: undefined, isSuccess: false } }),
+      onWagmiTxHash: wagmiHash =>
+        updatePoolCreation({ createPoolTx: { wagmiHash, safeHash: undefined, isSuccess: false } }),
     });
 
     return txHash;

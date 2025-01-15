@@ -157,12 +157,14 @@ export const PoolConfiguration = () => {
             isPending={false}
             isDisabled={!canProceedToCreate}
             onClick={() => {
+              if (!chain?.id) throw new Error("Missing chain id!");
+              if (!token1) throw new Error("Missing token 1 selection!");
+              if (!token2) throw new Error("Missing token 2 selection!");
+
               setPoolCreation({
-                chainId: chain?.id || 0,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                token1: token1!,
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                token2: token2!,
+                chainId: chain.id,
+                token1: token1,
+                token2: token2,
                 token1Amount,
                 token2Amount,
                 name: poolName.trim(),
@@ -170,14 +172,13 @@ export const PoolConfiguration = () => {
                 poolAddress: undefined,
                 step: 1,
                 tokenWeights,
-                createPoolTxHash: undefined,
-                pendingSafeTxHash: undefined,
-                approveToken1TxHash: undefined,
-                approveToken2TxHash: undefined,
-                bindToken1TxHash: undefined,
-                bindToken2TxHash: undefined,
-                setSwapFeeTxHash: undefined,
-                finalizePoolTxHash: undefined,
+                createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+                approveToken1Tx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+                approveToken2Tx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+                bindToken1Tx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+                bindToken2Tx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+                setSwapFeeTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+                finalizePoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
               });
             }}
           />

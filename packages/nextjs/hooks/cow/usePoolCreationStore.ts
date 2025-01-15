@@ -3,6 +3,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Token } from "~~/hooks/token";
 
+export interface TransactionDetails {
+  safeHash: `0x${string}` | undefined;
+  wagmiHash: `0x${string}` | undefined;
+  isSuccess: boolean;
+}
+
 export interface PoolCreationState {
   chainId: number;
   token1: Token;
@@ -14,23 +20,24 @@ export interface PoolCreationState {
   poolAddress: Address | undefined; // updated by tx receipt from completion of step 1
   step: number;
   tokenWeights: "5050" | "8020";
-  createPoolTxHash: `0x${string}` | undefined;
-  pendingSafeTxHash: `0x${string}` | undefined;
-  approveToken1TxHash: `0x${string}` | undefined;
-  approveToken2TxHash: `0x${string}` | undefined;
-  bindToken1TxHash: `0x${string}` | undefined;
-  bindToken2TxHash: `0x${string}` | undefined;
-  setSwapFeeTxHash: `0x${string}` | undefined;
-  finalizePoolTxHash: `0x${string}` | undefined;
+  createPoolTx: TransactionDetails;
+  approveToken1Tx: TransactionDetails;
+  approveToken2Tx: TransactionDetails;
+  bindToken1Tx: TransactionDetails;
+  bindToken2Tx: TransactionDetails;
+  setSwapFeeTx: TransactionDetails;
+  finalizePoolTx: TransactionDetails;
+}
+
+export interface PoolCreationStore {
+  poolCreation: PoolCreationState | null;
+  setPoolCreation: (pool: PoolCreationState) => void;
+  updatePoolCreation: (updates: Partial<PoolCreationState>) => void;
+  clearPoolCreation: () => void;
 }
 
 export const usePoolCreationStore = create(
-  persist<{
-    poolCreation: PoolCreationState | null;
-    setPoolCreation: (pool: PoolCreationState) => void;
-    updatePoolCreation: (updates: Partial<PoolCreationState>) => void;
-    clearPoolCreation: () => void;
-  }>(
+  persist<PoolCreationStore>(
     set => ({
       poolCreation: null,
       setPoolCreation: (pool: PoolCreationState) => set({ poolCreation: pool }),
