@@ -19,7 +19,7 @@ export function useBindTokenTxHash({ tokenNumber }: UseBindTokenTxHashProps) {
   const { safeHash, wagmiHash, isSuccess } = poolCreation?.[txKey] || {};
 
   return useQuery({
-    queryKey: [`approveToken${tokenNumber}TxHash`, safeHash, wagmiHash, isSuccess],
+    queryKey: [`bindToken${tokenNumber}TxHash`, safeHash, wagmiHash, isSuccess],
     queryFn: async () => {
       if (!publicClient) throw new Error("No public client for fetching pool address");
 
@@ -40,8 +40,9 @@ export function useBindTokenTxHash({ tokenNumber }: UseBindTokenTxHashProps) {
           [txKey]: { safeHash, wagmiHash, isSuccess: true },
           step: poolCreation.step + 1,
         });
+        return { isSuccess: true };
       } else {
-        throw new Error("Approve token transaction reverted");
+        throw new Error("Bind token transaction reverted");
       }
     },
     enabled: Boolean(!isSuccess && (safeHash || wagmiHash)),

@@ -33,6 +33,7 @@ export function useSetSwapFeeTxHash() {
       if (txReceipt.status === "success") {
         if (!poolCreation?.step) throw new Error("Missing pool creation step");
         if (!poolCreation?.poolAddress) throw new Error("Missing pool address");
+
         const MAX_FEE = await publicClient.readContract({
           abi: abis.CoW.BCoWPool,
           address: poolCreation?.poolAddress,
@@ -48,6 +49,7 @@ export function useSetSwapFeeTxHash() {
         if (swapFee !== MAX_FEE) throw new Error("Swap fee is not set to max fee");
 
         updatePoolCreation({ setSwapFeeTx: { safeHash, wagmiHash, isSuccess: true }, step: poolCreation?.step + 1 });
+        return { isSuccess: true };
       } else {
         throw new Error("Set swap fee transaction reverted");
       }

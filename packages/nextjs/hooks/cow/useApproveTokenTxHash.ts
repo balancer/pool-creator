@@ -56,6 +56,7 @@ export function useApproveTokenTxHash({ tokenNumber }: UseApproveTokenTxHashProp
           [txKey]: { safeHash, wagmiHash, isSuccess: true },
           step: poolCreation.step + 1,
         });
+        return { isSuccess: true };
       } else {
         throw new Error("Approve token transaction reverted");
       }
