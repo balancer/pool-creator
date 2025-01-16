@@ -31,7 +31,7 @@ export function useFinalizePoolTxHash() {
 
       if (txReceipt.status === "success") {
         if (!poolCreation?.step) throw new Error("Missing pool creation step");
-        updatePoolCreation({ finalizePoolTx: { safeHash, wagmiHash, isSuccess: true }, step: poolCreation?.step + 1 });
+        updatePoolCreation({ finalizePoolTx: { safeHash, wagmiHash, isSuccess: true }, step: poolCreation.step + 1 });
         return { isSuccess: true };
       } else {
         throw new Error("Create pool transaction reverted");
