@@ -1,3 +1,4 @@
+import { usePoolCreationStore } from "./usePoolCreationStore";
 import { useMutation } from "@tanstack/react-query";
 import { Address } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
@@ -16,6 +17,7 @@ export const useBindToken = (tokenWeights: SupportedTokenWeight, isToken1: boole
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
   const denormalizedTokenWeight = getDenormalizedTokenWeight(tokenWeights, isToken1);
+  const { updatePoolCreation } = usePoolCreationStore();
 
   const bind = async ({ pool, token, rawAmount }: BindPayload) => {
     if (!pool) throw new Error("Cannot bind token without pool address");
@@ -31,9 +33,22 @@ export const useBindToken = (tokenWeights: SupportedTokenWeight, isToken1: boole
     });
 
     const txHash = await writeTx(() => walletClient.writeContract(bind), {
-      blockConfirmations: 1,
-      onBlockConfirmation: () => {
-        console.log("Bound token:", token, "to pool:", pool);
+      onSafeTxHash: safeHash => {
+        const safeUpdate = { safeHash, wagmiHash: undefined, isSuccess: false };
+
+        if (isToken1) {
+          updatePoolCreation({ bindToken1Tx: safeUpdate });
+        } else {
+          updatePoolCreation({ bindToken2Tx: safeUpdate });
+        }
+      },
+      onWagmiTxHash: wagmiHash => {
+        const wagmiUpdate = { wagmiHash, safeHash: undefined, isSuccess: false };
+        if (isToken1) {
+          updatePoolCreation({ bindToken1Tx: wagmiUpdate });
+        } else {
+          updatePoolCreation({ bindToken2Tx: wagmiUpdate });
+        }
       },
     });
 

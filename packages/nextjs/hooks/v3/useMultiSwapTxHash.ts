@@ -66,6 +66,7 @@ export function useMultiSwapTxHash() {
         });
 
         updatePool({ step: step + 1, swapToBoostedTx: { wagmiHash, safeHash, isSuccess: true } });
+        return { isSuccess: true };
       } else {
         throw new Error("Swap to boosted variant transaction reverted");
       }

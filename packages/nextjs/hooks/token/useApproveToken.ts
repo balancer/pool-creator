@@ -10,7 +10,12 @@ type ApproveOnTokenPayload = {
   rawAmount: bigint;
 };
 
-export const useApproveToken = () => {
+type UseApproveTokenOptions = {
+  onSafeTxHash?: (safeHash: `0x${string}`) => void;
+  onWagmiTxHash?: (wagmiHash: `0x${string}`) => void;
+};
+
+export const useApproveToken = ({ onSafeTxHash, onWagmiTxHash }: UseApproveTokenOptions) => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
@@ -29,7 +34,10 @@ export const useApproveToken = () => {
       args: [spender, rawAmount],
     });
 
-    const txHash = await writeTx(() => walletClient.writeContract(approveSpenderOnToken));
+    const txHash = await writeTx(() => walletClient.writeContract(approveSpenderOnToken), {
+      onSafeTxHash: onSafeTxHash,
+      onWagmiTxHash: onWagmiTxHash,
+    });
     console.log("Approved pool contract to spend token, txHash:", txHash);
     return txHash;
   };

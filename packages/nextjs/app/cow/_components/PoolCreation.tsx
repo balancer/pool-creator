@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { PoolCreated } from "./";
 import { parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
@@ -14,15 +13,18 @@ import {
 import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
+  useApproveTokenTxHash,
   useBindToken,
+  useBindTokenTxHash,
   useCreatePool,
-  useFetchPoolAddress,
+  useCreatePoolTxHash,
   useFinalizePool,
-  useReadPool,
+  useFinalizePoolTxHash,
   useSetSwapFee,
+  useSetSwapFeeTxHash,
 } from "~~/hooks/cow/";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { useApproveToken, useReadToken } from "~~/hooks/token";
+import { useApproveToken } from "~~/hooks/token";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 import { getPerTokenWeights } from "~~/utils/token-weights";
@@ -36,16 +38,15 @@ interface ManagePoolCreationProps {
 export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreation }: ManagePoolCreationProps) => {
   const {
     poolAddress,
-    createPoolTxHash,
-    approveToken1TxHash,
-    approveToken2TxHash,
-    bindToken1TxHash,
-    bindToken2TxHash,
-    setSwapFeeTxHash,
-    finalizePoolTxHash,
+    tokenWeights,
+    createPoolTx,
+    approveToken1Tx,
+    approveToken2Tx,
+    bindToken1Tx,
+    bindToken2Tx,
+    setSwapFeeTx,
+    finalizePoolTx,
   } = poolCreation;
-
-  const { isFetching: isFetchPoolAddressPending, error: fetchPoolAddressError } = useFetchPoolAddress();
 
   const token1RawAmount = parseUnits(poolCreation.token1Amount, poolCreation.token1.decimals);
   const token2RawAmount = parseUnits(poolCreation.token2Amount, poolCreation.token2.decimals);
@@ -55,72 +56,69 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
   const { switchChain } = useSwitchChain();
   const isWrongNetwork = targetNetwork.id !== poolCreation.chainId;
 
-  const { data: poolData, refetch: refetchPool } = useReadPool(poolAddress);
-  const { allowance: allowance1, refetchAllowance: refetchAllowance1 } = useReadToken(
-    poolCreation.token1.address,
-    poolAddress,
-  );
-  const { allowance: allowance2, refetchAllowance: refetchAllowance2 } = useReadToken(
-    poolCreation.token2.address,
-    poolAddress,
-  );
   const { mutate: createPool, isPending: isCreatePending, error: createPoolError } = useCreatePool();
-  const { mutate: approve1, isPending: isApprove1Pending, error: approve1Error } = useApproveToken();
-  const { mutate: approve2, isPending: isApprove2Pending, error: approve2Error } = useApproveToken();
-  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken(poolCreation.tokenWeights, true);
+  const { isFetching: isCreatePoolTxPending, error: createPoolTxError } = useCreatePoolTxHash();
+
   const {
-    mutate: bind2,
-    isPending: isBind2Pending,
-    error: bind2Error,
-  } = useBindToken(poolCreation.tokenWeights, false);
+    mutate: approve1,
+    isPending: isApprove1Pending,
+    error: approve1Error,
+  } = useApproveToken({
+    onSafeTxHash: safeHash =>
+      updatePoolCreation({ approveToken1Tx: { safeHash, wagmiHash: undefined, isSuccess: false } }),
+    onWagmiTxHash: wagmiHash =>
+      updatePoolCreation({ approveToken1Tx: { wagmiHash, safeHash: undefined, isSuccess: false } }),
+  });
+  const { isFetching: isApproveToken1TxHashFetching, error: approveToken1TxHashError } = useApproveTokenTxHash({
+    tokenNumber: 1,
+  });
+
+  const {
+    mutate: approve2,
+    isPending: isApprove2Pending,
+    error: approve2Error,
+  } = useApproveToken({
+    onSafeTxHash: safeHash =>
+      updatePoolCreation({ approveToken2Tx: { safeHash, wagmiHash: undefined, isSuccess: false } }),
+    onWagmiTxHash: wagmiHash =>
+      updatePoolCreation({ approveToken2Tx: { wagmiHash, safeHash: undefined, isSuccess: false } }),
+  });
+  const { isFetching: isApproveToken2TxHashFetching, error: approveToken2TxHashError } = useApproveTokenTxHash({
+    tokenNumber: 2,
+  });
+
+  const { mutate: bind1, isPending: isBind1Pending, error: bind1Error } = useBindToken(tokenWeights, true);
+  const { isFetching: isBindToken1TxHashFetching, error: bindToken1TxHashError } = useBindTokenTxHash({
+    tokenNumber: 1,
+  });
+
+  const { mutate: bind2, isPending: isBind2Pending, error: bind2Error } = useBindToken(tokenWeights, false);
+  const { isFetching: isBindToken2TxHashFetching, error: bindToken2TxHashError } = useBindTokenTxHash({
+    tokenNumber: 2,
+  });
   const { mutate: setSwapFee, isPending: isSetSwapFeePending, error: setSwapFeeError } = useSetSwapFee();
+  const { isFetching: isSetSwapFeeTxHashFetching, error: setSwapFeeTxHashError } = useSetSwapFeeTxHash();
+
   const { mutate: finalizePool, isPending: isFinalizePending, error: finalizeError } = useFinalizePool();
+  const { isFetching: isFinalizePoolTxHashFetching, error: finalizePoolTxHashError } = useFinalizePoolTxHash();
 
   const txError =
     createPoolError ||
-    fetchPoolAddressError ||
+    createPoolTxError ||
     approve1Error ||
+    approveToken1TxHashError ||
     approve2Error ||
+    approveToken2TxHashError ||
     bind1Error ||
+    bindToken1TxHashError ||
     bind2Error ||
+    bindToken2TxHashError ||
     setSwapFeeError ||
-    finalizeError;
+    finalizeError ||
+    setSwapFeeTxHashError ||
+    finalizePoolTxHashError;
 
-  useEffect(() => {
-    if (!poolData || !poolAddress) return;
-
-    if (poolData.isFinalized) {
-      updatePoolCreation({ step: 8 });
-      return;
-    }
-
-    switch (poolData.numTokens) {
-      case 0n:
-        if (allowance1 < token1RawAmount) {
-          updatePoolCreation({ step: 2 });
-        } else if (allowance2 < token2RawAmount) {
-          updatePoolCreation({ step: 3 });
-        } else if (allowance1 >= token1RawAmount && allowance2 >= token2RawAmount) {
-          updatePoolCreation({ step: 4 });
-        }
-        break;
-
-      case 1n:
-        updatePoolCreation({ step: 5 });
-        break;
-
-      case 2n:
-        if (poolData.swapFee !== poolData.MAX_FEE) {
-          updatePoolCreation({ step: 6 });
-        } else {
-          updatePoolCreation({ step: 7 });
-        }
-        break;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [poolData, allowance1, allowance2, token1RawAmount, token2RawAmount]);
-
-  const etherscanURL = poolData && getBlockExplorerAddressLink(targetNetwork, poolData.address);
+  const etherscanURL = poolAddress && getBlockExplorerAddressLink(targetNetwork, poolAddress);
 
   return (
     <>
@@ -154,8 +152,8 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                     return (
                       <TransactionButton
                         title="Create Pool"
-                        isPending={isCreatePending || isFetchPoolAddressPending}
-                        isDisabled={isCreatePending || isFetchPoolAddressPending || isWrongNetwork}
+                        isPending={isCreatePending || isCreatePoolTxPending}
+                        isDisabled={isCreatePending || isCreatePoolTxPending || isWrongNetwork}
                         onClick={() => {
                           createPool({ name: poolCreation.name, symbol: poolCreation.symbol });
                         }}
@@ -165,24 +163,14 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                     return (
                       <TransactionButton
                         title={`Approve ${poolCreation.token1.symbol}`}
-                        isPending={isApprove1Pending}
-                        isDisabled={isApprove1Pending || isWrongNetwork}
+                        isPending={isApprove1Pending || isApproveToken1TxHashFetching}
+                        isDisabled={isApprove1Pending || isApproveToken1TxHashFetching || isWrongNetwork}
                         onClick={() => {
-                          approve1(
-                            {
-                              token: poolCreation.token1.address,
-                              spender: poolData?.address,
-                              rawAmount: token1RawAmount,
-                            },
-                            {
-                              onSuccess: hash => {
-                                refetchAllowance1();
-
-                                if (allowance1 >= token1RawAmount)
-                                  updatePoolCreation({ approveToken1TxHash: hash, step: 3 });
-                              },
-                            },
-                          );
+                          approve1({
+                            token: poolCreation.token1.address,
+                            spender: poolAddress,
+                            rawAmount: token1RawAmount,
+                          });
                         }}
                       />
                     );
@@ -190,23 +178,14 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                     return (
                       <TransactionButton
                         title={`Approve ${poolCreation.token2.symbol}`}
-                        isPending={isApprove2Pending}
-                        isDisabled={isApprove2Pending || isWrongNetwork}
+                        isPending={isApprove2Pending || isApproveToken2TxHashFetching}
+                        isDisabled={isApprove2Pending || isApproveToken2TxHashFetching || isWrongNetwork}
                         onClick={() => {
-                          approve2(
-                            {
-                              token: poolCreation.token2.address,
-                              spender: poolData?.address,
-                              rawAmount: token2RawAmount,
-                            },
-                            {
-                              onSuccess: hash => {
-                                refetchAllowance2();
-                                if (allowance2 >= token2RawAmount)
-                                  updatePoolCreation({ approveToken2TxHash: hash, step: 4 });
-                              },
-                            },
-                          );
+                          approve2({
+                            token: poolCreation.token2.address,
+                            spender: poolAddress,
+                            rawAmount: token2RawAmount,
+                          });
                         }}
                       />
                     );
@@ -215,22 +194,14 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                     return (
                       <TransactionButton
                         title={`Add ${poolCreation.token1.symbol}`}
-                        isPending={isBind1Pending}
-                        isDisabled={isBind1Pending || isWrongNetwork}
+                        isPending={isBind1Pending || isBindToken1TxHashFetching}
+                        isDisabled={isBind1Pending || isBindToken1TxHashFetching || isWrongNetwork}
                         onClick={() => {
-                          bind1(
-                            {
-                              pool: poolData?.address,
-                              token: poolCreation.token1.address,
-                              rawAmount: token1RawAmount,
-                            },
-                            {
-                              onSuccess: hash => {
-                                refetchPool();
-                                updatePoolCreation({ bindToken1TxHash: hash, step: 5 });
-                              },
-                            },
-                          );
+                          bind1({
+                            pool: poolAddress,
+                            token: poolCreation.token1.address,
+                            rawAmount: token1RawAmount,
+                          });
                         }}
                       />
                     );
@@ -238,22 +209,14 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                     return (
                       <TransactionButton
                         title={`Add ${poolCreation.token2.symbol}`}
-                        isPending={isBind2Pending}
-                        isDisabled={isBind2Pending || isWrongNetwork}
+                        isPending={isBind2Pending || isBindToken2TxHashFetching}
+                        isDisabled={isBind2Pending || isBindToken2TxHashFetching || isWrongNetwork}
                         onClick={() => {
-                          bind2(
-                            {
-                              pool: poolData?.address,
-                              token: poolCreation.token2.address,
-                              rawAmount: token2RawAmount,
-                            },
-                            {
-                              onSuccess: hash => {
-                                refetchPool();
-                                updatePoolCreation({ bindToken2TxHash: hash, step: 6 });
-                              },
-                            },
-                          );
+                          bind2({
+                            pool: poolAddress,
+                            token: poolCreation.token2.address,
+                            rawAmount: token2RawAmount,
+                          });
                         }}
                       />
                     );
@@ -262,18 +225,10 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                       <>
                         <TransactionButton
                           title="Set Swap Fee"
-                          isPending={isSetSwapFeePending}
-                          isDisabled={isSetSwapFeePending || isWrongNetwork}
+                          isPending={isSetSwapFeePending || isSetSwapFeeTxHashFetching}
+                          isDisabled={isSetSwapFeePending || isSetSwapFeeTxHashFetching || isWrongNetwork}
                           onClick={() => {
-                            setSwapFee(
-                              { pool: poolData?.address, rawAmount: poolData?.MAX_FEE },
-                              {
-                                onSuccess: hash => {
-                                  refetchPool();
-                                  updatePoolCreation({ setSwapFeeTxHash: hash, step: 7 });
-                                },
-                              },
-                            );
+                            setSwapFee({ pool: poolAddress });
                           }}
                         />
                       </>
@@ -282,15 +237,10 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                     return (
                       <TransactionButton
                         title="Finalize"
-                        isPending={isFinalizePending}
-                        isDisabled={isFinalizePending || isWrongNetwork}
+                        isPending={isFinalizePending || isFinalizePoolTxHashFetching}
+                        isDisabled={isFinalizePending || isFinalizePoolTxHashFetching || isWrongNetwork}
                         onClick={() => {
-                          finalizePool(poolData?.address, {
-                            onSuccess: hash => {
-                              refetchPool();
-                              updatePoolCreation({ finalizePoolTxHash: hash, step: 8 });
-                            },
-                          });
+                          finalizePool(poolAddress);
                         }}
                       />
                     );
@@ -342,7 +292,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             <PoolCreated
               clearState={clearPoolCreation}
               etherscanURL={etherscanURL}
-              poolAddress={poolData?.address}
+              poolAddress={poolAddress}
               chainId={poolCreation.chainId}
             />
           )}
@@ -353,31 +303,31 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             steps={[
               {
                 label: "Create Pool",
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, createPoolTxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, createPoolTx?.wagmiHash),
               },
               {
                 label: `Approve ${poolCreation.token1.symbol}`,
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken1TxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken1Tx?.wagmiHash),
               },
               {
                 label: `Approve ${poolCreation.token2.symbol}`,
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken2TxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, approveToken2Tx?.wagmiHash),
               },
               {
                 label: `Add ${poolCreation.token1.symbol}`,
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken1TxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken1Tx?.wagmiHash),
               },
               {
                 label: `Add ${poolCreation.token2.symbol}`,
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken2TxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, bindToken2Tx?.wagmiHash),
               },
               {
                 label: "Set Swap Fee",
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, setSwapFeeTxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, setSwapFeeTx?.wagmiHash),
               },
               {
                 label: "Finalize Pool",
-                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, finalizePoolTxHash),
+                blockExplorerUrl: getBlockExplorerTxLink(poolCreation.chainId, finalizePoolTx?.wagmiHash),
               },
             ]}
           />
