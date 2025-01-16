@@ -34,6 +34,7 @@ export function useInitializePoolTxHash() {
 
       if (txReceipt.status === "success") {
         updatePool({ step: step + 1, initPoolTx: { safeHash, wagmiHash, isSuccess: true } });
+        return { isSuccess: true };
       } else {
         throw new Error("Init pool transaction reverted");
       }

@@ -3,7 +3,7 @@ import { getPublicClient } from "@wagmi/core";
 import { Hash, SendTransactionParameters, WalletClient } from "viem";
 import { Config, useWalletClient } from "wagmi";
 import { SendTransactionMutate } from "wagmi/query";
-import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
+// import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
 import { useIsSafeWallet } from "~~/hooks/safe/useIsSafeWallet";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import { pollSafeTxStatus } from "~~/utils/safe";
@@ -44,7 +44,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
   }
   const isSafeWallet = useIsSafeWallet();
   const { sdk } = useSafeAppsSDK();
-  const { updatePoolCreation } = usePoolCreationStore();
+  // const { updatePoolCreation } = usePoolCreationStore();
 
   const result: TransactionFunc = async (tx, options) => {
     if (!walletClient) {
@@ -78,8 +78,8 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       if (isSafeWallet) {
         const pendingSafeTxHash = transactionHash;
         // save to state in case of user disconnection
-        updatePoolCreation({ pendingSafeTxHash });
-        // update transactionHash to the on chain tx hash
+        if (options?.onSafeTxHash) options.onSafeTxHash(pendingSafeTxHash);
+        // set transactionHash to on chain tx hash returned by
         transactionHash = await pollSafeTxStatus(sdk, pendingSafeTxHash);
       }
 
@@ -91,8 +91,8 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
         <TxnNotification message="Waiting for transaction to complete." blockExplorerLink={blockExplorerTxURL} />,
       );
       // Matt added this callback to save tx hash to local storage incase user disconnects while tx pending
-      if (options?.onTransactionHash && transactionHash) {
-        options.onTransactionHash(transactionHash);
+      if (options?.onWagmiTxHash && transactionHash) {
+        options.onWagmiTxHash(transactionHash);
       }
 
       const transactionReceipt = await publicClient.waitForTransactionReceipt({

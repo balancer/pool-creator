@@ -12,7 +12,7 @@ type MinimalToken = { address: Address; amount: string; decimals: number; symbol
 export const ApproveOnTokenManager = ({ token }: { token: MinimalToken }) => {
   const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
-  const { mutateAsync: approveOnToken, isPending: isApprovePending, error: approveError } = useApproveToken();
+  const { mutateAsync: approveOnToken, isPending: isApprovePending, error: approveError } = useApproveToken({});
 
   const rawAmount = parseUnits(token.amount, token.decimals);
   const spender = PERMIT2[targetNetwork.id];

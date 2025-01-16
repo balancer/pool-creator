@@ -16,7 +16,7 @@ export const useInitializePool = () => {
   const chainId = publicClient?.chain.id;
   const rpcUrl = publicClient?.transport.transports[0].value.url;
   const protocolVersion = 3;
-  const { poolAddress, poolType, tokenConfigs, updatePool } = usePoolCreationStore();
+  const { poolAddress, poolType, tokenConfigs, updatePool, initPoolTx } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   async function initializePool() {
@@ -81,9 +81,9 @@ export const useInitializePool = () => {
     console.log("router.permitBatchAndCall args for initialize pool", args);
 
     const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
-      // Should be okay to set off-chain safeHash undefined once we have on chain wagmiHash
-      onTransactionHash: txHash =>
-        updatePool({ initPoolTx: { wagmiHash: txHash, safeHash: undefined, isSuccess: false } }),
+      // callbacks to save tx hash's to store
+      onSafeTxHash: safeHash => updatePool({ initPoolTx: { ...initPoolTx, safeHash } }),
+      onWagmiTxHash: wagmiHash => updatePool({ initPoolTx: { ...initPoolTx, wagmiHash } }),
     });
     if (!hash) throw new Error("Missing init pool transaction hash");
 

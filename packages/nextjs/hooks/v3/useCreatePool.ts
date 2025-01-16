@@ -42,6 +42,7 @@ export const useCreatePool = () => {
     disableUnbalancedLiquidity,
     amplificationParameter,
     updatePool,
+    createPoolTx,
   } = usePoolCreationStore();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
@@ -102,9 +103,9 @@ export const useCreatePool = () => {
           to: call.to,
         }),
       {
-        // tx not considered successful until tx receipt is parsed
-        onTransactionHash: txHash =>
-          updatePool({ createPoolTx: { wagmiHash: txHash, safeHash: undefined, isSuccess: false } }),
+        // callbacks to save tx hash's to store
+        onSafeTxHash: safeHash => updatePool({ createPoolTx: { ...createPoolTx, safeHash } }),
+        onWagmiTxHash: wagmiHash => updatePool({ createPoolTx: { ...createPoolTx, wagmiHash } }),
       },
     );
 
