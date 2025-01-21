@@ -1,7 +1,14 @@
 "use client";
 
-import { PoolConfiguration, PoolDetails, StartedOnDifferentNetworkAlert, UserExperienceAlerts } from "./_components";
+import {
+  ConnectWalletAlert,
+  PoolConfiguration,
+  PoolDetails,
+  StartedOnDifferentNetworkAlert,
+  UserExperienceAlerts,
+} from "./_components";
 import type { NextPage } from "next";
+import { useWalletClient } from "wagmi";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -10,7 +17,7 @@ import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 const BalancerV3: NextPage = () => {
   const { clearPoolStore, chain } = usePoolCreationStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
-
+  const { data: walletClient } = useWalletClient();
   const { clearUserData } = useUserDataStore();
 
   return (
@@ -22,12 +29,14 @@ const BalancerV3: NextPage = () => {
             <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer v3</h1>
           </div>
 
-          <UserExperienceAlerts />
-
-          {chain && selectedNetwork.id !== chain.id ? (
+          {!walletClient ? (
+            <ConnectWalletAlert />
+          ) : chain && selectedNetwork.id !== chain.id ? (
             <StartedOnDifferentNetworkAlert />
           ) : (
             <>
+              <UserExperienceAlerts />
+
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />
 

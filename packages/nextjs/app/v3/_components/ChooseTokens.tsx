@@ -13,7 +13,6 @@ const MAX_TOKENS = {
 export function ChooseTokens() {
   const { tokenConfigs, poolType, updatePool } = usePoolCreationStore();
   const { hasAgreedToWarning, updateUserData } = useUserDataStore();
-  // const isProportional = useVerifyProportionalInit();
 
   // Beware of javascript floating point precision issues if 100 % number of tokens is not equal to zero
   function handleAddToken() {

@@ -3,7 +3,6 @@ export * from "./useCreatePool";
 export * from "./useInitializePool";
 export * from "./useValidatePoolCreationInput";
 export * from "./useMultiSwap";
-export * from "./useVerifyProportionalInit";
 export * from "./useBoostableWhitelist";
 export * from "./useValidateHooksContract";
 export * from "./useValidateRateProvider";

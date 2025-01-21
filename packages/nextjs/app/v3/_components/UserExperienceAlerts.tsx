@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Link from "next/link";
-import { useWalletClient } from "wagmi";
 import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Alert } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
@@ -9,22 +8,7 @@ export function UserExperienceAlerts() {
   const [isInfoAlertVisible, setIsInfoAlertVisible] = useState(true);
   const { chain } = usePoolCreationStore();
 
-  const { data: walletClient } = useWalletClient();
-
-  const isWalletConnected = !!walletClient;
-
-  return !isWalletConnected ? (
-    <div className="flex justify-center w-full">
-      <div>
-        <Alert type="warning">
-          <div className="flex items-center gap-2">
-            Please connect a wallet and switch to the network you wish to create a pool
-            <ArrowUpRightIcon className="w-4 h-4" />
-          </div>
-        </Alert>
-      </div>
-    </div>
-  ) : (
+  return (
     <>
       {!chain && (
         <div className="flex justify-center">
@@ -65,6 +49,21 @@ export function UserExperienceAlerts() {
         </div>
       )}
     </>
+  );
+}
+
+export function ConnectWalletAlert() {
+  return (
+    <div className="flex justify-center w-full">
+      <div>
+        <Alert type="warning">
+          <div className="flex items-center gap-2">
+            Please connect a wallet and switch to the network you wish to create a pool
+            <ArrowUpRightIcon className="w-4 h-4" />
+          </div>
+        </Alert>
+      </div>
+    </div>
   );
 }
 
