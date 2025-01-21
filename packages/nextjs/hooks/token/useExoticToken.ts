@@ -9,7 +9,7 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
   const [exoticTokenAddress, setExoticTokenAddress] = useState<string | undefined>();
 
   const { name, symbol, decimals, isLoadingName, isLoadingDecimals, isLoadingSymbol } =
-    useReadToken(exoticTokenAddress);
+    useReadToken(exoticTokenAddress as `0x${string}` | undefined);
 
   const exoticToken: Token | undefined = useMemo(() => {
     if (exoticTokenAddress && name && symbol && decimals) {

@@ -68,7 +68,7 @@ export const useMultiSwap = () => {
 
     // 1. Query the swap result
     const { result: querySwapExactInResult } = await batchRouterContract.simulate.querySwapExactIn([
-      paths,
+      paths as any,
       zeroAddress,
       userData,
     ]);
@@ -88,7 +88,7 @@ export const useMultiSwap = () => {
     const encodedSwapData = encodeFunctionData({
       abi: balancerBatchRouterAbi,
       functionName: "swapExactIn",
-      args: [pathsWithSlippage, deadline, wethIsEth, userData],
+      args: [pathsWithSlippage as any, deadline, wethIsEth, userData],
     });
 
     // 5. Setup permit2 stuffs for permitBatchAndCall

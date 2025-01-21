@@ -42,7 +42,7 @@ export function useCreatePoolTxHash() {
 
         updatePoolCreation({
           createPoolTx: { safeHash, wagmiHash, isSuccess: true },
-          poolAddress: newPoolAddress,
+          poolAddress: newPoolAddress as `0x${string}`,
           step: 2,
         });
         return newPoolAddress;

@@ -31,10 +31,10 @@ export const createPermit2 = async ({ client, chainId, tokens, spender }: Create
 
   const details: PermitDetails[] = await Promise.all(
     tokens.map(async token => {
-      const [, , nonce] = await permit2Contract.read.allowance([owner, token.address, spender]);
+      const [, , nonce] = await permit2Contract.read.allowance([owner, token.address as `0x${string}`, spender]);
 
       return {
-        token: token.address,
+        token: token.address as `0x${string}`,
         amount: token.amount,
         expiration: Number(MaxAllowanceExpiration),
         nonce,

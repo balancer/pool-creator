@@ -66,7 +66,7 @@ export function ChooseToken({ index }: { index: number }) {
     }
 
     updateTokenConfig(index, {
-      address: tokenInfo.address,
+      address: tokenInfo.address as `0x${string}`,
       tokenType,
       // rateProvider,
       paysYieldFees: tokenType === TokenType.TOKEN_WITH_RATE ? true : false,
@@ -77,7 +77,7 @@ export function ChooseToken({ index }: { index: number }) {
     // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
     updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false });
 
-    const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];
+    const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address as `0x${string}`];
     if (hasBoostedVariant) {
       setShowBoostOpportunityModal(true);
     }
@@ -89,9 +89,17 @@ export function ChooseToken({ index }: { index: number }) {
 
   const handleTokenType = () => {
     if (tokenConfigs[index].tokenType === TokenType.STANDARD) {
-      updateTokenConfig(index, { tokenType: TokenType.TOKEN_WITH_RATE, rateProvider: "", paysYieldFees: true });
+      updateTokenConfig(index, {
+        tokenType: TokenType.TOKEN_WITH_RATE,
+        rateProvider: "" as `0x${string}`,
+        paysYieldFees: true,
+      });
     } else {
-      updateTokenConfig(index, { tokenType: TokenType.STANDARD, rateProvider: zeroAddress, paysYieldFees: false });
+      updateTokenConfig(index, {
+        tokenType: TokenType.STANDARD,
+        rateProvider: zeroAddress,
+        paysYieldFees: false,
+      });
     }
   };
 
@@ -254,7 +262,7 @@ export function ChooseToken({ index }: { index: number }) {
                 mustBeAddress={true}
                 placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
                 value={rateProvider !== zeroAddress ? rateProvider : ""}
-                onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() })}
+                onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() as `0x${string}` })}
               />
               {rateProvider.toLowerCase() !== tokenInfo?.priceRateProviderData?.address.toLowerCase() &&
                 !(
@@ -328,7 +336,11 @@ const BoostOpportunityModal = ({
     updateTokenConfig(tokenIndex, {
       useBoostedVariant: enableBoost,
       rateProvider:
-        enableBoost && boostedVariantRateProvider ? boostedVariantRateProvider : enableBoost ? "" : zeroAddress,
+        enableBoost && boostedVariantRateProvider
+          ? (boostedVariantRateProvider as `0x${string}`)
+          : enableBoost
+          ? ("" as `0x${string}`)
+          : zeroAddress,
       tokenType: enableBoost ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD,
       paysYieldFees: enableBoost ? true : false,
     });
@@ -442,7 +454,7 @@ const RateProviderModal = ({
             onClick={() => {
               setShowRateProviderModal(false);
               updateTokenConfig(tokenIndex, {
-                rateProvider: "",
+                rateProvider: "" as `0x${string}`,
               });
             }}
           >
@@ -453,7 +465,7 @@ const RateProviderModal = ({
             onClick={() => {
               setShowRateProviderModal(false);
               updateTokenConfig(tokenIndex, {
-                rateProvider: rateProviderData?.address ?? "",
+                rateProvider: (rateProviderData?.address ?? "") as `0x${string}`,
               });
             }}
           >

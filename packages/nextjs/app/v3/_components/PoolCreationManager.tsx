@@ -98,7 +98,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
         <ApproveOnTokenManager
           key={idx}
           token={{
-            address: boostedVariant.address,
+            address: boostedVariant.address as `0x${string}`,
             amount,
             decimals: boostedVariant.decimals,
             symbol: boostedVariant.symbol,
