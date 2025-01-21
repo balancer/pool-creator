@@ -14,7 +14,7 @@
     "vercel:yolo": "vercel --build-env NEXT_PUBLIC_IGNORE_BUILD_ERROR=true"
   },
   "dependencies": {
-    "@balancer/sdk": "^0.33.3",
+    "@balancer/sdk": "1.2.0",
     "@heroicons/react": "^2.0.11",
     "@rainbow-me/rainbowkit": "2.1.2",
     "@safe-global/safe-apps-provider": "^0.18.5",
@@ -36,7 +36,7 @@
     "react-tiny-virtual-list": "^2.2.0",
     "use-debounce": "^8.0.4",
     "usehooks-ts": "^2.13.0",
-    "viem": "2.17.4",
+    "viem": "2.21.56",
     "wagmi": "2.10.10",
     "zustand": "^4.1.2"
   },

@@ -10,9 +10,9 @@ export type ScaffoldConfig = {
   onlyLocalBurnerWallet: boolean;
 };
 
-const scaffoldConfig = {
+  const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.sepolia, chains.mainnet, chains.gnosis, chains.arbitrum, chains.base],
+  targetNetworks: [chains.sepolia, chains.mainnet, chains.gnosis, chains.arbitrum, chains.base, chains.sonic],
 
   // If using chains.foundry as your targetNetwork, you must specify a network to fork
   targetFork: chains.sepolia,
