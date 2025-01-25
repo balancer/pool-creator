@@ -3,7 +3,7 @@ import { PoolType } from "@balancer/sdk";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useBoostableWhitelist, useCheckIfV3PoolExists, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
-import { MAX_POOL_NAME_LENGTH } from "~~/utils/constants";
+import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 
 /**
  * @dev Gauge creation reverts if the name is longer than 32 characters
@@ -60,6 +60,7 @@ export const ChooseInfo = () => {
             label="Pool symbol"
             placeholder="Enter pool symbol"
             value={symbol}
+            maxLength={MAX_POOL_SYMBOL_LENGTH}
             onChange={e => {
               updatePool({ symbol: e.target.value.trim() });
               updateUserData({ hasEditedPoolSymbol: true });
