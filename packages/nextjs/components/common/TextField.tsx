@@ -37,7 +37,7 @@ export const TextField: React.FC<TextFieldProps> = ({
     if (!isValidAddress) return "Invalid address";
     if (isRateProvider && !isValidRateProvider) return "Invalid rate provider";
     if (isPoolHooksContract && !isValidPoolHooksContract) return "Invalid pool hooks contract";
-    if (maxLength && !isValidLength) return `Pool name is too long: ${value?.length ?? 0}/${maxLength}`;
+    if (maxLength && !isValidLength) return `Too many characters: ${value?.length ?? 0}/${maxLength}`;
     return null;
   };
 
