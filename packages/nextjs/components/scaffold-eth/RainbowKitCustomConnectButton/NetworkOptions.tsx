@@ -1,4 +1,3 @@
-import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useAccount, useSwitchChain } from "wagmi";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
@@ -17,17 +16,9 @@ export const NetworkOptions = ({ hidden = false }: NetworkOptionsProps) => {
   const { resolvedTheme } = useTheme();
   const isDarkMode = resolvedTheme === "dark";
 
-  // TODO: Update this as v3 adds more network support
-  const pathname = usePathname();
-  // Filter out base and arbitrum for v3 pool creation page
-  const filteredAllowedNetworks =
-    pathname === "/v3"
-      ? allowedNetworks.filter(network => network.id !== 42161 && network.id !== 8453)
-      : allowedNetworks;
-
   return (
     <>
-      {filteredAllowedNetworks
+      {allowedNetworks
         .filter(allowedNetwork => allowedNetwork.id !== chain?.id)
         .map(allowedNetwork => (
           <li key={allowedNetwork.id} className={hidden ? "hidden" : ""}>

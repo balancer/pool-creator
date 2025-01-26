@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-// import { ALLOWED_NETWORKS } from "./useValidateNetwork";
 import { PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
@@ -84,10 +83,10 @@ export const initialPoolCreationState = {
   poolType: undefined,
   tokenConfigs: [initialTokenConfig, initialTokenConfig],
   amplificationParameter: "", // only used for stable pools
-  swapFeePercentage: "", // store as human readable % to be converted later
-  swapFeeManager: "",
-  pauseManager: "",
-  poolHooksContract: "",
+  swapFeePercentage: "" as const, // store as human readable % to be converted later
+  swapFeeManager: "" as const,
+  pauseManager: "" as const,
+  poolHooksContract: "" as const,
   disableUnbalancedLiquidity: false,
   enableDonation: false,
   // isSuccess is only flipped to true after parsing tx receipt for status

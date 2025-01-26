@@ -1,10 +1,9 @@
-import { BALANCER_ROUTER, InitPool, InitPoolDataProvider, InitPoolInput, balancerRouterAbi } from "@balancer/sdk";
+import { InitPool, InitPoolDataProvider, InitPoolInput, Permit2Helper, PublicWalletClient } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { getContract, parseUnits } from "viem";
+import { parseUnits, publicActions, walletActions } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
-import { createPermit2 } from "~~/utils/permit2Helper";
 
 /**
  * Handles sending the init pool transaction
@@ -25,21 +24,14 @@ export const useInitializePool = () => {
     if (!chainId) throw new Error("Chain Id missing");
     if (!poolType) throw new Error("Pool type missing");
     if (!walletClient) throw new Error("Wallet client missing");
+    if (!walletClient.account) throw new Error("Wallet account missing");
 
-    const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-    const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
-    const initPool = new InitPool();
-
-    // Make sure all tokenConfigs have decimals and address
-    tokenConfigs.forEach(token => {
-      if (token.tokenInfo?.decimals === null || token.address === "") {
-        throw new Error(`Token ${token.address} is missing tokenInfo.decimals`);
-      }
-    });
-
+    // Build init pool input using pool creation store
     const amountsIn = tokenConfigs
       .map(token => {
+        if (!token.address) throw new Error(`Token is missing address`);
         if (!token.tokenInfo?.decimals) throw new Error(`Token ${token.address} is missing tokenInfo.decimals`);
+
         const boostedToken = boostableWhitelist?.[token.address];
         const address = token.useBoostedVariant ? boostedToken?.address : token.address;
         const decimals = token.useBoostedVariant ? boostedToken?.decimals : token.tokenInfo?.decimals;
@@ -58,33 +50,37 @@ export const useInitializePool = () => {
       chainId,
     };
 
-    const { callData: encodedInitData } = initPool.buildCall(initPoolInput, poolState);
+    // Fetch the necessary pool state
+    const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
+    const poolState = await initPoolDataProvider.getInitPoolData(
+      poolAddress as `0x${string}`,
+      poolType,
+      protocolVersion,
+    );
 
-    // Setup permit2 stuffs for permitBatchAndCall
-    const balancerRouterAddress = BALANCER_ROUTER[chainId];
-    const client = { public: publicClient, wallet: walletClient };
-
-    const { batch, signature } = await createPermit2({
-      chainId,
-      tokens: amountsIn.map(token => ({ address: token.address, amount: token.rawAmount })),
-      client,
-      spender: balancerRouterAddress,
+    const permit2 = await Permit2Helper.signInitPoolApproval({
+      ...initPoolInput,
+      client: walletClient.extend(publicActions).extend(walletActions) as unknown as PublicWalletClient, // TODO: upgrade viem/wagmi to match SDK version of viem to fix type casting
+      owner: walletClient.account.address as `0x${string}`,
     });
 
-    const router = getContract({
-      address: balancerRouterAddress,
-      abi: balancerRouterAbi,
-      client,
-    });
+    const initPool = new InitPool();
 
-    const args = [[], [], batch, signature, [encodedInitData]] as const;
-    console.log("router.permitBatchAndCall args for initialize pool", args);
+    const call = initPool.buildCallWithPermit2(initPoolInput, poolState, permit2);
 
-    const hash = await writeTx(() => router.write.permitBatchAndCall(args), {
-      // callbacks to save tx hash's to store
-      onSafeTxHash: safeHash => updatePool({ initPoolTx: { ...initPoolTx, safeHash } }),
-      onWagmiTxHash: wagmiHash => updatePool({ initPoolTx: { ...initPoolTx, wagmiHash } }),
-    });
+    const hash = await writeTx(
+      () =>
+        walletClient.sendTransaction({
+          account: walletClient.account,
+          data: call.callData,
+          to: call.to,
+        }),
+      {
+        // callbacks to save tx hash's to store
+        onSafeTxHash: safeHash => updatePool({ initPoolTx: { ...initPoolTx, safeHash } }),
+        onWagmiTxHash: wagmiHash => updatePool({ initPoolTx: { ...initPoolTx, wagmiHash } }),
+      },
+    );
     if (!hash) throw new Error("Missing init pool transaction hash");
 
     return hash;

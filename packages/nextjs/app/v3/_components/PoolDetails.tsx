@@ -258,7 +258,7 @@ function TokenDetails({ token }: { token: TokenConfig }) {
             </div>
           )}
         </div>
-        <div>{token.amount}</div>
+        <div>{token.amount.length > 15 ? `${token.amount.slice(0, 15)}...` : token.amount}</div>
       </div>
       {token.rateProvider && token.rateProvider !== zeroAddress && (
         <>

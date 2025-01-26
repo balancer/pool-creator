@@ -53,7 +53,7 @@ export const useMultiSwap = () => {
         const exactAmountIn = parseUnits(token.amount, token.tokenInfo.decimals);
 
         return {
-          tokenIn: token.address,
+          tokenIn: token.address as `0x${string}`,
           steps: [
             {
               pool: boostedToken.address,

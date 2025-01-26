@@ -324,7 +324,6 @@ const BoostOpportunityModal = ({
   const boostedVariantRateProvider = boostedVariant.priceRateProviderData?.address;
 
   const handleBoost = (enableBoost: boolean) => {
-    // TODO: more testing for rate provider UX
     updateTokenConfig(tokenIndex, {
       useBoostedVariant: enableBoost,
       rateProvider:

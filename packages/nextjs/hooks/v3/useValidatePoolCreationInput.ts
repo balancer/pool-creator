@@ -1,11 +1,10 @@
 import { PoolType, TokenType } from "@balancer/sdk";
 import { isAddress, parseUnits } from "viem";
 import { useWalletClient } from "wagmi";
-import { usePoolCreationStore, useUserDataStore, useValidateHooksContract, useValidateNetwork } from "~~/hooks/v3";
+import { usePoolCreationStore, useUserDataStore, useValidateHooksContract } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 
 export function useValidatePoolCreationInput() {
-  const { isWrongNetwork } = useValidateNetwork();
   const { data: walletClient } = useWalletClient();
   const { userTokenBalances, hasAgreedToWarning } = useUserDataStore();
 
@@ -24,7 +23,7 @@ export function useValidatePoolCreationInput() {
     poolHooksContract,
   } = usePoolCreationStore();
 
-  const isTypeValid = poolType !== undefined && !isWrongNetwork;
+  const isTypeValid = poolType !== undefined;
 
   const isValidTokenWeights =
     poolType !== PoolType.Weighted ||
