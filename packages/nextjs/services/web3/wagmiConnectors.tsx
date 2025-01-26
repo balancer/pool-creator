@@ -14,12 +14,12 @@ import scaffoldConfig from "~~/scaffold.config";
 const { onlyLocalBurnerWallet, targetNetworks } = scaffoldConfig;
 
 const wallets = [
+  safeWallet, // order prioritizes connection to safe wallet if available?
   metaMaskWallet,
   walletConnectWallet,
   ledgerWallet,
   coinbaseWallet,
   rainbowWallet,
-  safeWallet,
   ...(!targetNetworks.some(network => network.id !== (chains.hardhat as chains.Chain).id) || !onlyLocalBurnerWallet
     ? [rainbowkitBurnerWallet]
     : []),
@@ -37,7 +37,7 @@ export const wagmiConnectors = connectorsForWallets(
   ],
 
   {
-    appName: "scaffold-eth-2",
+    appName: "Balancer Pool Creator",
     projectId: scaffoldConfig.walletConnectProjectId,
   },
 );
