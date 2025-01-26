@@ -41,8 +41,8 @@ export const PoolConfiguration = () => {
   if (token2?.address) proposedPoolTokenMap.set(token2.address.toLowerCase(), token2Weight);
 
   const { existingPool } = useCheckIfPoolExists(proposedPoolTokenMap);
-  const { balance: balance1 } = useReadToken(token1?.address);
-  const { balance: balance2 } = useReadToken(token2?.address);
+  const { balance: balance1 } = useReadToken(token1?.address as `0x${string}` | undefined);
+  const { balance: balance2 } = useReadToken(token2?.address as `0x${string}` | undefined);
 
   const { chain } = useAccount();
 

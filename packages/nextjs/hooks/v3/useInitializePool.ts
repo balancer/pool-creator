@@ -32,7 +32,7 @@ export const useInitializePool = () => {
 
     // Make sure all tokenConfigs have decimals and address
     tokenConfigs.forEach(token => {
-      if (token.tokenInfo?.decimals === null || token.address === "") {
+      if (token.tokenInfo?.decimals === null || (token.address as string) === "") {
         throw new Error(`Token ${token.address} is missing tokenInfo.decimals`);
       }
     });

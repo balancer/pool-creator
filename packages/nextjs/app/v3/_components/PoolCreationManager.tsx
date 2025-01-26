@@ -98,7 +98,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
         <ApproveOnTokenManager
           key={idx}
           token={{
-            address: boostedVariant.address,
+            address: boostedVariant.address as `0x${string}`,
             amount,
             decimals: boostedVariant.decimals,
             symbol: boostedVariant.symbol,
@@ -225,7 +225,7 @@ const PoolCreatedView = () => {
         </button>
       </a>
       <Alert type="success">
-        Your pool has been successfully initialized and will be avaiable to view in the Balancer app shortly!
+        Your pool has been successfully initialized and will be available to view in the Balancer app shortly!
       </Alert>
     </div>
   );

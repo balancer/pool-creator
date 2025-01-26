@@ -34,7 +34,7 @@ export const TokenField: React.FC<TokenFieldProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { tokenUsdValue, isLoading, isError } = useTokenUsdValue(selectedToken?.address, value);
+  const { tokenUsdValue, isLoading, isError } = useTokenUsdValue(selectedToken?.address as `0x${string}`, value);
 
   const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
 

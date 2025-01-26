@@ -158,7 +158,7 @@ export const ChooseParameters = () => {
           label="Delegate swap fee management to the Balancer DAO"
           checked={isDelegatingSwapFeeManagement}
           onChange={() => {
-            updatePool({ isDelegatingSwapFeeManagement: true, swapFeeManager: "" });
+            updatePool({ isDelegatingSwapFeeManagement: true, swapFeeManager: "" as `0x${string}` });
           }}
         />
         <RadioInput
@@ -176,14 +176,14 @@ export const ChooseParameters = () => {
           name="swap-fee-manager"
           label="Choose a different swap fee manager"
           checked={!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress}
-          onChange={() => updatePool({ isDelegatingSwapFeeManagement: false, swapFeeManager: "" })}
+          onChange={() => updatePool({ isDelegatingSwapFeeManagement: false, swapFeeManager: "" as `0x${string}` })}
         />
         {!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress && (
           <TextField
             mustBeAddress={true}
             placeholder="Enter swap fee manager address"
             value={swapFeeManager}
-            onChange={e => updatePool({ swapFeeManager: e.target.value.trim() })}
+            onChange={e => updatePool({ swapFeeManager: e.target.value.trim() as `0x${string}` })}
           />
         )}
       </div>
@@ -205,7 +205,7 @@ export const ChooseParameters = () => {
           label="Delegate pause management to the Balancer DAO"
           checked={isDelegatingPauseManagement}
           onChange={() => {
-            updatePool({ isDelegatingPauseManagement: true, pauseManager: "" });
+            updatePool({ isDelegatingPauseManagement: true, pauseManager: "" as `0x${string}` });
           }}
         />
         <RadioInput
@@ -223,7 +223,7 @@ export const ChooseParameters = () => {
           name="pause-manager"
           label="Choose a different pause manager"
           checked={!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress}
-          onChange={() => updatePool({ isDelegatingPauseManagement: false, pauseManager: "" })}
+          onChange={() => updatePool({ isDelegatingPauseManagement: false, pauseManager: "" as `0x${string}` })}
         />
         {!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress && (
           <div className="flex flex-col gap-3 mt-3">
@@ -231,7 +231,7 @@ export const ChooseParameters = () => {
               mustBeAddress={true}
               placeholder="Enter pause manager address"
               value={pauseManager}
-              onChange={e => updatePool({ pauseManager: e.target.value.trim() })}
+              onChange={e => updatePool({ pauseManager: e.target.value.trim() as `0x${string}` })}
             />
           </div>
         )}
@@ -256,7 +256,7 @@ export const ChooseParameters = () => {
           onChange={() => {
             updatePool({
               isUsingHooks: false,
-              poolHooksContract: "",
+              poolHooksContract: "" as `0x${string}`,
               disableUnbalancedLiquidity: false,
               enableDonation: false,
             });
@@ -276,7 +276,7 @@ export const ChooseParameters = () => {
                 mustBeAddress={true}
                 placeholder="Enter pool hooks contract address"
                 value={poolHooksContract}
-                onChange={e => updatePool({ poolHooksContract: e.target.value.trim() })}
+                onChange={e => updatePool({ poolHooksContract: e.target.value.trim() as `0x${string}` })}
               />
             </div>
             <div className="mt-1 flex flex-col gap-2">

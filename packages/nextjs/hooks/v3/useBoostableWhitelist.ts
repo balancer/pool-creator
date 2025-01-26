@@ -72,7 +72,7 @@ export const useBoostableWhitelist = () => {
       // Create map of underlying token address to matching boosted variant info
       // If the token has an underlyingTokenAddress and isBufferAllowed
       const boostableTokensMap = data.reduce((acc: Record<Address, Token>, token: Token) => {
-        if (token.underlyingTokenAddress && token.isBufferAllowed) acc[token.underlyingTokenAddress] = token;
+        if (token.underlyingTokenAddress && token.isBufferAllowed) acc[token.underlyingTokenAddress as `0x${string}`] = token;
         return acc;
       }, {});
 

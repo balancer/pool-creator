@@ -167,7 +167,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                         isDisabled={isApprove1Pending || isApproveToken1TxHashFetching || isWrongNetwork}
                         onClick={() => {
                           approve1({
-                            token: poolCreation.token1.address,
+                            token: poolCreation.token1.address as `0x${string}`,
                             spender: poolAddress,
                             rawAmount: token1RawAmount,
                           });
@@ -182,7 +182,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                         isDisabled={isApprove2Pending || isApproveToken2TxHashFetching || isWrongNetwork}
                         onClick={() => {
                           approve2({
-                            token: poolCreation.token2.address,
+                            token: poolCreation.token2.address as `0x${string}`,
                             spender: poolAddress,
                             rawAmount: token2RawAmount,
                           });
@@ -199,7 +199,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                         onClick={() => {
                           bind1({
                             pool: poolAddress,
-                            token: poolCreation.token1.address,
+                            token: poolCreation.token1.address as `0x${string}`,
                             rawAmount: token1RawAmount,
                           });
                         }}
@@ -214,7 +214,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                         onClick={() => {
                           bind2({
                             pool: poolAddress,
-                            token: poolCreation.token2.address,
+                            token: poolCreation.token2.address as `0x${string}`,
                             rawAmount: token2RawAmount,
                           });
                         }}

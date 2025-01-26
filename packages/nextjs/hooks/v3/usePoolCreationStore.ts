@@ -59,7 +59,7 @@ export interface PoolCreationStore {
 }
 
 export const initialTokenConfig: TokenConfig = {
-  address: "",
+  address: "" as `0x${string}`,
   rateProvider: zeroAddress,
   isValidRateProvider: false,
   paysYieldFees: false,
@@ -85,9 +85,9 @@ export const initialPoolCreationState = {
   tokenConfigs: [initialTokenConfig, initialTokenConfig],
   amplificationParameter: "", // only used for stable pools
   swapFeePercentage: "", // store as human readable % to be converted later
-  swapFeeManager: "",
-  pauseManager: "",
-  poolHooksContract: "",
+  swapFeeManager: "" as `0x${string}`,
+  pauseManager: "" as `0x${string}`,
+  poolHooksContract: "" as `0x${string}`,
   disableUnbalancedLiquidity: false,
   enableDonation: false,
   // isSuccess is only flipped to true after parsing tx receipt for status

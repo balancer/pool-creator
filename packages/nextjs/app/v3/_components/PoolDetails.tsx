@@ -52,7 +52,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         title="Tokens"
         isPreview={isPreview}
         isValid={isTokensValid}
-        isEmpty={tokenConfigs.every(token => token.address === "")}
+        isEmpty={tokenConfigs.every(token => (token.address as string) === "")}
         content={
           <div className="flex flex-col gap-2">
             {tokenConfigs.map((token, index) => (

@@ -24,4 +24,5 @@ export const CHAIN_NAMES: { [key: number]: string } = {
   11155111: "SEPOLIA",
   42161: "ARBITRUM",
   8453: "BASE",
+  146: "SONIC",
 };
