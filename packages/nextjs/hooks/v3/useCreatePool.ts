@@ -56,9 +56,9 @@ export const useCreatePool = () => {
       name,
       symbol,
       swapFeePercentage: parseUnits(swapFeePercentage, SWAP_FEE_PERCENTAGE_DECIMALS),
-      swapFeeManager: swapFeeManager === "" ? zeroAddress : swapFeeManager,
-      pauseManager: pauseManager === "" ? zeroAddress : pauseManager,
-      poolHooksContract: poolHooksContract === "" ? zeroAddress : poolHooksContract,
+      swapFeeManager: swapFeeManager === "" ? zeroAddress : (swapFeeManager as `0x${string}`),
+      pauseManager: pauseManager === "" ? zeroAddress : (pauseManager as `0x${string}`),
+      poolHooksContract: poolHooksContract === "" ? zeroAddress : (poolHooksContract as `0x${string}`),
       enableDonation,
       disableUnbalancedLiquidity,
     };

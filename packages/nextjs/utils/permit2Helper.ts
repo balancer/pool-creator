@@ -8,13 +8,13 @@ import {
   PermitDetails,
   permit2Abi,
 } from "@balancer/sdk";
-import { Address, PublicClient, WalletClient, getContract } from "viem";
+import { PublicClient, WalletClient, getContract } from "viem";
 
 export type CreatePermit2 = {
   chainId: number;
-  tokens: { address: string; amount: bigint }[];
+  tokens: { address: `0x${string}`; amount: bigint }[];
   client: { public: PublicClient; wallet: WalletClient };
-  spender: Address;
+  spender: `0x${string}`;
 };
 
 export const createPermit2 = async ({ client, chainId, tokens, spender }: CreatePermit2) => {
@@ -55,7 +55,10 @@ export const createPermit2 = async ({ client, chainId, tokens, spender }: Create
     message: {
       ...values,
     },
-    domain,
+    domain: {
+      ...domain,
+      chainId: Number(domain.chainId),
+    },
     primaryType: "PermitBatch",
     types,
   });
