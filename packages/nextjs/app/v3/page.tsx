@@ -12,14 +12,14 @@ import { useWalletClient } from "wagmi";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
   const { clearPoolStore, chain } = usePoolCreationStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
   const { data: walletClient } = useWalletClient();
   const { clearUserData } = useUserDataStore();
-
+  usePoolStoreDebug();
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">

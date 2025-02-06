@@ -69,7 +69,7 @@ export function PoolConfiguration() {
               </div>
             ))}
           </div>
-          <div className="py-7 min-h-[500px] flex flex-col">{TAB_CONTENT[selectedTab]}</div>
+          <div className="py-7 min-h-[398px] flex flex-col">{TAB_CONTENT[selectedTab]}</div>
 
           <div className="grid grid-cols-2 gap-7">
             <button

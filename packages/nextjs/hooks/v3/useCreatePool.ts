@@ -1,5 +1,6 @@
 import {
   CreatePool,
+  CreatePoolStableSurgeInput,
   CreatePoolV3BaseInput,
   CreatePoolV3StableInput,
   CreatePoolV3WeightedInput,
@@ -12,10 +13,12 @@ import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { stableSurgeFactoryAbi } from "~~/utils/abis/stableSurgeFactory";
 
 export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
   [PoolType.Stable]: stablePoolFactoryAbi_V3,
+  [PoolType.StableSurge]: stableSurgeFactoryAbi,
 };
 
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
@@ -47,7 +50,9 @@ export const useCreatePool = () => {
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
-  function createPoolInput(poolType: PoolType): CreatePoolV3StableInput | CreatePoolV3WeightedInput {
+  function createPoolInput(
+    poolType: PoolType,
+  ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
     if (!publicClient) throw new Error("Public client must be available!");
     const baseInput: CreatePoolV3BaseInput = {
@@ -78,12 +83,16 @@ export const useCreatePool = () => {
       },
     );
 
+    console.log("amplificationParameter", amplificationParameter);
+
     return {
       ...baseInput,
       poolType,
       tokens,
-      ...(poolType === PoolType.Stable && { amplificationParameter: BigInt(amplificationParameter) }),
-    } as CreatePoolV3StableInput | CreatePoolV3WeightedInput;
+      ...((poolType === PoolType.Stable || poolType === PoolType.StableSurge) && {
+        amplificationParameter: BigInt(amplificationParameter),
+      }),
+    } as CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput;
   }
 
   async function createPool() {
@@ -94,6 +103,8 @@ export const useCreatePool = () => {
     const createPool = new CreatePool();
     const input = createPoolInput(poolType);
     const call = createPool.buildCall(input);
+
+    console.log("input", input);
 
     const hash = await writeTx(
       () =>
