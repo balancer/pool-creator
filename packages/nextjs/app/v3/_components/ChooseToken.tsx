@@ -57,21 +57,15 @@ export function ChooseToken({ index }: { index: number }) {
   }, [userTokenBalance, address]);
 
   const handleTokenSelection = (tokenInfo: Token) => {
-    const tokenType = tokenInfo.priceRateProviderData ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD;
-    const rateProvider = tokenInfo.priceRateProviderData ? tokenInfo.priceRateProviderData.address : zeroAddress;
-
-    // Force user to confirm if Balancer API has rate provider data for selected token
-    if (rateProvider !== zeroAddress) {
-      setShowRateProviderModal(true);
-    }
-
+    // upon initial selection of token, start with default values
     updateTokenConfig(index, {
       address: tokenInfo.address,
-      tokenType,
-      // rateProvider,
-      paysYieldFees: tokenType === TokenType.TOKEN_WITH_RATE ? true : false,
+      tokenType: TokenType.STANDARD,
+      rateProvider: zeroAddress,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
+
+      paysYieldFees: false,
     });
 
     // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
@@ -87,7 +81,7 @@ export function ChooseToken({ index }: { index: number }) {
     updateTokenConfig(index, { amount });
   };
 
-  const handleTokenType = () => {
+  const handleTokenTypeToggle = () => {
     if (tokenConfigs[index].tokenType === TokenType.STANDARD) {
       updateTokenConfig(index, { tokenType: TokenType.TOKEN_WITH_RATE, rateProvider: "", paysYieldFees: true });
     } else {
@@ -156,6 +150,22 @@ export function ChooseToken({ index }: { index: number }) {
     updatePool({ tokenConfigs: updatedTokenConfigs });
     isUpdatingWeights.current = false;
   };
+
+  // show rate provider modal when appropriate
+  const token = tokenConfigs[index];
+  useEffect(() => {
+    let rateProviderAddress = token.tokenInfo?.priceRateProviderData?.address;
+    // if user opted to use boosted variant of underlying token, offer the rate provider from the boosted variant
+    if (token.useBoostedVariant) {
+      const boostedVariant = boostableWhitelist?.[token.address];
+      rateProviderAddress = boostedVariant?.priceRateProviderData?.address;
+    }
+    // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
+    if (rateProviderAddress && !showBoostOpportunityModal) {
+      setShowRateProviderModal(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token.tokenInfo?.priceRateProviderData, token.useBoostedVariant, token.address, showBoostOpportunityModal]);
 
   return (
     <>
@@ -226,7 +236,7 @@ export function ChooseToken({ index }: { index: number }) {
                     </a>
                   }
                   checked={tokenType === TokenType.TOKEN_WITH_RATE}
-                  onChange={handleTokenType}
+                  onChange={handleTokenTypeToggle}
                 />
               </div>
 
@@ -290,11 +300,7 @@ export function ChooseToken({ index }: { index: number }) {
         </div>
       </div>
       {showRateProviderModal && tokenInfo && (
-        <RateProviderModal
-          setShowRateProviderModal={setShowRateProviderModal}
-          tokenInfo={tokenInfo}
-          tokenIndex={index}
-        />
+        <RateProviderModal setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
       )}
       {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal
@@ -323,14 +329,24 @@ const BoostOpportunityModal = ({
 
   const boostedVariantRateProvider = boostedVariant.priceRateProviderData?.address;
 
-  const handleBoost = (enableBoost: boolean) => {
+  const handleConfirmBoost = () => {
     updateTokenConfig(tokenIndex, {
-      useBoostedVariant: enableBoost,
-      rateProvider:
-        enableBoost && boostedVariantRateProvider ? boostedVariantRateProvider : enableBoost ? "" : zeroAddress,
-      tokenType: enableBoost ? TokenType.TOKEN_WITH_RATE : TokenType.STANDARD,
-      paysYieldFees: enableBoost ? true : false,
+      useBoostedVariant: true,
+      rateProvider: boostedVariantRateProvider ? boostedVariantRateProvider : zeroAddress,
+      tokenType: TokenType.TOKEN_WITH_RATE,
+      paysYieldFees: true,
     });
+    setShowBoostOpportunityModal(false);
+  };
+
+  const handleDenyBoost = () => {
+    updateTokenConfig(tokenIndex, {
+      useBoostedVariant: false,
+      rateProvider: zeroAddress,
+      tokenType: TokenType.STANDARD,
+      paysYieldFees: false,
+    });
+
     setShowBoostOpportunityModal(false);
   };
 
@@ -347,10 +363,10 @@ const BoostOpportunityModal = ({
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 w-full">
-          <button className={`btn ${bgBeigeGradient} rounded-xl text-lg`} onClick={() => handleBoost(false)}>
+          <button className={`btn ${bgBeigeGradient} rounded-xl text-lg`} onClick={() => handleDenyBoost()}>
             {standardVariant.symbol}
           </button>
-          <button className={`btn ${bgPrimaryGradient} rounded-xl text-lg`} onClick={() => handleBoost(true)}>
+          <button className={`btn ${bgPrimaryGradient} rounded-xl text-lg`} onClick={() => handleConfirmBoost()}>
             {boostedVariant.symbol}
           </button>
         </div>
@@ -361,30 +377,60 @@ const BoostOpportunityModal = ({
 
 const RateProviderModal = ({
   tokenIndex,
-  tokenInfo,
   setShowRateProviderModal,
 }: {
   tokenIndex: number;
-  tokenInfo: Token;
   setShowRateProviderModal: Dispatch<SetStateAction<boolean>>;
 }) => {
   const { targetNetwork } = useTargetNetwork();
-  const { updateTokenConfig } = usePoolCreationStore();
+  const { updateTokenConfig, tokenConfigs } = usePoolCreationStore();
 
-  const rateProviderData = tokenInfo.priceRateProviderData;
+  const { data: boostableWhitelist } = useBoostableWhitelist();
+
+  const token = tokenConfigs[tokenIndex];
+
+  let rateProviderData = token.tokenInfo?.priceRateProviderData;
+  let tokenSymbol = token.tokenInfo?.symbol;
+
+  if (token.useBoostedVariant) {
+    const boostedVariant = boostableWhitelist?.[token.address];
+    rateProviderData = boostedVariant?.priceRateProviderData;
+    tokenSymbol = boostedVariant?.symbol;
+  }
+
+  const rateProviderAddress = rateProviderData?.address;
 
   const rateProviderLink = rateProviderData
     ? getBlockExplorerAddressLink(targetNetwork, rateProviderData.address)
     : undefined;
 
+  const handleConfirmRateProvider = () => {
+    if (rateProviderAddress) {
+      updateTokenConfig(tokenIndex, {
+        rateProvider: rateProviderAddress,
+        tokenType: TokenType.TOKEN_WITH_RATE,
+        paysYieldFees: true,
+      });
+    }
+    setShowRateProviderModal(false);
+  };
+
+  const handleDenyRateProvider = () => {
+    updateTokenConfig(tokenIndex, {
+      tokenType: TokenType.STANDARD,
+      rateProvider: zeroAddress,
+    });
+    setShowRateProviderModal(false);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="w-[650px] min-h-[333px] bg-base-200 rounded-lg py-7 px-10 flex flex-col gap-5 justify-around">
-        <h3 className="font-bold text-3xl text-center">Confirm Rate Provider</h3>
+        <h3 className="font-bold text-3xl text-center">Whitelisted Rate Provider</h3>
 
         <div className="flex flex-col gap-5">
           <div className="text-xl">
-            Consider using the following rate provider for <b>{tokenInfo.symbol}</b>
+            Consider using the following rate provider for <b>{tokenSymbol}</b>
           </div>
           {rateProviderData ? (
             <div className="overflow-x-auto px-5">
@@ -431,30 +477,28 @@ const RateProviderModal = ({
             <div>No rate provider data</div>
           )}
           <div className="text-xl">
-            If you wish to use this rate provider, click confirm. Otherwise, choose deny and paste in a rate provider
-            address
+            {token.useBoostedVariant ? (
+              <>
+                Since you opted to boost <b>{token.tokenInfo?.symbol}</b> into <b>{tokenSymbol}</b>, you must accept the
+                default rate provder from the balancer white list
+              </>
+            ) : (
+              "If you wish to use this rate provider, click confirm. Otherwise, choose deny and paste in a rate provider address"
+            )}
           </div>
         </div>
         <div className="w-full flex gap-4 justify-end mt-3">
           <button
+            disabled={token.useBoostedVariant}
             className={`btn btn-error rounded-xl text-lg w-28`}
-            onClick={() => {
-              setShowRateProviderModal(false);
-              updateTokenConfig(tokenIndex, {
-                rateProvider: "",
-              });
-            }}
+            onClick={() => handleDenyRateProvider()}
           >
             Deny
           </button>
           <button
             className={`btn btn-success rounded-xl text-lg w-28`}
-            onClick={() => {
-              setShowRateProviderModal(false);
-              updateTokenConfig(tokenIndex, {
-                rateProvider: rateProviderData?.address ?? "",
-              });
-            }}
+            disabled={!rateProviderData?.address}
+            onClick={() => handleConfirmRateProvider()}
           >
             Confirm
           </button>
