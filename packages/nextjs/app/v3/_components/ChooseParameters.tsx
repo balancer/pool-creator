@@ -251,7 +251,17 @@ export const ChooseParameters = () => {
         </label>
 
         {poolType === PoolType.StableSurge ? (
-          <div className="text-lg">The Stable Surge pool type uses a core hooks contract</div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-1 text-lg">
+              The Stable Surge pool type uses a core hooks contract
+              <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
+            </div>
+            <Checkbox
+              label="Should this pool accept donations?"
+              checked={enableDonation}
+              onChange={() => updatePool({ enableDonation: !enableDonation })}
+            />
+          </div>
         ) : (
           <>
             <RadioInput

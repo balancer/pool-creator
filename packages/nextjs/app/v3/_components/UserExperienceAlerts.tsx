@@ -2,7 +2,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Alert } from "~~/components/common";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { PoolStateResetModal } from "~~/components/common";
+import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function UserExperienceAlerts() {
   const [isInfoAlertVisible, setIsInfoAlertVisible] = useState(true);
@@ -68,18 +69,37 @@ export function ConnectWalletAlert() {
 }
 
 export function StartedOnDifferentNetworkAlert() {
-  const { chain } = usePoolCreationStore();
+  const { chain, clearPoolStore } = usePoolCreationStore();
+  const { clearUserData } = useUserDataStore();
 
   return (
-    <div className="flex justify-center w-full">
-      <div className="w-[1110px]">
-        <Alert type="warning">
-          <div className="flex items-center gap-2">
-            You have already begun the pool configuration process on {chain?.name}. If you wish to start creating a pool
-            on a different network, choose reset progress after switching back to {chain?.name}.
-            <ArrowUpRightIcon className="w-4 h-4" />
-          </div>
-        </Alert>
+    <div>
+      <div className="flex justify-center w-full">
+        <div className="w-[1110px] flex flex-col gap-3">
+          <Alert type="warning">
+            <div className="flex items-center gap-2">
+              You have already begun the pool configuration process on {chain?.name}. To start over on a new network,
+              reset progress
+            </div>
+          </Alert>
+          <Alert type="info">
+            <div className="flex items-center gap-2">
+              To continue progress, switch back to the {chain?.name} network
+            </div>
+          </Alert>
+          <Alert type="error">
+            <div className="flex items-center gap-2">
+              To start over on a new network, reset progress by clicking
+              <PoolStateResetModal
+                trigger={<span className="underline">here</span>}
+                clearState={() => {
+                  clearPoolStore();
+                  clearUserData();
+                }}
+              />
+            </div>
+          </Alert>
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,6 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
-import { sepolia } from "viem/chains";
 import { ArrowUpRightIcon } from "@heroicons/react/24/solid";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
@@ -34,35 +32,17 @@ const INITIAL_DESCRIPTION = (
 
 export function ChooseType() {
   const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
-  const { targetNetwork } = useTargetNetwork();
-
-  const isSepolia = targetNetwork.id === sepolia.id;
-
-  // Filter pool types based on network
-  const availablePoolTypes = POOL_TYPES.filter(type => {
-    if (type === PoolType.StableSurge) return isSepolia;
-    return true;
-  });
 
   return (
     <>
       <div className="flex flex-col justify-center h-full gap-10 px-7 py-5">
-        {!poolType && (
-          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral">
-            <div className="text-xl font-bold mb-2">{poolType ? "Description" : "Instructions"}:</div>
-            {poolType ? POOL_TYPE_DESCRIPTIONS[poolType] : INITIAL_DESCRIPTION}
-          </div>
-        )}
-
         <div className="flex gap-4 justify-around">
-          {availablePoolTypes.map(type => (
+          {POOL_TYPES.map(type => (
             <button
               key={type}
               className={`${
-                type === poolType
-                  ? `bg-primary text-primary-content`
-                  : `bg-base-100 hover:bg-primary hover:text-primary-content hover:opacity-50 shadow-lg`
-              } p-7 w-full rounded-xl text-lg text`}
+                type === poolType ? `bg-accent text-white` : `bg-primary hover:bg-primary hover:opacity-80 shadow-lg`
+              } p-7 w-full rounded-xl text-lg text-accent-content`}
               onClick={() => updatePool({ poolType: type, tokenConfigs: tokenConfigs.slice(0, 4) })}
             >
               <div className="flex flex-col text-center">
@@ -72,10 +52,15 @@ export function ChooseType() {
           ))}
         </div>
 
-        {poolType && (
+        {poolType ? (
           <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral">
             <div className="text-xl font-bold mb-2">Description:</div>
             {POOL_TYPE_DESCRIPTIONS[poolType]}
+          </div>
+        ) : (
+          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral">
+            <div className="text-xl font-bold mb-2">{poolType ? "Description" : "Instructions"}:</div>
+            {poolType ? POOL_TYPE_DESCRIPTIONS[poolType] : INITIAL_DESCRIPTION}
           </div>
         )}
       </div>

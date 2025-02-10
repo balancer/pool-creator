@@ -83,8 +83,6 @@ export const useCreatePool = () => {
       },
     );
 
-    console.log("amplificationParameter", amplificationParameter);
-
     return {
       ...baseInput,
       poolType,
@@ -103,8 +101,6 @@ export const useCreatePool = () => {
     const createPool = new CreatePool();
     const input = createPoolInput(poolType);
     const call = createPool.buildCall(input);
-
-    console.log("input", input);
 
     const hash = await writeTx(
       () =>

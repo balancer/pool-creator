@@ -6,7 +6,7 @@ export const ContactSupportModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <>
-      <div onClick={() => setIsModalOpen(true)} className="text-center hover:underline cursor-pointer text-lg">
+      <div onClick={() => setIsModalOpen(true)} className="text-center hover:underline cursor-pointer">
         Contact Support
       </div>
       {isModalOpen && (

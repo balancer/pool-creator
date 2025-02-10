@@ -120,6 +120,19 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               </div>
             </div>
 
+            {poolType === PoolType.StableSurge && (
+              <>
+                <div className="flex justify-between">
+                  <div className="">Disable Unbalanced Liquidity</div>
+                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Donations Enabled</div>
+                  <div>{enableDonation ? "true" : "false"}</div>
+                </div>
+              </>
+            )}
+
             {isUsingHooks && (
               <>
                 <div className="flex justify-between">

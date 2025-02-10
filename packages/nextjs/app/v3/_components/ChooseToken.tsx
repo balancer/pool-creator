@@ -154,15 +154,19 @@ export function ChooseToken({ index }: { index: number }) {
   // show rate provider modal when appropriate
   const token = tokenConfigs[index];
   useEffect(() => {
-    let rateProviderAddress = token.tokenInfo?.priceRateProviderData?.address;
+    let rateProviderData = token.tokenInfo?.priceRateProviderData;
     // if user opted to use boosted variant of underlying token, offer the rate provider from the boosted variant
     if (token.useBoostedVariant) {
       const boostedVariant = boostableWhitelist?.[token.address];
-      rateProviderAddress = boostedVariant?.priceRateProviderData?.address;
+      rateProviderData = boostedVariant?.priceRateProviderData;
     }
+
     // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
-    if (rateProviderAddress && !showBoostOpportunityModal) {
-      setShowRateProviderModal(true);
+    if (rateProviderData && !showBoostOpportunityModal) {
+      // Constant rate providers are special case only used for gyro pools
+      if (rateProviderData.name !== "ConstantRateProvider") {
+        setShowRateProviderModal(true);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token.tokenInfo?.priceRateProviderData, token.useBoostedVariant, token.address, showBoostOpportunityModal]);
@@ -430,7 +434,7 @@ const RateProviderModal = ({
 
         <div className="flex flex-col gap-5">
           <div className="text-xl">
-            Consider using the following rate provider for <b>{tokenSymbol}</b>
+            The following rate provider for <b>{tokenSymbol} </b> has already been whitelisted by Balancer
           </div>
           {rateProviderData ? (
             <div className="overflow-x-auto px-5">
@@ -479,8 +483,8 @@ const RateProviderModal = ({
           <div className="text-xl">
             {token.useBoostedVariant ? (
               <>
-                Since you opted to boost <b>{token.tokenInfo?.symbol}</b> into <b>{tokenSymbol}</b>, you must accept the
-                default rate provder from the balancer white list
+                Since you opted to boost <b>{token.tokenInfo?.symbol}</b> into <b>{tokenSymbol}</b> as part of pool
+                creation, you should use the default rate provider
               </>
             ) : (
               "If you wish to use this rate provider, click confirm. Otherwise, choose deny and paste in a rate provider address"
@@ -488,13 +492,11 @@ const RateProviderModal = ({
           </div>
         </div>
         <div className="w-full flex gap-4 justify-end mt-3">
-          <button
-            disabled={token.useBoostedVariant}
-            className={`btn btn-error rounded-xl text-lg w-28`}
-            onClick={() => handleDenyRateProvider()}
-          >
-            Deny
-          </button>
+          {!token.useBoostedVariant && (
+            <button className={`btn btn-error rounded-xl text-lg w-28`} onClick={() => handleDenyRateProvider()}>
+              Deny
+            </button>
+          )}
           <button
             className={`btn btn-success rounded-xl text-lg w-28`}
             disabled={!rateProviderData?.address}
