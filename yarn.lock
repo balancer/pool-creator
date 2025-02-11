@@ -286,14 +286,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@balancer/sdk@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@balancer/sdk@npm:1.4.0"
+"@balancer/sdk@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@balancer/sdk@npm:2.1.1"
   dependencies:
     decimal.js-light: ^2.5.1
     lodash.clonedeep: ^4.5.0
     viem: ^2.22.3
-  checksum: 0128b7dd6f59e0a145d91d945a52073ef27de5aa9c7de14f9a7cca2203eff12c97bf76177ba5645dc7147ab7c7f48cf894ec62507917e45a04d23aa2ebc1db27
+  checksum: 4c1788af0e3c130249534d79337aed7841d1bb2330aa20287b9b48c28dd0c5db5877a1d0ee6f7ebdedfd06019c722b10b4b04018750a3dec2492000b9d1aa18e
   languageName: node
   linkType: hard
 
@@ -1659,7 +1659,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
-    "@balancer/sdk": ^1.4.0
+    "@balancer/sdk": ^2.1.1
     "@heroicons/react": ^2.0.11
     "@rainbow-me/rainbowkit": 2.1.2
     "@safe-global/safe-apps-provider": ^0.18.5

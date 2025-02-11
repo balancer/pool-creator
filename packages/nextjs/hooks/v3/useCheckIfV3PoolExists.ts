@@ -1,4 +1,5 @@
 import { AllowedPoolTypes } from "./usePoolCreationStore";
+import { PoolType } from "@balancer/sdk";
 import { useQuery } from "@tanstack/react-query";
 import { type Address } from "viem";
 import { useApiConfig } from "~~/hooks/balancer";
@@ -25,9 +26,12 @@ export type ExistingPool = {
 export const useCheckIfV3PoolExists = (type: AllowedPoolTypes | undefined, tokenAddresses: Address[]) => {
   const { url, chainName } = useApiConfig();
 
+  // API does not recognize stable surge as pool type like the SDK does
+  const poolType = type === PoolType.StableSurge ? PoolType.Stable : type;
+
   const query = `
   {
-    poolGetPools (where: {chainIn:[${chainName}], poolTypeIn:[${type?.toUpperCase()}], tokensIn:[${tokenAddresses
+    poolGetPools (where: {chainIn:[${chainName}], poolTypeIn:[${poolType?.toUpperCase()}], tokensIn:[${tokenAddresses
     .map(address => `"${address}"`)
     .join(",")}], protocolVersionIn:[3], tagNotIn: ["BLACK_LISTED"]}) {
         chain
@@ -48,9 +52,9 @@ export const useCheckIfV3PoolExists = (type: AllowedPoolTypes | undefined, token
   `;
 
   const { data: existingPools } = useQuery<ExistingPool[]>({
-    queryKey: ["existingPools", type, chainName, tokenAddresses],
+    queryKey: ["existingPools", poolType, chainName, tokenAddresses],
     queryFn: async () => {
-      if (!type || !tokenAddresses) return {};
+      if (!poolType || !tokenAddresses) return {};
 
       const response = await fetch(url, {
         method: "POST",

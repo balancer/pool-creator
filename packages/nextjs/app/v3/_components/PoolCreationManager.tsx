@@ -153,6 +153,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
                     clearUserData();
                     setIsModalOpen(false);
                   }}
+                  trigger={<span className="hover:underline">Reset Progress</span>}
                 />
               </div>
             </div>

@@ -72,12 +72,13 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <div className="">Swap Fee %</div>
               <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
             </div>
-            {poolType === PoolType.Stable && (
-              <div className="flex justify-between">
-                <div className="">Amplification Parameter</div>
-                <div>{amplificationParameter ? amplificationParameter : "-"}</div>
-              </div>
-            )}
+            {poolType === PoolType.Stable ||
+              (PoolType.StableSurge && (
+                <div className="flex justify-between">
+                  <div className="">Amplification Parameter</div>
+                  <div>{amplificationParameter ? amplificationParameter : "-"}</div>
+                </div>
+              ))}
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>
@@ -118,6 +119,19 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 )}
               </div>
             </div>
+
+            {poolType === PoolType.StableSurge && (
+              <>
+                <div className="flex justify-between">
+                  <div className="">Disable Unbalanced Liquidity</div>
+                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Donations Enabled</div>
+                  <div>{enableDonation ? "true" : "false"}</div>
+                </div>
+              </>
+            )}
 
             {isUsingHooks && (
               <>

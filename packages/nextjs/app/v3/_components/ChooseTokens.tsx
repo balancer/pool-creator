@@ -8,6 +8,7 @@ import { initialTokenConfig, usePoolCreationStore, useUserDataStore } from "~~/h
 const MAX_TOKENS = {
   [PoolType.Weighted]: 8,
   [PoolType.Stable]: 4, // because Daniel said to "for the moment, even though it theoretically supports more"
+  [PoolType.StableSurge]: 4,
 };
 
 export function ChooseTokens() {

@@ -103,7 +103,7 @@ export const ChooseParameters = () => {
         </div>
       </div>
 
-      {poolType === PoolType.Stable && (
+      {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
         <div className="bg-base-100 p-5 rounded-xl">
           <div className="text-lg font-bold mb-3 inline-flex">
             <a
@@ -249,57 +249,74 @@ export const ChooseParameters = () => {
             <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
           </a>
         </label>
-        <RadioInput
-          name="pool-hooks"
-          label="I do not want this pool to use any hooks"
-          checked={!isUsingHooks}
-          onChange={() => {
-            updatePool({
-              isUsingHooks: false,
-              poolHooksContract: "",
-              disableUnbalancedLiquidity: false,
-              enableDonation: false,
-            });
-          }}
-        />
-        <RadioInput
-          name="pool-hooks"
-          label="I want this pool to use a hooks contract"
-          checked={isUsingHooks}
-          onChange={() => updatePool({ isUsingHooks: true })}
-        />
-        {isUsingHooks && (
-          <div className="">
-            <div className="mb-4">
-              <TextField
-                isPoolHooksContract={true}
-                mustBeAddress={true}
-                placeholder="Enter pool hooks contract address"
-                value={poolHooksContract}
-                onChange={e => updatePool({ poolHooksContract: e.target.value.trim() })}
-              />
+
+        {poolType === PoolType.StableSurge ? (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-1 text-lg">
+              The Stable Surge pool type uses a core hooks contract
+              <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
             </div>
-            <div className="mt-1 flex flex-col gap-2">
-              {hookFlags?.enableHookAdjustedAmounts ? (
-                <div className="flex items-center gap-1 text-lg">
-                  This hook requires unbalanced liquidity operations to be disabled
-                  <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
-                </div>
-              ) : (
-                <Checkbox
-                  disabled={hookFlags?.enableHookAdjustedAmounts}
-                  label="Should this pool disable unbalanced liquidity operations?"
-                  checked={disableUnbalancedLiquidity}
-                  onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
-                />
-              )}
-              <Checkbox
-                label="Should this pool accept donations?"
-                checked={enableDonation}
-                onChange={() => updatePool({ enableDonation: !enableDonation })}
-              />
-            </div>
+            <Checkbox
+              label="Should this pool accept donations?"
+              checked={enableDonation}
+              onChange={() => updatePool({ enableDonation: !enableDonation })}
+            />
           </div>
+        ) : (
+          <>
+            <RadioInput
+              name="pool-hooks"
+              label="I do not want this pool to use any hooks"
+              checked={!isUsingHooks}
+              onChange={() => {
+                updatePool({
+                  isUsingHooks: false,
+                  poolHooksContract: "",
+                  disableUnbalancedLiquidity: false,
+                  enableDonation: false,
+                });
+              }}
+            />
+            <RadioInput
+              name="pool-hooks"
+              label="I want this pool to use a hooks contract"
+              checked={isUsingHooks}
+              onChange={() => updatePool({ isUsingHooks: true })}
+            />
+            {isUsingHooks && (
+              <div>
+                <div className="mb-4">
+                  <TextField
+                    isPoolHooksContract={true}
+                    mustBeAddress={true}
+                    placeholder="Enter pool hooks contract address"
+                    value={poolHooksContract}
+                    onChange={e => updatePool({ poolHooksContract: e.target.value.trim() })}
+                  />
+                </div>
+                <div className="mt-1 flex flex-col gap-2">
+                  {hookFlags?.enableHookAdjustedAmounts ? (
+                    <div className="flex items-center gap-1 text-lg">
+                      This hook requires unbalanced liquidity operations to be disabled
+                      <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
+                    </div>
+                  ) : (
+                    <Checkbox
+                      disabled={hookFlags?.enableHookAdjustedAmounts}
+                      label="Should this pool disable unbalanced liquidity operations?"
+                      checked={disableUnbalancedLiquidity}
+                      onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
+                    />
+                  )}
+                  <Checkbox
+                    label="Should this pool accept donations?"
+                    checked={enableDonation}
+                    onChange={() => updatePool({ enableDonation: !enableDonation })}
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

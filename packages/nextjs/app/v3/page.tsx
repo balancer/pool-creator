@@ -61,6 +61,7 @@ const BalancerV3: NextPage = () => {
                         clearPoolStore();
                         clearUserData();
                       }}
+                      trigger={<span className="hover:underline">Reset Progress</span>}
                     />
                   </div>
                 </div>

@@ -72,7 +72,7 @@ export const Footer = () => {
                 rel="noreferrer"
                 className="link no-underline hover:underline"
               >
-                Pool Creator Github
+                Github
               </a>
             </div>
             <span>·</span>

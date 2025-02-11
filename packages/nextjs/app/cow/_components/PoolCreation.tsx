@@ -284,6 +284,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
                 clearState={() => {
                   clearPoolCreation();
                 }}
+                trigger={<span className="hover:underline">Reset Progress</span>}
               />
             </div>
           )}
