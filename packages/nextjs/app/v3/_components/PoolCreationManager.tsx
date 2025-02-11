@@ -215,7 +215,11 @@ const PoolCreatedView = () => {
   const { poolAddress, chain } = usePoolCreationStore();
 
   const baseURL = chain?.id === 11155111 ? "https://test.balancer.fi" : "https://balancer.fi";
-  const poolURL = `${baseURL}/pools/${chain?.name.toLowerCase()}/v3/${poolAddress}`;
+
+  // V3 FE only uses single word so need to convert "Arbitrum One" (from wagmi) to "arbitrum" for the URL
+  const chainName = chain?.name.split(" ")[0].toLowerCase();
+
+  const poolURL = `${baseURL}/pools/${chainName}/v3/${poolAddress}`;
 
   return (
     <div className="flex flex-col gap-5">
