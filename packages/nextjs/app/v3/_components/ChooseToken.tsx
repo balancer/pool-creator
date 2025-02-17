@@ -33,6 +33,7 @@ export function ChooseToken({ index }: { index: number }) {
     address,
     useBoostedVariant,
     isWeightLocked,
+    paysYieldFees,
   } = tokenConfigs[index];
   useValidateRateProvider(rateProvider, index); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
 
@@ -270,6 +271,12 @@ export function ChooseToken({ index }: { index: number }) {
                 value={rateProvider !== zeroAddress ? rateProvider : ""}
                 onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() })}
               />
+              <Checkbox
+                label={`Should yield fees be charged on ${tokenInfo?.symbol}?`}
+                checked={paysYieldFees}
+                onChange={() => updateTokenConfig(index, { paysYieldFees: !paysYieldFees })}
+              />
+
               {rateProvider.toLowerCase() !== tokenInfo?.priceRateProviderData?.address.toLowerCase() &&
                 !(
                   useBoostedVariant &&
@@ -291,14 +298,6 @@ export function ChooseToken({ index }: { index: number }) {
                     </a>
                   </Alert>
                 )}
-
-              {/* 
-              <Checkbox
-                label={`Should yield fees be charged on ${tokenInfo?.symbol}?`}
-                checked={paysYieldFees}
-                onChange={handlePaysYieldFees}
-              /> 
-              */}
             </div>
           )}
         </div>
