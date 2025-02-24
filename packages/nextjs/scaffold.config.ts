@@ -1,4 +1,5 @@
 import * as chains from "viem/chains";
+import { monadTestnet } from "~~/utils/customChains";
 
 export type ScaffoldConfig = {
   targetNetworks: readonly chains.Chain[];
@@ -12,7 +13,7 @@ export type ScaffoldConfig = {
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.sepolia, chains.mainnet, chains.gnosis, chains.arbitrum, chains.base],
+  targetNetworks: [chains.sepolia, chains.mainnet, chains.gnosis, chains.arbitrum, chains.base, monadTestnet],
 
   // If using chains.foundry as your targetNetwork, you must specify a network to fork
   targetFork: chains.sepolia,
