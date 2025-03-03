@@ -10,7 +10,7 @@ import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 export type TabType = (typeof TABS)[number];
 
-export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted | PoolType.StableSurge;
+export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted | PoolType.StableSurge | "GyroE";
 
 export type TokenConfig = {
   address: Address;

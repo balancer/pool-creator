@@ -19,6 +19,7 @@ export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
   [PoolType.Stable]: stablePoolFactoryAbi_V3,
   [PoolType.StableSurge]: stableSurgeFactoryAbi,
+  GyroE: stablePoolFactoryAbi_V3, // TODO: replace after SDK version update
 };
 
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
@@ -51,7 +52,7 @@ export const useCreatePool = () => {
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   function createPoolInput(
-    poolType: PoolType,
+    poolType: PoolType | "GyroE",
   ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
     if (!publicClient) throw new Error("Public client must be available!");

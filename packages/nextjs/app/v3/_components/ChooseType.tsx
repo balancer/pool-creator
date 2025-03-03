@@ -4,7 +4,7 @@ import { ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
-const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable, PoolType.StableSurge];
+const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable, PoolType.StableSurge, "GyroE"];
 
 const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
   [PoolType.Weighted]:
@@ -13,6 +13,7 @@ const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
     "Engineered for assets that trade near parity, Stable Pools are perfect for tightly correlated assets like Stablecoins, ensuring seamless trading with minimal slippage",
   [PoolType.StableSurge]:
     "A core stable pool that uses a stable surge hook deployed by the official stable surge factory",
+  GyroE: "A GyroE pool is a special type of pool that uses a GyroE hook deployed by the official GyroE factory",
 };
 
 const INITIAL_DESCRIPTION = (
@@ -36,13 +37,13 @@ export function ChooseType() {
   return (
     <>
       <div className="flex flex-col justify-center h-full gap-10 px-7 py-5">
-        <div className="flex gap-4 justify-around">
+        <div className="grid grid-cols-2 gap-5 justify-around">
           {POOL_TYPES.map(type => (
             <button
               key={type}
               className={`${
-                type === poolType ? `bg-accent text-white` : `bg-primary hover:bg-primary hover:opacity-80 shadow-lg`
-              } p-7 w-full rounded-xl text-lg text-accent-content`}
+                type === poolType ? `${selectedPoolStyles}` : `bg-base-100 ${hoverPoolStyles} shadow-lg`
+              } p-4 w-full rounded-xl `}
               onClick={() => updatePool({ poolType: type, tokenConfigs: tokenConfigs.slice(0, 4) })}
             >
               <div className="flex flex-col text-center">
@@ -67,3 +68,9 @@ export function ChooseType() {
     </>
   );
 }
+
+const selectedPoolStyles =
+  "text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)]";
+
+const hoverPoolStyles =
+  "hover:bg-gradient-to-r hover:from-violet-300 hover:via-violet-200 hover:to-orange-300 hover:text-neutral-700 hover:opacity-80";
