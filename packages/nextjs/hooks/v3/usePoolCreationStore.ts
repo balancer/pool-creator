@@ -4,6 +4,7 @@ import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { EclpParams } from "~~/hooks/gyro";
 import { type Token } from "~~/hooks/token";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
@@ -52,8 +53,10 @@ export interface PoolCreationStore {
   createPoolTx: TransactionDetails;
   initPoolTx: TransactionDetails;
   swapToBoostedTx: TransactionDetails;
+  eclpParams: EclpParams;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
+  updateEclpParam: (updates: Partial<EclpParams>) => void;
   clearPoolStore: () => void;
 }
 
@@ -93,6 +96,14 @@ export const initialPoolCreationState = {
   createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  // Only for gyroECLP (default values from John's foundry script)
+  eclpParams: {
+    alpha: "998502246630054917",
+    beta: "1000200040008001600",
+    c: "707106781186547524",
+    s: "707106781186547524",
+    lambda: "4000000000000000000000",
+  },
 };
 
 // Stores all the data that will be used for pool creation
@@ -107,6 +118,11 @@ export const usePoolCreationStore = create(
           newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
           return { ...state, tokenConfigs: newTokenConfigs };
         }),
+      updateEclpParam: (updates: Partial<EclpParams>) =>
+        set(state => ({
+          ...state,
+          eclpParams: { ...state.eclpParams, ...updates },
+        })),
       clearPoolStore: () => set(initialPoolCreationState),
     }),
     {

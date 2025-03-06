@@ -26,8 +26,6 @@ export function drawLiquidityECLP({
     tokenRateScalingFactorString,
   ].map(el => Number(el));
 
-  console.log("params", { alpha, beta, s, c, lambda, scalingFactor });
-
   const priceRange = [alpha * scalingFactor, beta * scalingFactor];
   const granularity = (priceRange[1] - priceRange[0]) / 1000;
 

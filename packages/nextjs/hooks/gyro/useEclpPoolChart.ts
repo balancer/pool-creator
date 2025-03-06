@@ -19,8 +19,25 @@ export function useEclpPoolChart() {
       grid: {
         left: "1.5%",
         right: "1.5%",
-        top: "15%",
+        top: "10%",
         bottom: "18%",
+      },
+      tooltip: {
+        show: true,
+        showContent: true,
+        trigger: "axis",
+        confine: true,
+        extraCssText: "padding-right:2rem;border: none;background: #1A202C;",
+        formatter: (params: any) => {
+          const data = Array.isArray(params) ? params[0] : params;
+          return `
+            <div style="padding: none; display: flex; flex-direction: column; justify-content: center;background: #1A202C;">
+              <div style="font-size: 14px; font-weight: 500; color: #A0AEC0;">
+                ${fNum("gyroPrice", data.data[0])}
+              </div>
+            </div>
+          `;
+        },
       },
       xAxis: {
         type: "value",

@@ -2,7 +2,6 @@ import React from "react";
 import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import ReactECharts from "echarts-for-react";
-import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
@@ -59,6 +58,9 @@ export const ChooseParameters = () => {
 };
 
 function EclpParams() {
+  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { alpha, beta, s, c, lambda } = eclpParams;
+
   const { options } = useEclpPoolChart();
 
   return (
@@ -73,42 +75,84 @@ function EclpParams() {
         <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
       </a>
 
-      <div className="bg-base-300 w-full h-64 rounded-lg mb-5">
-        <ReactECharts
-          // onEvents={{
-          //   updateAxisPointer: handleAxisMoved,
-          // }}
-          option={options}
-          style={{ height: "100%", width: "100%" }}
-        />
+      <div className="bg-base-300 p-5 rounded-lg mb-5">
+        <div className="bg-base-300 w-full h-72 rounded-lg">
+          <ReactECharts
+            // TODO: fix graphics when user hovers over chart?
+            // onEvents={{
+            //   updateAxisPointer: handleAxisMoved,
+            // }}
+            option={options}
+            style={{ height: "100%", width: "100%" }}
+          />
+        </div>
       </div>
 
-      <TextField label="alpha" value="998502246630054917" onChange={e => console.log(e.target.value.trim())} />
-      <TextField label="beta" value="1000200040008001600" onChange={e => console.log(e.target.value.trim())} />
-      <EclpRange label="c" value="707106781186547524" min="0" max={parseUnits("1", 18).toString()} />
-      <EclpRange label="s" value="707106781186547524" min="0" max={parseUnits("1", 18).toString()} />
-      <EclpRange label="lambda" value="4000000000000000000000" min="0" max={parseUnits("1", 26).toString()} />
+      <TextField
+        label="alpha"
+        value={alpha.toString()}
+        onChange={e => updateEclpParam({ alpha: e.target.value.trim() })}
+      />
+      <TextField
+        label="beta"
+        value={beta.toString()}
+        onChange={e => updateEclpParam({ beta: e.target.value.trim() })}
+      />
+      <TextField label="c" value={c.toString()} onChange={e => updateEclpParam({ c: e.target.value.trim() })} />
+      <TextField label="s" value={s.toString()} onChange={e => updateEclpParam({ s: e.target.value.trim() })} />
+      <TextField
+        label="lambda"
+        value={lambda.toString()}
+        onChange={e => updateEclpParam({ lambda: e.target.value.trim() })}
+      />
+      {/* <EclpRange
+        label="c"
+        value={c.toString()}
+        min="0"
+        max={parseUnits("1", 18).toString()}
+        onChange={e => updateEclpParam({ c: e.target.value.trim() })}
+      />
+      <EclpRange
+        label="s"
+        value={s.toString()}
+        min="0"
+        max={parseUnits("1", 18).toString()}
+        onChange={e => updateEclpParam({ s: e.target.value.trim() })}
+      />
+      <EclpRange
+        label="lambda"
+        value={lambda.toString()}
+        min="0"
+        max={parseUnits("1", 26).toString()}
+        onChange={e => updateEclpParam({ lambda: e.target.value.trim() })}
+      /> */}
     </div>
   );
 }
 
-function EclpRange({ label, value, min, max }: { label: string; value: string; min: string; max: string }) {
-  const [rangeValue, setRangeValue] = React.useState(value);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setRangeValue(e.target.value);
-  };
-
-  return (
-    <div className="mb-2">
-      <div className="flex justify-between">
-        <div className="flex ml-2 mb-1 font-bold">{label}</div>
-        <div>{rangeValue}</div>
-      </div>
-      <input type="range" step={1} min={min} max={max} value={rangeValue} onChange={handleChange} className="range" />
-    </div>
-  );
-}
+// function EclpRange({
+//   label,
+//   value,
+//   min,
+//   max,
+//   onChange,
+// }: {
+//   label: string;
+//   value: string;
+//   min: string;
+//   max: string;
+//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+// }) {
+//   return (
+//     <div className="mb-2">
+//       <div className="flex justify-between">
+//         <div className="flex ml-2 mb-1 font-bold">{label}</div>
+//         <div>{value}</div>
+//       </div>
+//       <input type="range" step={1} min={min} max={max} value={value} onChange={onChange} className="range" />
+//     </div>
+//   );
+// }
 
 function SwapFeePercentage({ handleNumberInputChange }: { handleNumberInputChange: HandleNumberInputChange }) {
   const swapFeePercentages = ["0.1", "0.3", "1"];
