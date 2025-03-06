@@ -88,23 +88,11 @@ function EclpParams() {
         </div>
       </div>
 
-      <TextField
-        label="alpha"
-        value={alpha.toString()}
-        onChange={e => updateEclpParam({ alpha: e.target.value.trim() })}
-      />
-      <TextField
-        label="beta"
-        value={beta.toString()}
-        onChange={e => updateEclpParam({ beta: e.target.value.trim() })}
-      />
-      <TextField label="c" value={c.toString()} onChange={e => updateEclpParam({ c: e.target.value.trim() })} />
-      <TextField label="s" value={s.toString()} onChange={e => updateEclpParam({ s: e.target.value.trim() })} />
-      <TextField
-        label="lambda"
-        value={lambda.toString()}
-        onChange={e => updateEclpParam({ lambda: e.target.value.trim() })}
-      />
+      <TextField label="alpha" value={alpha} onChange={e => updateEclpParam({ alpha: e.target.value.trim() })} />
+      <TextField label="beta" value={beta} onChange={e => updateEclpParam({ beta: e.target.value.trim() })} />
+      <TextField label="c" value={c} onChange={e => updateEclpParam({ c: e.target.value.trim() })} />
+      <TextField label="s" value={s} onChange={e => updateEclpParam({ s: e.target.value.trim() })} />
+      <TextField label="lambda" value={lambda} onChange={e => updateEclpParam({ lambda: e.target.value.trim() })} />
       {/* <EclpRange
         label="c"
         value={c.toString()}
