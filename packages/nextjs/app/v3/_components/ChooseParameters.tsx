@@ -1,10 +1,12 @@
 import React from "react";
 import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
+import ReactECharts from "echarts-for-react";
 import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
+import { useEclpPoolChart } from "~~/hooks/gyro";
 import { type HookFlags, usePoolCreationStore } from "~~/hooks/v3";
 
 type HandleNumberInputChange = (
@@ -57,6 +59,8 @@ export const ChooseParameters = () => {
 };
 
 function EclpParams() {
+  const { options } = useEclpPoolChart();
+
   return (
     <div className="bg-base-100 p-5 rounded-xl">
       <a
@@ -69,7 +73,15 @@ function EclpParams() {
         <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
       </a>
 
-      <div className="bg-base-300 w-full h-64 rounded-lg mb-5"></div>
+      <div className="bg-base-300 w-full h-64 rounded-lg mb-5">
+        <ReactECharts
+          // onEvents={{
+          //   updateAxisPointer: handleAxisMoved,
+          // }}
+          option={options}
+          style={{ height: "100%", width: "100%" }}
+        />
+      </div>
 
       <TextField label="alpha" value="998502246630054917" onChange={e => console.log(e.target.value.trim())} />
       <TextField label="beta" value="1000200040008001600" onChange={e => console.log(e.target.value.trim())} />

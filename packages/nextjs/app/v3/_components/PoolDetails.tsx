@@ -72,13 +72,12 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <div className="">Swap Fee %</div>
               <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
             </div>
-            {poolType === PoolType.Stable ||
-              (PoolType.StableSurge && (
-                <div className="flex justify-between">
-                  <div className="">Amplification Parameter</div>
-                  <div>{amplificationParameter ? amplificationParameter : "-"}</div>
-                </div>
-              ))}
+            {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
+              <div className="flex justify-between">
+                <div className="">Amplification Parameter</div>
+                <div>{amplificationParameter ? amplificationParameter : "-"}</div>
+              </div>
+            )}
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>
