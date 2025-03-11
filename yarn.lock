@@ -293,6 +293,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@balancer-labs/balancer-maths@npm:^0.0.25":
+  version: 0.0.25
+  resolution: "@balancer-labs/balancer-maths@npm:0.0.25"
+  checksum: b0fb62c7ae8e5d2b90c12a4cafbf201912e70cd6390edafd477c4d0cf9a751e43246957661718f5e2a34917054c8021251298c112f99ce7306587aa6f0058a9d
+  languageName: node
+  linkType: hard
+
 "@balancer/sdk@npm:^2.4.0":
   version: 2.4.0
   resolution: "@balancer/sdk@npm:2.4.0"
@@ -1667,6 +1674,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
+    "@balancer-labs/balancer-maths": ^0.0.25
     "@balancer/sdk": ^2.4.0
     "@heroicons/react": ^2.0.11
     "@rainbow-me/rainbowkit": 2.1.2

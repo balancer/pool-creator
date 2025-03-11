@@ -52,8 +52,8 @@ export function ChooseType() {
         </div>
 
         <div>
-          <div className="text-xl mb-2 ml-2">{poolType ? "Description" : "Instructions"}</div>
-          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral h-32">
+          {/* <div className="text-xl mb-2 ml-2">{poolType ? "Description" : "Instructions"}</div> */}
+          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral h-32 flex flex-col justify-center">
             {poolType ? POOL_TYPE_INFO[poolType].description : INITIAL_INSTRUCTIONS}
           </div>
         </div>

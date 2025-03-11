@@ -61,6 +61,6 @@ export function calcDerivedParams(params: EclpParams): DerivedEclpParams {
   };
 }
 
-function bigIntSqrt(val: bigint): bigint {
+export function bigIntSqrt(val: bigint): bigint {
   return BigInt(new Big(val.toString()).sqrt().toFixed(0));
 }
