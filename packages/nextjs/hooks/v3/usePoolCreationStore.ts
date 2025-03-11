@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import { PoolType } from "@balancer/sdk";
+import { EclpParams, PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { EclpParams } from "~~/hooks/gyro";
 import { type Token } from "~~/hooks/token";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
@@ -98,11 +97,11 @@ export const initialPoolCreationState = {
   swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   // Only for gyroECLP
   eclpParams: {
-    alpha: "998502246630054917",
-    beta: "1000200040008001600",
-    c: "707106781186547524",
-    s: "707106781186547524",
-    lambda: "4000000000000000000000",
+    alpha: 998502246630054917n,
+    beta: 1000200040008001600n,
+    c: 707106781186547524n,
+    s: 707106781186547524n,
+    lambda: 4000000000000000000000n,
   },
 };
 

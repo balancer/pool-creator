@@ -6,31 +6,28 @@ import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
 const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable, PoolType.StableSurge, PoolType.GyroE];
 
-const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
-  [PoolType.Weighted]:
-    "Highly configurable and versatile, Weighted Pools support up to 8 tokens with customizable weightings, allowing for fine-tuned exposure to multiple assets",
-  [PoolType.Stable]:
-    "Engineered for assets that trade near parity, Stable Pools are perfect for tightly correlated assets like Stablecoins, ensuring seamless trading with minimal slippage",
-  [PoolType.StableSurge]:
-    "A core stable pool that uses a stable surge hook deployed by the official stable surge factory",
-  [PoolType.GyroE]:
-    "A GyroE pool is a special type of pool that uses a GyroE hook deployed by the official GyroE factory",
+const POOL_TYPE_INFO: Record<AllowedPoolTypes, { label: string; description: string }> = {
+  [PoolType.Weighted]: {
+    label: "Weighted",
+    description:
+      "Highly configurable and versatile, Weighted Pools support up to 8 tokens with customizable weightings, allowing for fine-tuned exposure to multiple assets",
+  },
+  [PoolType.Stable]: {
+    label: "Stable",
+    description:
+      "Engineered for assets that trade near parity, Stable Pools are perfect for tightly correlated assets like Stablecoins, ensuring seamless trading with minimal slippage",
+  },
+  [PoolType.StableSurge]: {
+    label: "Stable Surge",
+    description:
+      "A Balancer core stable pool that uses a stable surge hook deployed by the official stable surge factory",
+  },
+  [PoolType.GyroE]: {
+    label: "Gyro E-CLP",
+    description:
+      "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",
+  },
 };
-
-const INITIAL_DESCRIPTION = (
-  <div>
-    Begin by selecting a pool type. For detailed information about each pool type, check out our{" "}
-    <a
-      href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/"
-      className="link inline-flex items-center gap-1"
-      target="_blank"
-      rel="noreferrer"
-    >
-      docs
-      <ArrowUpRightIcon className="w-3.5 h-3.5" />
-    </a>
-  </div>
-);
 
 export function ChooseType() {
   const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
@@ -48,23 +45,18 @@ export function ChooseType() {
               onClick={() => updatePool({ poolType: type, tokenConfigs: tokenConfigs.slice(0, 4) })}
             >
               <div className="flex flex-col text-center">
-                <div className="font-bold text-xl w-full">{type}</div>
+                <div className="font-bold text-xl w-full">{POOL_TYPE_INFO[type].label}</div>
               </div>
             </button>
           ))}
         </div>
 
-        {poolType ? (
-          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral">
-            <div className="text-xl font-bold mb-2">Description:</div>
-            {POOL_TYPE_DESCRIPTIONS[poolType]}
+        <div>
+          <div className="text-xl mb-2 ml-2">{poolType ? "Description" : "Instructions"}</div>
+          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral h-32">
+            {poolType ? POOL_TYPE_INFO[poolType].description : INITIAL_INSTRUCTIONS}
           </div>
-        ) : (
-          <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral">
-            <div className="text-xl font-bold mb-2">{poolType ? "Description" : "Instructions"}:</div>
-            {poolType ? POOL_TYPE_DESCRIPTIONS[poolType] : INITIAL_DESCRIPTION}
-          </div>
-        )}
+        </div>
       </div>
     </>
   );
@@ -75,3 +67,18 @@ const selectedPoolStyles =
 
 const hoverPoolStyles =
   "hover:bg-gradient-to-r hover:from-violet-300 hover:via-violet-200 hover:to-orange-300 hover:text-neutral-700 hover:opacity-80";
+
+const INITIAL_INSTRUCTIONS = (
+  <div>
+    Begin by selecting a pool type. For detailed information about each pool type, check out our{" "}
+    <a
+      href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/"
+      className="link inline-flex items-center gap-1"
+      target="_blank"
+      rel="noreferrer"
+    >
+      docs
+      <ArrowUpRightIcon className="w-3.5 h-3.5" />
+    </a>
+  </div>
+);

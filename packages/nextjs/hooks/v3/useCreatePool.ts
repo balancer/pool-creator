@@ -88,14 +88,7 @@ export const useCreatePool = () => {
       },
     );
 
-    const parsedEclpParams = {
-      alpha: BigInt(eclpParams.alpha),
-      beta: BigInt(eclpParams.beta),
-      c: BigInt(eclpParams.c),
-      s: BigInt(eclpParams.s),
-      lambda: BigInt(eclpParams.lambda),
-    };
-    const derivedEclpParams = calcDerivedParams(parsedEclpParams);
+    const derivedEclpParams = calcDerivedParams(eclpParams);
 
     return {
       ...baseInput,
@@ -104,10 +97,7 @@ export const useCreatePool = () => {
       ...((poolType === PoolType.Stable || poolType === PoolType.StableSurge) && {
         amplificationParameter: BigInt(amplificationParameter),
       }),
-      ...(poolType === PoolType.GyroE && {
-        eclpParams: parsedEclpParams,
-        derivedEclpParams,
-      }),
+      ...(poolType === PoolType.GyroE && { eclpParams, derivedEclpParams }),
     } as CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput;
   }
 

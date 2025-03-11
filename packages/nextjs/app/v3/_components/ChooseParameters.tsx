@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import ReactECharts from "echarts-for-react";
+import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Checkbox, NumberInput, RadioInput, TextField } from "~~/components/common";
@@ -57,90 +58,155 @@ export const ChooseParameters = () => {
   );
 };
 
+// TODO: figure out how to keep RotationVectorNormalized for slider and manual?
 function EclpParams() {
+  const [isUsingSlider, setIsUsingSlider] = useState(true);
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
   const { alpha, beta, s, c, lambda } = eclpParams;
 
   const { options } = useEclpPoolChart();
 
+  const enforceNumericValue = (value: string, param: keyof typeof eclpParams) => {
+    // Allow empty values or numbers with optional decimal point
+    if (value === "" || /^[0-9]+\.?[0-9]*$/.test(value)) {
+      updateEclpParam({ [param]: value });
+    }
+  };
+
   return (
     <div className="bg-base-100 p-5 rounded-xl">
-      <a
-        className="flex items-center gap-2 link no-underline hover:underline text-lg font-bold mb-3"
-        href={"https://docs.gyro.finance/pools/e-clps#reading-e-clp-parameters"}
-        target="_blank"
-        rel="noreferrer"
-      >
-        E-CLP Parameters
-        <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
-      </a>
-
       <div className="bg-base-300 p-5 rounded-lg mb-5">
+        <a
+          className="flex items-center gap-2 link no-underline hover:underline text-lg font-bold mb-3"
+          href={"https://docs.gyro.finance/pools/e-clps#reading-e-clp-parameters"}
+          target="_blank"
+          rel="noreferrer"
+        >
+          E-CLP Parameters
+          <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+        </a>
+
         <div className="bg-base-300 w-full h-72 rounded-lg">
-          <ReactECharts
-            // TODO: fix graphics when user hovers over chart?
-            // onEvents={{
-            //   updateAxisPointer: handleAxisMoved,
-            // }}
-            option={options}
-            style={{ height: "100%", width: "100%" }}
-          />
+          <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
         </div>
       </div>
 
-      <TextField label="alpha" value={alpha} onChange={e => updateEclpParam({ alpha: e.target.value.trim() })} />
-      <TextField label="beta" value={beta} onChange={e => updateEclpParam({ beta: e.target.value.trim() })} />
-      <TextField label="c" value={c} onChange={e => updateEclpParam({ c: e.target.value.trim() })} />
-      <TextField label="s" value={s} onChange={e => updateEclpParam({ s: e.target.value.trim() })} />
-      <TextField label="lambda" value={lambda} onChange={e => updateEclpParam({ lambda: e.target.value.trim() })} />
-      {/* <EclpRange
-        label="c"
-        value={c.toString()}
-        min="0"
-        max={parseUnits("1", 18).toString()}
-        onChange={e => updateEclpParam({ c: e.target.value.trim() })}
-      />
-      <EclpRange
-        label="s"
-        value={s.toString()}
-        min="0"
-        max={parseUnits("1", 18).toString()}
-        onChange={e => updateEclpParam({ s: e.target.value.trim() })}
-      />
-      <EclpRange
-        label="lambda"
-        value={lambda.toString()}
-        min="0"
-        max={parseUnits("1", 26).toString()}
-        onChange={e => updateEclpParam({ lambda: e.target.value.trim() })}
-      /> */}
+      <div className="mb-3 flex gap-2">
+        <RadioInput
+          name="eclp-params"
+          label="Sliders"
+          checked={isUsingSlider}
+          onChange={() => setIsUsingSlider(true)}
+        />
+        <RadioInput
+          name="eclp-params"
+          label="Manual"
+          checked={!isUsingSlider}
+          onChange={() => setIsUsingSlider(false)}
+        />
+      </div>
+
+      {isUsingSlider ? (
+        <>
+          <EclpRange
+            label="alpha"
+            value={alpha.toString()}
+            min={parseUnits("0.8", 18).toString()}
+            max={parseUnits("1.2", 18).toString()}
+            step={parseUnits("0.01", 18).toString()}
+            onChange={e => {
+              updateEclpParam({ alpha: BigInt(Number(e.target.value)) });
+            }}
+          />
+          <EclpRange
+            label="beta"
+            value={beta.toString()}
+            min={parseUnits("0.8", 18).toString()}
+            max={parseUnits("1.2", 18).toString()}
+            step={parseUnits("0.01", 18).toString()}
+            onChange={e => updateEclpParam({ beta: BigInt(Number(e.target.value)) })}
+          />
+          <EclpRange
+            label="c"
+            value={c.toString()}
+            min="0"
+            max={parseUnits("1", 18).toString()}
+            step={parseUnits("0.01", 18).toString()}
+            onChange={e => updateEclpParam({ c: BigInt(Number(e.target.value)) })}
+          />
+          <EclpRange
+            label="s"
+            value={s.toString()}
+            min="0"
+            max={parseUnits("1", 18).toString()}
+            step={parseUnits("0.01", 18).toString()}
+            onChange={e => updateEclpParam({ s: BigInt(Number(e.target.value)) })}
+          />
+          <EclpRange
+            label="lambda"
+            value={lambda.toString()}
+            min="0"
+            max={parseUnits("1", 26).toString()}
+            step={parseUnits("0.1", 26).toString()}
+            onChange={e => updateEclpParam({ lambda: BigInt(Number(e.target.value)) })}
+          />
+        </>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-5">
+            <TextField
+              label="alpha"
+              value={alpha.toString()}
+              onChange={e => enforceNumericValue(e.target.value, "alpha")}
+            />
+            <TextField
+              label="beta"
+              value={beta.toString()}
+              onChange={e => enforceNumericValue(e.target.value, "beta")}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <div className="grid grid-cols-2 gap-2">
+              <TextField label="c" value={c.toString()} onChange={e => enforceNumericValue(e.target.value, "c")} />
+              <TextField label="s" value={s.toString()} onChange={e => enforceNumericValue(e.target.value, "s")} />
+            </div>
+            <TextField
+              label="lambda"
+              value={lambda.toString()}
+              onChange={e => enforceNumericValue(e.target.value, "lambda")}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-// function EclpRange({
-//   label,
-//   value,
-//   min,
-//   max,
-//   onChange,
-// }: {
-//   label: string;
-//   value: string;
-//   min: string;
-//   max: string;
-//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-// }) {
-//   return (
-//     <div className="mb-2">
-//       <div className="flex justify-between">
-//         <div className="flex ml-2 mb-1 font-bold">{label}</div>
-//         <div>{value}</div>
-//       </div>
-//       <input type="range" step={1} min={min} max={max} value={value} onChange={onChange} className="range" />
-//     </div>
-//   );
-// }
+function EclpRange({
+  label,
+  value,
+  min,
+  max,
+  step,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  step: string;
+  min: string;
+  max: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  return (
+    <div className="mb-2">
+      <div className="flex justify-between">
+        <div className="flex ml-2 mb-1 font-bold">{label}</div>
+        <div>{value}</div>
+      </div>
+      <input type="range" step={step} min={min} max={max} value={value} onChange={onChange} className="range" />
+    </div>
+  );
+}
 
 function SwapFeePercentage({ handleNumberInputChange }: { handleNumberInputChange: HandleNumberInputChange }) {
   const swapFeePercentages = ["0.1", "0.3", "1"];
