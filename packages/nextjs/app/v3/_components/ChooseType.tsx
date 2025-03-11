@@ -4,7 +4,7 @@ import { ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
-const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable, PoolType.StableSurge, "GyroE"];
+const POOL_TYPES: AllowedPoolTypes[] = [PoolType.Weighted, PoolType.Stable, PoolType.StableSurge, PoolType.GyroE];
 
 const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
   [PoolType.Weighted]:
@@ -13,7 +13,8 @@ const POOL_TYPE_DESCRIPTIONS: Record<AllowedPoolTypes, string> = {
     "Engineered for assets that trade near parity, Stable Pools are perfect for tightly correlated assets like Stablecoins, ensuring seamless trading with minimal slippage",
   [PoolType.StableSurge]:
     "A core stable pool that uses a stable surge hook deployed by the official stable surge factory",
-  GyroE: "A GyroE pool is a special type of pool that uses a GyroE hook deployed by the official GyroE factory",
+  [PoolType.GyroE]:
+    "A GyroE pool is a special type of pool that uses a GyroE hook deployed by the official GyroE factory",
 };
 
 const INITIAL_DESCRIPTION = (

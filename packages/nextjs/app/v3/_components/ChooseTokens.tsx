@@ -9,7 +9,7 @@ const MAX_TOKENS = {
   [PoolType.Weighted]: 8,
   [PoolType.Stable]: 4, // because Daniel said to "for the moment, even though it theoretically supports more"
   [PoolType.StableSurge]: 4,
-  ["GyroE"]: 2, // GyroECLP supports only 2 tokens
+  [PoolType.GyroE]: 2, // GyroECLP supports only 2 tokens
 };
 
 export function ChooseTokens() {

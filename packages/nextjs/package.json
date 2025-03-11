@@ -14,7 +14,7 @@
     "vercel:yolo": "vercel --build-env NEXT_PUBLIC_IGNORE_BUILD_ERROR=true"
   },
   "dependencies": {
-    "@balancer/sdk": "^2.1.1",
+    "@balancer/sdk": "^2.4.0",
     "@heroicons/react": "^2.0.11",
     "@rainbow-me/rainbowkit": "2.1.2",
     "@safe-global/safe-apps-provider": "^0.18.5",
@@ -22,6 +22,7 @@
     "@tanstack/react-query": "^5.28.6",
     "@uniswap/sdk-core": "^4.0.1",
     "@uniswap/v2-sdk": "^3.0.1",
+    "big.js": "^6.2.2",
     "bignumber.js": "^9.1.2",
     "blo": "^1.0.1",
     "burner-connector": "^0.0.8",
@@ -47,6 +48,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "@types/big.js": "^6.2.2",
     "@types/lodash": "^4",
     "@types/node": "^17.0.35",
     "@types/nprogress": "^0",

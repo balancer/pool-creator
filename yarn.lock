@@ -286,14 +286,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@balancer/sdk@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "@balancer/sdk@npm:2.1.1"
+"@balancer-labs/balancer-maths@npm:0.0.24":
+  version: 0.0.24
+  resolution: "@balancer-labs/balancer-maths@npm:0.0.24"
+  checksum: f755a245ba04cbc40889db2a9fefa9018885053cd5920b848092d69a211e682b06a704a6678dd97fe223b456bcc39679c0f04b21fef4f2e44a4eb52e11d41c5e
+  languageName: node
+  linkType: hard
+
+"@balancer/sdk@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "@balancer/sdk@npm:2.4.0"
   dependencies:
+    "@balancer-labs/balancer-maths": 0.0.24
     decimal.js-light: ^2.5.1
     lodash.clonedeep: ^4.5.0
     viem: ^2.22.3
-  checksum: 4c1788af0e3c130249534d79337aed7841d1bb2330aa20287b9b48c28dd0c5db5877a1d0ee6f7ebdedfd06019c722b10b4b04018750a3dec2492000b9d1aa18e
+  checksum: 208e6b997181f4ca347dc9cc0d14c40341abad8936ad810b39f625b92e013497018f774bcc3e4a1840c8550ceb9b650d7c59c968cf8ad9941395b31bdf96006f
   languageName: node
   linkType: hard
 
@@ -1659,13 +1667,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
-    "@balancer/sdk": ^2.1.1
+    "@balancer/sdk": ^2.4.0
     "@heroicons/react": ^2.0.11
     "@rainbow-me/rainbowkit": 2.1.2
     "@safe-global/safe-apps-provider": ^0.18.5
     "@safe-global/safe-apps-react-sdk": ^4.7.2
     "@tanstack/react-query": ^5.28.6
     "@trivago/prettier-plugin-sort-imports": ^4.1.1
+    "@types/big.js": ^6.2.2
     "@types/lodash": ^4
     "@types/node": ^17.0.35
     "@types/nprogress": ^0
@@ -1677,6 +1686,7 @@ __metadata:
     "@uniswap/v2-sdk": ^3.0.1
     abitype: 1.0.5
     autoprefixer: ^10.4.12
+    big.js: ^6.2.2
     bignumber.js: ^9.1.2
     blo: ^1.0.1
     burner-connector: ^0.0.8
@@ -1987,6 +1997,13 @@ __metadata:
   version: 1.0.4
   resolution: "@tsconfig/node16@npm:1.0.4"
   checksum: 202319785901f942a6e1e476b872d421baec20cf09f4b266a1854060efbf78cde16a4d256e8bc949d31e6cd9a90f1e8ef8fb06af96a65e98338a2b6b0de0a0ff
+  languageName: node
+  linkType: hard
+
+"@types/big.js@npm:^6.2.2":
+  version: 6.2.2
+  resolution: "@types/big.js@npm:6.2.2"
+  checksum: 6aeff1b763e71b79bb796c9f395ebecdd5a6aeb997b1c9b9acb2e14aa2f88eec620f26a6aedeba120ec7a881a0834d0b8e9869da864c60bba623f92d6de6f848
   languageName: node
   linkType: hard
 
@@ -3499,6 +3516,13 @@ __metadata:
   version: 5.2.2
   resolution: "big.js@npm:5.2.2"
   checksum: b89b6e8419b097a8fb4ed2399a1931a68c612bce3cfd5ca8c214b2d017531191070f990598de2fc6f3f993d91c0f08aa82697717f6b3b8732c9731866d233c9e
+  languageName: node
+  linkType: hard
+
+"big.js@npm:^6.2.2":
+  version: 6.2.2
+  resolution: "big.js@npm:6.2.2"
+  checksum: 3659092d155d01338f21a01a46a93aa343d25e83bce55700005a46eec27d90fe56abd3b3edde742f16fbc5fee31b4c572b6821a595c1c180392b60b469fcda54
   languageName: node
   linkType: hard
 
