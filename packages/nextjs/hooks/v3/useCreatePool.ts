@@ -109,7 +109,6 @@ export const useCreatePool = () => {
     const createPool = new CreatePool();
     const input = createPoolInput(poolType);
 
-    console.log("input", input);
     const call = createPool.buildCall(input);
 
     const hash = await writeTx(

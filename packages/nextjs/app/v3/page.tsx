@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   ConnectWalletAlert,
   PoolConfiguration,
@@ -15,11 +16,22 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
-  const { clearPoolStore, chain } = usePoolCreationStore();
+  const { clearPoolStore, chain, updateEclpParam, eclpParams } = usePoolCreationStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
   const { data: walletClient } = useWalletClient();
   const { clearUserData } = useUserDataStore();
   usePoolStoreDebug();
+
+  // Gross quirk with forcing zustand storage to hold bigint values that otherwise transform to strings on page refresh
+  useEffect(() => {
+    const { alpha, lambda, beta, c, s } = eclpParams;
+    if (typeof alpha !== "bigint") updateEclpParam({ alpha: BigInt(alpha) });
+    if (typeof beta !== "bigint") updateEclpParam({ beta: BigInt(beta) });
+    if (typeof c !== "bigint") updateEclpParam({ c: BigInt(c) });
+    if (typeof s !== "bigint") updateEclpParam({ s: BigInt(s) });
+    if (typeof lambda !== "bigint") updateEclpParam({ lambda: BigInt(lambda) });
+  }, [eclpParams, updateEclpParam]);
+
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">

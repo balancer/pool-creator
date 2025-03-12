@@ -3,41 +3,36 @@ import { GyroECLPMath } from "@balancer-labs/balancer-maths";
 import ReactECharts from "echarts-for-react";
 import { formatUnits, parseUnits } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import { RadioInput, TextField } from "~~/components/common";
+import { TextField } from "~~/components/common";
 import { useEclpPoolChart } from "~~/hooks/gyro";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { bigIntSqrt } from "~~/utils/gyro/calcDerivedParams";
 
 // TODO: figure out how to keep RotationVectorNormalized for slider and manual?
 export function EclpParams() {
-  const [useManualInputs, setUseManualInputs] = useState(true);
+  const [useManualInputs] = useState(true);
 
   const { options } = useEclpPoolChart();
 
-  const test =
-    (707106781186547524n * 707106781186547524n + 707106781186547524n * 707106781186547524n) / GyroECLPMath._ONE;
-
-  console.log("test", GyroECLPMath._ONE - test);
-
   return (
     <div className="bg-base-100 p-5 rounded-xl">
-      <div className="bg-base-300 p-5 rounded-lg mb-5">
-        <a
-          className="flex items-center gap-2 link no-underline hover:underline text-lg font-bold mb-3"
-          href={"https://docs.gyro.finance/pools/e-clps#reading-e-clp-parameters"}
-          target="_blank"
-          rel="noreferrer"
-        >
-          E-CLP Parameters
-          <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
-        </a>
+      <a
+        className="flex items-center gap-2 link no-underline hover:underline text-lg font-bold mb-3"
+        href={"https://docs.gyro.finance/pools/e-clps#reading-e-clp-parameters"}
+        target="_blank"
+        rel="noreferrer"
+      >
+        E-CLP Parameters
+        <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
+      </a>
 
+      <div className="bg-base-300 p-5 rounded-lg mb-5">
         <div className="bg-base-300 w-full h-72 rounded-lg">
           <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
         </div>
       </div>
 
-      <div className="mb-3 flex gap-2">
+      {/* <div className="mb-3 flex gap-2">
         <RadioInput
           name="eclp-params"
           label="Sliders"
@@ -50,7 +45,7 @@ export function EclpParams() {
           checked={useManualInputs}
           onChange={() => setUseManualInputs(true)}
         />
-      </div>
+      </div> */}
 
       {useManualInputs ? <EclpManualInputs /> : <EclpRangeInputs />}
     </div>
@@ -102,12 +97,12 @@ function EclpRangeInputs() {
     if (updatedParam === "c") {
       const cSquared = (c * c) / GyroECLPMath._ONE; // scale back down to 1e18
       const remainder = GyroECLPMath._ONE - cSquared;
-      const normalizedS = bigIntSqrt(remainder) * parseUnits("1", 9); // scale back up to 18
+      const normalizedS = bigIntSqrt(remainder * GyroECLPMath._ONE); // scale back up to 18
       updateEclpParam({ s: normalizedS });
     } else if (updatedParam === "s") {
       const sSquared = (s * s) / GyroECLPMath._ONE; // scale back down to 1e18
       const remainder = GyroECLPMath._ONE - sSquared;
-      const normalizedC = bigIntSqrt(remainder) * parseUnits("1", 9); // scale back up to 18
+      const normalizedC = bigIntSqrt(remainder * GyroECLPMath._ONE); // scale back up to 18
       updateEclpParam({ c: normalizedC });
     }
   };
@@ -116,12 +111,12 @@ function EclpRangeInputs() {
     if (changedParam === "alpha") {
       updateEclpParam({ alpha: BigInt(Number(e.target.value)) });
       if (alpha >= beta) {
-        updateEclpParam({ beta: alpha + parseUnits("0.01", 18) });
+        updateEclpParam({ beta: alpha + BigInt(parseUnits("0.01", 18)) });
       }
     } else if (changedParam === "beta") {
       updateEclpParam({ beta: BigInt(Number(e.target.value)) });
       if (beta <= alpha) {
-        updateEclpParam({ alpha: beta - parseUnits("0.01", 18) });
+        updateEclpParam({ alpha: beta - BigInt(parseUnits("0.01", 18)) });
       }
     }
   };
@@ -146,10 +141,10 @@ function EclpRangeInputs() {
       />
       <EclpRange
         label="c"
-        value={c.toString()}
+        value={Number(c).toString()}
         min="0"
         max={parseUnits("1", 18).toString()}
-        step={parseUnits("0.001", 18).toString()} // 100 steps from 0 to 1e18
+        step={parseUnits("0.001", 18).toString()} // 1000 steps from 0 to 1e18
         onChange={e => {
           updateEclpParam({ c: BigInt(Number(e.target.value)) });
           enforceRotationVectorNormalized("c");
@@ -160,7 +155,7 @@ function EclpRangeInputs() {
         value={s.toString()}
         min="0"
         max={parseUnits("1", 18).toString()}
-        step={parseUnits("0.001", 18).toString()} // 100 steps from 0 to 1e18
+        step={parseUnits("0.001", 18).toString()} // 1000 steps from 0 to 1e18
         onChange={e => {
           updateEclpParam({ s: BigInt(Number(e.target.value)) });
           enforceRotationVectorNormalized("s");
@@ -168,11 +163,13 @@ function EclpRangeInputs() {
       />
       <EclpRange
         label="lambda"
-        value={lambda.toString()}
+        value={Number(lambda).toString()}
         min="0"
         max={parseUnits("10000", 18).toString()} // max is actually _MAX_STRETCH_FACTOR but that is 1e26 which is too big for slider
         step={parseUnits("100", 18).toString()} // 10 steps from 0 to _MAX_STRETCH_FACTOR
-        onChange={e => updateEclpParam({ lambda: BigInt(Number(e.target.value)) })}
+        onChange={e => {
+          updateEclpParam({ lambda: BigInt(Number(e.target.value)) });
+        }}
       />
     </>
   );
@@ -197,7 +194,7 @@ function EclpRange({
     <div className="mb-2">
       <div className="flex justify-between">
         <div className="flex ml-2 mb-1 font-bold">{label}</div>
-        <div>{formatUnits(BigInt(value), 18).toString()}</div>
+        <div>{formatUnits(BigInt(Number(value)), 18).toString()}</div>
       </div>
       <input type="range" step={step} min={min} max={max} value={value} onChange={onChange} className="range" />
     </div>
