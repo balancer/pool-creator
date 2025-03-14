@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { drawLiquidityECLP } from "./drawLiquidityECLP";
-import { formatUnits } from "viem";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 export function useGetECLPLiquidityProfile() {
@@ -8,11 +7,11 @@ export function useGetECLPLiquidityProfile() {
   const { alpha, beta, s, c, lambda } = eclpParams;
 
   const data: [number, number][] | null = drawLiquidityECLP({
-    alphaString: formatUnits(alpha, 18),
-    betaString: formatUnits(beta, 18),
-    sString: formatUnits(s, 18),
-    cString: formatUnits(c, 18),
-    lambdaString: formatUnits(lambda, 18),
+    alphaString: alpha,
+    betaString: beta,
+    sString: s,
+    cString: c,
+    lambdaString: lambda,
     tokenRateScalingFactorString: "1", // TODO: fetch getRate() from each token's rate provider?
   });
 

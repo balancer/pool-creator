@@ -6,6 +6,7 @@ import {
   CreatePoolV3StableInput,
   CreatePoolV3WeightedInput,
   PoolType,
+  calcDerivedParams,
   gyroECLPPoolFactoryAbi_V3,
   stablePoolFactoryAbi_V3,
   stableSurgeFactoryAbi,
@@ -16,7 +17,6 @@ import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
-import { calcDerivedParams } from "~~/utils/gyro";
 
 export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
@@ -50,7 +50,7 @@ export const useCreatePool = () => {
     amplificationParameter,
     updatePool,
     createPoolTx,
-    eclpParams,
+    eclpParams: humanReadableEclpParams,
   } = usePoolCreationStore();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
@@ -87,6 +87,16 @@ export const useCreatePool = () => {
         };
       },
     );
+
+    const { alpha, beta, c, s, lambda } = humanReadableEclpParams;
+
+    const eclpParams = {
+      alpha: parseUnits(alpha, 18),
+      beta: parseUnits(beta, 18),
+      c: parseUnits(c, 18),
+      s: parseUnits(s, 18),
+      lambda: parseUnits(lambda, 18),
+    };
 
     const derivedEclpParams = calcDerivedParams(eclpParams);
 

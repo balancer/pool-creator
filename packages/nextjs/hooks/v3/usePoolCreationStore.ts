@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { EclpParams, PoolType } from "@balancer/sdk";
+import { PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
@@ -23,6 +23,14 @@ export type TokenConfig = {
   tokenInfo: Token | null;
   amount: string; // human readable
   useBoostedVariant: boolean;
+};
+
+export type EclpParams = {
+  alpha: string;
+  beta: string;
+  c: string;
+  s: string;
+  lambda: string;
 };
 
 export interface TransactionDetails {
@@ -97,11 +105,11 @@ export const initialPoolCreationState = {
   swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   // Only for gyroECLP
   eclpParams: {
-    alpha: 998502246630054917n,
-    beta: 1000200040008001600n,
-    c: 707106781186547524n,
-    s: 707106781186547524n,
-    lambda: 4000000000000000000000n,
+    alpha: "0.998502246630054917",
+    beta: "1.000200040008001600",
+    c: "0.707106781186547524",
+    s: "0.707106781186547524",
+    lambda: "4000",
   },
 };
 
