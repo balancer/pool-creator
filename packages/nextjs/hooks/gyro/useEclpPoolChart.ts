@@ -1,15 +1,52 @@
-import { useMemo } from "react";
-import { usePoolCreationStore } from "../v3";
+import { useEffect, useMemo } from "react";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
-import { fNum } from "~~/utils/numbers";
+import { useTokenUsdValue } from "~~/hooks/token";
+import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3/";
+import { calculateRotationComponents } from "~~/utils/gryo";
+import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
-  const { tokenConfigs } = usePoolCreationStore();
+  const { tokenConfigs, updateEclpParam } = usePoolCreationStore();
   const tokens = tokenConfigs.map(token => token.tokenInfo?.symbol).join("/");
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
+  const { hasEditedEclpParams } = useUserDataStore();
+
+  const { tokenUsdValue: usdValueToken1 } = useTokenUsdValue(tokenConfigs[0].address, "1");
+  const { tokenUsdValue: usdValueToken2 } = useTokenUsdValue(tokenConfigs[1].address, "1");
+
+  let poolSpotPrice = null;
+  if (usdValueToken1 && usdValueToken2) poolSpotPrice = usdValueToken1 / usdValueToken2;
+  console.log("poolSpotPrice", poolSpotPrice);
+
+  const markPointMargin = 0.005;
+  const isSpotPriceNearLowerBound = useMemo(() => {
+    return bn(poolSpotPrice || 0).lt(xMin * (1 + markPointMargin));
+  }, [poolSpotPrice, xMin]);
+  const isSpotPriceNearUpperBound = useMemo(() => {
+    return bn(poolSpotPrice || 0).gt(xMax * (1 - markPointMargin));
+  }, [poolSpotPrice, xMax]);
+  const poolIsInRange = useMemo(() => {
+    const margin = 0.000001; // if spot price is within the margin on both sides it's considered out of range
+    return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
+  }, [xMin, xMax, poolSpotPrice]);
 
   const secondaryFontColor = "#718096";
+
+  useEffect(() => {
+    if (poolSpotPrice && !hasEditedEclpParams) {
+      const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
+
+      updateEclpParam({
+        alpha: (poolSpotPrice - poolSpotPrice * 0.075).toString(),
+        beta: (poolSpotPrice + poolSpotPrice * 0.075).toString(),
+        c: c.toString(),
+        s: s.toString(),
+        lambda: (poolSpotPrice * 100).toString(),
+        peakPrice: poolSpotPrice.toString(),
+      });
+    }
+  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams]);
 
   const options = useMemo(() => {
     if (!data) return;
@@ -176,6 +213,92 @@ export function useEclpPoolChart() {
               ],
             ],
           },
+        },
+
+        // spot price
+        {
+          type: "line",
+          data: [],
+          symbol: "none",
+          markPoint: {
+            silent: true,
+            symbol: "rect",
+            symbolSize: [60, 36],
+            itemStyle: {
+              color: "transparent",
+              borderWidth: 0,
+            },
+            // but markpoints for all 3 lines are here
+            data: [
+              {
+                coord: [xMin, yMax * 1.22],
+                value: "Lower\nbound",
+                label: {
+                  show: !isSpotPriceNearLowerBound || !poolIsInRange,
+                  fontSize: 12,
+                  color: secondaryFontColor,
+                  padding: 4,
+                  borderRadius: 4,
+                },
+              },
+              {
+                coord: [xMax, yMax * 1.22],
+                value: "Upper\nbound",
+                label: {
+                  show: !isSpotPriceNearUpperBound || !poolIsInRange,
+                  fontSize: 12,
+                  color: secondaryFontColor,
+                  padding: 4,
+                  borderRadius: 4,
+                },
+              },
+              {
+                coord: [poolSpotPrice, yMax * 1.22],
+                value: "Current\nprice",
+                label: {
+                  show: poolIsInRange,
+                  fontSize: 12,
+                  color: "#63f2be",
+                },
+              },
+            ],
+          },
+          markLine: poolIsInRange
+            ? {
+                symbol: ["none", "circle"],
+                symbolSize: 6,
+                symbolRotate: 0,
+                silent: true,
+                label: {
+                  show: true,
+                  fontSize: 12,
+                  color: "#2D3748",
+                  backgroundColor: "#63f2be",
+                  padding: [2, 3, 2, 3],
+                  borderRadius: 2,
+                  fontWeight: "bold",
+                },
+                lineStyle: {
+                  color: "#63f2be",
+                },
+                data: [
+                  [
+                    {
+                      coord: [poolSpotPrice, 0],
+                      label: {
+                        formatter: () => fNum("gyroPrice", poolSpotPrice || "0"),
+                        position: "start",
+                        distance: 6,
+                        backgroundColor: "#63f2be",
+                      },
+                    },
+                    {
+                      coord: [poolSpotPrice, yMax * 1.1],
+                    },
+                  ],
+                ],
+              }
+            : undefined,
         },
         // main chart
         {

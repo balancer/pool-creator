@@ -6,7 +6,7 @@ import { parseUnits } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useEclpPoolChart } from "~~/hooks/gyro";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents } from "~~/utils/gryo";
 
 export function EclpParams() {
@@ -88,10 +88,9 @@ export function EclpParams() {
 }
 
 function ParamInputs() {
-  const [peakPrice, setPeakPrice] = useState("1");
-
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, lambda } = eclpParams;
+  const { alpha, beta, lambda, peakPrice } = eclpParams;
+  const { updateUserData } = useUserDataStore();
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -103,16 +102,23 @@ function ParamInputs() {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-5 mb-3">
+      <Alert type="info">Stretching factor controls concentration of liquidity around peak price</Alert>
+      <div className="grid grid-cols-2 gap-5 mt-5 mb-3">
         <TextField
           label="Lowest Price"
           value={alpha.toString()}
-          onChange={e => updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) })}
+          onChange={e => {
+            updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) });
+            updateUserData({ hasEditedEclpParams: true });
+          }}
         />
         <TextField
           label="Highest Price"
           value={beta.toString()}
-          onChange={e => updateEclpParam({ beta: sanitizeNumberInput(e.target.value) })}
+          onChange={e => {
+            updateEclpParam({ beta: sanitizeNumberInput(e.target.value) });
+            updateUserData({ hasEditedEclpParams: true });
+          }}
         />
       </div>
 
@@ -121,15 +127,19 @@ function ParamInputs() {
           label="Peak Price"
           value={peakPrice}
           onChange={e => {
-            setPeakPrice(sanitizeNumberInput(e.target.value));
+            updateEclpParam({ peakPrice: sanitizeNumberInput(e.target.value) });
             const { c, s } = calculateRotationComponents(peakPrice);
             updateEclpParam({ c: c.toString(), s: s.toString() });
+            updateUserData({ hasEditedEclpParams: true });
           }}
         />
         <TextField
           label="Stretching factor"
           value={lambda.toString()}
-          onChange={e => updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) })}
+          onChange={e => {
+            updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) });
+            updateUserData({ hasEditedEclpParams: true });
+          }}
         />
       </div>
     </>

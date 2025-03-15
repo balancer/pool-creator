@@ -75,11 +75,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <>
                 <div className="flex justify-between">
                   <div className="">Lowest Price</div>
-                  <div>{alpha}</div>
+                  <div>{alpha.split(".")[1]?.length > 5 ? `${Number(alpha).toFixed(5)}...` : alpha}</div>
                 </div>
                 <div className="flex justify-between">
                   <div className="">Highest Price</div>
-                  <div>{beta}</div>
+                  <div>{beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}</div>
                 </div>
                 <div className="flex justify-between">
                   <div className="">Stretching Factor</div>

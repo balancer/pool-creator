@@ -31,6 +31,7 @@ export type EclpParams = {
   c: string;
   s: string;
   lambda: string;
+  peakPrice: string;
 };
 
 export interface TransactionDetails {
@@ -110,6 +111,7 @@ export const initialPoolCreationState = {
     c: "0.707106781186547524",
     s: "0.707106781186547524",
     lambda: "4000",
+    peakPrice: "1", // peak price only for UX purposes, not sent in tx
   },
 };
 

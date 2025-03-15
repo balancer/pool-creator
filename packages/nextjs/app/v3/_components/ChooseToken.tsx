@@ -70,7 +70,7 @@ export function ChooseToken({ index }: { index: number }) {
     });
 
     // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
-    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false });
+    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false, hasEditedEclpParams: false });
 
     const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];
     if (hasBoostedVariant) {

@@ -8,6 +8,7 @@ export type UserDataStore = {
   hasEditedPoolName: boolean;
   hasEditedPoolSymbol: boolean;
   hasAgreedToWarning: boolean;
+  hasEditedEclpParams: boolean;
   updateUserData: (updates: Partial<UserDataStore>) => void;
   clearUserData: () => void;
 };
@@ -17,6 +18,7 @@ export const initialUserDataStore = {
   hasAgreedToWarning: false,
   hasEditedPoolName: false,
   hasEditedPoolSymbol: false,
+  hasEditedEclpParams: false,
 };
 
 // Stores all the data that will be used for pool creation
