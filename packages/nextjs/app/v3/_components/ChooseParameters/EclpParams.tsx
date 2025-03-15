@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { GyroECLPMath } from "@balancer-labs/balancer-maths";
 import { calcDerivedParams } from "@balancer/sdk";
-import { Big } from "big.js";
 import ReactECharts from "echarts-for-react";
-import { formatUnits, parseUnits } from "viem";
+import { parseUnits } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import { Alert, RadioInput, TextField } from "~~/components/common";
+import { Alert, TextField } from "~~/components/common";
 import { useEclpPoolChart } from "~~/hooks/gyro";
 import { usePoolCreationStore } from "~~/hooks/v3";
+import { calculateRotationComponents } from "~~/utils/gryo";
 
-// TODO: figure out how to keep RotationVectorNormalized for slider and manual?
 export function EclpParams() {
   const [baseParamsErrorMessage, setBaseParamsErrorMessage] = useState<string | null>(null);
   const [derivedParamsErrorMessage, setDerivedParamsErrorMessage] = useState<string | null>(null);
   const { eclpParams } = usePoolCreationStore();
   const { alpha, beta, c, s, lambda } = eclpParams;
+  const { options } = useEclpPoolChart();
 
   useEffect(() => {
     const rawEclpParams = {
@@ -47,9 +47,7 @@ export function EclpParams() {
         setDerivedParamsErrorMessage("An unknown error occurred");
       }
     }
-  }, [alpha, beta, c, s, lambda]); // Only rerun when these values change
-
-  const { options } = useEclpPoolChart();
+  }, [alpha, beta, c, s, lambda]);
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -90,10 +88,10 @@ export function EclpParams() {
 }
 
 function ParamInputs() {
-  const [useManualInputs, setUseManualInputs] = useState(true);
+  const [peakPrice, setPeakPrice] = useState("1");
 
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, c, s, lambda } = eclpParams;
+  const { alpha, beta, lambda } = eclpParams;
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -105,22 +103,7 @@ function ParamInputs() {
 
   return (
     <>
-      <div className="mb-3 flex gap-2">
-        <RadioInput
-          name="eclp-params"
-          label="Sliders"
-          checked={!useManualInputs}
-          onChange={() => setUseManualInputs(false)}
-        />
-        <RadioInput
-          name="eclp-params"
-          label="Manual"
-          checked={useManualInputs}
-          onChange={() => setUseManualInputs(true)}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-5">
+      <div className="grid grid-cols-2 gap-5 mb-3">
         <TextField
           label="alpha"
           value={alpha.toString()}
@@ -133,121 +116,115 @@ function ParamInputs() {
         />
       </div>
 
-      {useManualInputs ? (
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-2 gap-2">
-            <TextField
-              label="c"
-              value={c.toString()}
-              onChange={e => updateEclpParam({ c: sanitizeNumberInput(e.target.value) || "0" })}
-            />
-            <TextField
-              label="s"
-              value={s.toString()}
-              onChange={e => updateEclpParam({ s: sanitizeNumberInput(e.target.value) || "0" })}
-            />
-          </div>
-          <TextField
-            label="lambda"
-            value={lambda.toString()}
-            onChange={e => updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) || "0" })}
-          />
-        </div>
-      ) : (
-        <EclpRangeInputs />
-      )}
-    </>
-  );
-}
+      <div className="grid grid-cols-2 gap-5">
+        <TextField
+          label="peak price"
+          value={peakPrice}
+          onChange={e => {
+            setPeakPrice(sanitizeNumberInput(e.target.value) || "0");
+            const { c, s } = calculateRotationComponents(peakPrice);
+            updateEclpParam({ c: c.toString(), s: s.toString() });
+          }}
+        />
 
-function EclpRangeInputs() {
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { c, s, lambda } = eclpParams;
-
-  // TODO: account for _ROTATION_VECTOR_NORM_ACCURACY range?
-  // TODO: fix problem where RotationVectorNotNormalized() error always thrown after sliding c or s
-  const enforceRotationVectorNormalized = (updatedParam: "c" | "s") => {
-    // c^2 + s^2 = 1e18
-
-    const rawC = parseUnits(c, 18);
-    const rawS = parseUnits(s, 18);
-
-    if (updatedParam === "c") {
-      const cSquared = (rawC * rawC) / GyroECLPMath._ONE; // scale back down to 1e18
-      const remainder = GyroECLPMath._ONE - cSquared;
-      const scaledRemainder = remainder * GyroECLPMath._ONE;
-      const normalizedS = new Big(scaledRemainder.toString()).sqrt().toFixed(0);
-      updateEclpParam({ s: formatUnits(BigInt(normalizedS), 18) });
-    } else if (updatedParam === "s") {
-      const sSquared = (rawS * rawS) / GyroECLPMath._ONE; // scale back down to 1e18
-      const remainder = GyroECLPMath._ONE - sSquared;
-      const scaledRemainder = remainder * GyroECLPMath._ONE;
-      const normalizedC = new Big(scaledRemainder.toString()).sqrt().toFixed(0);
-      updateEclpParam({ c: formatUnits(BigInt(normalizedC), 18) });
-    }
-  };
-
-  return (
-    <>
-      <EclpRange
-        label="c"
-        value={c}
-        min="0"
-        max="1"
-        step="0.001"
-        onChange={e => {
-          updateEclpParam({ c: e.target.value });
-          enforceRotationVectorNormalized("c");
-        }}
-      />
-      <EclpRange
-        label="s"
-        value={s}
-        min="0"
-        max="1"
-        step="0.001"
-        onChange={e => {
-          updateEclpParam({ s: e.target.value });
-          enforceRotationVectorNormalized("s");
-        }}
-      />
-      <EclpRange
-        label="lambda"
-        value={lambda}
-        min="0"
-        // max={formatUnits(GyroECLPMath._MAX_STRETCH_FACTOR, 18)} // actual max too big for slider
-        max={"100000"}
-        step="1000" // 10 steps from 0 to _MAX_STRETCH_FACTOR
-        onChange={e => {
-          updateEclpParam({ lambda: e.target.value });
-        }}
-      />
-    </>
-  );
-}
-
-function EclpRange({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  step: string;
-  min: string;
-  max: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-  return (
-    <div className="mb-2">
-      <div className="flex justify-between">
-        <div className="flex ml-2 mb-1 font-bold">{label}</div>
-        <div>{value}</div>
+        <TextField
+          label="lambda"
+          value={lambda.toString()}
+          onChange={e => updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) || "0" })}
+        />
       </div>
-      <input type="range" step={step} min={min} max={max} value={value} onChange={onChange} className="range" />
-    </div>
+    </>
   );
 }
+
+// function EclpRangeInputs() {
+//   const { eclpParams, updateEclpParam } = usePoolCreationStore();
+//   const { c, s, lambda } = eclpParams;
+
+//   // TODO: account for _ROTATION_VECTOR_NORM_ACCURACY range?
+//   // TODO: fix problem where RotationVectorNotNormalized() error always thrown after sliding c or s
+//   const enforceRotationVectorNormalized = (updatedParam: "c" | "s") => {
+//     // c^2 + s^2 = 1e18
+
+//     const rawC = parseUnits(c, 18);
+//     const rawS = parseUnits(s, 18);
+
+//     if (updatedParam === "c") {
+//       const cSquared = (rawC * rawC) / GyroECLPMath._ONE; // scale back down to 1e18
+//       const remainder = GyroECLPMath._ONE - cSquared;
+//       const scaledRemainder = remainder * GyroECLPMath._ONE;
+//       const normalizedS = new Big(scaledRemainder.toString()).sqrt().toFixed(0);
+//       updateEclpParam({ s: formatUnits(BigInt(normalizedS), 18) });
+//     } else if (updatedParam === "s") {
+//       const sSquared = (rawS * rawS) / GyroECLPMath._ONE; // scale back down to 1e18
+//       const remainder = GyroECLPMath._ONE - sSquared;
+//       const scaledRemainder = remainder * GyroECLPMath._ONE;
+//       const normalizedC = new Big(scaledRemainder.toString()).sqrt().toFixed(0);
+//       updateEclpParam({ c: formatUnits(BigInt(normalizedC), 18) });
+//     }
+//   };
+
+//   return (
+//     <>
+//       <EclpRange
+//         label="c"
+//         value={c}
+//         min="0"
+//         max="1"
+//         step="0.001"
+//         onChange={e => {
+//           updateEclpParam({ c: e.target.value });
+//           enforceRotationVectorNormalized("c");
+//         }}
+//       />
+//       <EclpRange
+//         label="s"
+//         value={s}
+//         min="0"
+//         max="1"
+//         step="0.001"
+//         onChange={e => {
+//           updateEclpParam({ s: e.target.value });
+//           enforceRotationVectorNormalized("s");
+//         }}
+//       />
+//       <EclpRange
+//         label="lambda"
+//         value={lambda}
+//         min="0"
+//         // max={formatUnits(GyroECLPMath._MAX_STRETCH_FACTOR, 18)} // actual max too big for slider
+//         max={"100000"}
+//         step="1000" // 10 steps from 0 to _MAX_STRETCH_FACTOR
+//         onChange={e => {
+//           updateEclpParam({ lambda: e.target.value });
+//         }}
+//       />
+//     </>
+//   );
+// }
+
+// function EclpRange({
+//   label,
+//   value,
+//   min,
+//   max,
+//   step,
+//   onChange,
+// }: {
+//   label: string;
+//   value: string;
+//   step: string;
+//   min: string;
+//   max: string;
+//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+// }) {
+//   return (
+//     <div className="mb-2">
+//       <div className="flex justify-between">
+//         <div className="flex ml-2 mb-1 font-bold">{label}</div>
+//         <div>{value}</div>
+//       </div>
+//       <input type="range" step={step} min={min} max={max} value={value} onChange={onChange} className="range" />
+//     </div>
+//   );
+// }
