@@ -73,12 +73,16 @@ export function EclpParams() {
 
       {baseParamsErrorMessage && (
         <div className="mt-3">
-          <Alert type="error">Params Invalid: {baseParamsErrorMessage}</Alert>
+          <Alert type="error">
+            <b>Base Params Invalid:</b> {baseParamsErrorMessage}
+          </Alert>
         </div>
       )}
       {derivedParamsErrorMessage && (
         <div className="mt-3">
-          <Alert type="error">Derived Params Invalid: {derivedParamsErrorMessage}</Alert>
+          <Alert type="error">
+            <b>Derived Params Invalid:</b> {derivedParamsErrorMessage}
+          </Alert>
         </div>
       )}
     </div>

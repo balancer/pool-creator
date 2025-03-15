@@ -23,10 +23,10 @@ export const useValidateRateProvider = (address: string | undefined, tokenConfig
         });
         console.log("getRate()", rate);
         updateTokenConfig(tokenConfigIndex, { isValidRateProvider: true });
-        return true;
+        return rate;
       } catch {
         updateTokenConfig(tokenConfigIndex, { isValidRateProvider: false });
-        return false;
+        return null;
       }
     },
     enabled: !!address && isValidAddress,
