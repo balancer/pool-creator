@@ -33,9 +33,12 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     poolAddress,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
+    eclpParams,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
+
+  const { alpha, beta, lambda } = eclpParams;
 
   const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(targetNetwork, poolAddress) : undefined;
 
@@ -68,6 +71,22 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={false}
         content={
           <div>
+            {poolType === PoolType.GyroE && (
+              <>
+                <div className="flex justify-between">
+                  <div className="">Lowest Price</div>
+                  <div>{alpha}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Highest Price</div>
+                  <div>{beta}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Stretching Factor</div>
+                  <div>{lambda}</div>
+                </div>
+              </>
+            )}
             <div className="flex justify-between">
               <div className="">Swap Fee %</div>
               <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>

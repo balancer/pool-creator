@@ -105,12 +105,12 @@ function ParamInputs() {
     <>
       <div className="grid grid-cols-2 gap-5 mb-3">
         <TextField
-          label="alpha"
+          label="Lowest Price"
           value={alpha.toString()}
           onChange={e => updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) || "0" })}
         />
         <TextField
-          label="beta"
+          label="Highest Price"
           value={beta.toString()}
           onChange={e => updateEclpParam({ beta: sanitizeNumberInput(e.target.value) || "0" })}
         />
@@ -118,7 +118,7 @@ function ParamInputs() {
 
       <div className="grid grid-cols-2 gap-5">
         <TextField
-          label="peak price"
+          label="Peak Price"
           value={peakPrice}
           onChange={e => {
             setPeakPrice(sanitizeNumberInput(e.target.value) || "0");
@@ -128,7 +128,7 @@ function ParamInputs() {
         />
 
         <TextField
-          label="lambda"
+          label="Stretching factor"
           value={lambda.toString()}
           onChange={e => updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) || "0" })}
         />
