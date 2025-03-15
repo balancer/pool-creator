@@ -7,11 +7,11 @@ export function useGetECLPLiquidityProfile() {
   const { alpha, beta, s, c, lambda } = eclpParams;
 
   const data: [number, number][] | null = drawLiquidityECLP({
-    alphaString: alpha,
-    betaString: beta,
-    sString: s,
-    cString: c,
-    lambdaString: lambda,
+    alphaString: alpha || "0",
+    betaString: beta || "0",
+    sString: s || "0",
+    cString: c || "0",
+    lambdaString: lambda || "0",
     tokenRateScalingFactorString: "1", // TODO: fetch getRate() from each token's rate provider?
   });
 

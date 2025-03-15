@@ -107,12 +107,12 @@ function ParamInputs() {
         <TextField
           label="Lowest Price"
           value={alpha.toString()}
-          onChange={e => updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) || "0" })}
+          onChange={e => updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) })}
         />
         <TextField
           label="Highest Price"
           value={beta.toString()}
-          onChange={e => updateEclpParam({ beta: sanitizeNumberInput(e.target.value) || "0" })}
+          onChange={e => updateEclpParam({ beta: sanitizeNumberInput(e.target.value) })}
         />
       </div>
 
@@ -121,110 +121,17 @@ function ParamInputs() {
           label="Peak Price"
           value={peakPrice}
           onChange={e => {
-            setPeakPrice(sanitizeNumberInput(e.target.value) || "0");
+            setPeakPrice(sanitizeNumberInput(e.target.value));
             const { c, s } = calculateRotationComponents(peakPrice);
             updateEclpParam({ c: c.toString(), s: s.toString() });
           }}
         />
-
         <TextField
           label="Stretching factor"
           value={lambda.toString()}
-          onChange={e => updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) || "0" })}
+          onChange={e => updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) })}
         />
       </div>
     </>
   );
 }
-
-// function EclpRangeInputs() {
-//   const { eclpParams, updateEclpParam } = usePoolCreationStore();
-//   const { c, s, lambda } = eclpParams;
-
-//   // TODO: account for _ROTATION_VECTOR_NORM_ACCURACY range?
-//   // TODO: fix problem where RotationVectorNotNormalized() error always thrown after sliding c or s
-//   const enforceRotationVectorNormalized = (updatedParam: "c" | "s") => {
-//     // c^2 + s^2 = 1e18
-
-//     const rawC = parseUnits(c, 18);
-//     const rawS = parseUnits(s, 18);
-
-//     if (updatedParam === "c") {
-//       const cSquared = (rawC * rawC) / GyroECLPMath._ONE; // scale back down to 1e18
-//       const remainder = GyroECLPMath._ONE - cSquared;
-//       const scaledRemainder = remainder * GyroECLPMath._ONE;
-//       const normalizedS = new Big(scaledRemainder.toString()).sqrt().toFixed(0);
-//       updateEclpParam({ s: formatUnits(BigInt(normalizedS), 18) });
-//     } else if (updatedParam === "s") {
-//       const sSquared = (rawS * rawS) / GyroECLPMath._ONE; // scale back down to 1e18
-//       const remainder = GyroECLPMath._ONE - sSquared;
-//       const scaledRemainder = remainder * GyroECLPMath._ONE;
-//       const normalizedC = new Big(scaledRemainder.toString()).sqrt().toFixed(0);
-//       updateEclpParam({ c: formatUnits(BigInt(normalizedC), 18) });
-//     }
-//   };
-
-//   return (
-//     <>
-//       <EclpRange
-//         label="c"
-//         value={c}
-//         min="0"
-//         max="1"
-//         step="0.001"
-//         onChange={e => {
-//           updateEclpParam({ c: e.target.value });
-//           enforceRotationVectorNormalized("c");
-//         }}
-//       />
-//       <EclpRange
-//         label="s"
-//         value={s}
-//         min="0"
-//         max="1"
-//         step="0.001"
-//         onChange={e => {
-//           updateEclpParam({ s: e.target.value });
-//           enforceRotationVectorNormalized("s");
-//         }}
-//       />
-//       <EclpRange
-//         label="lambda"
-//         value={lambda}
-//         min="0"
-//         // max={formatUnits(GyroECLPMath._MAX_STRETCH_FACTOR, 18)} // actual max too big for slider
-//         max={"100000"}
-//         step="1000" // 10 steps from 0 to _MAX_STRETCH_FACTOR
-//         onChange={e => {
-//           updateEclpParam({ lambda: e.target.value });
-//         }}
-//       />
-//     </>
-//   );
-// }
-
-// function EclpRange({
-//   label,
-//   value,
-//   min,
-//   max,
-//   step,
-//   onChange,
-// }: {
-//   label: string;
-//   value: string;
-//   step: string;
-//   min: string;
-//   max: string;
-//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-// }) {
-//   return (
-//     <div className="mb-2">
-//       <div className="flex justify-between">
-//         <div className="flex ml-2 mb-1 font-bold">{label}</div>
-//         <div>{value}</div>
-//       </div>
-//       <input type="range" step={step} min={min} max={max} value={value} onChange={onChange} className="range" />
-//     </div>
-//   );
-// }
