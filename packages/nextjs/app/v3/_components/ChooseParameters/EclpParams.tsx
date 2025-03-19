@@ -1,58 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { GyroECLPMath } from "@balancer-labs/balancer-maths";
-import { calcDerivedParams } from "@balancer/sdk";
 import ReactECharts from "echarts-for-react";
-import { parseUnits } from "viem";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useEclpPoolChart } from "~~/hooks/gyro";
+import { useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents } from "~~/utils/gryo";
 
 export function EclpParams() {
-  const [baseParamsErrorMessage, setBaseParamsErrorMessage] = useState<string | null>(null);
-  const [derivedParamsErrorMessage, setDerivedParamsErrorMessage] = useState<string | null>(null);
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
   const { alpha, beta, c, s, lambda, isTokenOrderInverted } = eclpParams;
   const { options } = useEclpPoolChart();
   const { updateUserData } = useUserDataStore();
+
   const handleTokenOrderInversion = () => {
     updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
-    updateUserData({ hasEditedEclpParams: false }); // reset edited flag so "starter values" are recalculated
+    updateUserData({ hasEditedEclpParams: false }); // reset edited flag so suggested eclp param values are recalculated
   };
 
-  useEffect(() => {
-    const rawEclpParams = {
-      alpha: parseUnits(alpha, 18),
-      beta: parseUnits(beta, 18),
-      c: parseUnits(c, 18),
-      s: parseUnits(s, 18),
-      lambda: parseUnits(lambda, 18),
-    };
-
-    try {
-      GyroECLPMath.validateParams(rawEclpParams);
-      setBaseParamsErrorMessage(null);
-    } catch (error) {
-      if (error instanceof Error) {
-        setBaseParamsErrorMessage(error.message);
-      } else {
-        setBaseParamsErrorMessage("An unknown error occurred");
-      }
-    }
-
-    try {
-      const derivedParams = calcDerivedParams(rawEclpParams);
-      GyroECLPMath.validateDerivedParams(rawEclpParams, derivedParams);
-      setDerivedParamsErrorMessage(null);
-    } catch (error) {
-      if (error instanceof Error) {
-        setDerivedParamsErrorMessage(error.message);
-      } else {
-        setDerivedParamsErrorMessage("An unknown error occurred");
-      }
-    }
-  }, [alpha, beta, c, s, lambda]);
+  const { baseParamsError, derivedParamsError } = useEclpParamValidations({ alpha, beta, c, s, lambda });
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -80,17 +44,17 @@ export function EclpParams() {
 
       <ParamInputs />
 
-      {baseParamsErrorMessage && (
+      {baseParamsError && (
         <div className="mt-3">
           <Alert type="error">
-            <b>Base Params Invalid:</b> {baseParamsErrorMessage}
+            <b>Base Params Invalid:</b> {baseParamsError}
           </Alert>
         </div>
       )}
-      {derivedParamsErrorMessage && (
+      {derivedParamsError && (
         <div className="mt-3">
           <Alert type="error">
-            <b>Derived Params Invalid:</b> {derivedParamsErrorMessage}
+            <b>Derived Params Invalid:</b> {derivedParamsError}
           </Alert>
         </div>
       )}
