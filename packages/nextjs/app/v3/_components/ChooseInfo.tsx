@@ -81,7 +81,7 @@ export const ChooseInfo = () => {
                   return (
                     <tr key={pool.address}>
                       <td className="border border-neutral-500 px-2 py-1">{pool.name.slice(0, 20)}</td>
-                      <td className="border border-neutral-500 px-2 py-1">{pool.symbol.slice(0, 20)}</td>
+                      <td className="border border-neutral-500 px-2 py-1">{pool.type}</td>
                       <td className="text-right border border-neutral-500 px-2 py-1">
                         <a
                           target="_blank"

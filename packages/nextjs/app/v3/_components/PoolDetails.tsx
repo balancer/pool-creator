@@ -33,9 +33,12 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     poolAddress,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
+    eclpParams,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
+
+  const { alpha, beta, lambda } = eclpParams;
 
   const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(targetNetwork, poolAddress) : undefined;
 
@@ -68,17 +71,38 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={false}
         content={
           <div>
+            {poolType === PoolType.GyroE && (
+              <>
+                <div className="flex justify-between">
+                  <div className="">Lowest Price</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={alpha}>
+                    {alpha.split(".")[1]?.length > 5 ? `${Number(alpha).toFixed(5)}...` : alpha}
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Highest Price</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={beta}>
+                    {beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Stretching Factor</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={lambda}>
+                    {lambda.split(".")[1]?.length > 5 ? `${Number(lambda).toFixed(5)}...` : lambda}
+                  </div>
+                </div>
+              </>
+            )}
             <div className="flex justify-between">
               <div className="">Swap Fee %</div>
               <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
             </div>
-            {poolType === PoolType.Stable ||
-              (PoolType.StableSurge && (
-                <div className="flex justify-between">
-                  <div className="">Amplification Parameter</div>
-                  <div>{amplificationParameter ? amplificationParameter : "-"}</div>
-                </div>
-              ))}
+            {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
+              <div className="flex justify-between">
+                <div className="">Amplification Parameter</div>
+                <div>{amplificationParameter ? amplificationParameter : "-"}</div>
+              </div>
+            )}
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>

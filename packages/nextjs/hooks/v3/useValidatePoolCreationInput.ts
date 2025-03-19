@@ -1,6 +1,7 @@
 import { PoolType, TokenType } from "@balancer/sdk";
 import { isAddress, parseUnits } from "viem";
 import { useWalletClient } from "wagmi";
+import { useEclpParamValidations } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore, useValidateHooksContract } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 
@@ -21,7 +22,10 @@ export function useValidatePoolCreationInput() {
     swapFeeManager,
     pauseManager,
     poolHooksContract,
+    eclpParams,
   } = usePoolCreationStore();
+
+  const { baseParamsError, derivedParamsError } = useEclpParamValidations(eclpParams);
 
   const isTypeValid = poolType !== undefined;
 
@@ -68,8 +72,11 @@ export function useValidatePoolCreationInput() {
 
   const isParametersValid = [
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
-    poolType !== PoolType.Stable ||
+    // Stable and StableSurge require valid amplification parameter
+    (poolType !== PoolType.Stable && poolType !== PoolType.StableSurge) ||
       (!!amplificationParameter && Number(amplificationParameter) >= 1 && Number(amplificationParameter) <= 5000),
+    // GyroE type requires special validations for eclp params
+    poolType !== PoolType.GyroE || (!baseParamsError && !derivedParamsError),
     isDelegatingSwapFeeManagement || isAddress(swapFeeManager),
     isDelegatingPauseManagement || isAddress(pauseManager),
     !isUsingHooks || isValidPoolHooksContract,
