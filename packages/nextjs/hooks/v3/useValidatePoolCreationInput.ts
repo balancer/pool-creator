@@ -68,7 +68,7 @@ export function useValidatePoolCreationInput() {
 
   const isParametersValid = [
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
-    poolType !== PoolType.Stable ||
+    (poolType !== PoolType.Stable && poolType !== PoolType.StableSurge) ||
       (!!amplificationParameter && Number(amplificationParameter) >= 1 && Number(amplificationParameter) <= 5000),
     isDelegatingSwapFeeManagement || isAddress(swapFeeManager),
     isDelegatingPauseManagement || isAddress(pauseManager),

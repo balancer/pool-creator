@@ -113,7 +113,7 @@ export const initialPoolCreationState = {
     s: "0.707106781186547524",
     lambda: "4000",
     peakPrice: "1", // peak price only for UX purposes, not sent in tx
-    isTokenOrderInverted: false,
+    isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
   },
 };
 
