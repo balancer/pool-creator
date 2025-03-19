@@ -47,12 +47,17 @@ export function useEclpPoolChart() {
     if (poolSpotPrice && !hasEditedEclpParams && usdValueToken1 && usdValueToken2) {
       const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
 
+      // calculate suggested values
+      const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
+      const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
+      const stretchingFactor = 1000; // TODO: how to calculate stretching factor that makes sense given values for alpha, c, s?
+
       updateEclpParam({
-        alpha: (poolSpotPrice - poolSpotPrice * 0.075).toString(),
-        beta: (poolSpotPrice + poolSpotPrice * 0.075).toString(),
+        alpha: lowestPrice.toString(),
+        beta: highestPrice.toString(),
         c: c.toString(),
         s: s.toString(),
-        lambda: "10000",
+        lambda: stretchingFactor.toString(),
         peakPrice: poolSpotPrice.toString(),
       });
     }
