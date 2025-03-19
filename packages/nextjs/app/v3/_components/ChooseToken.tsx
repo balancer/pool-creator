@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { PoolType, TokenType, erc20Abi } from "@balancer/sdk";
 import { zeroAddress } from "viem";
+import { formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import {
   ArrowTopRightOnSquareIcon,
@@ -34,7 +35,7 @@ export function ChooseToken({ index }: { index: number }) {
     useBoostedVariant,
     isWeightLocked,
   } = tokenConfigs[index];
-  useValidateRateProvider(rateProvider, index); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
+  const { data: rate } = useValidateRateProvider(rateProvider, index); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
 
   const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();
@@ -69,7 +70,7 @@ export function ChooseToken({ index }: { index: number }) {
     });
 
     // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
-    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false });
+    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false, hasEditedEclpParams: false });
 
     const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];
     if (hasBoostedVariant) {
@@ -304,7 +305,11 @@ export function ChooseToken({ index }: { index: number }) {
         </div>
       </div>
       {showRateProviderModal && tokenInfo && (
-        <RateProviderModal setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
+        <RateProviderModal
+          setShowRateProviderModal={setShowRateProviderModal}
+          tokenIndex={index}
+          rate={rate ? formatUnits(rate, 18) : "unknown error"}
+        />
       )}
       {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal
@@ -382,9 +387,11 @@ const BoostOpportunityModal = ({
 const RateProviderModal = ({
   tokenIndex,
   setShowRateProviderModal,
+  rate,
 }: {
   tokenIndex: number;
   setShowRateProviderModal: Dispatch<SetStateAction<boolean>>;
+  rate: string;
 }) => {
   const { targetNetwork } = useTargetNetwork();
   const { updateTokenConfig, tokenConfigs } = usePoolCreationStore();
@@ -430,22 +437,22 @@ const RateProviderModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
       <div className="w-[650px] min-h-[333px] bg-base-200 rounded-lg py-7 px-10 flex flex-col gap-5 justify-around">
-        <h3 className="font-bold text-3xl text-center">Whitelisted Rate Provider</h3>
+        <h3 className="font-bold text-3xl text-center">Choose a Rate Provider</h3>
 
         <div className="flex flex-col gap-5">
           <div className="text-xl">
-            The following rate provider for <b>{tokenSymbol} </b> has already been whitelisted by Balancer
+            The following rate provider for <b>{tokenSymbol} </b> has been whitelisted
           </div>
           {rateProviderData ? (
-            <div className="overflow-x-auto px-5">
-              <table className="w-full text-xl table border border-neutral-500">
+            <div className="overflow-x-auto p-3 border border-base-100 rounded-lg bg-base-300">
+              <table className="w-full text-xl table ">
                 <tbody>
-                  <tr className="border-b border-neutral-500">
-                    <td className="py-2 w-32 font-bold">Name</td>
+                  <tr className="">
+                    <td className="py-2 w-32">Name:</td>
                     <td className="py-2 text-left">{rateProviderData.name}</td>
                   </tr>
-                  <tr className="border-b border-neutral-500">
-                    <td className="py-2 w-32 font-bold">Address</td>
+                  <tr className="">
+                    <td className="py-2 w-32">Address:</td>
                     <td className="py-2 text-left">
                       <a
                         href={rateProviderLink}
@@ -458,22 +465,18 @@ const RateProviderModal = ({
                       </a>
                     </td>
                   </tr>
-                  <tr className="border-b border-neutral-500">
-                    <td className="py-2 font-bold">Reviewed</td>
+                  <tr className="">
+                    <td className="py-2">Rate:</td>
+                    <td className="py-2 text-left">{rate}</td>
+                  </tr>
+                  <tr className="">
+                    <td className="py-2">Reviewed:</td>
                     <td className="py-2 text-left">{rateProviderData.reviewed ? "Yes" : "No"}</td>
                   </tr>
-                  <tr className="border-b border-neutral-500">
-                    <td className="py-2 font-bold ">Summary</td>
+                  <tr className="">
+                    <td className="py-2">Summary:</td>
                     <td className="py-2 text-left">{rateProviderData.summary}</td>
                   </tr>
-                  {/* <tr className="border-b border-neutral-500">
-                    <td className="py-2 font-bold ">Warnings</td>
-                    <td className="py-2 text-left">
-                      {rateProviderData.warnings.length > 0
-                        ? rateProviderData.warnings.map(message => message).join(", ")
-                        : "none"}
-                    </td>
-                  </tr> */}
                 </tbody>
               </table>
             </div>

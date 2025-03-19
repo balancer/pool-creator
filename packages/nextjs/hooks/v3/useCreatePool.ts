@@ -1,11 +1,15 @@
 import {
   CreatePool,
+  CreatePoolGyroECLPInput,
   CreatePoolStableSurgeInput,
   CreatePoolV3BaseInput,
   CreatePoolV3StableInput,
   CreatePoolV3WeightedInput,
   PoolType,
+  calcDerivedParams,
+  gyroECLPPoolFactoryAbi_V3,
   stablePoolFactoryAbi_V3,
+  stableSurgeFactoryAbi,
   weightedPoolFactoryAbi_V3,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
@@ -13,12 +17,12 @@ import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
-import { stableSurgeFactoryAbi } from "~~/utils/abis/stableSurgeFactory";
 
 export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
   [PoolType.Stable]: stablePoolFactoryAbi_V3,
   [PoolType.StableSurge]: stableSurgeFactoryAbi,
+  [PoolType.GyroE]: gyroECLPPoolFactoryAbi_V3,
 };
 
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
@@ -46,13 +50,14 @@ export const useCreatePool = () => {
     amplificationParameter,
     updatePool,
     createPoolTx,
+    eclpParams: humanReadableEclpParams,
   } = usePoolCreationStore();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   function createPoolInput(
     poolType: PoolType,
-  ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput {
+  ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
     if (!publicClient) throw new Error("Public client must be available!");
     const baseInput: CreatePoolV3BaseInput = {
@@ -83,6 +88,16 @@ export const useCreatePool = () => {
       },
     );
 
+    const { alpha, beta, c, s, lambda } = humanReadableEclpParams;
+
+    const eclpParams = {
+      alpha: parseUnits(alpha, 18),
+      beta: parseUnits(beta, 18),
+      c: parseUnits(c, 18),
+      s: parseUnits(s, 18),
+      lambda: parseUnits(lambda, 18),
+    };
+
     return {
       ...baseInput,
       poolType,
@@ -90,7 +105,11 @@ export const useCreatePool = () => {
       ...((poolType === PoolType.Stable || poolType === PoolType.StableSurge) && {
         amplificationParameter: BigInt(amplificationParameter),
       }),
-    } as CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput;
+      ...(poolType === PoolType.GyroE && {
+        eclpParams,
+        derivedEclpParams: calcDerivedParams(eclpParams),
+      }),
+    } as CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput;
   }
 
   async function createPool() {
@@ -100,6 +119,7 @@ export const useCreatePool = () => {
 
     const createPool = new CreatePool();
     const input = createPoolInput(poolType);
+
     const call = createPool.buildCall(input);
 
     const hash = await writeTx(

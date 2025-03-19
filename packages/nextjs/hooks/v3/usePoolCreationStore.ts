@@ -10,7 +10,7 @@ import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 export type TabType = (typeof TABS)[number];
 
-export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted | PoolType.StableSurge;
+export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted | PoolType.StableSurge | PoolType.GyroE;
 
 export type TokenConfig = {
   address: Address;
@@ -23,6 +23,16 @@ export type TokenConfig = {
   tokenInfo: Token | null;
   amount: string; // human readable
   useBoostedVariant: boolean;
+};
+
+export type EclpParams = {
+  alpha: string;
+  beta: string;
+  c: string;
+  s: string;
+  lambda: string;
+  peakPrice: string;
+  isTokenOrderInverted: boolean;
 };
 
 export interface TransactionDetails {
@@ -52,8 +62,10 @@ export interface PoolCreationStore {
   createPoolTx: TransactionDetails;
   initPoolTx: TransactionDetails;
   swapToBoostedTx: TransactionDetails;
+  eclpParams: EclpParams;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
+  updateEclpParam: (updates: Partial<EclpParams>) => void;
   clearPoolStore: () => void;
 }
 
@@ -93,6 +105,16 @@ export const initialPoolCreationState = {
   createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  // Only for gyroECLP
+  eclpParams: {
+    alpha: "0.998502246630054917",
+    beta: "1.000200040008001600",
+    c: "0.707106781186547524",
+    s: "0.707106781186547524",
+    lambda: "4000",
+    peakPrice: "1", // peak price only for UX purposes, not sent in tx
+    isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
+  },
 };
 
 // Stores all the data that will be used for pool creation
@@ -107,6 +129,11 @@ export const usePoolCreationStore = create(
           newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
           return { ...state, tokenConfigs: newTokenConfigs };
         }),
+      updateEclpParam: (updates: Partial<EclpParams>) =>
+        set(state => ({
+          ...state,
+          eclpParams: { ...state.eclpParams, ...updates },
+        })),
       clearPoolStore: () => set(initialPoolCreationState),
     }),
     {

@@ -20,6 +20,7 @@ const BalancerV3: NextPage = () => {
   const { data: walletClient } = useWalletClient();
   const { clearUserData } = useUserDataStore();
   usePoolStoreDebug();
+
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
