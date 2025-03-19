@@ -70,7 +70,7 @@ const hoverPoolStyles =
 
 const INITIAL_INSTRUCTIONS = (
   <div>
-    Begin by selecting a pool type. For detailed information about each pool type, check out our{" "}
+    Begin by selecting the type of pool you wish to create. For more information about pool types, check out our{" "}
     <a
       href="https://docs-v3.balancer.fi/concepts/explore-available-balancer-pools/"
       className="link inline-flex items-center gap-1"

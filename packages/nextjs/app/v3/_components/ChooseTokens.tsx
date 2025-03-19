@@ -81,8 +81,6 @@ export function ChooseTokens() {
           </div>
         </Alert>
       )}
-
-      {/* {!isProportional && <Alert type="warning">Token USD values are not proportional to selected weights</Alert>} */}
     </div>
   );
 }

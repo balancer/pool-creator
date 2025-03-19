@@ -6,26 +6,36 @@ import { calculateRotationComponents } from "~~/utils/gryo";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
-  const { tokenConfigs, updateEclpParam } = usePoolCreationStore();
-  const tokens = tokenConfigs.map(token => token.tokenInfo?.symbol).join("/");
+  const { tokenConfigs, updateEclpParam, eclpParams } = usePoolCreationStore();
+  const { isTokenOrderInverted } = eclpParams;
+
+  const sortedTokens = tokenConfigs
+    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
+    .sort((a, b) => (a.address > b.address ? 1 : -1));
+
+  if (isTokenOrderInverted) {
+    sortedTokens.reverse();
+  }
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const { hasEditedEclpParams } = useUserDataStore();
 
-  const { tokenUsdValue: usdValueToken1 } = useTokenUsdValue(tokenConfigs[0].address, "1");
-  const { tokenUsdValue: usdValueToken2 } = useTokenUsdValue(tokenConfigs[1].address, "1");
+  const { tokenUsdValue: usdValueToken1 } = useTokenUsdValue(sortedTokens[0].address, "1");
+  const { tokenUsdValue: usdValueToken2 } = useTokenUsdValue(sortedTokens[1].address, "1");
 
   let poolSpotPrice = null;
   if (usdValueToken1 && usdValueToken2) poolSpotPrice = usdValueToken1 / usdValueToken2;
-  console.log("poolSpotPrice", poolSpotPrice);
 
   const markPointMargin = 0.005;
+
   const isSpotPriceNearLowerBound = useMemo(() => {
     return bn(poolSpotPrice || 0).lt(xMin * (1 + markPointMargin));
   }, [poolSpotPrice, xMin]);
+
   const isSpotPriceNearUpperBound = useMemo(() => {
     return bn(poolSpotPrice || 0).gt(xMax * (1 - markPointMargin));
   }, [poolSpotPrice, xMax]);
+
   const poolIsInRange = useMemo(() => {
     const margin = 0.000001; // if spot price is within the margin on both sides it's considered out of range
     return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
@@ -34,7 +44,7 @@ export function useEclpPoolChart() {
   const secondaryFontColor = "#718096";
 
   useEffect(() => {
-    if (poolSpotPrice && !hasEditedEclpParams) {
+    if (poolSpotPrice && !hasEditedEclpParams && usdValueToken1 && usdValueToken2) {
       const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
 
       updateEclpParam({
@@ -42,11 +52,11 @@ export function useEclpPoolChart() {
         beta: (poolSpotPrice + poolSpotPrice * 0.075).toString(),
         c: c.toString(),
         s: s.toString(),
-        lambda: (poolSpotPrice * 100).toString(),
+        lambda: "10000",
         peakPrice: poolSpotPrice.toString(),
       });
     }
-  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams]);
+  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, usdValueToken1, usdValueToken2]);
 
   const options = useMemo(() => {
     if (!data) return;
@@ -78,13 +88,13 @@ export function useEclpPoolChart() {
       },
       xAxis: {
         type: "value",
-        name: `Price (${tokens})`,
+        name: `Price ( ${sortedTokens.map(token => token.symbol).join(" / ")} )`,
         nameLocation: "end",
         nameGap: 5,
         nameTextStyle: {
           align: "right",
           verticalAlign: "bottom",
-          padding: [0, 0, -54, 0],
+          padding: [0, 35, -52, 0],
           color: "#A0AEC0",
         },
         min: xMin - 0.1 * (xMax - xMin),

@@ -135,16 +135,21 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
       />
       <div className="flex flex-col gap-5">
         <div className="flex gap-5">
-          <div className="flex flex-col gap-5 relative z-10">
-            <div className="bg-base-300 border-neutral border rounded-lg w-[500px] p-5 flex flex-col gap-5 max-h-[90vh]">
+          <div className="flex flex-col gap-5 relative z-10 w-[500px]">
+            <div className="bg-base-300 border-neutral border rounded-lg  p-5 flex flex-col gap-5 max-h-[90vh]">
               <div className="font-bold text-2xl text-center">Pool Creation</div>
 
               <div className="flex-1 min-h-0 overflow-y-auto">
                 <PoolDetails />
               </div>
-              {step <= poolCreationSteps.length ? poolCreationSteps[step - 1].component : <PoolCreatedView />}
 
-              <div className="flex justify-center mt-2 gap-2 items-center">
+              {step <= poolCreationSteps.length ? (
+                poolCreationSteps[step - 1].component
+              ) : (
+                <PoolCreatedView setIsModalOpen={setIsModalOpen} />
+              )}
+
+              <div className="flex justify-center gap-2 items-center">
                 <ContactSupportModal />
                 <div className="text-xl">·</div>
                 <PoolStateResetModal
@@ -158,16 +163,9 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
               </div>
             </div>
             {step > poolCreationSteps.length && (
-              <button
-                onClick={() => {
-                  clearPoolStore();
-                  clearUserData();
-                  setIsModalOpen(false);
-                }}
-                className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} ${bgBeigeGradientHover} text-neutral-700`}
-              >
-                Create another pool
-              </button>
+              <Alert type="success">
+                Your pool has been successfully initialized and will be avaiable to view in the Balancer app shortly!
+              </Alert>
             )}
           </div>
 
@@ -211,9 +209,9 @@ function createTransactionStep({
   };
 }
 
-const PoolCreatedView = () => {
-  const { poolAddress, chain } = usePoolCreationStore();
-
+const PoolCreatedView = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) => {
+  const { poolAddress, chain, clearPoolStore } = usePoolCreationStore();
+  const { clearUserData } = useUserDataStore();
   const baseURL = chain?.id === 11155111 ? "https://test.balancer.fi" : "https://balancer.fi";
 
   // V3 FE only uses single word so need to convert "Arbitrum One" (from wagmi) to "arbitrum" for the URL
@@ -224,14 +222,22 @@ const PoolCreatedView = () => {
   return (
     <div className="flex flex-col gap-5">
       <a href={poolURL} target="_blank" rel="noopener noreferrer" className="">
-        <button className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}>
+        <button className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} ${bgBeigeGradientHover} text-neutral-700`}>
           <div>View on Balancer</div>
           <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
         </button>
       </a>
-      <Alert type="success">
-        Your pool has been successfully initialized and will be avaiable to view in the Balancer app shortly!
-      </Alert>
+
+      <button
+        onClick={() => {
+          clearPoolStore();
+          clearUserData();
+          setIsModalOpen(false);
+        }}
+        className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}
+      >
+        Create another pool
+      </button>
     </div>
   );
 };

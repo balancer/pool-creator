@@ -75,15 +75,21 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               <>
                 <div className="flex justify-between">
                   <div className="">Lowest Price</div>
-                  <div>{alpha.split(".")[1]?.length > 5 ? `${Number(alpha).toFixed(5)}...` : alpha}</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={alpha}>
+                    {alpha.split(".")[1]?.length > 5 ? `${Number(alpha).toFixed(5)}...` : alpha}
+                  </div>
                 </div>
                 <div className="flex justify-between">
                   <div className="">Highest Price</div>
-                  <div>{beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={beta}>
+                    {beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}
+                  </div>
                 </div>
                 <div className="flex justify-between">
                   <div className="">Stretching Factor</div>
-                  <div>{lambda}</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={lambda}>
+                    {lambda.split(".")[1]?.length > 5 ? `${Number(lambda).toFixed(5)}...` : lambda}
+                  </div>
                 </div>
               </>
             )}

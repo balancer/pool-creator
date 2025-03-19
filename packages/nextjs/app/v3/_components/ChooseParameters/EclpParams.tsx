@@ -3,7 +3,7 @@ import { GyroECLPMath } from "@balancer-labs/balancer-maths";
 import { calcDerivedParams } from "@balancer/sdk";
 import ReactECharts from "echarts-for-react";
 import { parseUnits } from "viem";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useEclpPoolChart } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
@@ -12,9 +12,14 @@ import { calculateRotationComponents } from "~~/utils/gryo";
 export function EclpParams() {
   const [baseParamsErrorMessage, setBaseParamsErrorMessage] = useState<string | null>(null);
   const [derivedParamsErrorMessage, setDerivedParamsErrorMessage] = useState<string | null>(null);
-  const { eclpParams } = usePoolCreationStore();
-  const { alpha, beta, c, s, lambda } = eclpParams;
+  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { alpha, beta, c, s, lambda, isTokenOrderInverted } = eclpParams;
   const { options } = useEclpPoolChart();
+  const { updateUserData } = useUserDataStore();
+  const handleTokenOrderInversion = () => {
+    updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
+    updateUserData({ hasEditedEclpParams: false }); // reset edited flag so "starter values" are recalculated
+  };
 
   useEffect(() => {
     const rawEclpParams = {
@@ -61,9 +66,15 @@ export function EclpParams() {
         <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
       </a>
 
-      <div className="bg-base-300 p-5 rounded-lg mb-5">
+      <div className="bg-base-300 p-5 rounded-lg mb-5 relative">
         <div className="bg-base-300 w-full h-72 rounded-lg">
           <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
+          <div
+            className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
+            onClick={handleTokenOrderInversion}
+          >
+            <ArrowsRightLeftIcon className="w-[18px] h-[18px]" />
+          </div>
         </div>
       </div>
 
