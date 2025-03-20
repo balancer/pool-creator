@@ -77,7 +77,7 @@ function ParamInputs() {
 
   return (
     <>
-      <Alert type="info">Stretching factor controls concentration of liquidity around peak price</Alert>
+      <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
       <div className="grid grid-cols-2 gap-5 mt-5 mb-3">
         <TextField
           label="Lowest Price"
@@ -109,7 +109,7 @@ function ParamInputs() {
           }}
         />
         <TextField
-          label="Stretching factor"
+          label="Stretching Factor"
           value={lambda.toString()}
           onChange={e => {
             updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) });

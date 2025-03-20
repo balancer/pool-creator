@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { Alert } from "~~/components/common";
 import { PoolStateResetModal } from "~~/components/common";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";

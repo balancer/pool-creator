@@ -8,17 +8,13 @@ import { bn, fNum } from "~~/utils/numbers";
 export function useEclpPoolChart() {
   const { tokenConfigs, updateEclpParam, eclpParams } = usePoolCreationStore();
   const { isTokenOrderInverted } = eclpParams;
+  const { hasEditedEclpParams } = useUserDataStore();
 
   const sortedTokens = tokenConfigs
     .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
     .sort((a, b) => (a.address > b.address ? 1 : -1));
 
-  if (isTokenOrderInverted) {
-    sortedTokens.reverse();
-  }
-
-  const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
-  const { hasEditedEclpParams } = useUserDataStore();
+  if (isTokenOrderInverted) sortedTokens.reverse();
 
   const { tokenUsdValue: usdValueToken1 } = useTokenUsdValue(sortedTokens[0].address, "1");
   const { tokenUsdValue: usdValueToken2 } = useTokenUsdValue(sortedTokens[1].address, "1");
@@ -26,6 +22,7 @@ export function useEclpPoolChart() {
   let poolSpotPrice = null;
   if (usdValueToken1 && usdValueToken2) poolSpotPrice = usdValueToken1 / usdValueToken2;
 
+  const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;
 
   const isSpotPriceNearLowerBound = useMemo(() => {
@@ -41,13 +38,11 @@ export function useEclpPoolChart() {
     return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
   }, [xMin, xMax, poolSpotPrice]);
 
-  const secondaryFontColor = "#718096";
-
+  // auto-fill suggested values if user has not edited eclp params yet
   useEffect(() => {
     if (poolSpotPrice && !hasEditedEclpParams && usdValueToken1 && usdValueToken2) {
       const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
 
-      // calculate suggested values
       const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
       const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
       const stretchingFactor = 1000; // TODO: how to calculate stretching factor that makes sense given values for alpha, c, s?
@@ -114,7 +109,7 @@ export function useEclpPoolChart() {
 
             return fNum("gyroPrice", value);
           },
-          color: secondaryFontColor,
+          color: "#718096",
         },
         splitLine: {
           show: false,
@@ -126,7 +121,7 @@ export function useEclpPoolChart() {
           show: true,
           lineStyle: {
             type: "dashed",
-            color: secondaryFontColor,
+            color: "#718096",
           },
         },
       },
@@ -251,7 +246,7 @@ export function useEclpPoolChart() {
                 label: {
                   show: !isSpotPriceNearLowerBound || !poolIsInRange,
                   fontSize: 12,
-                  color: secondaryFontColor,
+                  color: "#718096",
                   padding: 4,
                   borderRadius: 4,
                 },
@@ -262,7 +257,7 @@ export function useEclpPoolChart() {
                 label: {
                   show: !isSpotPriceNearUpperBound || !poolIsInRange,
                   fontSize: 12,
-                  color: secondaryFontColor,
+                  color: "#718096",
                   padding: 4,
                   borderRadius: 4,
                 },
