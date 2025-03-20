@@ -12,7 +12,7 @@ export function useGetECLPLiquidityProfile() {
     sString: s || "0",
     cString: c || "0",
     lambdaString: lambda || "0",
-    tokenRateScalingFactorString: "1", // TODO: I think this is okay because current price calculation done in USD?
+    tokenRateScalingFactorString: "1", // I think this is okay because current price calculation done in USD terms?
   });
 
   const xMin = useMemo(() => (data ? Math.min(...data.map(([x]) => x)) : 0), [data]);

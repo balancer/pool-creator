@@ -1,13 +1,9 @@
 import Link from "next/link";
-import {
-  CheckCircleIcon,
-  ExclamationCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { InformationCircleIcon, LightBulbIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 
 interface AlertProps {
-  type: "error" | "warning" | "success" | "info"; // `type` is required
+  type: "error" | "warning" | "success" | "info" | "eureka"; // `type` is required
   showIcon?: boolean;
   children?: React.ReactNode; // `children` can be optional
   classNames?: string;
@@ -20,7 +16,8 @@ const alertTypeMap = {
     icon: <ExclamationTriangleIcon className="w-6 h-6" />,
   },
   success: { styles: "bg-success", icon: <CheckCircleIcon className="w-6 h-6" /> },
-  info: { styles: "bg-[#93c6ff]", icon: <InformationCircleIcon className="w-6 h-6" /> },
+  info: { styles: "bg-[#b3aef5]", icon: <InformationCircleIcon className="w-6 h-6" /> },
+  eureka: { styles: "bg-[#b3aef5]", icon: <LightBulbIcon className="w-6 h-6" /> },
 };
 
 export const Alert: React.FC<AlertProps> = ({ children, type, classNames, showIcon = true }) => {
