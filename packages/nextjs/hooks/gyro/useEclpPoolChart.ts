@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from "react";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
-import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3/";
 import { calculateRotationComponents } from "~~/utils/gryo";
 import { bn, fNum } from "~~/utils/numbers";
@@ -10,17 +9,10 @@ export function useEclpPoolChart() {
   const { isTokenOrderInverted } = eclpParams;
   const { hasEditedEclpParams } = useUserDataStore();
 
-  const sortedTokens = tokenConfigs
-    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
-    .sort((a, b) => (a.address > b.address ? 1 : -1));
-
-  if (isTokenOrderInverted) sortedTokens.reverse();
-
-  const { tokenUsdValue: usdValueToken1 } = useTokenUsdValue(sortedTokens[0].address, "1");
-  const { tokenUsdValue: usdValueToken2 } = useTokenUsdValue(sortedTokens[1].address, "1");
+  const { usdValueToken0, usdValueToken1 } = eclpParams;
 
   let poolSpotPrice = null;
-  if (usdValueToken1 && usdValueToken2) poolSpotPrice = usdValueToken1 / usdValueToken2;
+  if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;
@@ -40,23 +32,40 @@ export function useEclpPoolChart() {
 
   // auto-fill suggested values if user has not edited eclp params yet
   useEffect(() => {
-    if (poolSpotPrice && !hasEditedEclpParams && usdValueToken1 && usdValueToken2) {
-      const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
+    if (poolSpotPrice) {
+      if (!hasEditedEclpParams && Number(usdValueToken1) && Number(usdValueToken1)) {
+        const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
 
-      const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
-      const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
-      const stretchingFactor = 1000; // TODO: how to calculate stretching factor that makes sense given values for alpha, c, s?
+        const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
+        const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
+        const stretchingFactor = 1000; // TODO: how to calculate stretching factor that makes sense given values for alpha, c, s?
 
+        updateEclpParam({
+          alpha: lowestPrice.toString(),
+          beta: highestPrice.toString(),
+          c: c.toString(),
+          s: s.toString(),
+          lambda: stretchingFactor.toString(),
+          peakPrice: poolSpotPrice.toString(),
+        });
+      }
+    } else {
       updateEclpParam({
-        alpha: lowestPrice.toString(),
-        beta: highestPrice.toString(),
-        c: c.toString(),
-        s: s.toString(),
-        lambda: stretchingFactor.toString(),
-        peakPrice: poolSpotPrice.toString(),
+        alpha: "",
+        beta: "",
+        c: "",
+        s: "",
+        peakPrice: "",
+        lambda: "",
       });
     }
-  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, usdValueToken1, usdValueToken2]);
+  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, usdValueToken0, usdValueToken1]);
+
+  // Gross but only for "Price ( token0 / token1 )" label on chart
+  const sortedTokens = tokenConfigs
+    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
+    .sort((a, b) => (a.address > b.address ? 1 : -1));
+  if (isTokenOrderInverted) sortedTokens.reverse();
 
   const options = useMemo(() => {
     if (!data) return;

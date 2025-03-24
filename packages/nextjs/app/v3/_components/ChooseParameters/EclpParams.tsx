@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
+import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents } from "~~/utils/gryo";
 
@@ -63,8 +65,8 @@ export function EclpParams() {
 }
 
 function ParamInputs() {
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, lambda, peakPrice } = eclpParams;
+  const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
+  const { alpha, beta, lambda, peakPrice, isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
 
   const sanitizeNumberInput = (input: string) => {
@@ -75,10 +77,60 @@ function ParamInputs() {
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
 
+  const sortedTokens = tokenConfigs
+    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
+    .sort((a, b) => (a.address > b.address ? 1 : -1));
+
+  if (isTokenOrderInverted) sortedTokens.reverse();
+
+  const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");
+  const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
+
+  useEffect(() => {
+    if (usdValueFromApiToken0) {
+      updateEclpParam({
+        usdValueToken0: usdValueFromApiToken0?.toString() || "",
+      });
+    } else {
+      updateEclpParam({ usdValueToken0: "" });
+    }
+
+    if (usdValueFromApiToken1) {
+      updateEclpParam({
+        usdValueToken1: usdValueFromApiToken1?.toString() || "",
+      });
+    } else {
+      updateEclpParam({ usdValueToken1: "" });
+    }
+  }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam]);
+
   return (
     <>
-      <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
-      <div className="grid grid-cols-2 gap-5 mt-5 mb-3">
+      <div className="flex flex-col gap-4">
+        <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
+        {!usdValueToken0 || (!usdValueToken1 && <Alert type="warning">USD values are required for both tokens</Alert>)}
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
+        <TextField
+          label={`${sortedTokens[0].symbol} Value`}
+          value={usdValueToken0}
+          isDollarValue={true}
+          onChange={e => {
+            updateEclpParam({ usdValueToken0: sanitizeNumberInput(e.target.value) });
+          }}
+        />
+        <TextField
+          label={`${sortedTokens[1].symbol} Value`}
+          value={usdValueToken1}
+          isDollarValue={true}
+          onChange={e => {
+            updateEclpParam({ usdValueToken1: sanitizeNumberInput(e.target.value) });
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 mb-2">
         <TextField
           label="Lowest Price"
           value={alpha.toString()}
