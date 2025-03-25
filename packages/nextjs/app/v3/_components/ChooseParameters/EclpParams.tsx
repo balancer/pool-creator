@@ -15,7 +15,8 @@ export function EclpParams() {
 
   const handleTokenOrderInversion = () => {
     updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
-    updateUserData({ hasEditedEclpParams: false }); // reset edited flag so suggested eclp param values are recalculated
+    // reset both edit flags on price inversion to recalculate suggested eclp param values
+    updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: false });
   };
 
   const { baseParamsError, derivedParamsError } = useEclpParamValidations({ alpha, beta, c, s, lambda });
@@ -67,7 +68,7 @@ export function EclpParams() {
 function ParamInputs() {
   const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
   const { alpha, beta, lambda, peakPrice, isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
-  const { updateUserData } = useUserDataStore();
+  const { updateUserData, hasEditedEclpTokenUsdValues } = useUserDataStore();
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -87,28 +88,21 @@ function ParamInputs() {
   const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
 
   useEffect(() => {
-    if (usdValueFromApiToken0) {
+    if (!hasEditedEclpTokenUsdValues) {
       updateEclpParam({
         usdValueToken0: usdValueFromApiToken0?.toString() || "",
-      });
-    } else {
-      updateEclpParam({ usdValueToken0: "" });
-    }
-
-    if (usdValueFromApiToken1) {
-      updateEclpParam({
         usdValueToken1: usdValueFromApiToken1?.toString() || "",
       });
-    } else {
-      updateEclpParam({ usdValueToken1: "" });
     }
-  }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam]);
+  }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam, hasEditedEclpTokenUsdValues]);
 
   return (
     <>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 mt-3">
         <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
-        {!usdValueToken0 || (!usdValueToken1 && <Alert type="warning">USD values are required for both tokens</Alert>)}
+        {(!usdValueToken0 || !usdValueToken1) && (
+          <Alert type="warning">Enter USD values for both tokens to begin parameter configuration</Alert>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
@@ -118,6 +112,9 @@ function ParamInputs() {
           isDollarValue={true}
           onChange={e => {
             updateEclpParam({ usdValueToken0: sanitizeNumberInput(e.target.value) });
+            // hasEditedEclpParams flag controls re-calculation of suggested eclp param values
+            // hasEditedEclpTokenUsdValues flag prevents price from being reset to API values after user edits it
+            updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: true });
           }}
         />
         <TextField
@@ -126,6 +123,9 @@ function ParamInputs() {
           isDollarValue={true}
           onChange={e => {
             updateEclpParam({ usdValueToken1: sanitizeNumberInput(e.target.value) });
+            // hasEditedEclpParams flag controls re-calculation of suggested eclp param values
+            // hasEditedEclpTokenUsdValues flag prevents price from being reset to API values after user edits it
+            updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: true });
           }}
         />
       </div>

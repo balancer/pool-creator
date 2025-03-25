@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3/";
 import { calculateRotationComponents } from "~~/utils/gryo";
+import { formatEclpParamValues } from "~~/utils/helpers";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
@@ -36,20 +37,22 @@ export function useEclpPoolChart() {
       if (!hasEditedEclpParams && Number(usdValueToken1) && Number(usdValueToken1)) {
         const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
 
+        // Fixed decimal places prevent e notation making it into string which breaks viem parseUnits
         const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
         const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
-        const stretchingFactor = 1000; // TODO: how to calculate stretching factor that makes sense given values for alpha, c, s?
 
         updateEclpParam({
-          alpha: lowestPrice.toString(),
-          beta: highestPrice.toString(),
-          c: c.toString(),
-          s: s.toString(),
-          lambda: stretchingFactor.toString(),
-          peakPrice: poolSpotPrice.toString(),
+          // toFixed ensures numbers are decimal strings instead of scientific notation which breaks viem parseUnits
+          alpha: formatEclpParamValues(lowestPrice),
+          beta: formatEclpParamValues(highestPrice),
+          c,
+          s,
+          lambda: "1000", // TODO: how to calculate stretching factor that makes pretty curve given values for alpha, c, s?
+          peakPrice: formatEclpParamValues(poolSpotPrice),
         });
       }
     } else {
+      // without pool spot price, can't calculate "starter" rotation component values
       updateEclpParam({
         alpha: "",
         beta: "",
