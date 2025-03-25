@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
+import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents } from "~~/utils/gryo";
 
@@ -13,7 +15,8 @@ export function EclpParams() {
 
   const handleTokenOrderInversion = () => {
     updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
-    updateUserData({ hasEditedEclpParams: false }); // reset edited flag so suggested eclp param values are recalculated
+    // reset both edit flags on price inversion to recalculate suggested eclp param values
+    updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: false });
   };
 
   const { baseParamsError, derivedParamsError } = useEclpParamValidations({ alpha, beta, c, s, lambda });
@@ -63,9 +66,9 @@ export function EclpParams() {
 }
 
 function ParamInputs() {
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, lambda, peakPrice } = eclpParams;
-  const { updateUserData } = useUserDataStore();
+  const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
+  const { alpha, beta, lambda, peakPrice, isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
+  const { updateUserData, hasEditedEclpTokenUsdValues } = useUserDataStore();
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -75,10 +78,59 @@ function ParamInputs() {
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
 
+  const sortedTokens = tokenConfigs
+    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
+    .sort((a, b) => (a.address > b.address ? 1 : -1));
+
+  if (isTokenOrderInverted) sortedTokens.reverse();
+
+  const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");
+  const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
+
+  useEffect(() => {
+    if (!hasEditedEclpTokenUsdValues) {
+      updateEclpParam({
+        usdValueToken0: usdValueFromApiToken0?.toString() || "",
+        usdValueToken1: usdValueFromApiToken1?.toString() || "",
+      });
+    }
+  }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam, hasEditedEclpTokenUsdValues]);
+
   return (
     <>
-      <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
-      <div className="grid grid-cols-2 gap-5 mt-5 mb-3">
+      <div className="flex flex-col gap-4 mt-3">
+        <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
+        {(!usdValueToken0 || !usdValueToken1) && (
+          <Alert type="warning">Enter USD values for both tokens to begin parameter configuration</Alert>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
+        <TextField
+          label={`${sortedTokens[0].symbol} Value`}
+          value={usdValueToken0}
+          isDollarValue={true}
+          onChange={e => {
+            updateEclpParam({ usdValueToken0: sanitizeNumberInput(e.target.value) });
+            // hasEditedEclpParams flag controls re-calculation of suggested eclp param values
+            // hasEditedEclpTokenUsdValues flag prevents price from being reset to API values after user edits it
+            updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: true });
+          }}
+        />
+        <TextField
+          label={`${sortedTokens[1].symbol} Value`}
+          value={usdValueToken1}
+          isDollarValue={true}
+          onChange={e => {
+            updateEclpParam({ usdValueToken1: sanitizeNumberInput(e.target.value) });
+            // hasEditedEclpParams flag controls re-calculation of suggested eclp param values
+            // hasEditedEclpTokenUsdValues flag prevents price from being reset to API values after user edits it
+            updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: true });
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 mb-2">
         <TextField
           label="Lowest Price"
           value={alpha.toString()}

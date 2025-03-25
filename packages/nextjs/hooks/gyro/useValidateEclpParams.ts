@@ -3,6 +3,9 @@ import { GyroECLPMath } from "@balancer-labs/balancer-maths";
 import { calcDerivedParams } from "@balancer/sdk";
 import { parseUnits } from "viem";
 
+/**
+ * Hacky solution that helps determine if base or derived params are invalid
+ */
 export function useEclpParamValidations(params: { alpha: string; beta: string; c: string; s: string; lambda: string }) {
   const { alpha, beta, c, s, lambda } = params;
   const [baseParamsError, setBaseParamsError] = useState<string | null>(null);
