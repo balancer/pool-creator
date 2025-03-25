@@ -1,6 +1,11 @@
 import Link from "next/link";
-import { InformationCircleIcon, LightBulbIcon } from "@heroicons/react/20/solid";
-import { CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  LightBulbIcon,
+} from "@heroicons/react/24/outline";
 
 interface AlertProps {
   type: "error" | "warning" | "success" | "info" | "eureka"; // `type` is required

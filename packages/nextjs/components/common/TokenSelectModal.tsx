@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import VirtualList from "react-tiny-virtual-list";
 import { isAddress } from "viem";
-import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common/";
 import { useNetworkColor, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { type Token, useExoticToken } from "~~/hooks/token";
@@ -143,16 +143,28 @@ const ExoticTokenWarning = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-      <div className="relative w-[550px] bg-base-300 rounded-lg p-6 flex flex-col items-center text-center">
+      <div className="relative w-[550px] bg-base-300 rounded-lg p-6 flex flex-col items-center">
         <ExclamationTriangleIcon className="w-10 h-10 hover:cursor-pointer text-error mb-2" />
         <h3 className="font-bold text-2xl mb-7">Warning</h3>
-        <div className="text-lg mb-10">
+        <div className="text-lg mb-7">
           This token is not included in Balancer&apos;s curated list. Please do your own research and proceed with
           caution
         </div>
+        <div className="text-lg mb-10">
+          If you would like to propose a change to our whitelist, follow the instructions outlined{" "}
+          <a
+            href="https://github.com/balancer/tokenlists?tab=readme-ov-file#balancer-tokenlists"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent link link-hover inline-flex gap-1 items-center"
+          >
+            here
+            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+          </a>
+        </div>
         <div className="grid grid-cols-2 gap-4 w-full">
-          <button className="btn btn-primary rounded-lg text-lg" onClick={cancelAction}>
-            Back
+          <button className="btn btn-outline rounded-lg text-lg" onClick={cancelAction}>
+            Cancel
           </button>
           <button className="btn btn-error mr-2 rounded-lg text-lg" onClick={confirmAction}>
             I understand

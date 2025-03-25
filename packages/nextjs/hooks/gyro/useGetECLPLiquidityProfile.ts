@@ -6,6 +6,7 @@ export function useGetECLPLiquidityProfile() {
   const { eclpParams } = usePoolCreationStore();
   const { alpha, beta, s, c, lambda } = eclpParams;
 
+  // Using || instead of ?? because values must be string numbers and user could delete input such that alpha = ""
   const data: [number, number][] | null = drawLiquidityECLP({
     alphaString: alpha || "0",
     betaString: beta || "0",

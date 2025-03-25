@@ -33,6 +33,8 @@ export type EclpParams = {
   lambda: string;
   peakPrice: string;
   isTokenOrderInverted: boolean;
+  usdValueToken0: string;
+  usdValueToken1: string;
 };
 
 export interface TransactionDetails {
@@ -107,13 +109,15 @@ export const initialPoolCreationState = {
   swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   // Only for gyroECLP
   eclpParams: {
-    alpha: "0.998502246630054917",
-    beta: "1.000200040008001600",
-    c: "0.707106781186547524",
-    s: "0.707106781186547524",
-    lambda: "4000",
-    peakPrice: "1", // peak price only for UX purposes, not sent in tx
+    alpha: "",
+    beta: "",
+    c: "",
+    s: "",
+    lambda: "",
+    peakPrice: "", // peak price only for UX purposes, not sent in tx
     isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
+    usdValueToken0: "",
+    usdValueToken1: "",
   },
 };
 
