@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { isAddress } from "viem";
+import { useApiConfig } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useReadToken } from "~~/hooks/token";
 import type { Token } from "~~/hooks/token";
+import { tokenBlacklist } from "~~/utils";
 
 export function useExoticToken(searchText: string, filteredTokenOptions: Token[]) {
   const { targetNetwork } = useTargetNetwork();
   const [exoticTokenAddress, setExoticTokenAddress] = useState<string | undefined>();
+  const { chainName } = useApiConfig();
 
   const { name, symbol, decimals, isLoadingName, isLoadingDecimals, isLoadingSymbol } =
     useReadToken(exoticTokenAddress);
@@ -27,14 +30,16 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
     }
   }, [exoticTokenAddress, name, symbol, decimals, targetNetwork.id]);
 
+  const blacklist = tokenBlacklist[chainName as keyof typeof tokenBlacklist].map(address => address.toLowerCase());
+
   useEffect(() => {
-    if (filteredTokenOptions.length === 0 && isAddress(searchText)) {
+    if (filteredTokenOptions.length === 0 && isAddress(searchText) && !blacklist.includes(searchText.toLowerCase())) {
       setExoticTokenAddress(searchText);
     }
     if (!isAddress(searchText)) {
       setExoticTokenAddress(undefined);
     }
-  }, [searchText, filteredTokenOptions]);
+  }, [searchText, filteredTokenOptions, blacklist]);
 
   const isLoadingExoticToken = isLoadingName || isLoadingDecimals || isLoadingSymbol;
 
