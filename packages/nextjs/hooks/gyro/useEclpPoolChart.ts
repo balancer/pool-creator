@@ -7,10 +7,8 @@ import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
   const { tokenConfigs, updateEclpParam, eclpParams } = usePoolCreationStore();
-  const { isTokenOrderInverted } = eclpParams;
+  const { isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
   const { hasEditedEclpParams } = useUserDataStore();
-
-  const { usdValueToken0, usdValueToken1 } = eclpParams;
 
   let poolSpotPrice = null;
   if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
@@ -31,36 +29,26 @@ export function useEclpPoolChart() {
     return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
   }, [xMin, xMax, poolSpotPrice]);
 
-  // auto-fill suggested values if user has not edited eclp params yet
   useEffect(() => {
     if (poolSpotPrice) {
+      // auto-fill "starter" values if user has not edited eclp params yet
       if (!hasEditedEclpParams && Number(usdValueToken1) && Number(usdValueToken1)) {
         const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
-
-        // Fixed decimal places prevent e notation making it into string which breaks viem parseUnits
         const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
         const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
 
         updateEclpParam({
-          // toFixed ensures numbers are decimal strings instead of scientific notation which breaks viem parseUnits
           alpha: formatEclpParamValues(lowestPrice),
           beta: formatEclpParamValues(highestPrice),
           c,
           s,
-          lambda: "1000", // TODO: how to calculate stretching factor that makes pretty curve given values for alpha, c, s?
+          lambda: "1000", // TODO: how to calculate stretching factor that makes pretty curve given values for alpha, beta, c, s?
           peakPrice: formatEclpParamValues(poolSpotPrice),
         });
       }
     } else {
       // without pool spot price, can't calculate "starter" rotation component values
-      updateEclpParam({
-        alpha: "",
-        beta: "",
-        c: "",
-        s: "",
-        peakPrice: "",
-        lambda: "",
-      });
+      updateEclpParam({ alpha: "", beta: "", c: "", s: "", peakPrice: "", lambda: "" });
     }
   }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, usdValueToken0, usdValueToken1]);
 

@@ -15,6 +15,7 @@ export const abbreviateAddress = (address: string | undefined): string => {
 /**
  * Handles formattinc eclp params for storage as strings in zustand store
  * Removes trailing zeros after decimal point (but keeps the decimal if needed)
+ * `.toFixed` ensures numbers are decimal strings instead of scientific notation which breaks viem parseUnits
  */
 export const formatEclpParamValues = (num: number): string => {
   // First convert to fixed decimal string
