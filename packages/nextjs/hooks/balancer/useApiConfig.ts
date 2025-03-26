@@ -13,7 +13,6 @@ export const useApiConfig = () => {
   }
 
   let chainName = targetNetwork.name.split(" ")[0].toUpperCase(); // "Arbitrum One" -> "ARBITRUM"
-  console.log("chainName", chainName);
   if (chainName === "ETHEREUM") chainName = "MAINNET"; // viem calls it "ETHEREUM" but our API requires "MAINNET";
 
   const url = currentChainId === sepolia.id ? "https://test-api-v3.balancer.fi/" : "https://api-v3.balancer.fi/";
