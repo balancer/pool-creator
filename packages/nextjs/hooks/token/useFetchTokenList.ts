@@ -46,8 +46,7 @@ export const useFetchTokenList = () => {
         throw new Error("Error fetching token list from balancer API");
       }
 
-      const blacklist =
-        tokenBlacklist[chainName as keyof typeof tokenBlacklist].map(address => address.toLowerCase()) || [];
+      const blacklist: string[] = tokenBlacklist[chainName as keyof typeof tokenBlacklist] || [];
 
       const tokenList = json.data.tokenGetTokens.filter(
         (token: Token) => token.address !== NATIVE_ASSET_ADDRESS && !blacklist.includes(token.address.toLowerCase()),

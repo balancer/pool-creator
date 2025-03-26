@@ -4,6 +4,7 @@ import scaffoldConfig from "~~/scaffold.config";
 
 export const useApiConfig = () => {
   const { targetNetwork } = useTargetNetwork();
+
   let currentChainId = targetNetwork.id;
 
   // If running locally, use the target fork chain id
@@ -11,18 +12,11 @@ export const useApiConfig = () => {
     currentChainId = scaffoldConfig.targetFork.id;
   }
 
-  const chainName = CHAIN_NAMES[currentChainId];
+  let chainName = targetNetwork.name.split(" ")[0].toUpperCase(); // "Arbitrum One" -> "ARBITRUM"
+  console.log("chainName", chainName);
+  if (chainName === "ETHEREUM") chainName = "MAINNET"; // viem calls it "ETHEREUM" but our API requires "MAINNET";
 
   const url = currentChainId === sepolia.id ? "https://test-api-v3.balancer.fi/" : "https://api-v3.balancer.fi/";
 
   return { url, chainName };
-};
-
-// TODO: Will need to update this as v3 is deployed to more chains
-export const CHAIN_NAMES: { [key: number]: string } = {
-  1: "MAINNET",
-  100: "GNOSIS",
-  11155111: "SEPOLIA",
-  42161: "ARBITRUM",
-  8453: "BASE",
 };

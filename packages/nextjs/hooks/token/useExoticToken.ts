@@ -30,7 +30,7 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
     }
   }, [exoticTokenAddress, name, symbol, decimals, targetNetwork.id]);
 
-  const blacklist = tokenBlacklist[chainName as keyof typeof tokenBlacklist].map(address => address.toLowerCase());
+  const blacklist = useMemo(() => tokenBlacklist[chainName as keyof typeof tokenBlacklist] || [], [chainName]);
 
   useEffect(() => {
     if (filteredTokenOptions.length === 0 && isAddress(searchText) && !blacklist.includes(searchText.toLowerCase())) {

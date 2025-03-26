@@ -158,11 +158,13 @@ export const PoolConfiguration = () => {
             isDisabled={!canProceedToCreate}
             onClick={() => {
               if (!chain?.id) throw new Error("Missing chain id!");
+              if (!chain?.name) throw new Error("Missing chain name!");
               if (!token1) throw new Error("Missing token 1 selection!");
               if (!token2) throw new Error("Missing token 2 selection!");
 
               setPoolCreation({
                 chainId: chain.id,
+                chainName: chain.name,
                 token1: token1,
                 token2: token2,
                 token1Amount,

@@ -10,7 +10,6 @@ import {
   TokenField,
   TransactionButton,
 } from "~~/components/common/";
-import { CHAIN_NAMES } from "~~/hooks/balancer/";
 import {
   type PoolCreationState,
   useApproveTokenTxHash,
@@ -260,7 +259,6 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
           {txError && (
             <Alert type="error">
               <div className="flex items-center gap-2">
-                {" "}
                 Error: {(txError as { shortMessage?: string }).shortMessage || txError.message}
               </div>
             </Alert>
@@ -268,11 +266,10 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
 
           {isWrongNetwork && (
             <Alert type="error">
-              You&apos;re connected to the wrong network, switch to{" "}
+              You&apos;re connected to the wrong network, switch back to{" "}
               <span onClick={() => switchChain?.({ chainId: poolCreation.chainId })} className="link">
-                {CHAIN_NAMES[poolCreation.chainId]}
+                {poolCreation.chainName}
               </span>{" "}
-              to finish creating your poolCreation, or start over.
             </Alert>
           )}
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useSwitchChain } from "wagmi";
 import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { Alert } from "~~/components/common";
 import { PoolStateResetModal } from "~~/components/common";
@@ -71,6 +72,7 @@ export function ConnectWalletAlert() {
 export function StartedOnDifferentNetworkAlert() {
   const { chain, clearPoolStore } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
+  const { switchChain } = useSwitchChain();
 
   return (
     <div>
@@ -78,20 +80,24 @@ export function StartedOnDifferentNetworkAlert() {
         <div className="w-[1110px] flex flex-col gap-3">
           <Alert type="warning">
             <div className="flex items-center gap-2">
-              You have already begun the pool configuration process on {chain?.name}. To start over on a new network,
-              reset progress
+              You have already begun the pool configuration process on {chain?.name}
             </div>
           </Alert>
           <Alert type="info">
             <div className="flex items-center gap-2">
-              To continue progress, switch back to the {chain?.name} network
+              To continue progress, switch back to{" "}
+              {chain && (
+                <span onClick={() => switchChain?.({ chainId: chain?.id })} className="link">
+                  {chain?.name}
+                </span>
+              )}
             </div>
           </Alert>
-          <Alert type="error">
+          <Alert type="info">
             <div className="flex items-center gap-2">
-              To start over on a new network, reset progress by clicking
+              To start over on a new network, you must first
               <PoolStateResetModal
-                trigger={<span className="underline">here</span>}
+                trigger={<span className="underline">reset all progress</span>}
                 clearState={() => {
                   clearPoolStore();
                   clearUserData();
