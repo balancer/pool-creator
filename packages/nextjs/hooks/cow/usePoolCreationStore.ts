@@ -11,6 +11,7 @@ export interface TransactionDetails {
 
 export interface PoolCreationState {
   chainId: number;
+  chainName: string;
   token1: Token;
   token2: Token;
   token1Amount: string;

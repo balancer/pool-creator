@@ -1,6 +1,7 @@
 import { type Token } from "./types";
 import { useQuery } from "@tanstack/react-query";
 import { useApiConfig } from "~~/hooks/balancer";
+import { tokenBlacklist } from "~~/utils";
 
 /**
  * Fetch list of tokens to display in the token selector modal
@@ -45,7 +46,11 @@ export const useFetchTokenList = () => {
         throw new Error("Error fetching token list from balancer API");
       }
 
-      const tokenList = json.data.tokenGetTokens.filter((token: Token) => token.address !== NATIVE_ASSET_ADDRESS);
+      const blacklist: string[] = tokenBlacklist[chainName as keyof typeof tokenBlacklist] || [];
+
+      const tokenList = json.data.tokenGetTokens.filter(
+        (token: Token) => token.address !== NATIVE_ASSET_ADDRESS && !blacklist.includes(token.address.toLowerCase()),
+      );
 
       return tokenList;
     },
