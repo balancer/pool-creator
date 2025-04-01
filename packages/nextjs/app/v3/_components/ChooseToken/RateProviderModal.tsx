@@ -3,16 +3,14 @@ import { TokenType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore, useValidateRateProvider } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export const RateProviderModal = ({
-  rate,
   tokenIndex,
   setShowRateProviderModal,
 }: {
-  rate: bigint | null | undefined;
   tokenIndex: number;
   setShowRateProviderModal: Dispatch<SetStateAction<boolean>>;
 }) => {
@@ -56,6 +54,8 @@ export const RateProviderModal = ({
     });
     setShowRateProviderModal(false);
   };
+
+  const { data: rate } = useValidateRateProvider(rateProviderAddress, tokenIndex); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
 
   const isRateValid = rate !== undefined && rate !== null;
 

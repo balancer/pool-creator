@@ -27,7 +27,7 @@ export function ChooseToken({ index }: { index: number }) {
     paysYieldFees,
   } = tokenConfigs[index];
 
-  const { data: rate } = useValidateRateProvider(rateProvider, index); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
+  useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
 
   const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();
@@ -295,7 +295,7 @@ export function ChooseToken({ index }: { index: number }) {
         </div>
       </div>
       {showRateProviderModal && tokenInfo && (
-        <RateProviderModal rate={rate} setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
+        <RateProviderModal setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
       )}
       {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal
