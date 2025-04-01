@@ -6,7 +6,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
-import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 
 export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
@@ -25,6 +25,8 @@ export function ChooseToken({ index }: { index: number }) {
     useBoostedVariant,
     isWeightLocked,
   } = tokenConfigs[index];
+
+  useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
 
   const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();

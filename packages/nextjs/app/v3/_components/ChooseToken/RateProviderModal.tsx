@@ -32,8 +32,6 @@ export const RateProviderModal = ({
 
   const rateProviderAddress = rateProviderData?.address;
 
-  const { data: rate } = useValidateRateProvider(rateProviderAddress, tokenIndex); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
-
   const rateProviderLink = rateProviderData
     ? getBlockExplorerAddressLink(targetNetwork, rateProviderData.address)
     : undefined;
@@ -56,6 +54,8 @@ export const RateProviderModal = ({
     });
     setShowRateProviderModal(false);
   };
+
+  const { data: rate } = useValidateRateProvider(rateProviderAddress, tokenIndex); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
 
   const isRateValid = rate !== undefined && rate !== null;
 
