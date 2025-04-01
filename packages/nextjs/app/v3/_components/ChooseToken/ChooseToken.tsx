@@ -6,7 +6,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
-import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 
 export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
@@ -26,6 +26,8 @@ export function ChooseToken({ index }: { index: number }) {
     isWeightLocked,
     paysYieldFees,
   } = tokenConfigs[index];
+
+  const { data: rate } = useValidateRateProvider(rateProvider, index); // updates "isValidRateProvider" in tokenConfigs[index] local storage based on response to getRate()
 
   const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();
@@ -293,7 +295,7 @@ export function ChooseToken({ index }: { index: number }) {
         </div>
       </div>
       {showRateProviderModal && tokenInfo && (
-        <RateProviderModal setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
+        <RateProviderModal rate={rate} setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
       )}
       {showBoostOpportunityModal && tokenInfo && boostedVariant && (
         <BoostOpportunityModal
