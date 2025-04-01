@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BoostOpportunityModal, RateProviderModal } from "./";
-import { PoolType, TokenType, erc20Abi } from "@balancer/sdk";
-import { zeroAddress } from "viem";
+import { PoolType, TokenType } from "@balancer/sdk";
+import { erc20Abi, zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { Cog6ToothIcon, LockClosedIcon, LockOpenIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Alert, Checkbox, TextField, TokenField } from "~~/components/common";

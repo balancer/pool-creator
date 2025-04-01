@@ -1,7 +1,6 @@
-import { erc20Abi } from "@balancer/sdk";
 import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
 import { useQuery } from "@tanstack/react-query";
-import { parseEventLogs, parseUnits } from "viem";
+import { erc20Abi, parseEventLogs, parseUnits } from "viem";
 import { usePublicClient } from "wagmi";
 import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
 import { useIsSafeWallet } from "~~/hooks/safe/useIsSafeWallet";

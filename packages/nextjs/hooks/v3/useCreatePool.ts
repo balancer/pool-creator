@@ -7,10 +7,10 @@ import {
   CreatePoolV3WeightedInput,
   PoolType,
   calcDerivedParams,
-  gyroECLPPoolFactoryAbi_V3,
-  stablePoolFactoryAbi_V3,
-  stableSurgeFactoryAbi,
-  weightedPoolFactoryAbi_V3,
+  gyroECLPPoolFactoryAbiExtended,
+  stablePoolFactoryAbiExtended,
+  stableSurgeFactoryAbiExtended,
+  weightedPoolFactoryAbiExtended_V3,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
@@ -19,10 +19,10 @@ import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
 export const poolFactoryAbi = {
-  [PoolType.Weighted]: weightedPoolFactoryAbi_V3,
-  [PoolType.Stable]: stablePoolFactoryAbi_V3,
-  [PoolType.StableSurge]: stableSurgeFactoryAbi,
-  [PoolType.GyroE]: gyroECLPPoolFactoryAbi_V3,
+  [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V3,
+  [PoolType.Stable]: stablePoolFactoryAbiExtended,
+  [PoolType.StableSurge]: stableSurgeFactoryAbiExtended,
+  [PoolType.GyroE]: gyroECLPPoolFactoryAbiExtended,
 };
 
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;

@@ -1,6 +1,5 @@
-import { erc20Abi } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { Address } from "viem";
+import { Address, erc20Abi } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 

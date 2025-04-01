@@ -2,7 +2,7 @@ import {
   BALANCER_BATCH_ROUTER,
   MAX_UINT256,
   Slippage,
-  balancerBatchRouterAbi,
+  balancerBatchRouterAbiExtended,
   permit2Abi,
   vaultExtensionAbi_V3,
   vaultV3Abi,
@@ -39,7 +39,7 @@ export const useMultiSwap = () => {
 
     const batchRouterContract = getContract({
       address: batchRouterAddress,
-      abi: [...balancerBatchRouterAbi, ...vaultV3Abi, ...vaultExtensionAbi_V3, ...permit2Abi],
+      abi: [...balancerBatchRouterAbiExtended, ...vaultV3Abi, ...vaultExtensionAbi_V3, ...permit2Abi],
       client,
     });
 
@@ -86,7 +86,7 @@ export const useMultiSwap = () => {
 
     // 3. Encode swap function call for multicallData arg of Batch Router's permitBatchAndCall function
     const encodedSwapData = encodeFunctionData({
-      abi: balancerBatchRouterAbi,
+      abi: balancerBatchRouterAbiExtended,
       functionName: "swapExactIn",
       args: [pathsWithSlippage, deadline, wethIsEth, userData],
     });

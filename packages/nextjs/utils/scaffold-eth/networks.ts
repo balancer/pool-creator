@@ -31,12 +31,15 @@ export const RPC_CHAIN_NAMES: Record<number, string> = {
   [chains.base.id]: "base-mainnet",
   [chains.baseGoerli.id]: "base-goerli",
   [chains.baseSepolia.id]: "base-sepolia",
+  [chains.avalanche.id]: "avax-mainnet",
 };
 
 export const INFURA_CHAIN_NAMES: Record<number, string> = {
   [chains.mainnet.id]: "mainnet",
   [chains.sepolia.id]: "sepolia",
   [chains.arbitrum.id]: "arbitrum-mainnet",
+  [chains.avalanche.id]: "avalanche-mainnet",
+  [chains.base.id]: "base-mainnet",
 };
 
 export const getAlchemyHttpUrl = (chainId: number) => {
@@ -57,6 +60,7 @@ export const RPC_FALLBACKS: Record<number, string> = {
   [chains.gnosis.id]: "https://gnosis.drpc.org",
   [chains.sepolia.id]: "https://sepolia.gateway.tenderly.co",
   [chains.base.id]: "https://base.llamarpc.com",
+  [chains.avalanche.id]: "https://avalanche.drpc.org",
 };
 
 export const getRpcFallbackUrl = (chainId: number) => {
@@ -104,6 +108,9 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   },
   [chains.scrollSepolia.id]: {
     color: "#fbebd4",
+  },
+  [chains.avalanche.id]: {
+    color: "#92D9FA",
   },
 };
 
