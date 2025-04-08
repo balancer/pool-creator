@@ -1,5 +1,4 @@
-import { erc20Abi } from "@balancer/sdk";
-import { Address, zeroAddress } from "viem";
+import { Address, erc20Abi, zeroAddress } from "viem";
 import { useReadContract, useWalletClient } from "wagmi";
 
 export const useReadToken = (token: Address | undefined, spender?: Address) => {

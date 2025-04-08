@@ -1,4 +1,4 @@
-import { vaultV3Abi } from "@balancer/sdk";
+import { vaultAbi_V3 } from "@balancer/sdk";
 import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits, parseEventLogs } from "viem";
@@ -40,7 +40,7 @@ export function useMultiSwapTxHash() {
 
       if (txReceipt.status === "success") {
         const logs = parseEventLogs({
-          abi: vaultV3Abi,
+          abi: vaultAbi_V3,
           eventName: "Wrap",
           logs: txReceipt.logs,
         });

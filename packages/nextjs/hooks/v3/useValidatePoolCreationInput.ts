@@ -1,4 +1,4 @@
-import { PoolType, TokenType } from "@balancer/sdk";
+import { PoolType, STABLE_POOL_CONSTRAINTS, TokenType } from "@balancer/sdk";
 import { isAddress, parseUnits } from "viem";
 import { useWalletClient } from "wagmi";
 import { useEclpParamValidations } from "~~/hooks/gyro";
@@ -74,7 +74,9 @@ export function useValidatePoolCreationInput() {
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
     // Stable and StableSurge require valid amplification parameter
     (poolType !== PoolType.Stable && poolType !== PoolType.StableSurge) ||
-      (!!amplificationParameter && Number(amplificationParameter) >= 1 && Number(amplificationParameter) <= 5000),
+      (!!amplificationParameter &&
+        Number(amplificationParameter) >= STABLE_POOL_CONSTRAINTS.MIN_AMP &&
+        Number(amplificationParameter) <= STABLE_POOL_CONSTRAINTS.MAX_AMP),
     // GyroE type requires special validations for eclp params
     poolType !== PoolType.GyroE || (!baseParamsError && !derivedParamsError),
     isDelegatingSwapFeeManagement || isAddress(swapFeeManager),

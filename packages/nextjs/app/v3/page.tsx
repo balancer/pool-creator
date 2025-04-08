@@ -44,11 +44,8 @@ const BalancerV3: NextPage = () => {
                 <div className="bg-base-200 w-full max-w-[400px] rounded-xl shadow-lg p-5 h-fit">
                   <div className="flex justify-between items-center gap-2 mb-3 mr-2">
                     <div className="font-bold text-2xl">Pool Preview</div>
-                    {chain && (
-                      <div
-                        className="text-xl font-bold"
-                        style={{ color: typeof chain.color === "string" ? chain.color : "rgb(135, 255, 101)" }}
-                      >
+                    {chain && typeof selectedNetwork.color === "string" && (
+                      <div className="text-xl font-bold" style={{ color: selectedNetwork.color }}>
                         {chain?.name}
                       </div>
                     )}
