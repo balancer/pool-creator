@@ -22,6 +22,7 @@ export const useBoostableWhitelist = () => {
       const boostableWhitelist: BoostableWhitelist = await response.json();
 
       const boostableAddresses = boostableWhitelist
+        .filter(list => list.id === "boosted_aave")
         .map(list => list.addresses[targetNetwork.id] || [])
         .flat()
         .map(address => `"${address}"`)
