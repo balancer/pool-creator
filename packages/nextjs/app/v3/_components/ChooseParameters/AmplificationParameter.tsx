@@ -1,5 +1,6 @@
 import { NumberParameterButton } from "./NumberParameterButton";
 import { type HandleNumberInputChange } from "./types";
+import { STABLE_POOL_CONSTRAINTS } from "@balancer/sdk";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { NumberInput } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
@@ -9,9 +10,11 @@ export function AmplificationParameter({
 }: {
   handleNumberInputChange: HandleNumberInputChange;
 }) {
-  const amplificationParameters = ["10", "100", "1000"];
-
   const { amplificationParameter, updatePool } = usePoolCreationStore();
+
+  const ampOptions = ["100", "1000", "10000"];
+  const minAmp = Number(STABLE_POOL_CONSTRAINTS.MIN_AMP);
+  const maxAmp = Number(STABLE_POOL_CONSTRAINTS.MAX_AMP);
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -28,7 +31,7 @@ export function AmplificationParameter({
       </div>
 
       <div className="flex gap-2 items-end">
-        {amplificationParameters.map(value => (
+        {ampOptions.map(value => (
           <NumberParameterButton
             key={value}
             value={value}
@@ -39,11 +42,9 @@ export function AmplificationParameter({
         ))}
         <div className="w-[135px]">
           <NumberInput
-            placeholder="1 - 5000"
+            placeholder={`${minAmp} - ${maxAmp}`}
             value={amplificationParameter}
-            onChange={e => handleNumberInputChange(e, "amplificationParameter", 0, 5000)}
-            min={1}
-            max={5000}
+            onChange={e => handleNumberInputChange(e, "amplificationParameter", minAmp, maxAmp)}
             step={1}
           />
         </div>
