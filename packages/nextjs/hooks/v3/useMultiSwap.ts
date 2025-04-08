@@ -1,11 +1,11 @@
 import {
-  BALANCER_BATCH_ROUTER,
   MAX_UINT256,
   Slippage,
   balancerBatchRouterAbiExtended,
+  balancerV3Contracts,
   permit2Abi,
+  vaultAbi_V3,
   vaultExtensionAbi_V3,
-  vaultV3Abi,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { encodeFunctionData, getContract, parseUnits, zeroAddress } from "viem";
@@ -35,11 +35,11 @@ export const useMultiSwap = () => {
     if (!walletClient) throw new Error("Wallet client missing");
 
     const client = { public: publicClient, wallet: walletClient };
-    const batchRouterAddress = BALANCER_BATCH_ROUTER[chainId];
+    const batchRouterAddress = balancerV3Contracts.BatchRouter[chainId as keyof typeof balancerV3Contracts.BatchRouter];
 
     const batchRouterContract = getContract({
       address: batchRouterAddress,
-      abi: [...balancerBatchRouterAbiExtended, ...vaultV3Abi, ...vaultExtensionAbi_V3, ...permit2Abi],
+      abi: [...balancerBatchRouterAbiExtended, ...vaultAbi_V3, ...vaultExtensionAbi_V3, ...permit2Abi],
       client,
     });
 

@@ -1,14 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { PoolType } from "@balancer/sdk";
-import { avalanche } from "viem/chains";
 import { ArrowUpRightIcon } from "@heroicons/react/24/solid";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
 
 export function ChooseType() {
   const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
-  const { targetNetwork } = useTargetNetwork();
 
   const POOL_TYPES: Record<AllowedPoolTypes, { label: string; description: string }> = {
     [PoolType.Weighted]: {
@@ -26,29 +23,22 @@ export function ChooseType() {
       description:
         "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",
     },
-  } as Record<AllowedPoolTypes, { label: string; description: string }>;
-
-  // Stable surge not available on avalanche for now
-  if (targetNetwork.id !== avalanche.id) {
-    POOL_TYPES[PoolType.StableSurge] = {
+    [PoolType.StableSurge]: {
       label: "Stable Surge",
       description:
         "A Balancer core stable pool that uses a stable surge hook deployed by the official stable surge factory",
-    };
-  }
-  useEffect(() => {
-    if (targetNetwork.id === avalanche.id && poolType === PoolType.StableSurge) updatePool({ poolType: undefined });
-  }, [targetNetwork.id, poolType, updatePool]);
-
-  const availablePoolTypes = Object.keys(POOL_TYPES);
+    },
+  };
 
   return (
     <>
       <div className="flex flex-col justify-center h-full gap-10 px-7 py-5">
         <div
-          className={`grid ${availablePoolTypes.length % 3 === 0 ? "grid-cols-3" : "grid-cols-2"} gap-5 justify-around`}
+          className={`grid ${
+            Object.keys(POOL_TYPES).length % 3 === 0 ? "grid-cols-3" : "grid-cols-2"
+          } gap-5 justify-around`}
         >
-          {availablePoolTypes.map(type => (
+          {Object.keys(POOL_TYPES).map(type => (
             <button
               key={type}
               className={`${

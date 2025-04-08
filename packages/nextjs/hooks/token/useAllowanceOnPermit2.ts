@@ -1,4 +1,4 @@
-import { BALANCER_ROUTER, PERMIT2, permit2Abi } from "@balancer/sdk";
+import { PERMIT2, balancerV3Contracts, permit2Abi } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { useReadContract, useWalletClient } from "wagmi";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -14,6 +14,6 @@ export const useAllowanceOnPermit2 = (token: Address) => {
     address: PERMIT2[chainId],
     abi: permit2Abi,
     functionName: "allowance",
-    args: [connectedAddress, token, BALANCER_ROUTER[chainId]],
+    args: [connectedAddress, token, balancerV3Contracts.Router[chainId as keyof typeof balancerV3Contracts.Router]],
   });
 };
