@@ -8,3 +8,4 @@ export * from "./PoolCreationManager";
 export * from "./ApproveOnTokenManager";
 export * from "./UserExperienceAlerts";
 export * from "./ChooseNetwork";
+export * from "./PoolCreatedView";
