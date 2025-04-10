@@ -7,10 +7,10 @@ import {
   PoolDetails,
   StartedOnDifferentNetworkAlert,
   UserExperienceAlerts,
-} from "./_components";
+} from "../v3/_components";
 import type { NextPage } from "next";
 import { useWalletClient } from "wagmi";
-import { BalancerLogo } from "~~/components/assets/BalancerLogo";
+import { BeetsLogo } from "~~/components/assets/BeetsLogo";
 import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore } from "~~/hooks/v3";
@@ -28,15 +28,15 @@ const BalancerV3: NextPage = () => {
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
         <div className="flex flex-col justify-center gap-5 w-full">
           <div className="flex gap-4 justify-center">
-            <BalancerLogo width="55px" />
-            <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer v3</h1>
+            <BeetsLogo width="40px" />
+            <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Beets</h1>
           </div>
 
           {!walletClient ? (
             <ConnectWalletAlert />
           ) : !chain ? (
             <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
-              <ChooseNetwork options={availableNetworks.balancerV3} />
+              <ChooseNetwork options={availableNetworks.beets} />
             </div>
           ) : chain && selectedNetwork.id !== chain.id ? (
             <StartedOnDifferentNetworkAlert />

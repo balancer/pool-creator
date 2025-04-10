@@ -1,20 +1,27 @@
 import Link from "next/link";
 import type { NextPage } from "next";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
+import { BeetsLogo } from "~~/components/assets/BeetsLogo";
 import { CowLogo } from "~~/components/assets/CowLogo";
 
 const PAGES = [
   {
-    emoji: <CowLogo className="h-28" />,
+    emoji: <CowLogo className="h-24" />,
     title: "CoW AMMs",
     href: "/cow",
     description: "Deploy a CoW AMM pool",
   },
   {
-    emoji: <BalancerLogo className="h-28" />,
+    emoji: <BalancerLogo className="h-24" />,
     title: "Balancer v3",
     href: "/v3",
     description: "Deploy a CoW AMM pool",
+  },
+  {
+    emoji: <BeetsLogo className="h-24" />,
+    title: "Beets",
+    href: "/beets",
+    description: "Deploy a Beets pool",
   },
 ];
 
@@ -28,7 +35,7 @@ const Home: NextPage = () => {
             Create and initialize a variety of liquidity pool types with Balancer protocol
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 justify-center gap-10 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 justify-center gap-10 w-full">
             {PAGES.map(item => (
               <Link
                 className="shadow-lg relative bg-base-100 hover:bg-base-200 text-2xl text-center p-8 rounded-3xl"

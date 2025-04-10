@@ -1,4 +1,6 @@
+import { usePathname } from "next/navigation";
 import { ApproveOnTokenManager } from ".";
+import { sepolia } from "viem/chains";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { PoolDetails } from "~~/app/v3/_components";
 import {
@@ -212,10 +214,15 @@ function createTransactionStep({
 const PoolCreatedView = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) => {
   const { poolAddress, chain, clearPoolStore } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
-  const baseURL = chain?.id === 11155111 ? "https://test.balancer.fi" : "https://balancer.fi";
 
-  // V3 FE only uses single word so need to convert "Arbitrum One" (from wagmi) to "arbitrum" for the URL
-  const chainName = chain?.name.split(" ")[0].toLowerCase();
+  // Check path to see if it is "/beets"
+  const pathname = usePathname();
+
+  let baseURL = chain?.id === sepolia.id ? "https://test.balancer.fi" : "https://balancer.fi";
+  if (pathname === "/beets") baseURL = "https://beets.fi";
+
+  let chainName = chain?.name.split(" ")[0].toLowerCase(); // V3 FE only uses single word for url paths so need to convert "Arbitrum One" (from wagmi) to "arbitrum" for the URL
+  if (chainName === "OP") chainName = "optimism"; // viem calls it "OP Mainnet" but path on beets.fi wants "optimism"
 
   const poolURL = `${baseURL}/pools/${chainName}/v3/${poolAddress}`;
 
