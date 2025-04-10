@@ -1,8 +1,9 @@
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
-  title: "v3 Pool Creator",
-  description: "Create a variety of pool types on Balancer v3",
+  title: "Beets Pool Creator",
+  description: "Create a variety of pool types on Beets, a friendly fork of Balancer v3",
+  imageRelativePath: "/beets-thumbnail.png",
 });
 
 const v3Layout = ({ children }: { children: React.ReactNode }) => {

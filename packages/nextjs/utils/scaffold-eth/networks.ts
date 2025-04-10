@@ -1,5 +1,6 @@
 import * as chains from "viem/chains";
 import scaffoldConfig from "~~/scaffold.config";
+import { sonic } from "~~/utils/customChains";
 
 type ChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -40,6 +41,23 @@ export const INFURA_CHAIN_NAMES: Record<number, string> = {
   [chains.arbitrum.id]: "arbitrum-mainnet",
   [chains.avalanche.id]: "avalanche-mainnet",
   [chains.base.id]: "base-mainnet",
+  [sonic.id]: "sonic-mainnet",
+};
+
+export const DRPC_CHAIN_NAMES: Record<number, string> = {
+  [sonic.id]: "sonic",
+  [chains.arbitrum.id]: "arbitrum",
+  [chains.base.id]: "base",
+  [chains.mainnet.id]: "ethereum",
+  [chains.avalanche.id]: "avalanche",
+  [chains.gnosis.id]: "gnosis",
+  [chains.sepolia.id]: "sepolia",
+};
+
+export const getDrpcHttpUrl = (chainId: number) => {
+  return scaffoldConfig.drpcApiKey && DRPC_CHAIN_NAMES[chainId]
+    ? `https://lb.drpc.org/ogrpc?network=${DRPC_CHAIN_NAMES[chainId]}&dkey=${scaffoldConfig.drpcApiKey}`
+    : undefined;
 };
 
 export const getAlchemyHttpUrl = (chainId: number) => {

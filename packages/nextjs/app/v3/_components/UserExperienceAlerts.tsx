@@ -8,23 +8,9 @@ import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function UserExperienceAlerts() {
   const [isInfoAlertVisible, setIsInfoAlertVisible] = useState(true);
-  const { chain } = usePoolCreationStore();
 
   return (
     <>
-      {!chain && (
-        <div className="flex justify-center">
-          <div className="w-[1110px]">
-            <Alert type="warning">
-              <div className="flex items-center gap-2">
-                Make sure you switch to your desired network before beginning pool creation. You cannot switch after
-                selecting pool type unless you reset progress
-                <ArrowUpRightIcon className="w-4 h-4" />
-              </div>
-            </Alert>
-          </div>
-        </div>
-      )}
       {isInfoAlertVisible && (
         <div className="flex justify-center">
           <div className="w-[1110px] relative">
@@ -60,7 +46,7 @@ export function ConnectWalletAlert() {
       <div>
         <Alert type="warning">
           <div className="flex items-center gap-2">
-            Please connect a wallet and switch to the network you wish to create a pool
+            Please connect a wallet to begin the pool creation process
             <ArrowUpRightIcon className="w-4 h-4" />
           </div>
         </Alert>
