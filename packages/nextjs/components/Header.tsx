@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { SwitchTheme } from "~~/components/SwitchTheme";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
+import { BeetsLogo } from "~~/components/assets/BeetsLogo";
 import { CowLogo } from "~~/components/assets/CowLogo";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -28,10 +29,18 @@ export const menuLinks: HeaderMenuLink[] = [
   {
     label: (
       <div className="flex gap-2">
-        <BalancerLogo width="25px" /> Balancer v3
+        <BalancerLogo width="25px" /> Balancer
       </div>
     ),
     href: "/v3",
+  },
+  {
+    label: (
+      <div className="flex gap-2">
+        <BeetsLogo width="18px" /> Beets
+      </div>
+    ),
+    href: "/beets",
   },
 ];
 

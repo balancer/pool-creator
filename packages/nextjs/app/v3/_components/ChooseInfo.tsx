@@ -3,14 +3,15 @@ import { PoolType } from "@balancer/sdk";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useBoostableWhitelist, useCheckIfV3PoolExists, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
-import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
+import { BEETS_MAX_POOL_NAME_LENGTH, MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
+import { sonic } from "~~/utils/customChains";
 
 /**
  * @dev Gauge creation reverts if the name is longer than 32 characters
  * https://github.com/balancer/pool-creator/issues/17#issuecomment-2430158673
  */
 export const ChooseInfo = () => {
-  const { name, symbol, tokenConfigs, poolType, updatePool } = usePoolCreationStore();
+  const { name, symbol, tokenConfigs, poolType, updatePool, chain } = usePoolCreationStore();
   const { updateUserData, hasEditedPoolName, hasEditedPoolSymbol } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
@@ -38,6 +39,8 @@ export const ChooseInfo = () => {
     }
   }, [tokenConfigs, poolType, updatePool, boostableWhitelist, hasEditedPoolName, hasEditedPoolSymbol]);
 
+  const MAX_NAME_LENGTH = chain?.id === sonic.id ? BEETS_MAX_POOL_NAME_LENGTH : MAX_POOL_NAME_LENGTH;
+
   return (
     <div>
       <div className="text-xl mb-5">Choose pool information:</div>
@@ -47,7 +50,7 @@ export const ChooseInfo = () => {
             label="Pool name"
             placeholder="Enter pool name"
             value={name}
-            maxLength={MAX_POOL_NAME_LENGTH}
+            maxLength={MAX_NAME_LENGTH}
             onChange={e => {
               updatePool({ name: e.target.value });
               updateUserData({ hasEditedPoolName: true });
