@@ -50,11 +50,15 @@ const BalancerV3: NextPage = () => {
                 <div className="bg-base-200 w-full max-w-[400px] rounded-xl shadow-lg p-5 h-fit">
                   <div className="flex justify-between items-center gap-2 mb-3 mr-2">
                     <div className="font-bold text-2xl">Pool Preview</div>
-                    {chain && typeof selectedNetwork.color === "string" && (
-                      <div className="text-xl font-bold" style={{ color: selectedNetwork.color }}>
-                        {chain?.name}
-                      </div>
-                    )}
+
+                    <div
+                      className="text-xl font-bold"
+                      style={{
+                        color: chain && typeof selectedNetwork.color === "string" ? selectedNetwork.color : "grey",
+                      }}
+                    >
+                      {chain?.name}
+                    </div>
                   </div>
                   <PoolDetails isPreview={true} />
                   <div className="flex justify-center mt-4 gap-2 items-center">
