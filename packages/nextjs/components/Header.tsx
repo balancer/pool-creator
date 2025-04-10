@@ -7,7 +7,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { SwitchTheme } from "~~/components/SwitchTheme";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { CowLogo } from "~~/components/assets/CowLogo";
-import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
+import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
 
 type HeaderMenuLink = {
@@ -110,9 +110,6 @@ export const Header = () => {
         <SwitchTheme className={`pointer-events-auto`} />
 
         <RainbowKitCustomConnectButton />
-        <div className="hidden sm:flex">
-          <FaucetButton />
-        </div>
       </div>
     </div>
   );
