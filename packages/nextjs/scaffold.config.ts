@@ -1,4 +1,5 @@
 import * as chains from "viem/chains";
+import { sonic } from "~~/utils/customChains";
 
 export type ScaffoldConfig = {
   targetNetworks: readonly chains.Chain[];
@@ -6,13 +7,22 @@ export type ScaffoldConfig = {
   pollingInterval: number;
   alchemyApiKey: string;
   infuraApiKey: string;
+  drpcApiKey: string;
   walletConnectProjectId: string;
   onlyLocalBurnerWallet: boolean;
 };
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.sepolia, chains.mainnet, chains.gnosis, chains.arbitrum, chains.base, chains.avalanche],
+  targetNetworks: [
+    chains.sepolia,
+    chains.mainnet,
+    chains.gnosis,
+    chains.arbitrum,
+    chains.base,
+    chains.avalanche,
+    sonic,
+  ],
 
   // If using chains.foundry as your targetNetwork, you must specify a network to fork
   targetFork: chains.sepolia,
@@ -26,6 +36,7 @@ const scaffoldConfig = {
   // .env.local for local testing, and in the Vercel/system env config for live apps.
   alchemyApiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || "",
   infuraApiKey: process.env.NEXT_PUBLIC_INFURA_API_KEY || "",
+  drpcApiKey: process.env.NEXT_PUBLIC_DRPC_API_KEY || "",
 
   // This is ours WalletConnect's default project ID.
   // You can get your own at https://cloud.walletconnect.com
