@@ -7,13 +7,13 @@ import { CowLogo } from "~~/components/assets/CowLogo";
 const PAGES = [
   {
     emoji: <CowLogo className="h-24" />,
-    title: "CoW AMMs",
+    title: "CoW AMM",
     href: "/cow",
     description: "Deploy a CoW AMM pool",
   },
   {
     emoji: <BalancerLogo className="h-24" />,
-    title: "Balancer v3",
+    title: "Balancer",
     href: "/v3",
     description: "Deploy a CoW AMM pool",
   },

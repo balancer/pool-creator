@@ -29,7 +29,7 @@ const BalancerV3: NextPage = () => {
         <div className="flex flex-col justify-center gap-5 w-full">
           <div className="flex gap-4 justify-center">
             <BalancerLogo width="55px" />
-            <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer v3</h1>
+            <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer</h1>
           </div>
 
           {!walletClient ? (
