@@ -1,10 +1,8 @@
 "use client";
 
 // @refresh reset
-// import { Balance } from "../Balance";
 import { useRef, useState } from "react";
 import { AddressInfoDropdown } from "./AddressInfoDropdown";
-// import { AddressQRCodeModal } from "./AddressQRCodeModal";
 import { NetworkOptions } from "./NetworkOptions";
 import { WrongNetworkDropdown } from "./WrongNetworkDropdown";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
