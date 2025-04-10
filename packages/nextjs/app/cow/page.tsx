@@ -1,19 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ConnectWalletAlert } from "../v3/_components";
 import { PoolConfiguration, PoolCreation } from "./_components";
+import { ChooseNetwork } from "./_components";
 import type { NextPage } from "next";
+import { useAccount } from "wagmi";
 import { CowAMM } from "~~/components/assets/CowAMM";
-import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
+import { usePoolCreationStore } from "~~/hooks/cow";
+import { availableNetworks } from "~~/utils";
 
 const CowAmm: NextPage = () => {
   const [isMounted, setIsMounted] = useState(false);
-
   const { poolCreation, updatePoolCreation, clearPoolCreation } = usePoolCreationStore();
+  const { chainId, isConnected } = useAccount();
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const supportedChainIds = availableNetworks.cowAmm.map(network => network.id);
+
+  const isConnectedToSupportedChain = chainId
+    ? supportedChainIds.includes(chainId as (typeof supportedChainIds)[number])
+    : false;
 
   return (
     <div className="flex-grow bg-base-300">
@@ -21,7 +31,12 @@ const CowAmm: NextPage = () => {
         <div className="w-full">
           <div className="flex items-center flex-col flex-grow py-14 gap-6">
             <CowAMM width="333" />
-            {!isMounted ? (
+
+            {!isConnected ? (
+              <ConnectWalletAlert />
+            ) : !isConnectedToSupportedChain ? (
+              <ChooseNetwork options={availableNetworks.cowAmm} />
+            ) : !isMounted ? (
               <CowLoadingSkeleton />
             ) : !poolCreation ? (
               <PoolConfiguration />
