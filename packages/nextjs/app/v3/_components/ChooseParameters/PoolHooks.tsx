@@ -1,15 +1,10 @@
 import { PoolType } from "@balancer/sdk";
-import { useQueryClient } from "@tanstack/react-query";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import { Checkbox, RadioInput, TextField } from "~~/components/common";
-import { type HookFlags, usePoolCreationStore } from "~~/hooks/v3";
+import { RadioInput, TextField } from "~~/components/common";
+import { usePoolCreationStore } from "~~/hooks/v3";
 
 export function PoolHooks() {
-  const { isUsingHooks, poolType, poolHooksContract, enableDonation, disableUnbalancedLiquidity, updatePool } =
-    usePoolCreationStore();
-
-  const queryClient = useQueryClient();
-  const hookFlags: HookFlags | undefined = queryClient.getQueryData(["validatePoolHooks", poolHooksContract]);
+  const { isUsingHooks, poolHooksContract, updatePool, poolType } = usePoolCreationStore();
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -28,14 +23,9 @@ export function PoolHooks() {
       {poolType === PoolType.StableSurge ? (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-1 text-lg">
-            The Stable Surge pool type uses a core hooks contract
+            Stable surge pools must use Balancer&apos;s stable surge hook
             <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
           </div>
-          <Checkbox
-            label="Should this pool accept donations?"
-            checked={enableDonation}
-            onChange={() => updatePool({ enableDonation: !enableDonation })}
-          />
         </div>
       ) : (
         <>
@@ -67,26 +57,6 @@ export function PoolHooks() {
                   placeholder="Enter pool hooks contract address"
                   value={poolHooksContract}
                   onChange={e => updatePool({ poolHooksContract: e.target.value.trim() })}
-                />
-              </div>
-              <div className="mt-1 flex flex-col gap-2">
-                {hookFlags?.enableHookAdjustedAmounts ? (
-                  <div className="flex items-center gap-1 text-lg">
-                    This hook requires unbalanced liquidity operations to be disabled
-                    <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
-                  </div>
-                ) : (
-                  <Checkbox
-                    disabled={hookFlags?.enableHookAdjustedAmounts}
-                    label="Should this pool disable unbalanced liquidity operations?"
-                    checked={disableUnbalancedLiquidity}
-                    onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
-                  />
-                )}
-                <Checkbox
-                  label="Should this pool accept donations?"
-                  checked={enableDonation}
-                  onChange={() => updatePool({ enableDonation: !enableDonation })}
                 />
               </div>
             </div>
