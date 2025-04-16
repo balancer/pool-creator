@@ -7,3 +7,4 @@ export * from "./AmplificationParameter";
 export * from "./PoolHooks";
 export * from "./PauseManager";
 export * from "./SwapFeeManager";
+export * from "./LiquidityManagement";

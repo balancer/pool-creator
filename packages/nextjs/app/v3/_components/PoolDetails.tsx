@@ -24,7 +24,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     swapFeeManager,
     pauseManager,
     poolHooksContract,
-    isUsingHooks,
     disableUnbalancedLiquidity,
     enableDonation,
     name,
@@ -34,6 +33,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
     eclpParams,
+    isUsingHooks,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
@@ -144,21 +144,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               </div>
             </div>
 
-            {poolType === PoolType.StableSurge && (
-              <>
-                <div className="flex justify-between">
-                  <div className="">Disable Unbalanced Liquidity</div>
-                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Donations Enabled</div>
-                  <div>{enableDonation ? "true" : "false"}</div>
-                </div>
-              </>
-            )}
-
-            {isUsingHooks && (
-              <>
+            <div>
+              {isUsingHooks && (
                 <div className="flex justify-between">
                   <div className="">Pool Hooks Contract</div>
                   <div>
@@ -177,16 +164,16 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-between">
-                  <div className="">Disable Unbalanced Liquidity</div>
-                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Donations Enabled</div>
-                  <div>{enableDonation ? "true" : "false"}</div>
-                </div>
-              </>
-            )}
+              )}
+              <div className="flex justify-between">
+                <div className="">Disable Unbalanced Liquidity</div>
+                <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+              </div>
+              <div className="flex justify-between">
+                <div className="">Donations Enabled</div>
+                <div>{enableDonation ? "true" : "false"}</div>
+              </div>
+            </div>
           </div>
         }
       />
