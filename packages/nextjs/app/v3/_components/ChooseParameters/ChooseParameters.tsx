@@ -3,6 +3,7 @@ import {
   AmplificationParameter,
   EclpParams,
   HandleNumberInputChange,
+  LiquidityManagement,
   PauseManager,
   PoolHooks,
   SwapFeeManger,
@@ -49,6 +50,7 @@ export const ChooseParameters = () => {
       <SwapFeeManger />
       <PauseManager />
       <PoolHooks />
+      <LiquidityManagement />
     </div>
   );
 };
