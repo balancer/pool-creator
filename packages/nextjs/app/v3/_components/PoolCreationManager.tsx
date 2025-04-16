@@ -162,7 +162,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
             </div>
             {step > poolCreationSteps.length && (
               <Alert type="success">
-                Your pool has been successfully initialized and will be avaiable to view in the Balancer app shortly!
+                Your pool has been successfully initialized and will be available to view in the Balancer app shortly!
               </Alert>
             )}
           </div>
