@@ -10,7 +10,12 @@ import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 export type TabType = (typeof TABS)[number];
 
-export type AllowedPoolTypes = PoolType.Stable | PoolType.Weighted | PoolType.StableSurge | PoolType.GyroE;
+export type AllowedPoolTypes =
+  | PoolType.Stable
+  | PoolType.Weighted
+  | PoolType.StableSurge
+  | PoolType.GyroE
+  | PoolType.ReClamm;
 
 export type TokenConfig = {
   address: Address;
@@ -18,7 +23,7 @@ export type TokenConfig = {
   isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
-  weight: number;
+  weight: number | undefined;
   isWeightLocked: boolean;
   tokenInfo: Token | null;
   amount: string; // human readable
@@ -77,7 +82,7 @@ export const initialTokenConfig: TokenConfig = {
   isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
-  weight: 50, // only used for weighted pools
+  weight: undefined, // only used for weighted pools
   isWeightLocked: false,
   tokenInfo: null, // Details including image, symbol, decimals, etc.
   amount: "",

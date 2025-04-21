@@ -18,39 +18,55 @@ export function ChooseType() {
       description:
         "Engineered for assets that trade near parity, Stable Pools are perfect for tightly correlated assets like Stablecoins, ensuring seamless trading with minimal slippage",
     },
-    [PoolType.GyroE]: {
-      label: "Gyro E-CLP",
-      description:
-        "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",
-    },
     [PoolType.StableSurge]: {
       label: "Stable Surge",
       description:
         "A Balancer core stable pool that uses a stable surge hook deployed by the official stable surge factory",
     },
+    [PoolType.GyroE]: {
+      label: "Gyro Elliptic CLP",
+      description:
+        "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",
+    },
+    [PoolType.ReClamm]: {
+      label: "Readjusting CLAMM",
+      description: "A concentrated liquidity pool that adjusts the range of liquidity provided as price moves",
+    },
   };
+
+  function PoolTypeButton({ type }: { type: string }) {
+    return (
+      <button
+        className={`${
+          type === poolType ? `${selectedPoolStyles}` : `bg-base-100 ${hoverPoolStyles} shadow-lg`
+        } p-4 w-full rounded-xl`}
+        onClick={() => updatePool({ poolType: type as AllowedPoolTypes, tokenConfigs: tokenConfigs.slice(0, 4) })}
+      >
+        <div className="flex flex-col text-center">
+          <div className="font-bold text-xl w-full">{POOL_TYPES[type as AllowedPoolTypes].label}</div>
+        </div>
+      </button>
+    );
+  }
+
+  const poolTypes = Object.keys(POOL_TYPES);
+  const firstRowTypes = poolTypes.slice(0, 3);
+  const secondRowTypes = poolTypes.slice(3, 5);
 
   return (
     <>
       <div className="flex flex-col justify-center h-full gap-10 px-7 py-5">
-        <div
-          className={`grid ${
-            Object.keys(POOL_TYPES).length % 3 === 0 ? "grid-cols-3" : "grid-cols-2"
-          } gap-5 justify-around`}
-        >
-          {Object.keys(POOL_TYPES).map(type => (
-            <button
-              key={type}
-              className={`${
-                type === poolType ? `${selectedPoolStyles}` : `bg-base-100 ${hoverPoolStyles} shadow-lg`
-              } p-4 w-full rounded-xl `}
-              onClick={() => updatePool({ poolType: type as AllowedPoolTypes, tokenConfigs: tokenConfigs.slice(0, 4) })}
-            >
-              <div className="flex flex-col text-center">
-                <div className="font-bold text-xl w-full">{POOL_TYPES[type as AllowedPoolTypes].label}</div>
-              </div>
-            </button>
-          ))}
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-3 gap-5">
+            {firstRowTypes.map(type => (
+              <PoolTypeButton key={type} type={type} />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-5 justify-center">
+            {secondRowTypes.map(type => (
+              <PoolTypeButton key={type} type={type} />
+            ))}
+          </div>
         </div>
 
         <div>

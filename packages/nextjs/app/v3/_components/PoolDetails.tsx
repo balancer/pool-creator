@@ -271,7 +271,9 @@ function TokenDetails({ token }: { token: TokenConfig }) {
     <div>
       <div className="flex justify-between">
         <div className="flex items-center gap-1.5">
-          {poolType === PoolType.Weighted && <span className="font-bold"> {token.weight.toFixed(0)}%</span>}
+          {poolType === PoolType.Weighted && token?.weight && (
+            <span className="font-bold"> {token.weight.toFixed(0)}%</span>
+          )}
 
           {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
           <div className="font-bold text-lg">

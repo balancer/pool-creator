@@ -1,8 +1,13 @@
 import React, { useEffect } from "react";
+import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useBoostableWhitelist, useCheckIfV3PoolExists, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import {
+  useBoostableWhitelist,
+  usePoolCreationStore,
+  useUserDataStore,
+  useValidatePoolCreationInput,
+} from "~~/hooks/v3";
 import { BEETS_MAX_POOL_NAME_LENGTH, MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 import { sonic } from "~~/utils/customChains";
 
@@ -12,14 +17,9 @@ import { sonic } from "~~/utils/customChains";
  */
 export const ChooseInfo = () => {
   const { name, symbol, tokenConfigs, poolType, updatePool, chain } = usePoolCreationStore();
-  const { updateUserData, hasEditedPoolName, hasEditedPoolSymbol } = useUserDataStore();
+  const { updateUserData, hasEditedPoolName, hasEditedPoolSymbol, hasAgreedToWarning } = useUserDataStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
-
-  const { existingPools } = useCheckIfV3PoolExists(
-    poolType,
-    tokenConfigs.map(token => token.address),
-  );
-
+  const { isValidTokenWeights } = useValidatePoolCreationInput();
   useEffect(() => {
     if (poolType) {
       const symbol = tokenConfigs
@@ -28,7 +28,7 @@ export const ChooseInfo = () => {
           const boostedVariant = boostableWhitelist?.[token.address];
           const symbol = useBoostedVariant ? boostedVariant?.symbol : tokenInfo?.symbol;
           if (poolType === PoolType.Weighted && weight) {
-            return `${token.weight.toFixed(0)}${symbol}`;
+            return `${weight.toFixed(0)}${symbol}`;
           }
           return symbol;
         })
@@ -43,7 +43,7 @@ export const ChooseInfo = () => {
 
   return (
     <div>
-      <div className="text-xl mb-5">Choose pool information:</div>
+      <div className="text-lg mb-3">Choose pool information:</div>
       <div className="mb-5 flex flex-col gap-4">
         <div className="bg-base-100 p-3 rounded-xl">
           <TextField
@@ -71,37 +71,38 @@ export const ChooseInfo = () => {
           />
         </div>
       </div>
-      {existingPools && existingPools.length > 0 && (
-        <div>
-          <Alert type="warning">Warning: Pools with a similar configuration have already been created</Alert>
-          <div className="overflow-x-auto mt-5">
-            <table className="table w-full text-lg border border-neutral-500">
-              <tbody>
-                {existingPools.map(pool => {
-                  const chainName = pool.chain.toLowerCase();
-                  const baseURL = chainName === "sepolia" ? "https://test.balancer.fi" : "https://balancer.fi";
-                  const poolURL = `${baseURL}/pools/${chainName}/v3/${pool.address}`;
-                  return (
-                    <tr key={pool.address}>
-                      <td className="border border-neutral-500 px-2 py-1">{pool.name.slice(0, 20)}</td>
-                      <td className="border border-neutral-500 px-2 py-1">{pool.type}</td>
-                      <td className="text-right border border-neutral-500 px-2 py-1">
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline text-info flex items-center gap-2 justify-end"
-                          href={poolURL}
-                        >
-                          See Details
-                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                        </a>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+
+      <div className="text-lg mb-3">Choose initialization amounts:</div>
+      <div className="flex flex-col gap-4">
+        {Array.from({ length: tokenConfigs.length }).map((_, index) => (
+          <ChooseTokenAmount key={index} index={index} />
+        ))}
+      </div>
+
+      {poolType === PoolType.Weighted && (
+        <div className="mt-5">
+          <Alert type="warning">
+            <label className="label cursor-pointer py-0 gap-3">
+              <span className="">
+                <span className="font-bold">Please Confirm:</span> USD values of amounts are proportional to token
+                weights?
+              </span>
+              <input
+                type="checkbox"
+                className="checkbox rounded-lg border-neutral-700"
+                onChange={() => {
+                  updateUserData({ hasAgreedToWarning: !hasAgreedToWarning });
+                }}
+                checked={hasAgreedToWarning}
+              />
+            </label>
+          </Alert>
+        </div>
+      )}
+
+      {!isValidTokenWeights && (
+        <div className="mt-5">
+          <Alert type="error">Each token weight must be at least 1% and sum of all weights must be 100%</Alert>
         </div>
       )}
     </div>
