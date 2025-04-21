@@ -35,6 +35,14 @@ export type EclpParams = {
   usdValueToken1: string;
 };
 
+export type ReClammParams = {
+  initialTargetPrice: string;
+  initialMinPrice: string;
+  initialMaxPrice: string;
+  priceShiftDailyRate: string;
+  centerednessMargin: string;
+};
+
 export interface TransactionDetails {
   safeHash: `0x${string}` | undefined;
   wagmiHash: `0x${string}` | undefined;
@@ -63,9 +71,11 @@ export interface PoolCreationStore {
   initPoolTx: TransactionDetails;
   swapToBoostedTx: TransactionDetails;
   eclpParams: EclpParams;
+  reClammParams: ReClammParams;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
   updateEclpParam: (updates: Partial<EclpParams>) => void;
+  updateReClammParam: (updates: Partial<ReClammParams>) => void;
   clearPoolStore: () => void;
 }
 
@@ -75,11 +85,11 @@ export const initialTokenConfig: TokenConfig = {
   isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
-  weight: undefined, // only used for weighted pools
   isWeightLocked: false,
   tokenInfo: null, // Details including image, symbol, decimals, etc.
   amount: "",
   useBoostedVariant: false,
+  weight: undefined, // only used for weighted pools
 };
 
 export const initialPoolCreationState = {
@@ -94,18 +104,15 @@ export const initialPoolCreationState = {
   symbol: "",
   poolType: undefined,
   tokenConfigs: [initialTokenConfig, initialTokenConfig],
-  amplificationParameter: "", // only used for stable pools
   swapFeePercentage: "" as const, // store as human readable % to be converted later
   swapFeeManager: "" as const,
   pauseManager: "" as const,
   poolHooksContract: "" as const,
   disableUnbalancedLiquidity: false,
   enableDonation: false,
-  // isSuccess is only flipped to true after parsing tx receipt for status
-  createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
-  initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
-  swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
-  // Only for gyroECLP
+  // For stable and stableSurge
+  amplificationParameter: "", // only used for stable pools
+  // For gyroECLP
   eclpParams: {
     alpha: "",
     beta: "",
@@ -117,6 +124,18 @@ export const initialPoolCreationState = {
     usdValueToken0: "",
     usdValueToken1: "",
   },
+  // For ReClamm
+  reClammParams: {
+    initialTargetPrice: "",
+    initialMinPrice: "",
+    initialMaxPrice: "",
+    priceShiftDailyRate: "",
+    centerednessMargin: "",
+  },
+  // isSuccess is only flipped to true after parsing tx receipt for status
+  createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
 };
 
 // Stores all the data that will be used for pool creation
@@ -135,6 +154,11 @@ export const usePoolCreationStore = create(
         set(state => ({
           ...state,
           eclpParams: { ...state.eclpParams, ...updates },
+        })),
+      updateReClammParam: (updates: Partial<ReClammParams>) =>
+        set(state => ({
+          ...state,
+          reClammParams: { ...state.reClammParams, ...updates },
         })),
       clearPoolStore: () => set(initialPoolCreationState),
     }),

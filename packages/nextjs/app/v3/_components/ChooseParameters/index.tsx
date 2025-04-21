@@ -8,3 +8,4 @@ export * from "./PoolHooks";
 export * from "./PauseManager";
 export * from "./SwapFeeManager";
 export * from "./LiquidityManagement";
+export * from "./ReClammParams";

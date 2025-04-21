@@ -6,6 +6,7 @@ import {
   LiquidityManagement,
   PauseManager,
   PoolHooks,
+  ReClammParams,
   SwapFeeManger,
   SwapFeePercentage,
 } from "./";
@@ -42,11 +43,12 @@ export const ChooseParameters = () => {
     <div className="flex flex-col gap-4">
       <div className="text-xl">Choose pool parameters:</div>
 
-      {poolType === "GyroE" && <EclpParams />}
-      <SwapFeePercentage handleNumberInputChange={handleNumberInputChange} />
+      {poolType === PoolType.GyroE && <EclpParams />}
+      {poolType === PoolType.ReClamm && <ReClammParams />}
       {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
         <AmplificationParameter handleNumberInputChange={handleNumberInputChange} />
       )}
+      <SwapFeePercentage handleNumberInputChange={handleNumberInputChange} />
       <SwapFeeManger />
       <PauseManager />
       <PoolHooks />

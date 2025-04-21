@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { BoostOpportunityModal, RateProviderModal } from "./";
+import { BoostOpportunityModal } from "./BoostOpportunityModal";
+import { RateProviderModal } from "./RateProviderModal";
 import { TokenType } from "@balancer/sdk";
 import { erc20Abi, zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
@@ -10,7 +11,7 @@ import { type Token, useFetchTokenList } from "~~/hooks/token";
 import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 
 /**
- * This component manages
+ * This component manages:
  * 1. Token selection
  * 2. Optional rate provider
  * 3. Optional boost opportunity for underlying tokens that have whitelisted boosted variants
@@ -71,7 +72,12 @@ export function ChooseToken({ index }: { index: number }) {
     if (tokenConfigs[index].tokenType === TokenType.STANDARD) {
       updateTokenConfig(index, { tokenType: TokenType.TOKEN_WITH_RATE, rateProvider: "", paysYieldFees: true });
     } else {
-      updateTokenConfig(index, { tokenType: TokenType.STANDARD, rateProvider: zeroAddress, paysYieldFees: false });
+      updateTokenConfig(index, {
+        tokenType: TokenType.STANDARD,
+        rateProvider: zeroAddress,
+        paysYieldFees: false,
+        useBoostedVariant: false,
+      });
     }
   };
 
@@ -108,12 +114,12 @@ export function ChooseToken({ index }: { index: number }) {
         {boostedVariant && (
           <div
             className={`flex justify-end items-center gap-1 cursor-pointer absolute top-2 right-5 text-lg ${
-              useBoostedVariant ? "text-info" : "text-base-content"
+              useBoostedVariant ? "text-success" : "text-info"
             }`}
             onClick={() => setShowBoostOpportunityModal(true)}
           >
             <Cog6ToothIcon className="w-5 h-5" />
-            {useBoostedVariant ? `Earning yield with ${boostedVariant.symbol}` : `Using standard ${tokenInfo?.symbol}`}
+            {useBoostedVariant ? `Earning yield with ${boostedVariant.symbol}` : `Using standard variant`}
           </div>
         )}
         <div className="flex gap-3 w-full items-center">

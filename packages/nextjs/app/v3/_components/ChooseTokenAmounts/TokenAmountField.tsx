@@ -1,8 +1,7 @@
 "use client";
 
 import { formatUnits, parseUnits } from "viem";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import { WalletIcon } from "@heroicons/react/24/outline";
+import { ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
 import { useTokenUsdValue } from "~~/hooks/token";
@@ -18,9 +17,6 @@ interface TokenFieldProps {
   setTokenAmount?: (amount: string) => void;
 }
 
-/**
- * This component will allow user to enter amount of token to initialize pool
- */
 export const TokenAmountField: React.FC<TokenFieldProps> = ({
   value,
   balance,
@@ -64,17 +60,15 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
         <div className="absolute top-0 left-0 ">
           <div className="p-2.5">
             <div
-              className={`${
-                selectedToken
-                  ? "bg-base-100"
-                  : "text-neutral-700 bg-gradient-to-b from-custom-beige-start to-custom-beige-end to-100%"
-              } px-3 py-1.5 shadow-md disabled:text-base-content text-lg font-bold rounded-lg flex justify-between items-center gap-2 `}
+              className={
+                "bg-base-100 px-3 py-1.5 shadow-md disabled:text-base-content text-lg font-bold rounded-lg flex justify-between items-center gap-2 w-fit"
+              }
             >
               {selectedToken && <TokenImage size="sm" token={selectedToken} />}
               {selectedToken?.symbol}
             </div>
 
-            {selectedToken && balance !== undefined ? (
+            {selectedToken && balance !== undefined && (
               <div className={`flex items-center gap-2 text-neutral-400`}>
                 <div
                   onClick={setAmountToMax}
@@ -94,8 +88,6 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="text-neutral-400 ml-1">{selectedToken?.name}</div>
             )}
           </div>
         </div>
