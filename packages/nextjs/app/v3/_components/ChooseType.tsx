@@ -1,55 +1,12 @@
 import React from "react";
-import { PoolType } from "@balancer/sdk";
 import { ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import { usePoolCreationStore } from "~~/hooks/v3";
-import { AllowedPoolTypes } from "~~/hooks/v3/usePoolCreationStore";
+import { type SupportedPoolTypes, poolTypeMap } from "~~/utils/constants";
 
 export function ChooseType() {
-  const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
+  const { poolType } = usePoolCreationStore();
 
-  const POOL_TYPES: Record<AllowedPoolTypes, { label: string; description: string }> = {
-    [PoolType.Weighted]: {
-      label: "Weighted",
-      description:
-        "Highly configurable and versatile, Weighted Pools support up to 8 tokens with customizable weightings, allowing for fine-tuned exposure to multiple assets",
-    },
-    [PoolType.Stable]: {
-      label: "Stable",
-      description:
-        "Engineered for assets that trade near parity, Stable Pools are perfect for tightly correlated assets like Stablecoins, ensuring seamless trading with minimal slippage",
-    },
-    [PoolType.StableSurge]: {
-      label: "Stable Surge",
-      description:
-        "A Balancer core stable pool that uses a stable surge hook deployed by the official stable surge factory",
-    },
-    [PoolType.GyroE]: {
-      label: "Gyro Elliptic CLP",
-      description:
-        "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",
-    },
-    [PoolType.ReClamm]: {
-      label: "Readjusting CLAMM",
-      description: "A concentrated liquidity pool that adjusts the range of liquidity provided as price moves",
-    },
-  };
-
-  function PoolTypeButton({ type }: { type: string }) {
-    return (
-      <button
-        className={`${
-          type === poolType ? `${selectedPoolStyles}` : `bg-base-100 ${hoverPoolStyles} shadow-lg`
-        } p-4 w-full rounded-xl`}
-        onClick={() => updatePool({ poolType: type as AllowedPoolTypes, tokenConfigs: tokenConfigs.slice(0, 4) })}
-      >
-        <div className="flex flex-col text-center">
-          <div className="font-bold text-xl w-full">{POOL_TYPES[type as AllowedPoolTypes].label}</div>
-        </div>
-      </button>
-    );
-  }
-
-  const poolTypes = Object.keys(POOL_TYPES);
+  const poolTypes = Object.keys(poolTypeMap) as SupportedPoolTypes[];
   const firstRowTypes = poolTypes.slice(0, 3);
   const secondRowTypes = poolTypes.slice(3, 5);
 
@@ -58,20 +15,20 @@ export function ChooseType() {
       <div className="flex flex-col justify-center h-full gap-10 px-7 py-5">
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-3 gap-5">
-            {firstRowTypes.map(type => (
-              <PoolTypeButton key={type} type={type} />
+            {firstRowTypes.map((type: SupportedPoolTypes) => (
+              <PoolTypeButton key={type} selectedPoolType={type} />
             ))}
           </div>
           <div className="grid grid-cols-2 gap-5 justify-center">
             {secondRowTypes.map(type => (
-              <PoolTypeButton key={type} type={type} />
+              <PoolTypeButton key={type} selectedPoolType={type} />
             ))}
           </div>
         </div>
 
         <div>
           <div className="text-xl bg-base-100 rounded-xl p-5 border border-neutral h-32 flex flex-col justify-center">
-            {poolType ? POOL_TYPES[poolType]?.description : INITIAL_INSTRUCTIONS}
+            {poolType ? poolTypeMap[poolType].description : staringInstructions}
           </div>
         </div>
       </div>
@@ -79,13 +36,31 @@ export function ChooseType() {
   );
 }
 
-const selectedPoolStyles =
-  "text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)]";
+function PoolTypeButton({ selectedPoolType }: { selectedPoolType: SupportedPoolTypes }) {
+  const { poolType, updatePool, tokenConfigs } = usePoolCreationStore();
 
-const hoverPoolStyles =
-  "hover:bg-gradient-to-r hover:from-violet-300 hover:via-violet-200 hover:to-orange-300 hover:text-neutral-700 hover:opacity-80";
+  const maxNumberOfTokens = poolType ? poolTypeMap[selectedPoolType].maxTokens : 0;
 
-const INITIAL_INSTRUCTIONS = (
+  function handlePoolTypeSelection() {
+    console.log("handlePoolTypeSelection", selectedPoolType, maxNumberOfTokens);
+    updatePool({ poolType: selectedPoolType, tokenConfigs: tokenConfigs.slice(0, maxNumberOfTokens) });
+  }
+
+  return (
+    <button
+      className={`${
+        selectedPoolType === poolType ? `${selectedPoolStyles}` : `bg-base-100 ${hoverPoolStyles} shadow-lg`
+      } p-4 w-full rounded-xl`}
+      onClick={handlePoolTypeSelection}
+    >
+      <div className="flex flex-col text-center">
+        <div className="font-bold text-xl w-full">{poolTypeMap[selectedPoolType].label}</div>
+      </div>
+    </button>
+  );
+}
+
+const staringInstructions = (
   <div>
     Begin by selecting the type of pool you wish to create. For more information about pool types, check out our{" "}
     <a
@@ -99,3 +74,9 @@ const INITIAL_INSTRUCTIONS = (
     </a>
   </div>
 );
+
+const selectedPoolStyles =
+  "text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)]";
+
+const hoverPoolStyles =
+  "hover:bg-gradient-to-r hover:from-violet-300 hover:via-violet-200 hover:to-orange-300 hover:text-neutral-700 hover:opacity-80";

@@ -1,21 +1,14 @@
 import { useEffect } from "react";
-import { PoolType } from "@balancer/sdk";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type Token } from "~~/hooks/token";
+import { SupportedPoolTypes } from "~~/utils";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
 export type TabType = (typeof TABS)[number];
-
-export type AllowedPoolTypes =
-  | PoolType.Stable
-  | PoolType.Weighted
-  | PoolType.StableSurge
-  | PoolType.GyroE
-  | PoolType.ReClamm;
 
 export type TokenConfig = {
   address: Address;
@@ -55,7 +48,7 @@ export interface PoolCreationStore {
   isDelegatingSwapFeeManagement: boolean;
   isUsingHooks: boolean;
   poolAddress: Address | undefined;
-  poolType: AllowedPoolTypes | undefined;
+  poolType: SupportedPoolTypes | undefined;
   tokenConfigs: TokenConfig[];
   name: string;
   symbol: string;

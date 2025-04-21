@@ -1,8 +1,8 @@
-import { AllowedPoolTypes } from "./usePoolCreationStore";
 import { PoolType } from "@balancer/sdk";
 import { useQuery } from "@tanstack/react-query";
 import { type Address } from "viem";
 import { useApiConfig } from "~~/hooks/balancer";
+import { SupportedPoolTypes } from "~~/utils/constants";
 
 export type ExistingPool = {
   chain: "string";
@@ -23,7 +23,7 @@ export type ExistingPool = {
 /**
  * Fetch all v3 poolsto see if user is trying to create a similar pool
  */
-export const useCheckIfV3PoolExists = (type: AllowedPoolTypes | undefined, tokenAddresses: Address[]) => {
+export const useCheckIfV3PoolExists = (type: SupportedPoolTypes | undefined, tokenAddresses: Address[]) => {
   const { url, chainName } = useApiConfig();
 
   // API does not recognize stable surge as pool type like the SDK does

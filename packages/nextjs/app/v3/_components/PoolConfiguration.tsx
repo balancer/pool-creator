@@ -22,8 +22,6 @@ export function PoolConfiguration() {
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid } =
     useValidatePoolCreationInput();
 
-  console.log("isPoolCreationInputValid", isPoolCreationInputValid);
-
   const { existingPools } = useCheckIfV3PoolExists(
     poolType,
     tokenConfigs.map(token => token.address),
