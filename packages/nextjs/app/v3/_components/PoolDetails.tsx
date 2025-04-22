@@ -34,13 +34,20 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     isDelegatingSwapFeeManagement,
     eclpParams,
     isUsingHooks,
+    reClammParams,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
 
   const { alpha, beta, lambda } = eclpParams;
+  const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
+    reClammParams;
 
   const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(targetNetwork, poolAddress) : undefined;
+
+  const isGyroEclp = poolType === PoolType.GyroE;
+  const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
+  const isReClamm = poolType === PoolType.ReClamm;
 
   return (
     <div className="flex flex-col gap-3">
@@ -71,7 +78,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={false}
         content={
           <div>
-            {poolType === PoolType.GyroE && (
+            {isGyroEclp && (
               <>
                 <div className="flex justify-between">
                   <div className="">Lowest Price</div>
@@ -93,16 +100,40 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 </div>
               </>
             )}
-            <div className="flex justify-between">
-              <div className="">Swap Fee %</div>
-              <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
-            </div>
-            {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
+            {isStablePool && (
               <div className="flex justify-between">
                 <div className="">Amplification Parameter</div>
                 <div>{amplificationParameter ? amplificationParameter : "-"}</div>
               </div>
             )}
+            {isReClamm && (
+              <>
+                <div className="flex justify-between">
+                  <div className="">Initial Target Price</div>
+                  <div>{initialTargetPrice ? initialTargetPrice : "-"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Initial Min Price</div>
+                  <div>{initialMinPrice ? initialMinPrice : "-"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Initial Max Price</div>
+                  <div>{initialMaxPrice ? initialMaxPrice : "-"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Price Shift Daily Rate</div>
+                  <div>{priceShiftDailyRate ? priceShiftDailyRate : "-"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Centeredness Margin</div>
+                  <div>{centerednessMargin ? centerednessMargin : "-"}</div>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between">
+              <div className="">Swap Fee %</div>
+              <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
+            </div>
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>
@@ -272,7 +303,9 @@ function TokenDetails({ token }: { token: TokenConfig }) {
     <div>
       <div className="flex justify-between">
         <div className="flex items-center gap-1.5">
-          {poolType === PoolType.Weighted && <span className="font-bold"> {token.weight.toFixed(0)}%</span>}
+          {poolType === PoolType.Weighted && token?.weight && (
+            <span className="font-bold"> {token.weight.toFixed(0)}%</span>
+          )}
 
           {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}
           <div className="font-bold text-lg">

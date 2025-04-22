@@ -1,4 +1,4 @@
-import { NumberParameterButton } from "./";
+import { NumberParameterButton } from "./NumberParameterButton";
 import { type HandleNumberInputChange } from "./types";
 import { PoolType } from "@balancer/sdk";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";

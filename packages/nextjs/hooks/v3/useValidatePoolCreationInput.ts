@@ -31,41 +31,35 @@ export function useValidatePoolCreationInput() {
 
   const isValidTokenWeights =
     poolType !== PoolType.Weighted ||
-    (tokenConfigs.every(token => token.weight > 0) &&
-      tokenConfigs.reduce((acc, token) => acc + token.weight, 0) === 100);
+    (tokenConfigs.every(token => (token?.weight ?? 0) > 0) &&
+      tokenConfigs.reduce((acc, token) => acc + (token?.weight ?? 0), 0) === 100);
 
-  const isTokensValid =
-    tokenConfigs.every(token => {
-      if (
-        !token.address ||
-        !token.amount ||
-        !walletClient?.account.address ||
-        !token.tokenInfo?.decimals ||
-        Number(token.amount) <= 0
-      )
-        return false;
+  const isTokensValid = tokenConfigs.every(token => {
+    if (!token.address || !token.tokenInfo?.decimals) return false;
 
-      const rawUserBalance: bigint = userTokenBalances[token.address] ? BigInt(userTokenBalances[token.address]) : 0n;
+    // Must have rate provider if token type is TOKEN_WITH_RATE
+    if (token.tokenType === TokenType.TOKEN_WITH_RATE && !isAddress(token.rateProvider)) return false;
 
-      const rawTokenAmount = parseUnits(token.amount, token.tokenInfo.decimals);
+    // Check tanstack query cache for rate provider validity
+    if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
+      if (!token.isValidRateProvider) return false;
+    }
+    return true;
+  });
 
-      // User must have enough token balance
-      if (rawTokenAmount > rawUserBalance) return false;
+  const isTokenAmountsValid = tokenConfigs.every(token => {
+    if (!token.amount || !walletClient?.account.address || Number(token.amount) <= 0 || !token.tokenInfo?.decimals)
+      return false;
 
-      // If pool type is weighted, no token can have a weight of 0
-      if (poolType === PoolType.Weighted && token.weight === 0) return false;
+    const rawUserBalance: bigint = userTokenBalances[token.address] ? BigInt(userTokenBalances[token.address]) : 0n;
 
-      // Must have rate provider if token type is TOKEN_WITH_RATE
-      if (token.tokenType === TokenType.TOKEN_WITH_RATE && !isAddress(token.rateProvider)) return false;
+    const rawTokenAmount = parseUnits(token.amount, token.tokenInfo.decimals);
 
-      // Check tanstack query cache for rate provider validity
-      if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
-        if (!token.isValidRateProvider) return false;
-      }
-      return true;
-    }) &&
-    isValidTokenWeights &&
-    (poolType !== PoolType.Weighted || hasAgreedToWarning);
+    // User must have enough token balance
+    if (rawTokenAmount > rawUserBalance) return false;
+
+    return true;
+  });
 
   // Check tanstack query cache for pool hooks contract validity
   const { data: isValidPoolHooksContract } = useValidateHooksContract(isUsingHooks, poolHooksContract);
@@ -84,8 +78,15 @@ export function useValidatePoolCreationInput() {
     !isUsingHooks || isValidPoolHooksContract,
   ].every(Boolean);
 
+  // TODO: Make info tab validatiosn less sloppy? (temporarily combining weighted and token amount validations with info)
   const isInfoValid =
-    !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH && symbol.length <= MAX_POOL_SYMBOL_LENGTH;
+    !!name &&
+    !!symbol &&
+    name.length <= MAX_POOL_NAME_LENGTH &&
+    symbol.length <= MAX_POOL_SYMBOL_LENGTH &&
+    isValidTokenWeights &&
+    (poolType !== PoolType.Weighted || hasAgreedToWarning) &&
+    isTokenAmountsValid;
 
   const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
 
