@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
+import { ChooseFinalDetails, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -15,9 +15,10 @@ import {
 import { bgBeigeGradient } from "~~/utils";
 
 export function PoolConfiguration() {
+  const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
+
   const { selectedTab, updatePool, createPoolTx, poolType, tokenConfigs } = usePoolCreationStore();
   const { targetNetwork } = useTargetNetwork();
-  const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
   const { prev, next } = getAdjacentTabs(selectedTab);
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid } =
     useValidatePoolCreationInput();
@@ -31,14 +32,14 @@ export function PoolConfiguration() {
     Type: <ChooseType />,
     Tokens: <ChooseTokens />,
     Parameters: <ChooseParameters />,
-    Information: <ChooseInfo />,
+    Finalize: <ChooseFinalDetails />,
   };
 
   function isNextDisabled() {
     if (selectedTab === "Type") return !isTypeValid;
     if (selectedTab === "Tokens") return !isTokensValid;
     if (selectedTab === "Parameters") return !isParametersValid;
-    if (selectedTab === "Information") return !isInfoValid;
+    if (selectedTab === "Finalize") return !isInfoValid;
     return false;
   }
 
@@ -93,14 +94,14 @@ export function PoolConfiguration() {
               <ArrowLeftIcon className="w-5 h-5" />
               Previous
             </button>
-            {isPoolCreationInputValid && selectedTab === "Information" ? (
+            {isPoolCreationInputValid && selectedTab === "Finalize" ? (
               <TransactionButton
                 onClick={() => setIsPoolCreationModalOpen(true)}
                 title="Create Pool"
                 isDisabled={false}
                 isPending={false}
               />
-            ) : selectedTab !== "Information" ? (
+            ) : selectedTab !== "Finalize" ? (
               <button
                 onClick={() => {
                   if (selectedTab === "Type") {
@@ -118,7 +119,7 @@ export function PoolConfiguration() {
               </button>
             ) : null}
           </div>
-          {selectedTab === "Information" && existingPools && existingPools.length > 0 && (
+          {selectedTab === "Finalize" && existingPools && existingPools.length > 0 && (
             <div className="mt-5">
               <Alert type="warning">Warning: Pools with a similar configuration have already been created</Alert>
               <div className="overflow-x-auto mt-5">

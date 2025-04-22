@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { ChooseTokenAmounts } from "./ChooseTokenAmounts";
 import { PoolType } from "@balancer/sdk";
 import { TextField } from "~~/components/common";
 import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
@@ -37,8 +36,6 @@ export const ChooseInfo = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <ChooseTokenAmounts />
-
       <div>
         <div className="text-xl mb-3">Choose pool information:</div>
         <div className="flex flex-col gap-4">

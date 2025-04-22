@@ -7,7 +7,7 @@ import { type Token } from "~~/hooks/token";
 import { SupportedPoolTypes } from "~~/utils";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
-export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
+export const TABS = ["Type", "Tokens", "Parameters", "Finalize"] as const;
 export type TabType = (typeof TABS)[number];
 
 export type TokenConfig = {
