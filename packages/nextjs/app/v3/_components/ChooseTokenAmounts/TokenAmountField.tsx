@@ -44,7 +44,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
 
   return (
     <>
-      <div className="relative w-full rounded-xl">
+      <div className="relative w-full rounded-lg">
         <input
           disabled={isDisabled}
           type="number"

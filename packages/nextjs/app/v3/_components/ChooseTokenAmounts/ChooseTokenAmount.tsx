@@ -69,10 +69,10 @@ export function ChooseTokenAmount({ index }: { index: number }) {
   };
 
   return (
-    <>
-      <div className="bg-base-100 p-4 rounded-xl flex flex-col gap-3">
-        <div className="flex gap-3 w-full items-center">
-          {poolType === PoolType.Weighted && (
+    <div className="bg-base-100 p-3 rounded-lg flex flex-col gap-3">
+      <div className="flex gap-3 w-full items-center">
+        {poolType === PoolType.Weighted && (
+          <>
             <div className="flex flex-col gap-5 justify-between items-center">
               {isWeightLocked ? (
                 <LockClosedIcon
@@ -86,9 +86,6 @@ export function ChooseTokenAmount({ index }: { index: number }) {
                 />
               )}
             </div>
-          )}
-
-          {poolType === PoolType.Weighted && (
             <div className="w-full max-w-[80px] h-full flex flex-col relative">
               <input
                 type="number"
@@ -100,18 +97,19 @@ export function ChooseTokenAmount({ index }: { index: number }) {
               />
               <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
             </div>
-          )}
-          <div className="flex-grow">
-            <TokenAmountField
-              value={amount}
-              selectedToken={tokenInfo}
-              setTokenAmount={handleTokenAmount}
-              tokenOptions={remainingTokens}
-              balance={userTokenBalance}
-            />
-          </div>
+          </>
+        )}
+
+        <div className="flex-grow">
+          <TokenAmountField
+            value={amount}
+            selectedToken={tokenInfo}
+            setTokenAmount={handleTokenAmount}
+            tokenOptions={remainingTokens}
+            balance={userTokenBalance}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }
