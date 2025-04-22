@@ -80,7 +80,7 @@ function ParamInputs() {
 
   const sortedTokens = tokenConfigs
     .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
-    .sort((a, b) => (a.address > b.address ? 1 : -1));
+    .sort((a, b) => a.address.localeCompare(b.address));
 
   if (isTokenOrderInverted) sortedTokens.reverse();
 

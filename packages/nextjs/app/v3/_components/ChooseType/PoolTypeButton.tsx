@@ -8,7 +8,6 @@ export function PoolTypeButton({ selectedPoolType }: { selectedPoolType: Support
   const maxNumberOfTokens = poolType ? poolTypeMap[selectedPoolType].maxTokens : 2;
 
   function handlePoolTypeSelection() {
-    console.log("handlePoolTypeSelection", selectedPoolType, maxNumberOfTokens);
     updatePool({ poolType: selectedPoolType, tokenConfigs: tokenConfigs.slice(0, maxNumberOfTokens) });
   }
 
