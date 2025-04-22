@@ -3,7 +3,7 @@ export * from "./PoolDetails";
 export * from "./ChooseType";
 export * from "./ChooseTokens";
 export * from "./ChooseParameters";
-export * from "./ChooseInfo";
+export * from "./ChooseFinalDetails";
 export * from "./PoolCreationManager";
 export * from "./ApproveOnTokenManager";
 export * from "./UserExperienceAlerts";

@@ -23,6 +23,7 @@ export const poolFactoryAbi = {
   [PoolType.Stable]: stablePoolFactoryAbiExtended,
   [PoolType.StableSurge]: stableSurgeFactoryAbiExtended,
   [PoolType.GyroE]: gyroECLPPoolFactoryAbiExtended,
+  [PoolType.ReClamm]: gyroECLPPoolFactoryAbiExtended,
 };
 
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
@@ -71,22 +72,21 @@ export const useCreatePool = () => {
       poolHooksContract: poolHooksContract === "" ? zeroAddress : (poolHooksContract as `0x${string}`),
       enableDonation,
       disableUnbalancedLiquidity,
-    };
-
-    // Conditionally creates pool with boosted variant addresses if useBoostedVariant is true
-    const tokens = tokenConfigs.map(
-      ({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => {
+      tokens: tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => {
+        // Conditionally creates pool with boosted variant addresses if useBoostedVariant is true
         const boostedVariant = boostableWhitelist?.[address];
         const tokenAddress = useBoostedVariant && boostedVariant ? boostedVariant.address : address;
+        if (poolType === PoolType.Weighted && !weight) throw new Error("Weight is required for each token");
         return {
-          address: tokenAddress,
-          rateProvider,
+          address: tokenAddress as `0x${string}`,
+          rateProvider: rateProvider as `0x${string}`,
           tokenType,
           paysYieldFees,
-          ...(poolType === PoolType.Weighted && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
+          ...(poolType === PoolType.Weighted &&
+            weight !== undefined && { weight: parseUnits(weight.toString(), TOKEN_WEIGHT_DECIMALS) }),
         };
-      },
-    );
+      }),
+    };
 
     const { alpha, beta, c, s, lambda } = humanReadableEclpParams;
 
@@ -101,7 +101,6 @@ export const useCreatePool = () => {
     return {
       ...baseInput,
       poolType,
-      tokens,
       ...((poolType === PoolType.Stable || poolType === PoolType.StableSurge) && {
         amplificationParameter: BigInt(amplificationParameter),
       }),

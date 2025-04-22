@@ -1,4 +1,4 @@
-import { PoolCreated } from "./";
+import { PoolCreated, TokenField } from "./";
 import { parseUnits } from "viem";
 import { useSwitchChain } from "wagmi";
 import {
@@ -7,7 +7,6 @@ import {
   PoolStateResetModal,
   PoolStepsDisplay,
   TextField,
-  TokenField,
   TransactionButton,
 } from "~~/components/common/";
 import {

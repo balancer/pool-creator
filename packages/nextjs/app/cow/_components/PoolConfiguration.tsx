@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { TokenField } from "./";
 import { parseUnits } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
-import { TextField, TokenField } from "~~/components/common/";
+import { TextField } from "~~/components/common/";
 import { ButtonTabs } from "~~/components/common/ButtonTabs";
 import { useCheckIfPoolExists } from "~~/hooks/cow";
 import { getPoolUrl } from "~~/hooks/cow/getPoolUrl";
