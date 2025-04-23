@@ -5,6 +5,7 @@ import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import { useFetchTokenList } from "~~/hooks/token";
+import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index }: { index: number }) {
@@ -37,10 +38,19 @@ export function ChooseTokenAmount({ index }: { index: number }) {
       if (poolType === PoolType.GyroE) {
         // Use USD values to calculate proper amount for other token
         const otherIndex = index === 0 ? 1 : 0;
-        const { usdValueToken0, usdValueToken1 } = eclpParams;
+        const { usdValueToken0, usdValueToken1, isTokenOrderInverted } = eclpParams;
 
-        const currentTokenPrice = index === 0 ? Number(usdValueToken0) : Number(usdValueToken1);
-        const otherTokenPrice = index === 0 ? Number(usdValueToken1) : Number(usdValueToken0);
+        // TODO: this is gross, make it better
+        // If order is inverted, swap which price corresponds to which index
+        const currentTokenPrice =
+          index === 0
+            ? Number(isTokenOrderInverted ? usdValueToken1 : usdValueToken0)
+            : Number(isTokenOrderInverted ? usdValueToken0 : usdValueToken1);
+
+        const otherTokenPrice =
+          index === 0
+            ? Number(isTokenOrderInverted ? usdValueToken0 : usdValueToken1)
+            : Number(isTokenOrderInverted ? usdValueToken1 : usdValueToken0);
 
         const calculatedAmount = (Number(inputValue) * currentTokenPrice) / otherTokenPrice;
 
@@ -89,6 +99,22 @@ export function ChooseTokenAmount({ index }: { index: number }) {
     isUpdatingWeights.current = false;
   };
 
+  const {
+    tokenUsdValue,
+    isLoading: isUsdValueLoading,
+    isError: isUsdValueError,
+  } = useTokenUsdValue(tokenInfo?.address, amount);
+
+  let usdValue = null;
+
+  // Handle edge case of if user altered token values for gyro eclp
+  if (poolType === PoolType.GyroE) {
+    if (index === 0) usdValue = Number(eclpParams.usdValueToken0);
+    if (index === 1) usdValue = Number(eclpParams.usdValueToken1);
+  } else {
+    usdValue = tokenUsdValue;
+  }
+
   return (
     <div className="bg-base-100 p-3 rounded-lg flex flex-col gap-3">
       <div className="flex gap-3 w-full items-center">
@@ -123,7 +149,10 @@ export function ChooseTokenAmount({ index }: { index: number }) {
 
         <div className="flex-grow">
           <TokenAmountField
-            value={amount}
+            inputValue={amount}
+            usdValue={usdValue}
+            isUsdValueLoading={isUsdValueLoading}
+            isUsdValueError={isUsdValueError}
             selectedToken={tokenInfo}
             onChange={handleAmountChange}
             setAmountToUserBalance={setAmountToUserBalance}

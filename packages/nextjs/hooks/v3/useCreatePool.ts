@@ -88,7 +88,10 @@ export const useCreatePool = () => {
       }),
     };
 
-    const { alpha, beta, c, s, lambda } = humanReadableEclpParams;
+    // TODO: figure out how to handle token order inversion
+    // If token order is inverted, need to do math to calculate these eclp params
+    const { alpha, beta, c, s, lambda, isTokenOrderInverted } = humanReadableEclpParams;
+    console.log("isTokenOrderInverted:", isTokenOrderInverted);
 
     const eclpParams = {
       alpha: parseUnits(alpha, 18),
@@ -118,7 +121,6 @@ export const useCreatePool = () => {
 
     const createPool = new CreatePool();
     const input = createPoolInput(poolType);
-
     const call = createPool.buildCall(input);
 
     const hash = await writeTx(

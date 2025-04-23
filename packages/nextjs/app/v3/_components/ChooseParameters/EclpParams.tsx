@@ -1,25 +1,13 @@
-import { useEffect } from "react";
 import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
-import { useTokenUsdValue } from "~~/hooks/token";
+import { useEclpParamValidations, useEclpPoolChart, useEclpPoolSpotPrice } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
-import { calculateRotationComponents } from "~~/utils/gryo";
+import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
 
 export function EclpParams() {
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, c, s, lambda, isTokenOrderInverted } = eclpParams;
-  const { options } = useEclpPoolChart();
-  const { updateUserData } = useUserDataStore();
-
-  const handleTokenOrderInversion = () => {
-    updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
-    // reset both edit flags on price inversion to recalculate suggested eclp param values
-    updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: false });
-  };
-
-  const { baseParamsError, derivedParamsError } = useEclpParamValidations({ alpha, beta, c, s, lambda });
+  const { eclpParams } = usePoolCreationStore();
+  const { baseParamsError, derivedParamsError } = useEclpParamValidations(eclpParams);
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -33,19 +21,8 @@ export function EclpParams() {
         <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
       </a>
 
-      <div className="bg-base-300 p-5 rounded-lg mb-5 relative">
-        <div className="bg-base-300 w-full h-72 rounded-lg">
-          <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
-          <div
-            className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
-            onClick={handleTokenOrderInversion}
-          >
-            <ArrowsRightLeftIcon className="w-[18px] h-[18px]" />
-          </div>
-        </div>
-      </div>
-
-      <ParamInputs />
+      <EclpChartDisplay />
+      <EclpParamInputs />
 
       {baseParamsError && (
         <div className="mt-3">
@@ -65,10 +42,52 @@ export function EclpParams() {
   );
 }
 
-function ParamInputs() {
+function EclpChartDisplay() {
+  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { isTokenOrderInverted } = eclpParams;
+  useEclpPoolSpotPrice();
+  const { options } = useEclpPoolChart();
+
+  const handleTokenOrderInversion = () => {
+    updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
+
+    const poolSpotPrice = Number(eclpParams.usdValueToken1) / Number(eclpParams.usdValueToken0);
+    const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
+
+    updateEclpParam({
+      // TODO: figure out how to calculate alpha and beta based on values user has updated
+      alpha: (poolSpotPrice - poolSpotPrice * 0.075).toString(),
+      beta: (poolSpotPrice + poolSpotPrice * 0.075).toString(),
+      c,
+      s,
+      lambda: eclpParams.lambda,
+      peakPrice: formatEclpParamValues(poolSpotPrice),
+      usdValueToken0: eclpParams.usdValueToken1,
+      usdValueToken1: eclpParams.usdValueToken0,
+    });
+  };
+
+  return (
+    <div className="bg-base-300 p-5 rounded-lg mb-5 relative">
+      <div className="bg-base-300 w-full h-72 rounded-lg">
+        <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
+        <div
+          className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
+          onClick={handleTokenOrderInversion}
+        >
+          <ArrowsRightLeftIcon className="w-[18px] h-[18px]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EclpParamInputs() {
   const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
   const { alpha, beta, lambda, peakPrice, isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
-  const { updateUserData, hasEditedEclpTokenUsdValues } = useUserDataStore();
+  const { updateUserData } = useUserDataStore();
+
+  useEclpPoolSpotPrice();
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -83,18 +102,6 @@ function ParamInputs() {
     .sort((a, b) => a.address.localeCompare(b.address));
 
   if (isTokenOrderInverted) sortedTokens.reverse();
-
-  const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");
-  const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
-
-  useEffect(() => {
-    if (!hasEditedEclpTokenUsdValues) {
-      updateEclpParam({
-        usdValueToken0: usdValueFromApiToken0?.toString() || "",
-        usdValueToken1: usdValueFromApiToken1?.toString() || "",
-      });
-    }
-  }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam, hasEditedEclpTokenUsdValues]);
 
   return (
     <>
@@ -156,7 +163,7 @@ function ParamInputs() {
           onChange={e => {
             updateEclpParam({ peakPrice: sanitizeNumberInput(e.target.value) });
             const { c, s } = calculateRotationComponents(peakPrice);
-            updateEclpParam({ c: c.toString(), s: s.toString() });
+            updateEclpParam({ c, s });
             updateUserData({ hasEditedEclpParams: true });
           }}
         />

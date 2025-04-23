@@ -39,7 +39,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
 
-  const { alpha, beta, lambda } = eclpParams;
+  const { alpha, beta, lambda, peakPrice } = eclpParams;
   const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
     reClammParams;
 
@@ -48,6 +48,9 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
   const isReClamm = poolType === PoolType.ReClamm;
+
+  // Display tokenConfigs in sorted order for debugging ECLP sanity
+  const sortedTokenConfigs = [...tokenConfigs].sort((a, b) => a.address.localeCompare(b.address));
 
   return (
     <div className="flex flex-col gap-3">
@@ -65,7 +68,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={tokenConfigs.every(token => token.address === "")}
         content={
           <div className="flex flex-col gap-2">
-            {tokenConfigs.map((token, index) => (
+            {sortedTokenConfigs.map((token, index) => (
               <TokenDetails key={index} token={token} />
             ))}
           </div>
@@ -90,6 +93,12 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                   <div className="">Highest Price</div>
                   <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={beta}>
                     {beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Peak Price</div>
+                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={peakPrice}>
+                    {peakPrice.split(".")[1]?.length > 5 ? `${Number(peakPrice).toFixed(5)}...` : peakPrice}
                   </div>
                 </div>
                 <div className="flex justify-between">

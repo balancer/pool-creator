@@ -1,8 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3/";
-import { calculateRotationComponents } from "~~/utils/gryo";
-import { formatEclpParamValues } from "~~/utils/helpers";
+import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
@@ -32,7 +31,7 @@ export function useEclpPoolChart() {
   useEffect(() => {
     if (poolSpotPrice) {
       // auto-fill "starter" values if user has not edited eclp params yet
-      if (!hasEditedEclpParams && Number(usdValueToken1) && Number(usdValueToken1)) {
+      if (!hasEditedEclpParams) {
         const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
         const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
         const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;

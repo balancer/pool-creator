@@ -4,11 +4,13 @@ import { formatUnits, parseUnits } from "viem";
 import { ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
-import { useTokenUsdValue } from "~~/hooks/token";
 import { COW_MIN_AMOUNT } from "~~/utils";
 
 interface TokenFieldProps {
-  value: string;
+  inputValue: string;
+  usdValue: number | null | undefined;
+  isUsdValueLoading: boolean;
+  isUsdValueError: boolean;
   balance?: bigint;
   selectedToken: Token | null;
   sufficientAmount?: boolean;
@@ -19,7 +21,10 @@ interface TokenFieldProps {
 }
 
 export const TokenAmountField: React.FC<TokenFieldProps> = ({
-  value,
+  inputValue,
+  usdValue,
+  isUsdValueLoading,
+  isUsdValueError,
   balance,
   selectedToken,
   sufficientAmount,
@@ -27,9 +32,8 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
   onChange,
   setAmountToUserBalance,
 }) => {
-  const { tokenUsdValue, isLoading, isError } = useTokenUsdValue(selectedToken?.address, value);
-
-  const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
+  const amountGreaterThanBalance =
+    balance !== undefined && parseUnits(inputValue ?? "0", selectedToken?.decimals || 0) > balance;
 
   return (
     <>
@@ -40,7 +44,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
           onChange={onChange}
           min="0"
           placeholder="0.0"
-          value={value}
+          value={inputValue}
           className={`shadow-inner border-0 h-[77px] pb-4 px-4 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
             ${
               sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"
@@ -81,15 +85,15 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
           </div>
         </div>
         <div className="absolute bottom-1 right-5 text-neutral-400">
-          {typeof tokenUsdValue === "number" ? (
-            isLoading ? (
+          {typeof usdValue === "number" ? (
+            isUsdValueLoading ? (
               <div>...</div>
-            ) : isError ? (
+            ) : isUsdValueError ? (
               <div>price error</div>
             ) : (
-              <div>${tokenUsdValue.toFixed(2)}</div>
+              <div>${usdValue.toFixed(2)}</div>
             )
-          ) : !isLoading && selectedToken && value ? (
+          ) : !isUsdValueLoading && selectedToken && inputValue ? (
             <div>unknown price</div>
           ) : null}
         </div>

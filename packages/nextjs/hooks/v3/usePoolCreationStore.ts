@@ -33,6 +33,7 @@ export type EclpParams = {
   isTokenOrderInverted: boolean;
   usdValueToken0: string;
   usdValueToken1: string;
+  poolSpotPrice: number | null;
 };
 
 export type ReClammParams = {
@@ -102,6 +103,7 @@ export const initialEclpParams: EclpParams = {
   isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
   usdValueToken0: "",
   usdValueToken1: "",
+  poolSpotPrice: null,
 };
 
 export const initialPoolCreationState = {
