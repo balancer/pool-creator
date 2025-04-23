@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
-import { erc20Abi } from "viem";
+import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import { useFetchTokenList } from "~~/hooks/token";
@@ -9,7 +9,7 @@ import { usePoolCreationStore, useUserDataStore, useValidateRateProvider } from 
 
 export function ChooseTokenAmount({ index }: { index: number }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
+  const { tokenConfigs, poolType, updatePool, updateTokenConfig, eclpParams } = usePoolCreationStore();
   const { weight, rateProvider, tokenInfo, amount, address, isWeightLocked } = tokenConfigs[index];
 
   useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
@@ -31,8 +31,29 @@ export function ChooseTokenAmount({ index }: { index: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userTokenBalance, address]);
 
-  const handleTokenAmount = (amount: string) => {
-    updateTokenConfig(index, { amount });
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.trim();
+    if (Number(inputValue) >= 0) {
+      if (poolType === PoolType.GyroE) {
+        // Use USD values to calculate proper amount for other token
+        const otherIndex = index === 0 ? 1 : 0;
+        const { usdValueToken0, usdValueToken1 } = eclpParams;
+
+        const currentTokenPrice = index === 0 ? Number(usdValueToken0) : Number(usdValueToken1);
+        const otherTokenPrice = index === 0 ? Number(usdValueToken1) : Number(usdValueToken0);
+
+        const calculatedAmount = (Number(inputValue) * currentTokenPrice) / otherTokenPrice;
+
+        updateTokenConfig(index, { amount: inputValue });
+        updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() });
+      }
+    } else {
+      updateTokenConfig(index, { amount: "" });
+    }
+  };
+
+  const setAmountToUserBalance = () => {
+    updateTokenConfig(index, { amount: formatUnits(userTokenBalance || 0n, tokenInfo?.decimals || 0) });
   };
 
   const isUpdatingWeights = useRef(false);
@@ -104,7 +125,8 @@ export function ChooseTokenAmount({ index }: { index: number }) {
           <TokenAmountField
             value={amount}
             selectedToken={tokenInfo}
-            setTokenAmount={handleTokenAmount}
+            onChange={handleAmountChange}
+            setAmountToUserBalance={setAmountToUserBalance}
             tokenOptions={remainingTokens}
             balance={userTokenBalance}
           />

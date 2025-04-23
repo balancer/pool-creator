@@ -55,12 +55,17 @@ export function ChooseToken({ index }: { index: number }) {
       rateProvider: zeroAddress,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
-
       paysYieldFees: false,
     });
+    // updatePool({ eclpParams: initialEclpParams });
 
     // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
-    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false, hasEditedEclpParams: false });
+    updateUserData({
+      hasEditedPoolName: false,
+      hasEditedPoolSymbol: false,
+      hasEditedEclpParams: false,
+      hasEditedEclpTokenUsdValues: false,
+    });
 
     const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];
     if (hasBoostedVariant) {

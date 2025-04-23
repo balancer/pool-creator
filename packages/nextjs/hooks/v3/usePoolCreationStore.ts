@@ -92,6 +92,18 @@ export const initialTokenConfig: TokenConfig = {
   weight: undefined, // only used for weighted pools
 };
 
+export const initialEclpParams: EclpParams = {
+  alpha: "",
+  beta: "",
+  c: "",
+  s: "",
+  lambda: "",
+  peakPrice: "", // peak price only for UX purposes, not sent in tx
+  isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
+  usdValueToken0: "",
+  usdValueToken1: "",
+};
+
 export const initialPoolCreationState = {
   chain: undefined,
   step: 1,
@@ -113,17 +125,7 @@ export const initialPoolCreationState = {
   // For stable and stableSurge
   amplificationParameter: "", // only used for stable pools
   // For gyroECLP
-  eclpParams: {
-    alpha: "",
-    beta: "",
-    c: "",
-    s: "",
-    lambda: "",
-    peakPrice: "", // peak price only for UX purposes, not sent in tx
-    isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
-    usdValueToken0: "",
-    usdValueToken1: "",
-  },
+  eclpParams: initialEclpParams,
   // For ReClamm
   reClammParams: {
     initialTargetPrice: "",
@@ -173,6 +175,6 @@ export function usePoolStoreDebug() {
   const poolState = usePoolCreationStore();
 
   useEffect(() => {
-    console.log("Persistent Pool Store:", poolState);
+    console.log("Pool Store:", poolState);
   }, [poolState]);
 }

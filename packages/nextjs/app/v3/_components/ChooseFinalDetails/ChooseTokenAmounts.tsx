@@ -8,11 +8,14 @@ export function ChooseTokenAmounts() {
   const { tokenConfigs, poolType } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
   const { isValidTokenWeights } = useValidatePoolCreationInput();
+
+  // Sorting token configs is necessary for gyro auto-fill of other token amount
+  const sortedTokenConfigs = tokenConfigs.sort((a, b) => a.address.localeCompare(b.address));
   return (
     <div>
       <div className="text-xl mb-3">Choose initialization amounts:</div>
       <div className="flex flex-col gap-4">
-        {Array.from({ length: tokenConfigs.length }).map((_, index) => (
+        {sortedTokenConfigs.map((_, index) => (
           <ChooseTokenAmount key={index} index={index} />
         ))}
       </div>

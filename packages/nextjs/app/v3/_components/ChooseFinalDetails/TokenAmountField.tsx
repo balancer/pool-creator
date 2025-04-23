@@ -14,7 +14,8 @@ interface TokenFieldProps {
   sufficientAmount?: boolean;
   isDisabled?: boolean;
   tokenOptions?: Token[];
-  setTokenAmount?: (amount: string) => void;
+  setAmountToUserBalance?: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const TokenAmountField: React.FC<TokenFieldProps> = ({
@@ -23,24 +24,12 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
   selectedToken,
   sufficientAmount,
   isDisabled,
-  setTokenAmount,
+  onChange,
+  setAmountToUserBalance,
 }) => {
   const { tokenUsdValue, isLoading, isError } = useTokenUsdValue(selectedToken?.address, value);
 
   const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!setTokenAmount) return;
-    const inputValue = e.target.value.trim();
-    if (Number(inputValue) >= 0) {
-      setTokenAmount(inputValue);
-    } else {
-      setTokenAmount("");
-    }
-  };
-
-  const setAmountToMax = () =>
-    setTokenAmount && setTokenAmount(formatUnits(balance || 0n, selectedToken?.decimals || 0));
 
   return (
     <>
@@ -48,7 +37,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
         <input
           disabled={isDisabled}
           type="number"
-          onChange={handleAmountChange}
+          onChange={onChange}
           min="0"
           placeholder="0.0"
           value={value}
@@ -71,7 +60,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
             {selectedToken && balance !== undefined && (
               <div className={`flex items-center gap-2 text-neutral-400`}>
                 <div
-                  onClick={setAmountToMax}
+                  onClick={setAmountToUserBalance}
                   className="flex items-center gap-1 hover:text-accent hover:cursor-pointer"
                 >
                   <WalletIcon className="h-4 w-4 mt-0.5" /> {formatUnits(balance, selectedToken?.decimals || 0)}

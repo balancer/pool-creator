@@ -42,6 +42,6 @@ export function useUserDataStoreDebug() {
   const userDataState = useUserDataStore();
 
   useEffect(() => {
-    console.log("Persistent User Data Store:", userDataState);
+    console.log("User Data Store:", userDataState);
   }, [userDataState]);
 }
