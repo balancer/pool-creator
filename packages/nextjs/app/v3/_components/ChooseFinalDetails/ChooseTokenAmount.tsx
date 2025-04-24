@@ -4,14 +4,14 @@ import { PoolType } from "@balancer/sdk";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
-import { useFetchTokenList } from "~~/hooks/token";
-import { useTokenUsdValue } from "~~/hooks/token";
+import { useFetchTokenList, useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index }: { index: number }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, poolType, updatePool, updateTokenConfig, eclpParams } = usePoolCreationStore();
   const { weight, rateProvider, tokenInfo, amount, address, isWeightLocked } = tokenConfigs[index];
+  const { usdValueToken0, usdValueToken1, isTokenOrderInverted } = eclpParams;
 
   useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
 
@@ -38,7 +38,6 @@ export function ChooseTokenAmount({ index }: { index: number }) {
       if (poolType === PoolType.GyroE) {
         // Use USD values to calculate proper amount for other token
         const otherIndex = index === 0 ? 1 : 0;
-        const { usdValueToken0, usdValueToken1, isTokenOrderInverted } = eclpParams;
 
         // TODO: this is gross, make it better
         // If order is inverted, swap which price corresponds to which index
@@ -106,11 +105,15 @@ export function ChooseTokenAmount({ index }: { index: number }) {
   } = useTokenUsdValue(tokenInfo?.address, amount);
 
   let usdValue = null;
-
   // Handle edge case of if user altered token values for gyro eclp
   if (poolType === PoolType.GyroE) {
-    if (index === 0) usdValue = Number(eclpParams.usdValueToken0);
-    if (index === 1) usdValue = Number(eclpParams.usdValueToken1);
+    if (isTokenOrderInverted) {
+      if (index === 0) usdValue = Number(eclpParams.usdValueToken1);
+      if (index === 1) usdValue = Number(eclpParams.usdValueToken0);
+    } else {
+      if (index === 0) usdValue = Number(eclpParams.usdValueToken0);
+      if (index === 1) usdValue = Number(eclpParams.usdValueToken1);
+    }
   } else {
     usdValue = tokenUsdValue;
   }
