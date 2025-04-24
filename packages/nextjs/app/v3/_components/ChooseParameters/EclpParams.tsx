@@ -1,7 +1,7 @@
 import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useEclpParamValidations, useEclpPoolChart, useEclpPoolSpotPrice } from "~~/hooks/gyro";
+import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
 import { sortTokenConfigs } from "~~/utils/helpers";
@@ -63,7 +63,8 @@ function EclpChartDisplay() {
     const invertedAlpha = formatEclpParamValues(afterInvertSpotPrice - proportionalAlphaAdjustment);
     const invertedBeta = formatEclpParamValues(afterInvertSpotPrice + proportionalBetaAdjustment);
 
-    const beforeInvertPeakPricePercentDiff = (Number(peakPrice) - beforeInvertSpotPrice) / beforeInvertSpotPrice;
+    const beforeInvertPeakPrice = Number(peakPrice);
+    const beforeInvertPeakPricePercentDiff = (beforeInvertPeakPrice - beforeInvertSpotPrice) / beforeInvertSpotPrice;
     const peakPriceAdjustment = 1 + beforeInvertPeakPricePercentDiff;
     const invertedPeakPrice = formatEclpParamValues(afterInvertSpotPrice * peakPriceAdjustment);
     const { c, s } = calculateRotationComponents(invertedPeakPrice); // use peak price to calculate c & s
@@ -100,7 +101,7 @@ function EclpParamInputs() {
   const { alpha, beta, lambda, peakPrice, isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
 
-  useEclpPoolSpotPrice();
+  useAutofillStarterParams();
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -132,9 +133,7 @@ function EclpParamInputs() {
           isDollarValue={true}
           onChange={e => {
             updateEclpParam({ usdValueToken0: sanitizeNumberInput(e.target.value) });
-            // hasEditedEclpParams flag controls re-calculation of suggested eclp param values
-            // hasEditedEclpTokenUsdValues flag prevents price from being reset to API values after user edits it
-            updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: true });
+            updateUserData({ hasEditedEclpTokenUsdValues: true }); // flag prevents price from being reset to API values after user edits it
           }}
         />
         <TextField
@@ -143,9 +142,7 @@ function EclpParamInputs() {
           isDollarValue={true}
           onChange={e => {
             updateEclpParam({ usdValueToken1: sanitizeNumberInput(e.target.value) });
-            // hasEditedEclpParams flag controls re-calculation of suggested eclp param values
-            // hasEditedEclpTokenUsdValues flag prevents price from being reset to API values after user edits it
-            updateUserData({ hasEditedEclpParams: false, hasEditedEclpTokenUsdValues: true });
+            updateUserData({ hasEditedEclpTokenUsdValues: true }); // flag prevents price from being reset to API values after user edits it
           }}
         />
       </div>

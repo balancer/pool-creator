@@ -1,13 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
-import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3/";
-import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
+import { usePoolCreationStore } from "~~/hooks/v3/";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
-  const { tokenConfigs, updateEclpParam, eclpParams } = usePoolCreationStore();
+  const { tokenConfigs, eclpParams } = usePoolCreationStore();
   const { isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
-  const { hasEditedEclpParams } = useUserDataStore();
 
   let poolSpotPrice = null;
   if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
@@ -28,30 +26,7 @@ export function useEclpPoolChart() {
     return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
   }, [xMin, xMax, poolSpotPrice]);
 
-  useEffect(() => {
-    if (poolSpotPrice) {
-      // auto-fill "starter" values if user has not edited eclp params yet
-      if (!hasEditedEclpParams) {
-        const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
-        const lowestPrice = poolSpotPrice - poolSpotPrice * 0.1;
-        const highestPrice = poolSpotPrice + poolSpotPrice * 0.1;
-
-        updateEclpParam({
-          alpha: formatEclpParamValues(lowestPrice),
-          beta: formatEclpParamValues(highestPrice),
-          c,
-          s,
-          lambda: "100", // TODO: formula for lambda with consistent curve? maybe something logarithmic?
-          peakPrice: formatEclpParamValues(poolSpotPrice),
-        });
-      }
-    } else {
-      // without pool spot price, can't calculate "starter" rotation component values
-      updateEclpParam({ alpha: "", beta: "", c: "", s: "", peakPrice: "", lambda: "" });
-    }
-  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, usdValueToken0, usdValueToken1]);
-
-  // Gross but only for "Price ( token0 / token1 )" label on chart
+  // Sort w/ persistant state invert bool for consistent "Price ( token0 / token1 )" label on chart
   const sortedTokens = tokenConfigs
     .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
     .sort((a, b) => (a.address > b.address ? 1 : -1));
