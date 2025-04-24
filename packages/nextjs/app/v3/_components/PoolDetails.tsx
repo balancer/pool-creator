@@ -79,7 +79,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={false}
         content={
           <div>
-            {isGyroEclp && <EclpChartDisplay />}
+            {isGyroEclp && (
+              <div className="mb-3">
+                <EclpChartDisplay size="mini" />
+              </div>
+            )}
             {isStablePool && (
               <div className="flex justify-between">
                 <div className="">Amplification Parameter</div>

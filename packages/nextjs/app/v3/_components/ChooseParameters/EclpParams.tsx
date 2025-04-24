@@ -22,7 +22,7 @@ export function EclpParams() {
         <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-0.5" />
       </a>
 
-      <EclpChartDisplay />
+      <EclpChartDisplay size="full" />
       <EclpParamInputs />
 
       {baseParamsError && (
@@ -43,7 +43,7 @@ export function EclpParams() {
   );
 }
 
-export function EclpChartDisplay() {
+export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
   const { options } = useEclpPoolChart();
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
 
@@ -65,15 +65,17 @@ export function EclpChartDisplay() {
   };
 
   return (
-    <div className="bg-base-300 p-5 rounded-lg mb-5 relative">
-      <div className="bg-base-300 w-full h-72 rounded-lg">
+    <div className="bg-base-300 p-5 rounded-lg relative">
+      <div className={`bg-base-300 w-full h-${size === "full" ? "72" : "48"} rounded-lg`}>
         <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
-        <div
-          className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
-          onClick={handleInvertEclpParams}
-        >
-          <ArrowsRightLeftIcon className="w-[18px] h-[18px]" />
-        </div>
+        {size === "full" && (
+          <div
+            className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
+            onClick={handleInvertEclpParams}
+          >
+            <ArrowsRightLeftIcon className="w-[18px] h-[18px]" />
+          </div>
+        )}
       </div>
     </div>
   );
