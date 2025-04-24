@@ -1,9 +1,14 @@
 import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
+import {
+  useAutofillStarterParams,
+  useEclpParamValidations,
+  useEclpPoolChart,
+  useInvertEclpParams,
+} from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
-import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
+import { calculateRotationComponents } from "~~/utils/gryo";
 import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function EclpParams() {
@@ -43,43 +48,9 @@ export function EclpParams() {
   );
 }
 
-function EclpChartDisplay() {
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { isTokenOrderInverted, usdValueToken0, usdValueToken1, alpha, beta, lambda, peakPrice } = eclpParams;
+export function EclpChartDisplay() {
   const { options } = useEclpPoolChart();
-
-  const handleTokenOrderInversion = () => {
-    updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
-
-    const beforeInvertSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
-    const afterInvertSpotPrice = Number(usdValueToken1) / Number(usdValueToken0);
-
-    const beforeInvertAlpha = Number(alpha);
-    const beforeInvertBeta = Number(beta);
-    const beforeInvertAlphaPercentDiff = (beforeInvertSpotPrice - beforeInvertAlpha) / beforeInvertSpotPrice;
-    const beforeInvertBetaPercentDiff = (beforeInvertBeta - beforeInvertSpotPrice) / beforeInvertSpotPrice;
-    const proportionalAlphaAdjustment = afterInvertSpotPrice * beforeInvertAlphaPercentDiff;
-    const proportionalBetaAdjustment = afterInvertSpotPrice * beforeInvertBetaPercentDiff;
-    const invertedAlpha = formatEclpParamValues(afterInvertSpotPrice - proportionalAlphaAdjustment);
-    const invertedBeta = formatEclpParamValues(afterInvertSpotPrice + proportionalBetaAdjustment);
-
-    const beforeInvertPeakPrice = Number(peakPrice);
-    const beforeInvertPeakPricePercentDiff = (beforeInvertPeakPrice - beforeInvertSpotPrice) / beforeInvertSpotPrice;
-    const peakPriceAdjustment = 1 + beforeInvertPeakPricePercentDiff;
-    const invertedPeakPrice = formatEclpParamValues(afterInvertSpotPrice * peakPriceAdjustment);
-    const { c, s } = calculateRotationComponents(invertedPeakPrice); // use peak price to calculate c & s
-
-    updateEclpParam({
-      alpha: invertedAlpha,
-      beta: invertedBeta,
-      c,
-      s,
-      lambda,
-      peakPrice: invertedPeakPrice,
-      usdValueToken0: usdValueToken1,
-      usdValueToken1: usdValueToken0,
-    });
-  };
+  const { invertEclpParams } = useInvertEclpParams();
 
   return (
     <div className="bg-base-300 p-5 rounded-lg mb-5 relative">
@@ -87,7 +58,7 @@ function EclpChartDisplay() {
         <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
         <div
           className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
-          onClick={handleTokenOrderInversion}
+          onClick={invertEclpParams}
         >
           <ArrowsRightLeftIcon className="w-[18px] h-[18px]" />
         </div>

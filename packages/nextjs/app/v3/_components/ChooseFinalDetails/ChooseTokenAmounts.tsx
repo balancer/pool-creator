@@ -17,8 +17,8 @@ export function ChooseTokenAmounts() {
     <div>
       <div className="text-xl mb-3">Choose initialization amounts:</div>
       <div className="flex flex-col gap-4">
-        {sortedTokenConfigs.map((_, index) => (
-          <ChooseTokenAmount key={index} index={index} />
+        {sortedTokenConfigs.map((tokenConfig, index) => (
+          <ChooseTokenAmount key={tokenConfig.address} index={index} tokenConfig={tokenConfig} />
         ))}
       </div>
 

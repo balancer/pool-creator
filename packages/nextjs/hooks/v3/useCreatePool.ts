@@ -15,6 +15,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
+import { useInvertEclpParams } from "~~/hooks/gyro";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
@@ -55,7 +56,7 @@ export const useCreatePool = () => {
   } = usePoolCreationStore();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
-
+  const { invertEclpParams } = useInvertEclpParams();
   function createPoolInput(
     poolType: PoolType,
   ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput {
@@ -88,10 +89,8 @@ export const useCreatePool = () => {
       }),
     };
 
-    // TODO: figure out how to handle token order inversion
-    // If token order is inverted, need to do math to calculate these eclp params
     const { alpha, beta, c, s, lambda, isTokenOrderInverted } = humanReadableEclpParams;
-    console.log("isTokenOrderInverted:", isTokenOrderInverted);
+    if (isTokenOrderInverted) invertEclpParams(); // if params are inverted, reverse them before creating the pool
 
     const eclpParams = {
       alpha: parseUnits(alpha, 18),

@@ -4,21 +4,17 @@ import { PoolType } from "@balancer/sdk";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
-import { useFetchTokenList, useTokenUsdValue } from "~~/hooks/token";
-import { usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
+import { useTokenUsdValue } from "~~/hooks/token";
+import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
-export function ChooseTokenAmount({ index }: { index: number }) {
+export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, poolType, updatePool, updateTokenConfig, eclpParams } = usePoolCreationStore();
-  const { weight, rateProvider, tokenInfo, amount, address, isWeightLocked } = tokenConfigs[index];
+  const { tokenInfo, amount, address, isWeightLocked } = tokenConfig;
+  const weight = tokenConfig?.weight;
   const { usdValueToken0, usdValueToken1, isTokenOrderInverted } = eclpParams;
 
-  useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
-
   const { address: connectedAddress } = useAccount();
-  const { data } = useFetchTokenList();
-  const tokenList = data || [];
-  const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
   const { data: userTokenBalance } = useReadContract({
     address,
@@ -55,6 +51,8 @@ export function ChooseTokenAmount({ index }: { index: number }) {
 
         updateTokenConfig(index, { amount: inputValue });
         updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() });
+      } else {
+        updateTokenConfig(index, { amount: inputValue });
       }
     } else {
       updateTokenConfig(index, { amount: "" });
@@ -159,7 +157,6 @@ export function ChooseTokenAmount({ index }: { index: number }) {
             selectedToken={tokenInfo}
             onChange={handleAmountChange}
             setAmountToUserBalance={setAmountToUserBalance}
-            tokenOptions={remainingTokens}
             balance={userTokenBalance}
           />
         </div>

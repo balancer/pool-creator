@@ -15,7 +15,6 @@ interface TokenFieldProps {
   selectedToken: Token | null;
   sufficientAmount?: boolean;
   isDisabled?: boolean;
-  tokenOptions?: Token[];
   setAmountToUserBalance?: () => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }

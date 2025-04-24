@@ -1,5 +1,6 @@
 "use client";
 
+import { EclpChartDisplay } from "./ChooseParameters/EclpParams";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
@@ -32,14 +33,14 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     poolAddress,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
-    eclpParams,
+    // eclpParams,
     isUsingHooks,
     reClammParams,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
 
-  const { alpha, beta, lambda, peakPrice } = eclpParams;
+  // const { alpha, beta, lambda, peakPrice } = eclpParams;
   const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
     reClammParams;
 
@@ -81,7 +82,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={false}
         content={
           <div>
-            {isGyroEclp && (
+            {/* {isGyroEclp && (
               <>
                 <div className="flex justify-between">
                   <div className="">Lowest Price</div>
@@ -108,7 +109,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                   </div>
                 </div>
               </>
-            )}
+            )} */}
             {isStablePool && (
               <div className="flex justify-between">
                 <div className="">Amplification Parameter</div>
@@ -217,6 +218,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           </div>
         }
       />
+      {isGyroEclp && <EclpChartDisplay />}
       <DetailSection
         title="Information"
         isPreview={isPreview}
