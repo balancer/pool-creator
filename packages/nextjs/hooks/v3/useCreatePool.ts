@@ -15,9 +15,9 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useInvertEclpParams } from "~~/hooks/gyro";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { getParsedEclpParams } from "~~/utils/gryo/helpers";
 
 export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V3,
@@ -52,16 +52,16 @@ export const useCreatePool = () => {
     amplificationParameter,
     updatePool,
     createPoolTx,
-    eclpParams: humanReadableEclpParams,
+    eclpParams,
   } = usePoolCreationStore();
 
   const { data: boostableWhitelist } = useBoostableWhitelist();
-  const { invertEclpParams } = useInvertEclpParams();
   function createPoolInput(
     poolType: PoolType,
   ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput {
     if (poolType === undefined) throw new Error("No pool type provided!");
     if (!publicClient) throw new Error("Public client must be available!");
+
     const baseInput: CreatePoolV3BaseInput = {
       chainId: publicClient.chain.id,
       protocolVersion: 3,
@@ -89,16 +89,7 @@ export const useCreatePool = () => {
       }),
     };
 
-    const { alpha, beta, c, s, lambda, isTokenOrderInverted } = humanReadableEclpParams;
-    if (isTokenOrderInverted) invertEclpParams(); // if params are inverted, reverse them before creating the pool
-
-    const eclpParams = {
-      alpha: parseUnits(alpha, 18),
-      beta: parseUnits(beta, 18),
-      c: parseUnits(c, 18),
-      s: parseUnits(s, 18),
-      lambda: parseUnits(lambda, 18),
-    };
+    const parsedEclpParams = getParsedEclpParams(eclpParams);
 
     return {
       ...baseInput,
@@ -107,8 +98,8 @@ export const useCreatePool = () => {
         amplificationParameter: BigInt(amplificationParameter),
       }),
       ...(poolType === PoolType.GyroE && {
-        eclpParams,
-        derivedEclpParams: calcDerivedParams(eclpParams),
+        eclpParams: parsedEclpParams,
+        derivedEclpParams: calcDerivedParams(parsedEclpParams),
       }),
     } as CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput;
   }

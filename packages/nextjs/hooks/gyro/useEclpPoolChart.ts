@@ -5,7 +5,7 @@ import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
   const { tokenConfigs, eclpParams } = usePoolCreationStore();
-  const { isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
+  const { isEclpParamsInverted, usdValueToken0, usdValueToken1 } = eclpParams;
 
   let poolSpotPrice = null;
   if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
@@ -30,7 +30,7 @@ export function useEclpPoolChart() {
   const sortedTokens = tokenConfigs
     .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
     .sort((a, b) => (a.address > b.address ? 1 : -1));
-  if (isTokenOrderInverted) sortedTokens.reverse();
+  if (isEclpParamsInverted) sortedTokens.reverse();
 
   const options = useMemo(() => {
     if (!data) return;

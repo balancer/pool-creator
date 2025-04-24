@@ -6,14 +6,14 @@ import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function useAutofillStarterParams() {
   const { eclpParams, tokenConfigs, updateEclpParam } = usePoolCreationStore();
-  const { isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
+  const { isEclpParamsInverted, usdValueToken0, usdValueToken1 } = eclpParams;
   const { hasEditedEclpTokenUsdValues, hasEditedEclpParams } = useUserDataStore();
 
   const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
     address: token.address,
     symbol: token.tokenInfo?.symbol,
   }));
-  if (isTokenOrderInverted) sortedTokens.reverse();
+  if (isEclpParamsInverted) sortedTokens.reverse();
 
   // 1. Fetch token prices from API to auto-fill USD values for tokens
   const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");

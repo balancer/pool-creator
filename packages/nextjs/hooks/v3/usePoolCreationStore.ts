@@ -31,7 +31,7 @@ export type EclpParams = {
   s: string;
   lambda: string;
   peakPrice: string;
-  isTokenOrderInverted: boolean;
+  isEclpParamsInverted: boolean;
   usdValueToken0: string;
   usdValueToken1: string;
 };
@@ -100,7 +100,7 @@ export const initialEclpParams: EclpParams = {
   s: "",
   lambda: "",
   peakPrice: "", // peak price only for UX purposes, not sent in tx
-  isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
+  isEclpParamsInverted: false, // inverted relative to alphanumeric (used for chart toggle)
   usdValueToken0: "",
   usdValueToken1: "",
   // poolSpotPrice: null,

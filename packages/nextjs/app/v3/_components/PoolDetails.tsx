@@ -33,14 +33,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     poolAddress,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
-    // eclpParams,
     isUsingHooks,
     reClammParams,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
-
-  // const { alpha, beta, lambda, peakPrice } = eclpParams;
   const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
     reClammParams;
 
@@ -82,34 +79,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={false}
         content={
           <div>
-            {/* {isGyroEclp && (
-              <>
-                <div className="flex justify-between">
-                  <div className="">Lowest Price</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={alpha}>
-                    {alpha.split(".")[1]?.length > 5 ? `${Number(alpha).toFixed(5)}...` : alpha}
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Highest Price</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={beta}>
-                    {beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Peak Price</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={peakPrice}>
-                    {peakPrice.split(".")[1]?.length > 5 ? `${Number(peakPrice).toFixed(5)}...` : peakPrice}
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Stretching Factor</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={lambda}>
-                    {lambda.split(".")[1]?.length > 5 ? `${Number(lambda).toFixed(5)}...` : lambda}
-                  </div>
-                </div>
-              </>
-            )} */}
+            {isGyroEclp && <EclpChartDisplay />}
             {isStablePool && (
               <div className="flex justify-between">
                 <div className="">Amplification Parameter</div>
@@ -218,7 +188,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           </div>
         }
       />
-      {isGyroEclp && <EclpChartDisplay />}
       <DetailSection
         title="Information"
         isPreview={isPreview}
