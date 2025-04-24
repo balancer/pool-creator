@@ -33,15 +33,15 @@ export function useEclpPoolChart() {
       // auto-fill "starter" values if user has not edited eclp params yet
       if (!hasEditedEclpParams) {
         const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
-        const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
-        const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
+        const lowestPrice = poolSpotPrice - poolSpotPrice * 0.1;
+        const highestPrice = poolSpotPrice + poolSpotPrice * 0.1;
 
         updateEclpParam({
           alpha: formatEclpParamValues(lowestPrice),
           beta: formatEclpParamValues(highestPrice),
           c,
           s,
-          lambda: "1000", // TODO: how to calculate stretching factor that makes pretty curve given values for alpha, beta, c, s?
+          lambda: "100", // TODO: formula for lambda with consistent curve? maybe something logarithmic?
           peakPrice: formatEclpParamValues(poolSpotPrice),
         });
       }

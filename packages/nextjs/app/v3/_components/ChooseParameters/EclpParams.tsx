@@ -4,6 +4,7 @@ import { Alert, TextField } from "~~/components/common";
 import { useEclpParamValidations, useEclpPoolChart, useEclpPoolSpotPrice } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
+import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function EclpParams() {
   const { eclpParams } = usePoolCreationStore();
@@ -44,26 +45,38 @@ export function EclpParams() {
 
 function EclpChartDisplay() {
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { isTokenOrderInverted } = eclpParams;
-  useEclpPoolSpotPrice();
+  const { isTokenOrderInverted, usdValueToken0, usdValueToken1, alpha, beta, lambda, peakPrice } = eclpParams;
   const { options } = useEclpPoolChart();
 
   const handleTokenOrderInversion = () => {
     updateEclpParam({ isTokenOrderInverted: !isTokenOrderInverted });
 
-    const poolSpotPrice = Number(eclpParams.usdValueToken1) / Number(eclpParams.usdValueToken0);
-    const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
+    const beforeInvertSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
+    const afterInvertSpotPrice = Number(usdValueToken1) / Number(usdValueToken0);
+
+    const beforeInvertAlpha = Number(alpha);
+    const beforeInvertBeta = Number(beta);
+    const beforeInvertAlphaPercentDiff = (beforeInvertSpotPrice - beforeInvertAlpha) / beforeInvertSpotPrice;
+    const beforeInvertBetaPercentDiff = (beforeInvertBeta - beforeInvertSpotPrice) / beforeInvertSpotPrice;
+    const proportionalAlphaAdjustment = afterInvertSpotPrice * beforeInvertAlphaPercentDiff;
+    const proportionalBetaAdjustment = afterInvertSpotPrice * beforeInvertBetaPercentDiff;
+    const invertedAlpha = formatEclpParamValues(afterInvertSpotPrice - proportionalAlphaAdjustment);
+    const invertedBeta = formatEclpParamValues(afterInvertSpotPrice + proportionalBetaAdjustment);
+
+    const beforeInvertPeakPricePercentDiff = (Number(peakPrice) - beforeInvertSpotPrice) / beforeInvertSpotPrice;
+    const peakPriceAdjustment = 1 + beforeInvertPeakPricePercentDiff;
+    const invertedPeakPrice = formatEclpParamValues(afterInvertSpotPrice * peakPriceAdjustment);
+    const { c, s } = calculateRotationComponents(invertedPeakPrice); // use peak price to calculate c & s
 
     updateEclpParam({
-      // TODO: figure out how to calculate alpha and beta based on values user has updated
-      alpha: (poolSpotPrice - poolSpotPrice * 0.075).toString(),
-      beta: (poolSpotPrice + poolSpotPrice * 0.075).toString(),
+      alpha: invertedAlpha,
+      beta: invertedBeta,
       c,
       s,
-      lambda: eclpParams.lambda,
-      peakPrice: formatEclpParamValues(poolSpotPrice),
-      usdValueToken0: eclpParams.usdValueToken1,
-      usdValueToken1: eclpParams.usdValueToken0,
+      lambda,
+      peakPrice: invertedPeakPrice,
+      usdValueToken0: usdValueToken1,
+      usdValueToken1: usdValueToken0,
     });
   };
 
@@ -92,15 +105,15 @@ function EclpParamInputs() {
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
     const sanitized = input.replace(/[^0-9.]/g, "");
-    // Prevent multiple decimal points
+    // Prevent decimal points
     const parts = sanitized.split(".");
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
 
-  const sortedTokens = tokenConfigs
-    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
-    .sort((a, b) => a.address.localeCompare(b.address));
-
+  const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
+    address: token.address,
+    symbol: token.tokenInfo?.symbol,
+  }));
   if (isTokenOrderInverted) sortedTokens.reverse();
 
   return (
@@ -162,7 +175,7 @@ function EclpParamInputs() {
           value={peakPrice}
           onChange={e => {
             updateEclpParam({ peakPrice: sanitizeNumberInput(e.target.value) });
-            const { c, s } = calculateRotationComponents(peakPrice);
+            const { c, s } = calculateRotationComponents(sanitizeNumberInput(e.target.value));
             updateEclpParam({ c, s });
             updateUserData({ hasEditedEclpParams: true });
           }}

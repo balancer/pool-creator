@@ -11,7 +11,7 @@ import {
   usePoolCreationStore,
   useValidatePoolCreationInput,
 } from "~~/hooks/v3";
-import { abbreviateAddress } from "~~/utils/helpers";
+import { abbreviateAddress, sortTokenConfigs } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
@@ -49,8 +49,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
   const isReClamm = poolType === PoolType.ReClamm;
 
-  // Display tokenConfigs in sorted order for debugging ECLP sanity
-  const sortedTokenConfigs = [...tokenConfigs].sort((a, b) => a.address.localeCompare(b.address));
+  // Display tokenConfigs in sorted order for sanity check debugging of gyro ECLP
+  const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
 
   return (
     <div className="flex flex-col gap-3">
