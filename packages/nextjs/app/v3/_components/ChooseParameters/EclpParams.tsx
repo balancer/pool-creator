@@ -1,4 +1,6 @@
 import ReactECharts from "echarts-for-react";
+import { erc20Abi } from "viem";
+import { useReadContract } from "wagmi";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
@@ -49,15 +51,10 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 
   const handleInvertEclpParams = () => {
     const { usdValueToken0, usdValueToken1, isEclpParamsInverted } = eclpParams;
-
-    const { alpha, beta, c, s, peakPrice } = invertEclpParams(eclpParams);
+    const invertedParams = invertEclpParams(eclpParams);
 
     updateEclpParam({
-      alpha,
-      beta,
-      c,
-      s,
-      peakPrice,
+      ...invertedParams,
       usdValueToken0: usdValueToken1,
       usdValueToken1: usdValueToken0,
       isEclpParamsInverted: !isEclpParamsInverted,
@@ -66,7 +63,7 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 
   return (
     <div className="bg-base-300 p-5 rounded-lg relative">
-      <div className={`bg-base-300 w-full h-${size === "full" ? "72" : "48"} rounded-lg`}>
+      <div className={`bg-base-300 w-full ${size === "full" && "h-72"} ${size === "mini" && "h-48"} rounded-lg`}>
         <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
         {size === "full" && (
           <div
@@ -99,13 +96,34 @@ function EclpParamInputs() {
   const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
     address: token.address,
     symbol: token.tokenInfo?.symbol,
+    underlyingTokenAddress: token.tokenInfo?.underlyingTokenAddress,
   }));
   if (isEclpParamsInverted) sortedTokens.reverse();
+
+  const { data: underlyingToken0Symbol } = useReadContract({
+    address: sortedTokens[0].underlyingTokenAddress,
+    abi: erc20Abi,
+    functionName: "symbol",
+  });
+
+  const { data: underlyingToken1Symbol } = useReadContract({
+    address: sortedTokens[1].underlyingTokenAddress,
+    abi: erc20Abi,
+    functionName: "symbol",
+  });
+
+  const symbolForToken0 = underlyingToken0Symbol ? underlyingToken0Symbol : sortedTokens[0].symbol;
+  const symbolForToken1 = underlyingToken1Symbol ? underlyingToken1Symbol : sortedTokens[1].symbol;
+  const tokenHasRateProvider = sortedTokens.some(token => token.underlyingTokenAddress);
 
   return (
     <>
       <div className="flex flex-col gap-4 mt-3">
-        <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
+        {tokenHasRateProvider ? (
+          <Alert type="warning">For yield bearing assets, params are computed using underlying token values</Alert>
+        ) : (
+          <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
+        )}
         {(!usdValueToken0 || !usdValueToken1) && (
           <Alert type="warning">Enter USD values for both tokens to begin parameter configuration</Alert>
         )}
@@ -113,7 +131,7 @@ function EclpParamInputs() {
 
       <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
         <TextField
-          label={`${sortedTokens[0].symbol} Value`}
+          label={`USD value for ${symbolForToken0}`}
           value={usdValueToken0}
           isDollarValue={true}
           onChange={e => {
@@ -122,7 +140,7 @@ function EclpParamInputs() {
           }}
         />
         <TextField
-          label={`${sortedTokens[1].symbol} Value`}
+          label={`$ value for ${symbolForToken1}`}
           value={usdValueToken1}
           isDollarValue={true}
           onChange={e => {

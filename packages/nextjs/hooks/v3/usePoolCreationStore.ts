@@ -14,6 +14,7 @@ export type TabType = (typeof TABS)[number];
 export type TokenConfig = {
   address: Address;
   rateProvider: Address;
+  currentRate: bigint | undefined;
   isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
@@ -83,6 +84,7 @@ export interface PoolCreationStore {
 export const initialTokenConfig: TokenConfig = {
   address: "",
   rateProvider: zeroAddress,
+  currentRate: undefined,
   isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,

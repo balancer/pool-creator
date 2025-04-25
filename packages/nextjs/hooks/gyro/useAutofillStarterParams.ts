@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { formatUnits } from "viem";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
@@ -12,6 +13,7 @@ export function useAutofillStarterParams() {
   const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
     address: token.address,
     symbol: token.tokenInfo?.symbol,
+    currentRate: token.currentRate,
   }));
   if (isEclpParamsInverted) sortedTokens.reverse();
 
@@ -20,12 +22,23 @@ export function useAutofillStarterParams() {
   const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
 
   useEffect(() => {
-    if (!hasEditedEclpTokenUsdValues && usdValueFromApiToken0 && usdValueFromApiToken1) {
-      updateEclpParam({
-        usdValueToken0: usdValueFromApiToken0.toString(),
-        usdValueToken1: usdValueFromApiToken1.toString(),
-      });
+    if (!hasEditedEclpTokenUsdValues && usdValueFromApiToken0) {
+      const currentRate = sortedTokens[0].currentRate;
+      // If token is using rate provider, use it to convert the USD price to that of the underlying token
+      const usdValueToken0 = currentRate
+        ? usdValueFromApiToken0 / Number(formatUnits(currentRate, 18))
+        : usdValueFromApiToken0;
+      updateEclpParam({ usdValueToken0: usdValueToken0.toString() }); // need string because this state is for input field
     }
+    if (!hasEditedEclpTokenUsdValues && usdValueFromApiToken1) {
+      const currentRate = sortedTokens[1].currentRate;
+      // If token is using rate provider, use it to convert the USD price to that of the underlying token
+      const usdValueToken1 = currentRate
+        ? usdValueFromApiToken1 / Number(formatUnits(currentRate, 18))
+        : usdValueFromApiToken1;
+      updateEclpParam({ usdValueToken1: usdValueToken1.toString() }); // need string because this state is for input field
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam, hasEditedEclpTokenUsdValues]);
 
   // 2. Use token usd values to calculate spot price

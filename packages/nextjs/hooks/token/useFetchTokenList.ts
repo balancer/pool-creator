@@ -19,6 +19,7 @@ export const useFetchTokenList = () => {
       decimals
       logoURI
       isErc4626
+      underlyingTokenAddress
       priceRateProviderData {
         address
         summary

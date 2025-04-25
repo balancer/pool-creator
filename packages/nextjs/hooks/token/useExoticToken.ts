@@ -14,6 +14,7 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
   const { name, symbol, decimals, isLoadingName, isLoadingDecimals, isLoadingSymbol } =
     useReadToken(exoticTokenAddress);
 
+  // TODO: handle priceRateProviderData and underlyingTokenAddress for exotic tokens?
   const exoticToken: Token | undefined = useMemo(() => {
     if (exoticTokenAddress && name && symbol && decimals) {
       return {
@@ -24,7 +25,7 @@ export function useExoticToken(searchText: string, filteredTokenOptions: Token[]
         decimals,
         chainId: targetNetwork.id,
         priceRateProviderData: null,
-        underlyingTokenAddress: null,
+        underlyingTokenAddress: undefined,
         isBufferAllowed: false,
       };
     }
