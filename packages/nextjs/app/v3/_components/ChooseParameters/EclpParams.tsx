@@ -120,7 +120,7 @@ function EclpParamInputs() {
     <>
       <div className="flex flex-col gap-4 mt-3">
         {tokenHasRateProvider ? (
-          <Alert type="warning">For yield bearing assets, params are computed using underlying token values</Alert>
+          <Alert type="warning">For yield bearing assets, you set the USD value for the underlying token</Alert>
         ) : (
           <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
         )}
@@ -136,7 +136,7 @@ function EclpParamInputs() {
           isDollarValue={true}
           onChange={e => {
             updateEclpParam({ usdValueToken0: sanitizeNumberInput(e.target.value) });
-            updateUserData({ hasEditedEclpTokenUsdValues: true }); // flag prevents price from being reset to API values after user edits it
+            updateUserData({ hasEditedEclpParams: false }); // resetting this flag causes useAutofillStarterParams to do its thing, which we want so chart moves to surround new "current price" of pool
           }}
         />
         <TextField
@@ -145,7 +145,7 @@ function EclpParamInputs() {
           isDollarValue={true}
           onChange={e => {
             updateEclpParam({ usdValueToken1: sanitizeNumberInput(e.target.value) });
-            updateUserData({ hasEditedEclpTokenUsdValues: true }); // flag prevents price from being reset to API values after user edits it
+            updateUserData({ hasEditedEclpParams: false }); // resetting this flag causes useAutofillStarterParams to do its thing, which we want so chart moves to surround new "current price" of pool
           }}
         />
       </div>

@@ -70,7 +70,6 @@ export function ChooseToken({ index }: { index: number }) {
       hasEditedPoolName: false,
       hasEditedPoolSymbol: false,
       hasEditedEclpParams: false,
-      hasEditedEclpTokenUsdValues: false,
     });
 
     const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];

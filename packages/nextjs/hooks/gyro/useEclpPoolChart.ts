@@ -1,14 +1,14 @@
 import { useMemo } from "react";
+import { useEclpSpotPrice } from "./useEclpSpotPrice";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
 import { usePoolCreationStore } from "~~/hooks/v3/";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
   const { tokenConfigs, eclpParams } = usePoolCreationStore();
-  const { isEclpParamsInverted, usdValueToken0, usdValueToken1 } = eclpParams;
+  const { isEclpParamsInverted } = eclpParams;
 
-  let poolSpotPrice = null;
-  if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
+  const poolSpotPrice = useEclpSpotPrice();
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;
