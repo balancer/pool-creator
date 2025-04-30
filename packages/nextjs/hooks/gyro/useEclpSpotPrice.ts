@@ -1,22 +1,24 @@
-// import { formatUnits } from "viem";
-// import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
-
-// import { sortTokenConfigs } from "~~/utils/helpers";
 
 export const useEclpSpotPrice = () => {
   const { eclpParams } = usePoolCreationStore();
-  const { usdValueToken0, usdValueToken1 } = eclpParams;
+  const { usdValueToken0, usdValueToken1, underlyingUsdValueToken0, underlyingUsdValueToken1 } = eclpParams;
 
-  if (Number(usdValueToken0) && Number(usdValueToken1)) {
-    return Number(usdValueToken0) / Number(usdValueToken1);
-  } else {
-    return null;
-  }
+  let valueToken0 = Number(usdValueToken0);
+  let valueToken1 = Number(usdValueToken1);
+
+  // use underlying usd values if they exist (meaning token is erc4626)
+  if (underlyingUsdValueToken0) valueToken0 = underlyingUsdValueToken0;
+  if (underlyingUsdValueToken1) valueToken1 = underlyingUsdValueToken1;
+
+  if (valueToken0 && valueToken1) return valueToken0 / valueToken1;
+  return null;
+
+  // TODO: implement this for the transaction send?
 
   // OPTION TO SCALE UNDERLYING USD VALUES TO ERC4626 VALUES FOR ECLP CALCULATIONS:
 
-  // const sortedTokens = useEclpTokenOrder();
+  // // const sortedTokens = useEclpTokenOrder();
 
   //   // Fetch token prices from API to auto-fill USD values for tokens (always boosted token usd price)
   //   const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");

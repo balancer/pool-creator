@@ -47,13 +47,26 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
 
   const handleInvertEclpParams = () => {
-    const { usdValueToken0, usdValueToken1, isEclpParamsInverted } = eclpParams;
+    const {
+      usdValueToken0,
+      usdValueToken1,
+      underlyingUsdValueToken0,
+      underlyingUsdValueToken1,
+      isEclpParamsInverted,
+      usdValueTokenInput0,
+      usdValueTokenInput1,
+    } = eclpParams;
     const invertedParams = invertEclpParams(eclpParams);
 
+    // TODO: ahhhh this is gross
     updateEclpParam({
       ...invertedParams,
+      usdValueTokenInput0: usdValueTokenInput1,
       usdValueToken0: usdValueToken1,
+      underlyingUsdValueToken0: underlyingUsdValueToken1,
+      usdValueTokenInput1: usdValueTokenInput0,
       usdValueToken1: usdValueToken0,
+      underlyingUsdValueToken1: underlyingUsdValueToken0,
       isEclpParamsInverted: !isEclpParamsInverted,
     });
   };
@@ -77,7 +90,7 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 
 function EclpParamInputs() {
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, lambda, peakPrice, usdValueToken0, usdValueToken1 } = eclpParams;
+  const { alpha, beta, lambda, peakPrice, usdValueTokenInput0, usdValueTokenInput1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
   const sortedTokens = useEclpTokenOrder();
   const tokenHasRateProvider = sortedTokens.some(token => token.underlyingTokenAddress);
@@ -100,7 +113,7 @@ function EclpParamInputs() {
         ) : (
           <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
         )}
-        {(!usdValueToken0 || !usdValueToken1) && (
+        {(!usdValueTokenInput0 || !usdValueTokenInput1) && (
           <Alert type="warning">Enter USD values for both tokens to begin parameter configuration</Alert>
         )}
       </div>
@@ -108,19 +121,19 @@ function EclpParamInputs() {
       <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
         <TextField
           label={`USD value for ${sortedTokens[0].symbol}`}
-          value={usdValueToken0}
+          value={usdValueTokenInput0}
           isDollarValue={true}
           onChange={e => {
-            updateEclpParam({ usdValueToken0: sanitizeNumberInput(e.target.value) });
+            updateEclpParam({ usdValueTokenInput0: sanitizeNumberInput(e.target.value) });
             updateUserData({ hasEditedEclpParams: false }); // resetting this flag causes useAutofillStarterParams to do its thing, which we want so chart moves to surround new "current price" of pool
           }}
         />
         <TextField
           label={`USD value for ${sortedTokens[1].symbol}`}
-          value={usdValueToken1}
+          value={usdValueTokenInput1}
           isDollarValue={true}
           onChange={e => {
-            updateEclpParam({ usdValueToken1: sanitizeNumberInput(e.target.value) });
+            updateEclpParam({ usdValueTokenInput1: sanitizeNumberInput(e.target.value) });
             updateUserData({ hasEditedEclpParams: false }); // resetting this flag causes useAutofillStarterParams to do its thing, which we want so chart moves to surround new "current price" of pool
           }}
         />
