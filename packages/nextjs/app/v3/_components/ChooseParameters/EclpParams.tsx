@@ -1,12 +1,9 @@
 import ReactECharts from "echarts-for-react";
-import { erc20Abi } from "viem";
-import { useReadContract } from "wagmi";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
+import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart, useEclpTokenOrder } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, invertEclpParams } from "~~/utils/gryo";
-import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function EclpParams() {
   const { eclpParams } = usePoolCreationStore();
@@ -79,9 +76,11 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 }
 
 function EclpParamInputs() {
-  const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
-  const { alpha, beta, lambda, peakPrice, isEclpParamsInverted, usdValueToken0, usdValueToken1 } = eclpParams;
+  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { alpha, beta, lambda, peakPrice, usdValueToken0, usdValueToken1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
+  const sortedTokens = useEclpTokenOrder();
+  const tokenHasRateProvider = sortedTokens.some(token => token.underlyingTokenAddress);
 
   useAutofillStarterParams();
 
@@ -92,29 +91,6 @@ function EclpParamInputs() {
     const parts = sanitized.split(".");
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
-
-  const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
-    address: token.address,
-    symbol: token.tokenInfo?.symbol,
-    underlyingTokenAddress: token.tokenInfo?.underlyingTokenAddress,
-  }));
-  if (isEclpParamsInverted) sortedTokens.reverse();
-
-  const { data: underlyingToken0Symbol } = useReadContract({
-    address: sortedTokens[0].underlyingTokenAddress,
-    abi: erc20Abi,
-    functionName: "symbol",
-  });
-
-  const { data: underlyingToken1Symbol } = useReadContract({
-    address: sortedTokens[1].underlyingTokenAddress,
-    abi: erc20Abi,
-    functionName: "symbol",
-  });
-
-  const symbolForToken0 = underlyingToken0Symbol ? underlyingToken0Symbol : sortedTokens[0].symbol;
-  const symbolForToken1 = underlyingToken1Symbol ? underlyingToken1Symbol : sortedTokens[1].symbol;
-  const tokenHasRateProvider = sortedTokens.some(token => token.underlyingTokenAddress);
 
   return (
     <>
@@ -131,7 +107,7 @@ function EclpParamInputs() {
 
       <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
         <TextField
-          label={`USD value for ${symbolForToken0}`}
+          label={`USD value for ${sortedTokens[0].symbol}`}
           value={usdValueToken0}
           isDollarValue={true}
           onChange={e => {
@@ -140,7 +116,7 @@ function EclpParamInputs() {
           }}
         />
         <TextField
-          label={`$ value for ${symbolForToken1}`}
+          label={`USD value for ${sortedTokens[1].symbol}`}
           value={usdValueToken1}
           isDollarValue={true}
           onChange={e => {
