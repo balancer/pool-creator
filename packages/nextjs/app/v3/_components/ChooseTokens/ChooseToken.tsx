@@ -59,6 +59,8 @@ export function ChooseToken({ index }: { index: number }) {
       address: tokenInfo.address,
       tokenType: TokenType.STANDARD,
       rateProvider: zeroAddress,
+      currentRate: undefined,
+      isValidRateProvider: false,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
       paysYieldFees: false,
@@ -107,7 +109,7 @@ export function ChooseToken({ index }: { index: number }) {
     }
 
     // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
-    if (rateProviderData && !showBoostOpportunityModal) {
+    if (rateProviderData && !showBoostOpportunityModal && !token.isValidRateProvider) {
       // Constant rate providers are special case only used for gyro pools
       if (rateProviderData.name !== "ConstantRateProvider") {
         setShowRateProviderModal(true);
