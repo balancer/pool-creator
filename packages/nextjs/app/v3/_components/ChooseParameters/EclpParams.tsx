@@ -58,7 +58,7 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
     } = eclpParams;
     const invertedParams = invertEclpParams(eclpParams);
 
-    // TODO: ahhhh this is gross
+    // TODO: ahhhh this is gross... waited too long to do the state refactor :'(
     updateEclpParam({
       ...invertedParams,
       usdValueTokenInput0: usdValueTokenInput1,

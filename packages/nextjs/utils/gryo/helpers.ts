@@ -63,10 +63,7 @@ export const formatEclpParamValues = (num: number): string => {
   return fixed.replace(/(\.\d*[1-9])0+$|\.0+$/, "$1");
 };
 
-/**
- * 1. Parses ECLP param input string values to bigint
- * 2. Inverts the values using reciprocal if isEclpParamsInverted is true
- */
+// Parse ECLP param input string values to bigint for on chain usage
 export const parseEclpParams = ({
   alpha,
   beta,
@@ -89,6 +86,7 @@ export const parseEclpParams = ({
   };
 };
 
+// Handle inverting eclp params if needed
 export function getParsedEclpParams(inputs: EclpParams) {
   const { alpha, beta, c, s, lambda, isEclpParamsInverted } = inputs;
   const eclpParams = isEclpParamsInverted ? { ...invertEclpParams(inputs), lambda } : { alpha, beta, c, s, lambda };
