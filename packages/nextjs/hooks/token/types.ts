@@ -6,7 +6,7 @@ export type Token = {
   decimals: number;
   logoURI: string;
   hasBoostedVariant?: boolean;
-  underlyingTokenAddress: string | null;
+  underlyingTokenAddress: string | undefined;
   isBufferAllowed: boolean;
   priceRateProviderData: {
     address: string;

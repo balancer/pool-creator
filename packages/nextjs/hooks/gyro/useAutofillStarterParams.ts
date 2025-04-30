@@ -1,39 +1,59 @@
 import { useEffect } from "react";
+import { useEclpSpotPrice } from "./";
+import { formatUnits } from "viem";
+import { useEclpTokenOrder } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
-import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function useAutofillStarterParams() {
-  const { eclpParams, tokenConfigs, updateEclpParam } = usePoolCreationStore();
-  const { isEclpParamsInverted, usdValueToken0, usdValueToken1 } = eclpParams;
-  const { hasEditedEclpTokenUsdValues, hasEditedEclpParams } = useUserDataStore();
+  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { usdValueToken0, usdValueToken1, hasFetchedUsdValueToken0, hasFetchedUsdValueToken1 } = eclpParams;
+  const { hasEditedEclpParams } = useUserDataStore();
+  const poolSpotPrice = useEclpSpotPrice();
+  const sortedTokens = useEclpTokenOrder();
 
-  const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
-    address: token.address,
-    symbol: token.tokenInfo?.symbol,
-  }));
-  if (isEclpParamsInverted) sortedTokens.reverse();
-
-  // 1. Fetch token prices from API to auto-fill USD values for tokens
+  // Fetch token prices from API to auto-fill USD values for tokens
   const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");
   const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
 
   useEffect(() => {
-    if (!hasEditedEclpTokenUsdValues && usdValueFromApiToken0 && usdValueFromApiToken1) {
+    // If token is using rate provider, use it to convert the USD price to that of the underlying token
+    // for the user input that sets usd value of token
+    if (!hasFetchedUsdValueToken0 && usdValueFromApiToken0) {
+      const currentRate = sortedTokens[0].currentRate;
+      const rateAdjustedUsdValueToken0 = currentRate
+        ? usdValueFromApiToken0 / Number(formatUnits(currentRate, 18))
+        : usdValueFromApiToken0;
+
       updateEclpParam({
-        usdValueToken0: usdValueFromApiToken0.toString(),
-        usdValueToken1: usdValueFromApiToken1.toString(),
+        usdValueToken0: rateAdjustedUsdValueToken0.toString(), // need string because this state is for input field
+        hasFetchedUsdValueToken0: true,
+        isUnderlyingUsdValueToken0: currentRate !== undefined,
       });
     }
-  }, [usdValueFromApiToken0, usdValueFromApiToken1, updateEclpParam, hasEditedEclpTokenUsdValues]);
+    if (!hasFetchedUsdValueToken1 && usdValueFromApiToken1) {
+      const currentRate = sortedTokens[1].currentRate;
+      const rateAdjustedUsdValueToken1 = currentRate
+        ? usdValueFromApiToken1 / Number(formatUnits(currentRate, 18))
+        : usdValueFromApiToken1;
 
-  // 2. Use token usd values to calculate spot price
-  let poolSpotPrice = null;
-  // Using persistant state values intead of api values directly incase user changes them
-  if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
+      updateEclpParam({
+        usdValueToken1: rateAdjustedUsdValueToken1.toString(), // need string because this state is for input field
+        hasFetchedUsdValueToken1: true,
+        isUnderlyingUsdValueToken1: currentRate !== undefined,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    usdValueFromApiToken0,
+    usdValueFromApiToken1,
+    updateEclpParam,
+    hasFetchedUsdValueToken0,
+    hasFetchedUsdValueToken1,
+  ]);
 
-  // 3. Use spot price to calculate starting params for eclp curve
+  // Use pool spot price (which depends on usdValueToken0 and usdValueToken1) to calculate starting params for eclp curve
   useEffect(() => {
     if (poolSpotPrice) {
       if (!hasEditedEclpParams) {

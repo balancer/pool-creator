@@ -21,7 +21,7 @@ export const useValidateRateProvider = (address: string | undefined, tokenConfig
           functionName: "getRate",
           args: [],
         });
-        updateTokenConfig(tokenConfigIndex, { isValidRateProvider: true });
+        updateTokenConfig(tokenConfigIndex, { isValidRateProvider: true, currentRate: rate });
         return rate;
       } catch {
         updateTokenConfig(tokenConfigIndex, { isValidRateProvider: false });

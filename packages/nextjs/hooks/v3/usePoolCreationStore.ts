@@ -14,6 +14,7 @@ export type TabType = (typeof TABS)[number];
 export type TokenConfig = {
   address: Address;
   rateProvider: Address;
+  currentRate: bigint | undefined;
   isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
@@ -33,7 +34,11 @@ export type EclpParams = {
   peakPrice: string;
   isEclpParamsInverted: boolean;
   usdValueToken0: string;
+  hasFetchedUsdValueToken0: boolean;
+  isUnderlyingUsdValueToken0: boolean;
   usdValueToken1: string;
+  hasFetchedUsdValueToken1: boolean;
+  isUnderlyingUsdValueToken1: boolean;
 };
 
 export type ReClammParams = {
@@ -83,6 +88,7 @@ export interface PoolCreationStore {
 export const initialTokenConfig: TokenConfig = {
   address: "",
   rateProvider: zeroAddress,
+  currentRate: undefined,
   isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
@@ -102,8 +108,11 @@ export const initialEclpParams: EclpParams = {
   peakPrice: "", // peak price only for UX purposes, not sent in tx
   isEclpParamsInverted: false, // inverted relative to alphanumeric (used for chart toggle)
   usdValueToken0: "",
+  hasFetchedUsdValueToken0: false,
+  isUnderlyingUsdValueToken0: false,
   usdValueToken1: "",
-  // poolSpotPrice: null,
+  hasFetchedUsdValueToken1: false,
+  isUnderlyingUsdValueToken1: false,
 };
 
 export const initialPoolCreationState = {

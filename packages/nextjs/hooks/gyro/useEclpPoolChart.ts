@@ -1,14 +1,13 @@
 import { useMemo } from "react";
+import { useEclpSpotPrice } from "./useEclpSpotPrice";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
-import { usePoolCreationStore } from "~~/hooks/v3/";
+import { useEclpTokenOrder } from "~~/hooks/gyro";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
-  const { tokenConfigs, eclpParams } = usePoolCreationStore();
-  const { isEclpParamsInverted, usdValueToken0, usdValueToken1 } = eclpParams;
-
-  let poolSpotPrice = null;
-  if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
+  // use token order from state for consistent "Price ( token0 / token1 )" label on chart
+  const sortedTokens = useEclpTokenOrder();
+  const poolSpotPrice = useEclpSpotPrice();
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;
@@ -25,12 +24,6 @@ export function useEclpPoolChart() {
     const margin = 0.000001; // if spot price is within the margin on both sides it's considered out of range
     return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
   }, [xMin, xMax, poolSpotPrice]);
-
-  // Sort w/ persistant state invert bool for consistent "Price ( token0 / token1 )" label on chart
-  const sortedTokens = tokenConfigs
-    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
-    .sort((a, b) => (a.address > b.address ? 1 : -1));
-  if (isEclpParamsInverted) sortedTokens.reverse();
 
   const options = useMemo(() => {
     if (!data) return;
@@ -70,6 +63,7 @@ export function useEclpPoolChart() {
           verticalAlign: "bottom",
           padding: [0, 35, -52, 0],
           color: "#A0AEC0",
+          fontSize: 14,
         },
         min: xMin - 0.1 * (xMax - xMin),
         max: xMax + 0.1 * (xMax - xMin),
