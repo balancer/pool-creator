@@ -7,7 +7,7 @@ import { bn, fNum } from "~~/utils/numbers";
 export function useEclpPoolChart() {
   // use token order from state for consistent "Price ( token0 / token1 )" label on chart
   const sortedTokens = useEclpTokenOrder();
-  const poolSpotPrice = useEclpSpotPrice();
+  const { poolSpotPrice } = useEclpSpotPrice();
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;

@@ -47,26 +47,14 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
 
   const handleInvertEclpParams = () => {
-    const {
-      usdValueToken0,
-      usdValueToken1,
-      underlyingUsdValueToken0,
-      underlyingUsdValueToken1,
-      isEclpParamsInverted,
-      usdValueTokenInput0,
-      usdValueTokenInput1,
-    } = eclpParams;
+    const { usdPerTokenInput0, usdPerTokenInput1, isEclpParamsInverted } = eclpParams;
     const invertedParams = invertEclpParams(eclpParams);
 
-    // TODO: ahhhh this is gross... waited too long to do the state refactor :'(
+    // invert eclp params, flip inputs, and keep track of inverted state
     updateEclpParam({
       ...invertedParams,
-      usdValueTokenInput0: usdValueTokenInput1,
-      usdValueToken0: usdValueToken1,
-      underlyingUsdValueToken0: underlyingUsdValueToken1,
-      usdValueTokenInput1: usdValueTokenInput0,
-      usdValueToken1: usdValueToken0,
-      underlyingUsdValueToken1: underlyingUsdValueToken0,
+      usdPerTokenInput0: usdPerTokenInput1,
+      usdPerTokenInput1: usdPerTokenInput0,
       isEclpParamsInverted: !isEclpParamsInverted,
     });
   };
@@ -90,7 +78,7 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 
 function EclpParamInputs() {
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
-  const { alpha, beta, lambda, peakPrice, usdValueTokenInput0, usdValueTokenInput1 } = eclpParams;
+  const { alpha, beta, lambda, peakPrice, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
   const sortedTokens = useEclpTokenOrder();
   const tokenHasRateProvider = sortedTokens.some(token => token.underlyingTokenAddress);
@@ -113,28 +101,30 @@ function EclpParamInputs() {
         ) : (
           <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
         )}
-        {(!usdValueTokenInput0 || !usdValueTokenInput1) && (
+        {(!usdPerTokenInput0 || !usdPerTokenInput1) && (
           <Alert type="warning">Enter USD values for both tokens to begin parameter configuration</Alert>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
         <TextField
-          label={`USD value for ${sortedTokens[0].symbol}`}
-          value={usdValueTokenInput0}
+          label={`${sortedTokens[0].symbol} / USD`}
+          value={usdPerTokenInput0}
           isDollarValue={true}
           onChange={e => {
-            updateEclpParam({ usdValueTokenInput0: sanitizeNumberInput(e.target.value) });
-            updateUserData({ hasEditedEclpParams: false }); // resetting this flag causes useAutofillStarterParams to do its thing, which we want so chart moves to surround new "current price" of pool
+            updateEclpParam({ usdPerTokenInput0: sanitizeNumberInput(e.target.value) });
+            // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
+            if (usdPerTokenInput0 !== e.target.value) updateUserData({ hasEditedEclpParams: false });
           }}
         />
         <TextField
-          label={`USD value for ${sortedTokens[1].symbol}`}
-          value={usdValueTokenInput1}
+          label={`${sortedTokens[1].symbol} / USD`}
+          value={usdPerTokenInput1}
           isDollarValue={true}
           onChange={e => {
-            updateEclpParam({ usdValueTokenInput1: sanitizeNumberInput(e.target.value) });
-            updateUserData({ hasEditedEclpParams: false }); // resetting this flag causes useAutofillStarterParams to do its thing, which we want so chart moves to surround new "current price" of pool
+            updateEclpParam({ usdPerTokenInput1: sanitizeNumberInput(e.target.value) });
+            // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
+            if (usdPerTokenInput1 !== e.target.value) updateUserData({ hasEditedEclpParams: false });
           }}
         />
       </div>

@@ -90,7 +90,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
             ) : isUsdValueError ? (
               <div>price error</div>
             ) : (
-              <div>${usdValue.toFixed(2)}</div>
+              <div>${usdValue.toFixed(4)}</div>
             )
           ) : !isUsdValueLoading && selectedToken && inputValue ? (
             <div>unknown price</div>

@@ -4,16 +4,17 @@ import { PoolType } from "@balancer/sdk";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
+import { useEclpSpotPrice } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, poolType, updatePool, updateTokenConfig, eclpParams } = usePoolCreationStore();
-  const { tokenInfo, amount, address, isWeightLocked } = tokenConfig;
-  const weight = tokenConfig?.weight;
-  const { usdValueToken0, usdValueToken1, isEclpParamsInverted } = eclpParams;
+  const { tokenInfo, amount, address, isWeightLocked, weight } = tokenConfig;
+  const { isEclpParamsInverted } = eclpParams;
 
+  const { usdPerToken0, usdPerToken1 } = useEclpSpotPrice();
   const { address: connectedAddress } = useAccount();
 
   const { data: userTokenBalance } = useReadContract({
@@ -39,13 +40,13 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
         // If order is inverted, swap which price corresponds to which index
         const currentTokenPrice =
           index === 0
-            ? Number(isEclpParamsInverted ? usdValueToken1 : usdValueToken0)
-            : Number(isEclpParamsInverted ? usdValueToken0 : usdValueToken1);
+            ? Number(isEclpParamsInverted ? usdPerToken1 : usdPerToken0)
+            : Number(isEclpParamsInverted ? usdPerToken0 : usdPerToken1);
 
         const otherTokenPrice =
           index === 0
-            ? Number(isEclpParamsInverted ? usdValueToken0 : usdValueToken1)
-            : Number(isEclpParamsInverted ? usdValueToken1 : usdValueToken0);
+            ? Number(isEclpParamsInverted ? usdPerToken0 : usdPerToken1)
+            : Number(isEclpParamsInverted ? usdPerToken1 : usdPerToken0);
 
         const calculatedAmount = (Number(inputValue) * currentTokenPrice) / otherTokenPrice;
 
@@ -105,13 +106,8 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   let usdValue = null;
   // Handle edge case of if user altered token values for gyro eclp
   if (poolType === PoolType.GyroE) {
-    if (isEclpParamsInverted) {
-      if (index === 0) usdValue = Number(eclpParams.usdValueToken1);
-      if (index === 1) usdValue = Number(eclpParams.usdValueToken0);
-    } else {
-      if (index === 0) usdValue = Number(eclpParams.usdValueToken0);
-      if (index === 1) usdValue = Number(eclpParams.usdValueToken1);
-    }
+    if (index === 0) usdValue = isEclpParamsInverted ? Number(usdPerToken1) : Number(usdPerToken0);
+    if (index === 1) usdValue = isEclpParamsInverted ? Number(usdPerToken0) : Number(usdPerToken1);
   } else {
     usdValue = tokenUsdValue;
   }

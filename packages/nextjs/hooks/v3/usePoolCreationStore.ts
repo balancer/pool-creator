@@ -33,14 +33,8 @@ export type EclpParams = {
   lambda: string;
   peakPrice: string;
   isEclpParamsInverted: boolean;
-  usdValueTokenInput0: string;
-  usdValueToken0: number | undefined;
-  underlyingUsdValueToken0: number | undefined;
-  hasFetchedUsdValueToken0: boolean;
-  usdValueTokenInput1: string;
-  usdValueToken1: number | undefined;
-  underlyingUsdValueToken1: number | undefined;
-  hasFetchedUsdValueToken1: boolean;
+  usdPerTokenInput0: string;
+  usdPerTokenInput1: string;
 };
 
 export type ReClammParams = {
@@ -109,14 +103,8 @@ export const initialEclpParams: EclpParams = {
   lambda: "",
   peakPrice: "", // peak price only for UX purposes, not sent in tx
   isEclpParamsInverted: false, // inverted relative to alphanumeric (used for chart toggle)
-  usdValueTokenInput0: "", // user input
-  usdValueToken0: undefined,
-  underlyingUsdValueToken0: undefined,
-  hasFetchedUsdValueToken0: false,
-  usdValueTokenInput1: "", // user input
-  usdValueToken1: undefined,
-  underlyingUsdValueToken1: undefined,
-  hasFetchedUsdValueToken1: false,
+  usdPerTokenInput0: "",
+  usdPerTokenInput1: "",
 };
 
 export const initialPoolCreationState = {

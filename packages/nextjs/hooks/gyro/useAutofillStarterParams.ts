@@ -1,15 +1,14 @@
 import { useEffect } from "react";
-import { useEclpSpotPrice, useFetchTokenUsdValues } from "./";
+import { useEclpSpotPrice } from "./";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
 
 export function useAutofillStarterParams() {
-  useFetchTokenUsdValues();
-
-  const { updateEclpParam } = usePoolCreationStore();
+  const { updateEclpParam, eclpParams } = usePoolCreationStore();
   const { hasEditedEclpParams } = useUserDataStore();
-  const poolSpotPrice = useEclpSpotPrice();
+  const { poolSpotPrice } = useEclpSpotPrice();
 
+  const { lambda } = eclpParams;
   // Use pool spot price to calculate starting params for eclp curve
   useEffect(() => {
     if (poolSpotPrice) {
@@ -23,7 +22,7 @@ export function useAutofillStarterParams() {
           beta: formatEclpParamValues(highestPrice),
           c,
           s,
-          lambda: "1000", // TODO: formula for lambda with consistent curve? maybe something logarithmic?
+          lambda: lambda ? lambda : "100", // TODO: formula for lambda with consistent curve? maybe something logarithmic?
           peakPrice: formatEclpParamValues(poolSpotPrice),
         });
       }
@@ -31,5 +30,5 @@ export function useAutofillStarterParams() {
       // without pool spot price, can't calculate "starter" rotation component values
       updateEclpParam({ alpha: "", beta: "", c: "", s: "", peakPrice: "", lambda: "" });
     }
-  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams]);
+  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, lambda]);
 }

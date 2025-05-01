@@ -1,47 +1,44 @@
+import { useEffect } from "react";
+import { formatUnits } from "viem";
+import { useEclpTokenOrder } from "~~/hooks/gyro";
+import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 export const useEclpSpotPrice = () => {
-  const { eclpParams } = usePoolCreationStore();
-  const { usdValueToken0, usdValueToken1, underlyingUsdValueToken0, underlyingUsdValueToken1 } = eclpParams;
+  const { updateEclpParam, eclpParams } = usePoolCreationStore();
+  const { usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
 
-  let valueToken0 = Number(usdValueToken0);
-  let valueToken1 = Number(usdValueToken1);
+  const sortedTokens = useEclpTokenOrder();
 
-  // use underlying usd values if they exist (meaning token is erc4626)
-  if (underlyingUsdValueToken0) valueToken0 = underlyingUsdValueToken0;
-  if (underlyingUsdValueToken1) valueToken1 = underlyingUsdValueToken1;
+  // fetch usd per token from API
+  const { tokenUsdValue: usdPerToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");
+  const { tokenUsdValue: usdPerToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
 
-  if (valueToken0 && valueToken1) return valueToken0 / valueToken1;
-  return null;
+  // calculate usd per underlying token
+  const currentRateToken0 = sortedTokens[0].currentRate;
+  const currentRateToken1 = sortedTokens[1].currentRate;
 
-  // TODO: implement this for the transaction send?
+  const shouldUseUnderlyingToken0 = currentRateToken0 && usdPerToken0;
+  const shouldUseUnderlyingToken1 = currentRateToken1 && usdPerToken1;
 
-  // OPTION TO SCALE UNDERLYING USD VALUES TO ERC4626 VALUES FOR ECLP CALCULATIONS:
+  const usdPerUnderlyingToken0 = shouldUseUnderlyingToken0 && usdPerToken0 / Number(formatUnits(currentRateToken0, 18));
+  const usdPerUnderlyingToken1 = shouldUseUnderlyingToken1 && usdPerToken1 / Number(formatUnits(currentRateToken1, 18));
 
-  // // const sortedTokens = useEclpTokenOrder();
+  // use usd per underlying token if available, otherwise use usd per token
+  const valueToken0 = shouldUseUnderlyingToken0 ? usdPerUnderlyingToken0 : usdPerToken0;
+  const valueToken1 = shouldUseUnderlyingToken1 ? usdPerUnderlyingToken1 : usdPerToken1;
 
-  //   // Fetch token prices from API to auto-fill USD values for tokens (always boosted token usd price)
-  //   const { tokenUsdValue: usdValueFromApiToken0 } = useTokenUsdValue(sortedTokens[0].address, "1");
-  //   const { tokenUsdValue: usdValueFromApiToken1 } = useTokenUsdValue(sortedTokens[1].address, "1");
+  // auto-fill usd per token input field values to start
+  useEffect(() => {
+    updateEclpParam({ usdPerTokenInput0: (valueToken0 ?? "").toString() });
+  }, [valueToken0, updateEclpParam]);
 
-  // if (Number(usdValueToken0) && Number(usdValueToken1)) {
-  //   let valueToken0 = Number(usdValueToken0);
-  //   let valueToken1 = Number(usdValueToken1);
+  useEffect(() => {
+    updateEclpParam({ usdPerTokenInput1: (valueToken1 ?? "").toString() });
+  }, [valueToken1, updateEclpParam]);
 
-  //   // If input has been converted to underlying usd value
-  //   // Use rate toconvert back to boosted usd value before calculating spot price
-  //   // so that ECLP params are calculated correctly
-  //   if (isUnderlyingUsdValueToken0 && usdValueFromApiToken0 && sortedTokens[0].currentRate) {
-  //     const rateInDecimalsToken0 = Number(formatUnits(sortedTokens[0].currentRate, 18));
-  //     valueToken0 = Number(usdValueToken0) * rateInDecimalsToken0;
-  //   }
-  //   if (isUnderlyingUsdValueToken1 && usdValueFromApiToken1 && sortedTokens[1].currentRate) {
-  //     const rateInDecimalsToken1 = Number(formatUnits(sortedTokens[1].currentRate, 18));
-  //     valueToken1 = Number(usdValueToken1) * rateInDecimalsToken1;
-  //   }
+  const poolSpotPrice =
+    usdPerTokenInput0 && usdPerTokenInput1 ? Number(usdPerTokenInput0) / Number(usdPerTokenInput1) : null;
 
-  //   return valueToken0 / valueToken1;
-  // } else {
-  //   return null;
-  // }
+  return { poolSpotPrice, usdPerToken0, usdPerToken1 };
 };
