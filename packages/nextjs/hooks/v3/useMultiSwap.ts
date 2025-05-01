@@ -93,7 +93,6 @@ export const useMultiSwap = () => {
 
     // 5. Setup permit2 stuffs for permitBatchAndCall
     const { batch, signature } = await createPermit2({
-      chainId,
       tokens: paths.map(path => ({ address: path.tokenIn, amount: path.exactAmountIn })),
       client,
       spender: batchRouterAddress,

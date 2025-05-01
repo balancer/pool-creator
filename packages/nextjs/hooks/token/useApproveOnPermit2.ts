@@ -1,8 +1,9 @@
-import { MaxUint48, MaxUint160, PERMIT2, permit2Abi } from "@balancer/sdk";
+import { MaxUint48, MaxUint160, permit2Abi } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { Address } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
+import { PERMIT2_ADDRESS } from "~~/utils/constants";
 
 type ApproveOnPermit2Payload = {
   token: Address;
@@ -18,14 +19,12 @@ export const useApproveOnPermit2 = () => {
   const writeTx = useTransactor();
 
   const approve = async ({ token, spender }: ApproveOnPermit2Payload) => {
-    if (!token) throw new Error("Cannot approve token without token address");
-    if (!spender) throw new Error("Cannot approve token without spender address (the pool)");
     if (!walletClient) throw new Error("No wallet client found");
     if (!publicClient) throw new Error("No public client found");
     if (!chainId) throw new Error("No chain id found on public client");
 
     const { request: approveSpenderOnToken } = await publicClient.simulateContract({
-      address: PERMIT2[chainId],
+      address: PERMIT2_ADDRESS,
       abi: permit2Abi,
       functionName: "approve",
       account: walletClient.account,
