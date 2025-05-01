@@ -9,7 +9,6 @@ export type UserDataStore = {
   hasEditedPoolSymbol: boolean;
   hasAgreedToWarning: boolean;
   hasEditedEclpParams: boolean;
-  hasEditedEclpTokenUsdValues: boolean;
   updateUserData: (updates: Partial<UserDataStore>) => void;
   clearUserData: () => void;
 };
@@ -20,7 +19,6 @@ export const initialUserDataStore = {
   hasEditedPoolName: false,
   hasEditedPoolSymbol: false,
   hasEditedEclpParams: false,
-  hasEditedEclpTokenUsdValues: false,
 };
 
 // Stores all the data that will be used for pool creation
@@ -42,6 +40,6 @@ export function useUserDataStoreDebug() {
   const userDataState = useUserDataStore();
 
   useEffect(() => {
-    console.log("Persistent User Data Store:", userDataState);
+    console.log("User Data Store:", userDataState);
   }, [userDataState]);
 }

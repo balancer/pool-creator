@@ -1,4 +1,6 @@
 import { Big } from "big.js";
+import { parseUnits } from "viem";
+import type { EclpParams } from "~~/hooks/v3/usePoolCreationStore";
 
 // Configure precision for elliptic curve calculations
 Big.DP = 100;
@@ -29,4 +31,64 @@ export function calculateRotationComponents(rotationAngleTangent: string): { c: 
     c: cosθ.toFixed(18), // 18 decimals matches EVM fixed-point standards
     s: sinθ.toFixed(18), // Required for elliptic curve stability
   };
+}
+
+export function invertEclpParams({ alpha, beta, peakPrice, c, s }: EclpParams) {
+  // take reciprocal and flip alpha to beta
+  const invertedAlpha = 1 / Number(beta);
+  // take reciprocal and flip beta to alpha
+  const invertedBeta = 1 / Number(alpha);
+  // take reciprocal of peakPrice
+  const invertedPeakPrice = 1 / Number(peakPrice);
+
+  return {
+    alpha: formatEclpParamValues(invertedAlpha),
+    beta: formatEclpParamValues(invertedBeta),
+    peakPrice: formatEclpParamValues(invertedPeakPrice),
+    // flip c and s
+    c: s,
+    s: c,
+  };
+}
+
+/**
+ * Handles formattinc eclp params for storage as strings in zustand store
+ * Removes trailing zeros after decimal point (but keeps the decimal if needed)
+ * `.toFixed` ensures numbers are decimal strings instead of scientific notation which breaks viem parseUnits
+ */
+export const formatEclpParamValues = (num: number): string => {
+  // First convert to fixed decimal string
+  const fixed = num.toFixed(18);
+  // Then remove trailing zeros after decimal point (but keep the decimal if needed)
+  return fixed.replace(/(\.\d*[1-9])0+$|\.0+$/, "$1");
+};
+
+// Parse ECLP param input string values to bigint for on chain usage
+export const parseEclpParams = ({
+  alpha,
+  beta,
+  c,
+  s,
+  lambda,
+}: {
+  alpha: string;
+  beta: string;
+  c: string;
+  s: string;
+  lambda: string;
+}) => {
+  return {
+    alpha: parseUnits(alpha, 18),
+    beta: parseUnits(beta, 18),
+    c: parseUnits(c, 18),
+    s: parseUnits(s, 18),
+    lambda: parseUnits(lambda, 18),
+  };
+};
+
+// Handle inverting eclp params if needed
+export function getParsedEclpParams(inputs: EclpParams) {
+  const { alpha, beta, c, s, lambda, isEclpParamsInverted } = inputs;
+  const eclpParams = isEclpParamsInverted ? { ...invertEclpParams(inputs), lambda } : { alpha, beta, c, s, lambda };
+  return parseEclpParams(eclpParams);
 }

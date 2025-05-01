@@ -1,17 +1,13 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { useEclpSpotPrice } from "./useEclpSpotPrice";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
-import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3/";
-import { calculateRotationComponents } from "~~/utils/gryo";
-import { formatEclpParamValues } from "~~/utils/helpers";
+import { useEclpTokenOrder } from "~~/hooks/gyro";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
-  const { tokenConfigs, updateEclpParam, eclpParams } = usePoolCreationStore();
-  const { isTokenOrderInverted, usdValueToken0, usdValueToken1 } = eclpParams;
-  const { hasEditedEclpParams } = useUserDataStore();
-
-  let poolSpotPrice = null;
-  if (usdValueToken0 && usdValueToken1) poolSpotPrice = Number(usdValueToken0) / Number(usdValueToken1);
+  // use token order from state for consistent "Price ( token0 / token1 )" label on chart
+  const sortedTokens = useEclpTokenOrder();
+  const { poolSpotPrice } = useEclpSpotPrice();
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;
@@ -28,35 +24,6 @@ export function useEclpPoolChart() {
     const margin = 0.000001; // if spot price is within the margin on both sides it's considered out of range
     return bn(poolSpotPrice || 0).gt(xMin * (1 + margin)) && bn(poolSpotPrice || 0).lt(xMax * (1 - margin));
   }, [xMin, xMax, poolSpotPrice]);
-
-  useEffect(() => {
-    if (poolSpotPrice) {
-      // auto-fill "starter" values if user has not edited eclp params yet
-      if (!hasEditedEclpParams && Number(usdValueToken1) && Number(usdValueToken1)) {
-        const { c, s } = calculateRotationComponents(poolSpotPrice.toString());
-        const lowestPrice = poolSpotPrice - poolSpotPrice * 0.075;
-        const highestPrice = poolSpotPrice + poolSpotPrice * 0.075;
-
-        updateEclpParam({
-          alpha: formatEclpParamValues(lowestPrice),
-          beta: formatEclpParamValues(highestPrice),
-          c,
-          s,
-          lambda: "1000", // TODO: how to calculate stretching factor that makes pretty curve given values for alpha, beta, c, s?
-          peakPrice: formatEclpParamValues(poolSpotPrice),
-        });
-      }
-    } else {
-      // without pool spot price, can't calculate "starter" rotation component values
-      updateEclpParam({ alpha: "", beta: "", c: "", s: "", peakPrice: "", lambda: "" });
-    }
-  }, [poolSpotPrice, updateEclpParam, hasEditedEclpParams, usdValueToken0, usdValueToken1]);
-
-  // Gross but only for "Price ( token0 / token1 )" label on chart
-  const sortedTokens = tokenConfigs
-    .map(token => ({ address: token.address, symbol: token.tokenInfo?.symbol }))
-    .sort((a, b) => (a.address > b.address ? 1 : -1));
-  if (isTokenOrderInverted) sortedTokens.reverse();
 
   const options = useMemo(() => {
     if (!data) return;
@@ -96,6 +63,7 @@ export function useEclpPoolChart() {
           verticalAlign: "bottom",
           padding: [0, 35, -52, 0],
           color: "#A0AEC0",
+          fontSize: 14,
         },
         min: xMin - 0.1 * (xMax - xMin),
         max: xMax + 0.1 * (xMax - xMin),

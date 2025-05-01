@@ -8,7 +8,13 @@ import { ChevronDownIcon, Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/o
 import { Checkbox, TextField } from "~~/components/common";
 import { Alert, TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
-import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
+import {
+  initialEclpParams,
+  useBoostableWhitelist,
+  usePoolCreationStore,
+  useUserDataStore,
+  useValidateRateProvider,
+} from "~~/hooks/v3";
 
 /**
  * This component manages:
@@ -54,19 +60,23 @@ export function ChooseToken({ index }: { index: number }) {
       address: tokenInfo.address,
       tokenType: TokenType.STANDARD,
       rateProvider: zeroAddress,
+      currentRate: undefined,
+      isValidRateProvider: false,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
-
       paysYieldFees: false,
     });
+    updatePool({ eclpParams: initialEclpParams }); // Don't remember why but this is needed?
 
-    // If user switches token, this will force trigger auto-generation of pool name and symbol, at which point user can decide to modify
-    updateUserData({ hasEditedPoolName: false, hasEditedPoolSymbol: false, hasEditedEclpParams: false });
+    // If user switches token, these flags are reset to force auto-generation of pool name and symbol, at which point user can decide to modify
+    updateUserData({
+      hasEditedPoolName: false,
+      hasEditedPoolSymbol: false,
+      hasEditedEclpParams: false,
+    });
 
     const hasBoostedVariant = boostableWhitelist?.[tokenInfo.address];
-    if (hasBoostedVariant) {
-      setShowBoostOpportunityModal(true);
-    }
+    if (hasBoostedVariant) setShowBoostOpportunityModal(true);
   };
 
   const handleTokenTypeToggle = () => {
@@ -100,7 +110,7 @@ export function ChooseToken({ index }: { index: number }) {
     }
 
     // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
-    if (rateProviderData && !showBoostOpportunityModal) {
+    if (rateProviderData && !showBoostOpportunityModal && !token.isValidRateProvider) {
       // Constant rate providers are special case only used for gyro pools
       if (rateProviderData.name !== "ConstantRateProvider") {
         setShowRateProviderModal(true);

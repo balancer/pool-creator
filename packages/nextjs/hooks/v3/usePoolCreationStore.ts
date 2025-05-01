@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type Token } from "~~/hooks/token";
 import { SupportedPoolTypes } from "~~/utils";
+import { sortTokenConfigs } from "~~/utils/helpers";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
 export const TABS = ["Type", "Tokens", "Parameters", "Finalize"] as const;
@@ -13,6 +14,7 @@ export type TabType = (typeof TABS)[number];
 export type TokenConfig = {
   address: Address;
   rateProvider: Address;
+  currentRate: bigint | undefined;
   isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
@@ -30,9 +32,9 @@ export type EclpParams = {
   s: string;
   lambda: string;
   peakPrice: string;
-  isTokenOrderInverted: boolean;
-  usdValueToken0: string;
-  usdValueToken1: string;
+  isEclpParamsInverted: boolean;
+  usdPerTokenInput0: string;
+  usdPerTokenInput1: string;
 };
 
 export type ReClammParams = {
@@ -82,6 +84,7 @@ export interface PoolCreationStore {
 export const initialTokenConfig: TokenConfig = {
   address: "",
   rateProvider: zeroAddress,
+  currentRate: undefined,
   isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
@@ -90,6 +93,18 @@ export const initialTokenConfig: TokenConfig = {
   amount: "",
   useBoostedVariant: false,
   weight: undefined, // only used for weighted pools
+};
+
+export const initialEclpParams: EclpParams = {
+  alpha: "",
+  beta: "",
+  c: "",
+  s: "",
+  lambda: "",
+  peakPrice: "", // peak price only for UX purposes, not sent in tx
+  isEclpParamsInverted: false, // inverted relative to alphanumeric (used for chart toggle)
+  usdPerTokenInput0: "",
+  usdPerTokenInput1: "",
 };
 
 export const initialPoolCreationState = {
@@ -113,17 +128,7 @@ export const initialPoolCreationState = {
   // For stable and stableSurge
   amplificationParameter: "", // only used for stable pools
   // For gyroECLP
-  eclpParams: {
-    alpha: "",
-    beta: "",
-    c: "",
-    s: "",
-    lambda: "",
-    peakPrice: "", // peak price only for UX purposes, not sent in tx
-    isTokenOrderInverted: false, // inverted relative to alphanumeric (used for chart toggle)
-    usdValueToken0: "",
-    usdValueToken1: "",
-  },
+  eclpParams: initialEclpParams,
   // For ReClamm
   reClammParams: {
     initialTargetPrice: "",
@@ -148,7 +153,7 @@ export const usePoolCreationStore = create(
         set(state => {
           const newTokenConfigs = [...state.tokenConfigs];
           newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
-          return { ...state, tokenConfigs: newTokenConfigs };
+          return { ...state, tokenConfigs: sortTokenConfigs(newTokenConfigs) }; // ensure token configs are always sorted in state
         }),
       updateEclpParam: (updates: Partial<EclpParams>) =>
         set(state => ({
@@ -173,6 +178,6 @@ export function usePoolStoreDebug() {
   const poolState = usePoolCreationStore();
 
   useEffect(() => {
-    console.log("Persistent Pool Store:", poolState);
+    console.log("Pool Store:", poolState);
   }, [poolState]);
 }
