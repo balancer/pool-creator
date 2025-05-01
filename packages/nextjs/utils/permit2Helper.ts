@@ -1,8 +1,8 @@
+import { PERMIT2_ADDRESS } from "./constants";
 import {
   AllowanceTransfer,
   MaxAllowanceExpiration,
   MaxSigDeadline,
-  PERMIT2,
   Permit2,
   Permit2Batch,
   PermitDetails,
@@ -11,20 +11,19 @@ import {
 import { PublicClient, WalletClient, getContract } from "viem";
 
 export type CreatePermit2 = {
-  chainId: number;
   tokens: { address: `0x${string}`; amount: bigint }[];
   client: { public: PublicClient; wallet: WalletClient };
   spender: `0x${string}`;
 };
 
-export const createPermit2 = async ({ client, chainId, tokens, spender }: CreatePermit2) => {
+export const createPermit2 = async ({ client, tokens, spender }: CreatePermit2) => {
   if (!client.wallet.account) throw new Error("Wallet account not found for permit2 allowance read");
-  if (!client.wallet.chain?.id) throw new Error("Wallet chain not found for permit2 allowance read");
+  if (!client.wallet.chain?.id) throw new Error("Wallet chain id not found for permit2 allowance read");
 
   const owner = client.wallet.account.address;
 
   const permit2Contract = getContract({
-    address: PERMIT2[chainId],
+    address: PERMIT2_ADDRESS,
     abi: permit2Abi,
     client,
   });
@@ -48,7 +47,7 @@ export const createPermit2 = async ({ client, chainId, tokens, spender }: Create
     sigDeadline: MaxSigDeadline,
   };
 
-  const { domain, types, values } = AllowanceTransfer.getPermitData(batch, PERMIT2[chainId], client.wallet.chain.id);
+  const { domain, types, values } = AllowanceTransfer.getPermitData(batch, PERMIT2_ADDRESS, client.wallet.chain.id);
 
   const signature = await client.wallet.signTypedData({
     account: client.wallet.account,

@@ -1,21 +1,18 @@
 import { useEffect } from "react";
-import { PERMIT2 } from "@balancer/sdk";
-import { parseUnits } from "viem";
-import { Address } from "viem";
+import { Address, parseUnits } from "viem";
 import { Alert, TransactionButton } from "~~/components/common";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useApproveToken, useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
+import { PERMIT2_ADDRESS } from "~~/utils/constants";
 
 type MinimalToken = { address: Address; amount: string; decimals: number; symbol: string };
 
 export const ApproveOnTokenManager = ({ token }: { token: MinimalToken }) => {
-  const { targetNetwork } = useTargetNetwork();
   const { step, updatePool } = usePoolCreationStore();
   const { mutateAsync: approveOnToken, isPending: isApprovePending, error: approveError } = useApproveToken({});
 
   const rawAmount = parseUnits(token.amount, token.decimals);
-  const spender = PERMIT2[targetNetwork.id];
+  const spender = PERMIT2_ADDRESS;
   const { allowance, refetchAllowance } = useReadToken(token.address, spender);
 
   const handleApprove = async () => {

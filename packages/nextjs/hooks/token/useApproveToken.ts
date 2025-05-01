@@ -20,10 +20,10 @@ export const useApproveToken = ({ onSafeTxHash, onWagmiTxHash }: UseApproveToken
   const writeTx = useTransactor(); // scaffold hook for tx status toast notifications
 
   const approve = async ({ token, spender, rawAmount }: ApproveOnTokenPayload) => {
-    if (!token) throw new Error("Cannot approve token without token address");
-    if (!spender) throw new Error("Cannot approve token without spender address (the pool)");
-    if (!walletClient) throw new Error("No wallet client found");
-    if (!publicClient) throw new Error("No public client found");
+    if (!token) throw new Error("useApproveToken: token is undefined");
+    if (!spender) throw new Error("useApproveToken: spender is undefined");
+    if (!walletClient) throw new Error("useApproveToken: wallet client is undefined");
+    if (!publicClient) throw new Error("useApproveToken: public client is undefined");
 
     const { request: approveSpenderOnToken } = await publicClient.simulateContract({
       address: token,
