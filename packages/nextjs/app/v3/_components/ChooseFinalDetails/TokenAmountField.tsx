@@ -4,43 +4,35 @@ import { formatUnits, parseUnits } from "viem";
 import { ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
-import { useTokenUsdValue } from "~~/hooks/token";
 import { COW_MIN_AMOUNT } from "~~/utils";
 
 interface TokenFieldProps {
-  value: string;
+  inputValue: string;
+  usdValue: number | null | undefined;
+  isUsdValueLoading: boolean;
+  isUsdValueError: boolean;
   balance?: bigint;
   selectedToken: Token | null;
   sufficientAmount?: boolean;
   isDisabled?: boolean;
-  tokenOptions?: Token[];
-  setTokenAmount?: (amount: string) => void;
+  setAmountToUserBalance?: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const TokenAmountField: React.FC<TokenFieldProps> = ({
-  value,
+  inputValue,
+  usdValue,
+  isUsdValueLoading,
+  isUsdValueError,
   balance,
   selectedToken,
   sufficientAmount,
   isDisabled,
-  setTokenAmount,
+  onChange,
+  setAmountToUserBalance,
 }) => {
-  const { tokenUsdValue, isLoading, isError } = useTokenUsdValue(selectedToken?.address, value);
-
-  const amountGreaterThanBalance = balance !== undefined && parseUnits(value, selectedToken?.decimals || 0) > balance;
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!setTokenAmount) return;
-    const inputValue = e.target.value.trim();
-    if (Number(inputValue) >= 0) {
-      setTokenAmount(inputValue);
-    } else {
-      setTokenAmount("");
-    }
-  };
-
-  const setAmountToMax = () =>
-    setTokenAmount && setTokenAmount(formatUnits(balance || 0n, selectedToken?.decimals || 0));
+  const amountGreaterThanBalance =
+    balance !== undefined && parseUnits(inputValue ?? "0", selectedToken?.decimals || 0) > balance;
 
   return (
     <>
@@ -48,10 +40,10 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
         <input
           disabled={isDisabled}
           type="number"
-          onChange={handleAmountChange}
+          onChange={onChange}
           min="0"
           placeholder="0.0"
-          value={value}
+          value={inputValue}
           className={`shadow-inner border-0 h-[77px] pb-4 px-4 text-right text-2xl w-full input rounded-xl bg-base-300 disabled:bg-base-300 disabled:text-base-content 
             ${
               sufficientAmount !== undefined && (amountGreaterThanBalance || !sufficientAmount) && "ring-1 ring-red-400"
@@ -71,7 +63,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
             {selectedToken && balance !== undefined && (
               <div className={`flex items-center gap-2 text-neutral-400`}>
                 <div
-                  onClick={setAmountToMax}
+                  onClick={setAmountToUserBalance}
                   className="flex items-center gap-1 hover:text-accent hover:cursor-pointer"
                 >
                   <WalletIcon className="h-4 w-4 mt-0.5" /> {formatUnits(balance, selectedToken?.decimals || 0)}
@@ -92,15 +84,15 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
           </div>
         </div>
         <div className="absolute bottom-1 right-5 text-neutral-400">
-          {typeof tokenUsdValue === "number" ? (
-            isLoading ? (
+          {typeof usdValue === "number" ? (
+            isUsdValueLoading ? (
               <div>...</div>
-            ) : isError ? (
+            ) : isUsdValueError ? (
               <div>price error</div>
             ) : (
-              <div>${tokenUsdValue.toFixed(2)}</div>
+              <div>${usdValue.toFixed(4)}</div>
             )
-          ) : !isLoading && selectedToken && value ? (
+          ) : !isUsdValueLoading && selectedToken && inputValue ? (
             <div>unknown price</div>
           ) : null}
         </div>

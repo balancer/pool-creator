@@ -1,5 +1,6 @@
 "use client";
 
+import { EclpChartDisplay } from "./ChooseParameters/EclpParams";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
@@ -11,7 +12,7 @@ import {
   usePoolCreationStore,
   useValidatePoolCreationInput,
 } from "~~/hooks/v3";
-import { abbreviateAddress } from "~~/utils/helpers";
+import { abbreviateAddress, sortTokenConfigs } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
@@ -32,14 +33,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     poolAddress,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
-    eclpParams,
     isUsingHooks,
     reClammParams,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
-
-  const { alpha, beta, lambda } = eclpParams;
   const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
     reClammParams;
 
@@ -48,6 +46,9 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
   const isReClamm = poolType === PoolType.ReClamm;
+
+  // Display tokenConfigs in sorted order for sanity check debugging of gyro ECLP
+  const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
 
   return (
     <div className="flex flex-col gap-3">
@@ -65,7 +66,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isEmpty={tokenConfigs.every(token => token.address === "")}
         content={
           <div className="flex flex-col gap-2">
-            {tokenConfigs.map((token, index) => (
+            {sortedTokenConfigs.map((token, index) => (
               <TokenDetails key={index} token={token} />
             ))}
           </div>
@@ -79,26 +80,9 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         content={
           <div>
             {isGyroEclp && (
-              <>
-                <div className="flex justify-between">
-                  <div className="">Lowest Price</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={alpha}>
-                    {alpha.split(".")[1]?.length > 5 ? `${Number(alpha).toFixed(5)}...` : alpha}
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Highest Price</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={beta}>
-                    {beta.split(".")[1]?.length > 5 ? `${Number(beta).toFixed(5)}...` : beta}
-                  </div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Stretching Factor</div>
-                  <div className="tooltip tooltip-primary cursor-pointer tooltip-left" data-tip={lambda}>
-                    {lambda.split(".")[1]?.length > 5 ? `${Number(lambda).toFixed(5)}...` : lambda}
-                  </div>
-                </div>
-              </>
+              <div className="mb-3">
+                <EclpChartDisplay size="mini" />
+              </div>
             )}
             {isStablePool && (
               <div className="flex justify-between">

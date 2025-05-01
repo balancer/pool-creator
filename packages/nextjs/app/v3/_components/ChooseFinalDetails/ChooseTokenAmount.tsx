@@ -1,23 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
-import { erc20Abi } from "viem";
+import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
-import { useFetchTokenList } from "~~/hooks/token";
-import { usePoolCreationStore, useUserDataStore, useValidateRateProvider } from "~~/hooks/v3";
+import { useEclpSpotPrice } from "~~/hooks/gyro";
+import { useTokenUsdValue } from "~~/hooks/token";
+import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
-export function ChooseTokenAmount({ index }: { index: number }) {
+export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { tokenConfigs, poolType, updatePool, updateTokenConfig } = usePoolCreationStore();
-  const { weight, rateProvider, tokenInfo, amount, address, isWeightLocked } = tokenConfigs[index];
+  const { tokenConfigs, poolType, updatePool, updateTokenConfig, eclpParams } = usePoolCreationStore();
+  const { tokenInfo, amount, address, isWeightLocked, weight } = tokenConfig;
+  const { isEclpParamsInverted } = eclpParams;
 
-  useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
-
+  const { usdPerToken0, usdPerToken1 } = useEclpSpotPrice();
   const { address: connectedAddress } = useAccount();
-  const { data } = useFetchTokenList();
-  const tokenList = data || [];
-  const remainingTokens = tokenList.filter(token => !tokenConfigs.some(config => config.address === token.address));
 
   const { data: userTokenBalance } = useReadContract({
     address,
@@ -31,8 +29,39 @@ export function ChooseTokenAmount({ index }: { index: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userTokenBalance, address]);
 
-  const handleTokenAmount = (amount: string) => {
-    updateTokenConfig(index, { amount });
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value.trim();
+    if (Number(inputValue) >= 0) {
+      if (poolType === PoolType.GyroE) {
+        // Use USD values to calculate proper amount for other token
+        const otherIndex = index === 0 ? 1 : 0;
+
+        // TODO: this is gross, make it better
+        // If order is inverted, swap which price corresponds to which index
+        const currentTokenPrice =
+          index === 0
+            ? Number(isEclpParamsInverted ? usdPerToken1 : usdPerToken0)
+            : Number(isEclpParamsInverted ? usdPerToken0 : usdPerToken1);
+
+        const otherTokenPrice =
+          index === 0
+            ? Number(isEclpParamsInverted ? usdPerToken0 : usdPerToken1)
+            : Number(isEclpParamsInverted ? usdPerToken1 : usdPerToken0);
+
+        const calculatedAmount = (Number(inputValue) * currentTokenPrice) / otherTokenPrice;
+
+        updateTokenConfig(index, { amount: inputValue });
+        updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() });
+      } else {
+        updateTokenConfig(index, { amount: inputValue });
+      }
+    } else {
+      updateTokenConfig(index, { amount: "" });
+    }
+  };
+
+  const setAmountToUserBalance = () => {
+    updateTokenConfig(index, { amount: formatUnits(userTokenBalance || 0n, tokenInfo?.decimals || 0) });
   };
 
   const isUpdatingWeights = useRef(false);
@@ -68,6 +97,21 @@ export function ChooseTokenAmount({ index }: { index: number }) {
     isUpdatingWeights.current = false;
   };
 
+  const {
+    tokenUsdValue,
+    isLoading: isUsdValueLoading,
+    isError: isUsdValueError,
+  } = useTokenUsdValue(tokenInfo?.address, amount);
+
+  let usdValue = null;
+  // Handle edge case of if user altered token values for gyro eclp
+  if (poolType === PoolType.GyroE) {
+    if (index === 0) usdValue = isEclpParamsInverted ? Number(usdPerToken1) : Number(usdPerToken0);
+    if (index === 1) usdValue = isEclpParamsInverted ? Number(usdPerToken0) : Number(usdPerToken1);
+  } else {
+    usdValue = tokenUsdValue;
+  }
+
   return (
     <div className="bg-base-100 p-3 rounded-lg flex flex-col gap-3">
       <div className="flex gap-3 w-full items-center">
@@ -102,10 +146,13 @@ export function ChooseTokenAmount({ index }: { index: number }) {
 
         <div className="flex-grow">
           <TokenAmountField
-            value={amount}
+            inputValue={amount}
+            usdValue={usdValue}
+            isUsdValueLoading={isUsdValueLoading}
+            isUsdValueError={isUsdValueError}
             selectedToken={tokenInfo}
-            setTokenAmount={handleTokenAmount}
-            tokenOptions={remainingTokens}
+            onChange={handleAmountChange}
+            setAmountToUserBalance={setAmountToUserBalance}
             balance={userTokenBalance}
           />
         </div>

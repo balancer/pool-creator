@@ -3,17 +3,22 @@ import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { Alert } from "~~/components/common";
 import { usePoolCreationStore, useUserDataStore, useValidatePoolCreationInput } from "~~/hooks/v3";
+import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function ChooseTokenAmounts() {
   const { tokenConfigs, poolType } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
   const { isValidTokenWeights } = useValidatePoolCreationInput();
+
+  // Sorting token configs is necessary for consistent auto-fill of other token amount for gyro ECLP
+  const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
+
   return (
     <div>
       <div className="text-xl mb-3">Choose initialization amounts:</div>
       <div className="flex flex-col gap-4">
-        {Array.from({ length: tokenConfigs.length }).map((_, index) => (
-          <ChooseTokenAmount key={index} index={index} />
+        {sortedTokenConfigs.map((tokenConfig, index) => (
+          <ChooseTokenAmount key={tokenConfig.address} index={index} tokenConfig={tokenConfig} />
         ))}
       </div>
 

@@ -13,7 +13,7 @@ import { useWalletClient } from "wagmi";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore } from "~~/hooks/v3";
+import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore, useUserDataStoreDebug } from "~~/hooks/v3";
 import { availableNetworks } from "~~/utils";
 
 const BalancerV3: NextPage = () => {
@@ -21,7 +21,9 @@ const BalancerV3: NextPage = () => {
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
   const { data: walletClient } = useWalletClient();
   const { clearUserData } = useUserDataStore();
+
   usePoolStoreDebug();
+  useUserDataStoreDebug();
 
   return (
     <div className="flex justify-center">
@@ -47,7 +49,7 @@ const BalancerV3: NextPage = () => {
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />
 
-                <div className="bg-base-200 w-full max-w-[400px] rounded-xl shadow-lg p-5 h-fit">
+                <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
                   <div className="flex justify-between items-center gap-2 mb-3 mr-2">
                     <div className="font-bold text-2xl">Pool Preview</div>
                     {chain && typeof selectedNetwork.color === "string" && (

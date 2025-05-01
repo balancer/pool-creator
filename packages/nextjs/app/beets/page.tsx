@@ -47,7 +47,7 @@ const BalancerV3: NextPage = () => {
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />
 
-                <div className="bg-base-200 w-full max-w-[400px] rounded-xl shadow-lg p-5 h-fit">
+                <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
                   <div className="flex justify-between items-center gap-2 mb-3 mr-2">
                     <div className="font-bold text-2xl">Pool Preview</div>
 
