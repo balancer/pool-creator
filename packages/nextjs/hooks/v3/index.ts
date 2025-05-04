@@ -1,7 +1,7 @@
 export * from "./usePoolCreationStore";
 export * from "./useCreatePool";
 export * from "./useInitializePool";
-export * from "./useValidatePoolCreationInput";
+export * from "./useValidateCreationInputs";
 export * from "./useMultiSwap";
 export * from "./useBoostableWhitelist";
 export * from "./useValidateHooksContract";
@@ -11,3 +11,4 @@ export * from "./useCheckIfV3PoolExists";
 export * from "./useCreatePoolTxHash";
 export * from "./useMultiSwapTxHash";
 export * from "./useInitializePoolTxHash";
+export * from "./useValidateInitializationInputs";

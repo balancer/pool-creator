@@ -99,7 +99,7 @@ function EclpParamInputs() {
         {tokenHasRateProvider ? (
           <Alert type="warning">For yield bearing assets, you set the USD value for the underlying token</Alert>
         ) : (
-          <Alert type="eureka">Stretching factor controls concentration of liquidity around peak price</Alert>
+          <Alert type="eureka">Stretching factor controls depth of liquidity around peak price</Alert>
         )}
         {(!usdPerTokenInput0 || !usdPerTokenInput1) && (
           <Alert type="warning">Enter USD values for both tokens to begin parameter configuration</Alert>

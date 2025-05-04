@@ -24,22 +24,24 @@ export const ReClammParams = () => {
       <div className="bg-base-200 w-full h-72 rounded-xl mb-3"></div>
 
       <div className="flex flex-col gap-5">
-        <TextField
-          label="Initial Target Price"
-          value={initialTargetPrice}
-          onChange={e => updateReClammParam({ initialTargetPrice: e.target.value })}
-        />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <TextField
-            label="Initial Min Price"
+            label="Min Price"
             value={initialMinPrice}
             onChange={e => updateReClammParam({ initialMinPrice: e.target.value })}
           />
           <TextField
-            label="Initial Max Price"
+            label="Max Price"
             value={initialMaxPrice}
             onChange={e => updateReClammParam({ initialMaxPrice: e.target.value })}
           />
+          <TextField
+            label="Target Price"
+            value={initialTargetPrice}
+            onChange={e => updateReClammParam({ initialTargetPrice: e.target.value })}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
           <TextField
             label="Price Shift Daily Rate"
             value={priceShiftDailyRate}

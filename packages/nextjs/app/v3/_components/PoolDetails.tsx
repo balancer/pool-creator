@@ -6,12 +6,7 @@ import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import {
-  type TokenConfig,
-  useBoostableWhitelist,
-  usePoolCreationStore,
-  useValidatePoolCreationInput,
-} from "~~/hooks/v3";
+import { type TokenConfig, useBoostableWhitelist, usePoolCreationStore, useValidateCreationInputs } from "~~/hooks/v3";
 import { abbreviateAddress, sortTokenConfigs } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
@@ -37,7 +32,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     reClammParams,
   } = usePoolCreationStore();
 
-  const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
+  const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidateCreationInputs();
   const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
     reClammParams;
 
@@ -287,7 +282,7 @@ function TokenDetails({ token }: { token: TokenConfig }) {
       <div className="flex justify-between">
         <div className="flex items-center gap-1.5">
           {poolType === PoolType.Weighted && token?.weight && (
-            <span className="font-bold"> {token.weight.toFixed(0)}%</span>
+            <span className="font-bold"> {Number(token.weight).toFixed(0)}%</span>
           )}
 
           {token?.tokenInfo && <TokenImage size="md" token={token.tokenInfo} />}

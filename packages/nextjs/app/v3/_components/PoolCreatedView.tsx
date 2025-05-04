@@ -1,5 +1,4 @@
 import { optimism, sepolia } from "viem/chains";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
 import { sonic } from "~~/utils/customChains";
@@ -22,11 +21,10 @@ export const PoolCreatedView = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: b
   const poolURL = `${baseURL}/pools/${chainName}/v3/${poolAddress}`;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <a href={poolURL} target="_blank" rel="noopener noreferrer" className="">
         <button className={`btn w-full rounded-xl text-lg ${bgBeigeGradient} ${bgBeigeGradientHover} text-neutral-700`}>
-          <div>View on Balancer</div>
-          <ArrowTopRightOnSquareIcon className="w-5 h-5 mt-1" />
+          <div>View on balancer.fi</div>
         </button>
       </a>
 

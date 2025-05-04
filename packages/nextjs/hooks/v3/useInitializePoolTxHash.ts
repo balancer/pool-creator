@@ -36,6 +36,8 @@ export function useInitializePoolTxHash() {
         updatePool({ step: step + 1, initPoolTx: { safeHash, wagmiHash, isSuccess: true } });
         return { isSuccess: true };
       } else {
+        // other option is tx reverts at which point we want to clear state to attempt new tx to be sent
+        updatePool({ initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false } });
         throw new Error("Init pool transaction reverted");
       }
     },

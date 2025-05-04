@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { ApproveOnTokenManager, PoolCreatedView } from ".";
-import { PoolDetails } from "~~/app/v3/_components";
+import { ChooseTokenAmounts, PoolDetails } from "~~/app/v3/_components";
 import {
   Alert,
   ContactSupportModal,
@@ -24,6 +25,8 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
+  const [isChooseTokenAmountsModalOpen, setIsChooseTokenAmountsModalOpen] = useState(false);
+
   const { step, tokenConfigs, clearPoolStore, createPoolTx, swapToBoostedTx, initPoolTx, chain } =
     usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
@@ -48,13 +51,25 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     ? getBlockExplorerTxLink(chain?.id, initPoolTx.wagmiHash)
     : undefined;
 
-  const deployStep = createTransactionStep({
+  const deployStep = transactionButtonManager({
     label: "Deploy Pool",
     blockExplorerUrl: poolDeploymentUrl,
     onSubmit: createPool,
     isPending: isCreatePoolPending || isFetchPoolAddressPending,
     error: createPoolError || fetchPoolAddressError,
   });
+
+  const chooseAmountsStep = {
+    label: "Choose Amounts",
+    component: (
+      <TransactionButton
+        onClick={() => setIsChooseTokenAmountsModalOpen(true)}
+        title="Choose Token Amounts"
+        isDisabled={false}
+        isPending={false}
+      />
+    ),
+  };
 
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => {
     const { address, amount, tokenInfo } = token;
@@ -74,7 +89,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   const swapToBoosted = [];
   if (tokenConfigs.some(token => token.useBoostedVariant === true)) {
     swapToBoosted.push(
-      createTransactionStep({
+      transactionButtonManager({
         label: "Swap to Boosted",
         onSubmit: multiSwap,
         isPending: isMultiSwapPending || isMultiSwapTxHashPending,
@@ -106,7 +121,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
     });
   });
 
-  const initializeStep = createTransactionStep({
+  const initializeStep = transactionButtonManager({
     label: "Initialize Pool",
     onSubmit: initPool,
     isPending: isInitPoolPending || isInitPoolTxHashPending,
@@ -116,6 +131,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
 
   const poolCreationSteps = [
     deployStep,
+    chooseAmountsStep,
     ...approveOnTokenSteps,
     ...swapToBoosted,
     ...approveOnBoostedVariantSteps,
@@ -123,60 +139,65 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">
-      <div
-        className="absolute w-full h-full"
-        onClick={() => {
-          if (step > 1 || isCreatePoolPending) return;
-          setIsModalOpen(false);
-        }}
-      />
-      <div className="flex flex-col gap-5">
-        <div className="flex gap-5">
-          <div className="flex flex-col gap-5 relative z-10 w-[500px]">
-            <div className="bg-base-300 border-neutral border rounded-lg  p-5 flex flex-col gap-5 max-h-[90vh]">
-              <div className="font-bold text-2xl text-center">Pool Creation</div>
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-50">
+        <div
+          className="absolute w-full h-full"
+          onClick={() => {
+            if (initPoolTx.wagmiHash || initPoolTx.safeHash) return; // don't let user close modal to try to edit amounts after init tx has been sent
+            setIsModalOpen(false);
+          }}
+        />
+        <div className="flex flex-col gap-5">
+          <div className="flex gap-5">
+            <div className="flex flex-col gap-5 relative z-10 w-[500px]">
+              <div className="bg-base-300 border-neutral border rounded-lg  p-5 flex flex-col gap-5 max-h-[90vh]">
+                <div className="font-bold text-2xl text-center">Pool Creation</div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <PoolDetails />
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  <PoolDetails />
+                </div>
+
+                {step <= poolCreationSteps.length ? (
+                  poolCreationSteps[step - 1].component
+                ) : (
+                  <PoolCreatedView setIsModalOpen={setIsModalOpen} />
+                )}
+
+                <div className="flex justify-center gap-2 items-center">
+                  <ContactSupportModal />
+                  <div className="text-xl">·</div>
+                  <PoolStateResetModal
+                    clearState={() => {
+                      clearPoolStore();
+                      clearUserData();
+                      setIsModalOpen(false);
+                    }}
+                    trigger={<span className="hover:underline">Reset Progress</span>}
+                  />
+                </div>
               </div>
-
-              {step <= poolCreationSteps.length ? (
-                poolCreationSteps[step - 1].component
-              ) : (
-                <PoolCreatedView setIsModalOpen={setIsModalOpen} />
+              {step > poolCreationSteps.length && (
+                <Alert type="success">
+                  Your pool has been successfully initialized and will be available to view in the Balancer app shortly!
+                </Alert>
               )}
-
-              <div className="flex justify-center gap-2 items-center">
-                <ContactSupportModal />
-                <div className="text-xl">·</div>
-                <PoolStateResetModal
-                  clearState={() => {
-                    clearPoolStore();
-                    clearUserData();
-                    setIsModalOpen(false);
-                  }}
-                  trigger={<span className="hover:underline">Reset Progress</span>}
-                />
-              </div>
             </div>
-            {step > poolCreationSteps.length && (
-              <Alert type="success">
-                Your pool has been successfully initialized and will be available to view in the Balancer app shortly!
-              </Alert>
-            )}
-          </div>
 
-          <div className="relative z-5">
-            <PoolStepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
+            <div className="relative z-5">
+              <PoolStepsDisplay currentStepNumber={step} steps={poolCreationSteps} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      {isChooseTokenAmountsModalOpen && (
+        <ChooseTokenAmounts setIsChooseTokenAmountsModalOpen={setIsChooseTokenAmountsModalOpen} />
+      )}
+    </>
   );
 }
 
-function createTransactionStep({
+export function transactionButtonManager({
   label,
   blockExplorerUrl,
   onSubmit,

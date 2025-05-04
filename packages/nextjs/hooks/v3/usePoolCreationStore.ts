@@ -3,13 +3,11 @@ import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { type TabType } from "~~/app/v3/_components/PoolConfiguration";
 import { type Token } from "~~/hooks/token";
 import { SupportedPoolTypes } from "~~/utils";
 import { sortTokenConfigs } from "~~/utils/helpers";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
-
-export const TABS = ["Type", "Tokens", "Parameters", "Finalize"] as const;
-export type TabType = (typeof TABS)[number];
 
 export type TokenConfig = {
   address: Address;
@@ -18,7 +16,7 @@ export type TokenConfig = {
   isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
-  weight: number | undefined;
+  weight: string;
   isWeightLocked: boolean;
   tokenInfo: Token | null;
   amount: string; // human readable
@@ -92,7 +90,7 @@ export const initialTokenConfig: TokenConfig = {
   tokenInfo: null, // Details including image, symbol, decimals, etc.
   amount: "",
   useBoostedVariant: false,
-  weight: undefined, // only used for weighted pools
+  weight: "", // only used for weighted pools
 };
 
 export const initialEclpParams: EclpParams = {
@@ -114,7 +112,7 @@ export const initialPoolCreationState = {
   isDelegatingSwapFeeManagement: true,
   isUsingHooks: false,
   poolAddress: undefined, // set after pool deployment by parsing the tx hash
-  selectedTab: TABS[0],
+  selectedTab: "Type" as const,
   name: "",
   symbol: "",
   poolType: undefined,

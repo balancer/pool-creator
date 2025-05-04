@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BoostOpportunityModal } from "./BoostOpportunityModal";
 import { RateProviderModal } from "./RateProviderModal";
-import { TokenType } from "@balancer/sdk";
+import { PoolType, TokenType } from "@balancer/sdk";
 import { erc20Abi, zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { ChevronDownIcon, Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import { Checkbox, TextField } from "~~/components/common";
 import { Alert, TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
@@ -21,6 +22,7 @@ import {
  * 1. Token selection
  * 2. Optional rate provider
  * 3. Optional boost opportunity for underlying tokens that have whitelisted boosted variants
+ * 4. If weighted pool, input to decide token weight
  */
 export function ChooseToken({ index }: { index: number }) {
   const [showBoostOpportunityModal, setShowBoostOpportunityModal] = useState(false);
@@ -28,8 +30,17 @@ export function ChooseToken({ index }: { index: number }) {
   const [isTokenSelectModalOpen, setIsTokenSelectModalOpen] = useState(false);
 
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { tokenConfigs, updatePool, updateTokenConfig } = usePoolCreationStore();
-  const { tokenType, rateProvider, isValidRateProvider, tokenInfo, address, useBoostedVariant } = tokenConfigs[index];
+  const { tokenConfigs, updatePool, updateTokenConfig, poolType } = usePoolCreationStore();
+  const {
+    tokenType,
+    rateProvider,
+    isValidRateProvider,
+    tokenInfo,
+    address,
+    useBoostedVariant,
+    isWeightLocked,
+    weight,
+  } = tokenConfigs[index];
 
   useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
 
@@ -98,6 +109,41 @@ export function ChooseToken({ index }: { index: number }) {
     }
   };
 
+  const isUpdatingWeights = useRef(false);
+
+  const handleWeightChange = (newWeightString: string) => {
+    if (isUpdatingWeights.current) return;
+    isUpdatingWeights.current = true;
+
+    const newWeight = Number(newWeightString);
+
+    // The user's choice for the selected token's weight
+    const adjustedWeight = Math.min(newWeight, 99);
+
+    // Calculate total weight of locked tokens (excluding current token)
+    const lockedWeight = tokenConfigs.reduce(
+      (sum, token, i) => (i !== index && token.isWeightLocked ? sum + Number(token.weight) : sum),
+      0,
+    );
+
+    // Count unlocked tokens (excluding current token)
+    const unlockedTokenCount = tokenConfigs.reduce(
+      (count, token, i) => (i !== index && !token.isWeightLocked ? count + 1 : count),
+      0,
+    );
+
+    const remainingWeight = 100 - adjustedWeight - lockedWeight;
+    const evenWeight = unlockedTokenCount > 0 ? remainingWeight / unlockedTokenCount : 0;
+
+    const updatedTokenConfigs = tokenConfigs.map((token, i) => ({
+      ...token,
+      weight: i === index ? adjustedWeight.toString() : token.isWeightLocked ? token.weight : evenWeight.toString(),
+    }));
+
+    updatePool({ tokenConfigs: updatedTokenConfigs });
+    isUpdatingWeights.current = false;
+  };
+
   // show rate provider modal when appropriate
   const token = tokenConfigs[index];
   useEffect(() => {
@@ -133,25 +179,61 @@ export function ChooseToken({ index }: { index: number }) {
           </div>
         )}
         <div className="flex gap-3 w-full items-center">
-          {tokenConfigs.length > 2 && (
-            <div className="cursor-pointer" onClick={handleRemoveToken}>
-              <TrashIcon className="w-5 h-5" />
-            </div>
-          )}
-
           <div className="flex flex-grow justify-between items-end">
-            <button
-              onClick={() => setIsTokenSelectModalOpen(true)}
-              className={`${
-                tokenInfo
-                  ? "bg-base-300"
-                  : "text-neutral-700 bg-gradient-to-b from-custom-beige-start to-custom-beige-end to-100%"
-              } py-3 px-4 shadow-md disabled:text-base-content text-lg font-bold rounded-lg flex justify-between items-center gap-3`}
-            >
-              {tokenInfo && <TokenImage size="md" token={tokenInfo} />}
-              {tokenInfo?.symbol ? `${tokenInfo.symbol}` : `Select Token`}{" "}
-              {<ChevronDownIcon className="w-4 h-4 mt-0.5" />}
-            </button>
+            <div className="flex gap-3 items-center">
+              {(tokenConfigs.length > 2 || poolType === PoolType.Weighted) && (
+                <div className="flex flex-col gap-3">
+                  {poolType === PoolType.Weighted && (
+                    <>
+                      <div className="">
+                        {isWeightLocked ? (
+                          <LockClosedIcon
+                            onClick={() => updateTokenConfig(index, { isWeightLocked: false })}
+                            className="w-5 h-5 cursor-pointer"
+                          />
+                        ) : (
+                          <LockOpenIcon
+                            onClick={() => updateTokenConfig(index, { isWeightLocked: true })}
+                            className="w-5 h-5 cursor-pointer"
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
+                  {tokenConfigs.length > 2 && (
+                    <div className="cursor-pointer" onClick={handleRemoveToken}>
+                      <TrashIcon className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
+              )}
+              {poolType === PoolType.Weighted && (
+                <div className="w-full max-w-[80px] h-full flex flex-col relative">
+                  <input
+                    type="number"
+                    min="1"
+                    max="99"
+                    value={weight}
+                    onChange={e => handleWeightChange(Math.max(0, Number(e.target.value.trim())).toString())}
+                    className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[60px]"
+                  />
+                  <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
+                </div>
+              )}
+
+              <button
+                onClick={() => setIsTokenSelectModalOpen(true)}
+                className={`${
+                  tokenInfo
+                    ? "bg-base-300"
+                    : "text-neutral-700 bg-gradient-to-b from-custom-beige-start to-custom-beige-end to-100%"
+                } h-[60px] py-3 px-4 shadow-md disabled:text-base-content text-lg font-bold rounded-lg flex justify-between items-center gap-3`}
+              >
+                {tokenInfo && <TokenImage size="md" token={tokenInfo} />}
+                {tokenInfo?.symbol ? `${tokenInfo.symbol}` : `Select Token`}{" "}
+                {<ChevronDownIcon className="w-4 h-4 mt-0.5" />}
+              </button>
+            </div>
 
             <Checkbox
               label={
@@ -161,7 +243,7 @@ export function ChooseToken({ index }: { index: number }) {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Should this token use a <span className="underline">rate provider</span>?
+                  Use a <span className="underline">rate provider</span>?
                 </a>
               }
               checked={tokenType === TokenType.TOKEN_WITH_RATE}
