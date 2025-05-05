@@ -1,5 +1,5 @@
 import { PoolType } from "@balancer/sdk";
-import { type Address, zeroAddress } from "viem";
+import { type Address } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { RadioInput, TextField } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
@@ -37,7 +37,7 @@ export function PoolHooks() {
             onChange={() => {
               updatePool({
                 isUsingHooks: false,
-                poolHooksContract: zeroAddress,
+                poolHooksContract: "" as Address,
                 disableUnbalancedLiquidity: false,
                 enableDonation: false,
               });
