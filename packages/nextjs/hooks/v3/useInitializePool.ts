@@ -1,6 +1,6 @@
-import { InitPool, InitPoolDataProvider, InitPoolInput, Permit2Helper, PublicWalletClient } from "@balancer/sdk";
+import { InitPool, InitPoolDataProvider, InitPoolInput, Permit2Helper } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { parseUnits, publicActions, walletActions } from "viem";
+import { parseUnits, publicActions } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
@@ -52,25 +52,16 @@ export const useInitializePool = () => {
 
     // Fetch the necessary pool state
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-    const poolState = await initPoolDataProvider.getInitPoolData(
-      poolAddress as `0x${string}`,
-      poolType,
-      protocolVersion,
-    );
+    const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 
     const permit2 = await Permit2Helper.signInitPoolApproval({
       ...initPoolInput,
-      client: walletClient.extend(publicActions).extend(walletActions) as unknown as PublicWalletClient, // TODO: upgrade viem/wagmi to match SDK version of viem to fix type casting
-      owner: walletClient.account.address as `0x${string}`,
+      client: walletClient.extend(publicActions),
+      owner: walletClient.account.address,
     });
-
-    console.log("initPoolInput", initPoolInput);
-    console.log("poolState", poolState);
-    console.log("permit2", permit2);
 
     const initPool = new InitPool();
     const call = initPool.buildCallWithPermit2(initPoolInput, poolState, permit2);
-
     console.log("initPool call:", call);
 
     const hash = await writeTx(
@@ -91,5 +82,10 @@ export const useInitializePool = () => {
     return hash;
   }
 
-  return useMutation({ mutationFn: () => initializePool() });
+  return useMutation({
+    mutationFn: () => initializePool(),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };

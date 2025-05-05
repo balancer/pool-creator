@@ -1,3 +1,4 @@
+import { type Address, zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { RadioInput, TextField } from "~~/components/common";
@@ -26,7 +27,7 @@ export function SwapFeeManger() {
         label="Delegate swap fee management to the Balancer DAO"
         checked={isDelegatingSwapFeeManagement}
         onChange={() => {
-          updatePool({ isDelegatingSwapFeeManagement: true, swapFeeManager: "" });
+          updatePool({ isDelegatingSwapFeeManagement: true, swapFeeManager: zeroAddress });
         }}
       />
       <RadioInput
@@ -44,14 +45,14 @@ export function SwapFeeManger() {
         name="swap-fee-manager"
         label="Choose a different swap fee manager"
         checked={!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress}
-        onChange={() => updatePool({ isDelegatingSwapFeeManagement: false, swapFeeManager: "" })}
+        onChange={() => updatePool({ isDelegatingSwapFeeManagement: false, swapFeeManager: "" as Address })}
       />
       {!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress && (
         <TextField
           mustBeAddress={true}
           placeholder="Enter swap fee manager address"
           value={swapFeeManager}
-          onChange={e => updatePool({ swapFeeManager: e.target.value.trim() })}
+          onChange={e => updatePool({ swapFeeManager: e.target.value.trim() as Address })}
         />
       )}
     </div>

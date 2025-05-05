@@ -1,3 +1,4 @@
+import { type Address, zeroAddress } from "viem";
 import { useAccount } from "wagmi";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { RadioInput, TextField } from "~~/components/common";
@@ -26,7 +27,7 @@ export function PauseManager() {
         label="Delegate pause management to the Balancer DAO"
         checked={isDelegatingPauseManagement}
         onChange={() => {
-          updatePool({ isDelegatingPauseManagement: true, pauseManager: "" });
+          updatePool({ isDelegatingPauseManagement: true, pauseManager: zeroAddress });
         }}
       />
       <RadioInput
@@ -44,7 +45,7 @@ export function PauseManager() {
         name="pause-manager"
         label="Choose a different pause manager"
         checked={!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress}
-        onChange={() => updatePool({ isDelegatingPauseManagement: false, pauseManager: "" })}
+        onChange={() => updatePool({ isDelegatingPauseManagement: false, pauseManager: "" as Address })}
       />
       {!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress && (
         <div className="flex flex-col gap-3 mt-3">
@@ -52,7 +53,7 @@ export function PauseManager() {
             mustBeAddress={true}
             placeholder="Enter pause manager address"
             value={pauseManager}
-            onChange={e => updatePool({ pauseManager: e.target.value.trim() })}
+            onChange={e => updatePool({ pauseManager: e.target.value.trim() as Address })}
           />
         </div>
       )}

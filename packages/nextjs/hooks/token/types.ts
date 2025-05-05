@@ -1,15 +1,17 @@
+import { type Address } from "viem";
+
 export type Token = {
   chainId: number;
-  address: string;
+  address: Address;
   name: string;
   symbol: string;
   decimals: number;
   logoURI: string;
   hasBoostedVariant?: boolean;
-  underlyingTokenAddress: string | undefined;
+  underlyingTokenAddress: Address | undefined;
   isBufferAllowed: boolean;
   priceRateProviderData: {
-    address: string;
+    address: Address;
     summary: string;
     name: string;
     reviewed: boolean;

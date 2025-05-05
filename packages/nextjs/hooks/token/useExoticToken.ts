@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { isAddress } from "viem";
+import { Address, isAddress } from "viem";
 import { useApiConfig } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useReadToken } from "~~/hooks/token";
@@ -8,7 +8,7 @@ import { tokenBlacklist } from "~~/utils";
 
 export function useExoticToken(searchText: string, filteredTokenOptions: Token[]) {
   const { targetNetwork } = useTargetNetwork();
-  const [exoticTokenAddress, setExoticTokenAddress] = useState<string | undefined>();
+  const [exoticTokenAddress, setExoticTokenAddress] = useState<Address | undefined>();
   const { chainName } = useApiConfig();
 
   const { name, symbol, decimals, isLoadingName, isLoadingDecimals, isLoadingSymbol } =

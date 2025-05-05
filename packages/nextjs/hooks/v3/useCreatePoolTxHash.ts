@@ -48,7 +48,9 @@ export function useCreatePoolTxHash() {
         } else {
           throw new Error("Pool address not found in PoolCreated event logs");
         }
-      } else {
+      } else if (txReceipt.status === "reverted") {
+        // reset tx hash tracking state if revert
+        updatePool({ createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false } });
         throw new Error("Create pool transaction reverted");
       }
     },

@@ -41,5 +41,10 @@ export const useApproveToken = ({ onSafeTxHash, onWagmiTxHash }: UseApproveToken
     return txHash;
   };
 
-  return useMutation({ mutationFn: (payload: ApproveOnTokenPayload) => approve(payload) });
+  return useMutation({
+    mutationFn: (payload: ApproveOnTokenPayload) => approve(payload),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };

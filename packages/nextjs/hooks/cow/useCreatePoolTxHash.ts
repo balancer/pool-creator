@@ -1,6 +1,7 @@
 import { useSafeAppsSDK } from "@safe-global/safe-apps-react-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { parseEventLogs } from "viem";
+import { type Address } from "viem";
 import { usePublicClient } from "wagmi";
 import { abis } from "~~/contracts/abis";
 import { usePoolCreationStore } from "~~/hooks/cow/usePoolCreationStore";
@@ -42,7 +43,7 @@ export function useCreatePoolTxHash() {
 
         updatePoolCreation({
           createPoolTx: { safeHash, wagmiHash, isSuccess: true },
-          poolAddress: newPoolAddress,
+          poolAddress: newPoolAddress as Address,
           step: 2,
         });
         return newPoolAddress;
