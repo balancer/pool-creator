@@ -300,16 +300,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@balancer/sdk@npm:4.0.2":
-  version: 4.0.2
-  resolution: "@balancer/sdk@npm:4.0.2"
+"@balancer/sdk@npm:4.0.3":
+  version: 4.0.3
+  resolution: "@balancer/sdk@npm:4.0.3"
   dependencies:
     "@balancer-labs/balancer-maths": 0.0.27
     "@types/big.js": 6.2.2
     big.js: 6.2.2
     decimal.js-light: 2.5.1
     viem: 2.27.0
-  checksum: a5fb73dea2a146c807acb372bb50276740d74720bd4ec6ae4e301ea74580fe4bf9642eed5d9f2e9cfddd29c7f2a27b7308b28e284b625b6fcd320964e3d1fcc3
+  checksum: 7918afbebcb846e9ffe73c66e27eb7a2f8a84b3c7ee3a1ce55d5813dda324bd90d62c1d4e6c09c103adc9d9674c841763649e47c7a1417f85698af302cf186b8
   languageName: node
   linkType: hard
 
@@ -1699,7 +1699,7 @@ __metadata:
   resolution: "@se-2/nextjs@workspace:packages/nextjs"
   dependencies:
     "@balancer-labs/balancer-maths": ^0.0.25
-    "@balancer/sdk": 4.0.2
+    "@balancer/sdk": 4.0.3
     "@heroicons/react": ^2.0.11
     "@rainbow-me/rainbowkit": 2.1.2
     "@safe-global/safe-apps-provider": ^0.18.5

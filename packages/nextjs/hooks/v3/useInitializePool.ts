@@ -1,18 +1,9 @@
-import {
-  ChainId,
-  InitPool,
-  InitPoolDataProvider,
-  InitPoolInput,
-  Permit2Helper,
-  balancerV3Contracts,
-  permit2Abi,
-} from "@balancer/sdk";
+import { InitPool, InitPoolDataProvider, InitPoolInput, Permit2Helper } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, publicActions } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
-import { PERMIT2_ADDRESS } from "~~/utils/constants";
 
 /**
  * Handles sending the init pool transaction
@@ -63,29 +54,10 @@ export const useInitializePool = () => {
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
     const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
 
-    //TODO: figure out if this is necessary for mainnet becuase "allowance" reverted w/ internal error? (could have been viem version mismatch with SDK. see PR #67 on pool creator)
-    const nonces = [];
-    const isOptimism = chainId === ChainId.OPTIMISM;
-    const isSepolia = chainId === ChainId.SEPOLIA;
-
-    if (isOptimism || isSepolia) {
-      for (const token of poolState.tokens) {
-        const result = await publicClient.readContract({
-          abi: permit2Abi,
-          address: PERMIT2_ADDRESS,
-          functionName: "allowance",
-          args: [walletClient.account.address, token.address, balancerV3Contracts.Router[chainId]],
-        });
-        const nonce = result[2];
-        nonces.push(nonce);
-      }
-    }
-
     const permit2 = await Permit2Helper.signInitPoolApproval({
       ...initPoolInput,
       client: walletClient.extend(publicActions),
       owner: walletClient.account.address,
-      nonces: isOptimism || isSepolia ? nonces : undefined,
     });
 
     const initPool = new InitPool();
