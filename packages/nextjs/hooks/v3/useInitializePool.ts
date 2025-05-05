@@ -64,9 +64,14 @@ export const useInitializePool = () => {
       owner: walletClient.account.address as `0x${string}`,
     });
 
-    const initPool = new InitPool();
+    console.log("initPoolInput", initPoolInput);
+    console.log("poolState", poolState);
+    console.log("permit2", permit2);
 
+    const initPool = new InitPool();
     const call = initPool.buildCallWithPermit2(initPoolInput, poolState, permit2);
+
+    console.log("initPool call:", call);
 
     const hash = await writeTx(
       () =>
