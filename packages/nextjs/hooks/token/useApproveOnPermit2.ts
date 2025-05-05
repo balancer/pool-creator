@@ -39,5 +39,10 @@ export const useApproveOnPermit2 = () => {
     });
   };
 
-  return useMutation({ mutationFn: (payload: ApproveOnPermit2Payload) => approve(payload) });
+  return useMutation({
+    mutationFn: (payload: ApproveOnPermit2Payload) => approve(payload),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };

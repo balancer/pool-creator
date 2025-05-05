@@ -1,4 +1,5 @@
 import { PoolType } from "@balancer/sdk";
+import { type Address } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { RadioInput, TextField } from "~~/components/common";
 import { usePoolCreationStore } from "~~/hooks/v3";
@@ -36,7 +37,7 @@ export function PoolHooks() {
             onChange={() => {
               updatePool({
                 isUsingHooks: false,
-                poolHooksContract: "",
+                poolHooksContract: "" as Address,
                 disableUnbalancedLiquidity: false,
                 enableDonation: false,
               });
@@ -56,7 +57,7 @@ export function PoolHooks() {
                   mustBeAddress={true}
                   placeholder="Enter pool hooks contract address"
                   value={poolHooksContract}
-                  onChange={e => updatePool({ poolHooksContract: e.target.value.trim() })}
+                  onChange={e => updatePool({ poolHooksContract: e.target.value.trim() as Address })}
                 />
               </div>
             </div>

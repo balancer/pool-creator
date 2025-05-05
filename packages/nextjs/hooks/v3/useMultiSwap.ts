@@ -56,8 +56,8 @@ export const useMultiSwap = () => {
           tokenIn: token.address as `0x${string}`,
           steps: [
             {
-              pool: boostedToken.address,
-              tokenOut: boostedToken.address,
+              pool: boostedToken.address as `0x${string}`,
+              tokenOut: boostedToken.address as `0x${string}`,
               isBuffer: true,
             },
           ],
@@ -110,7 +110,12 @@ export const useMultiSwap = () => {
     return hash;
   }
 
-  return useMutation({ mutationFn: () => multiSwap() });
+  return useMutation({
+    mutationFn: () => multiSwap(),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };
 
 /**

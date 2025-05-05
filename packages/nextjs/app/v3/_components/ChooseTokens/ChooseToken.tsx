@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BoostOpportunityModal } from "./BoostOpportunityModal";
 import { RateProviderModal } from "./RateProviderModal";
 import { PoolType, TokenType } from "@balancer/sdk";
-import { erc20Abi, zeroAddress } from "viem";
+import { type Address, erc20Abi, zeroAddress } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 import { ChevronDownIcon, Cog6ToothIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
@@ -91,7 +91,11 @@ export function ChooseToken({ index }: { index: number }) {
 
   const handleTokenTypeToggle = () => {
     if (tokenConfigs[index].tokenType === TokenType.STANDARD) {
-      updateTokenConfig(index, { tokenType: TokenType.TOKEN_WITH_RATE, rateProvider: "", paysYieldFees: true });
+      updateTokenConfig(index, {
+        tokenType: TokenType.TOKEN_WITH_RATE,
+        rateProvider: "" as Address,
+        paysYieldFees: true,
+      });
     } else {
       updateTokenConfig(index, {
         tokenType: TokenType.STANDARD,
@@ -259,7 +263,7 @@ export function ChooseToken({ index }: { index: number }) {
               mustBeAddress={true}
               placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
               value={rateProvider !== zeroAddress ? rateProvider : ""}
-              onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() })}
+              onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() as Address })}
             />
 
             {rateProvider.toLowerCase() !== tokenInfo?.priceRateProviderData?.address.toLowerCase() &&
