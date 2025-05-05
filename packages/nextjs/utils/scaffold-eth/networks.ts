@@ -42,6 +42,7 @@ export const INFURA_CHAIN_NAMES: Record<number, string> = {
   [chains.avalanche.id]: "avalanche-mainnet",
   [chains.base.id]: "base-mainnet",
   [sonic.id]: "sonic-mainnet",
+  [chains.optimism.id]: "optimism-mainnet",
 };
 
 export const DRPC_CHAIN_NAMES: Record<number, string> = {
@@ -52,6 +53,7 @@ export const DRPC_CHAIN_NAMES: Record<number, string> = {
   [chains.avalanche.id]: "avalanche",
   [chains.gnosis.id]: "gnosis",
   [chains.sepolia.id]: "sepolia",
+  [chains.optimism.id]: "optimism",
 };
 
 export const getDrpcHttpUrl = (chainId: number) => {
@@ -73,12 +75,14 @@ export const getInfuraHttpUrl = (chainId: number) => {
 };
 
 export const RPC_FALLBACKS: Record<number, string> = {
-  [chains.mainnet.id]: "https://eth.llamarpc.com",
+  [chains.mainnet.id]: "https://mainnet.gateway.tenderly.co",
   [chains.arbitrum.id]: "https://arbitrum.llamarpc.com",
   [chains.gnosis.id]: "https://gnosis.drpc.org",
   [chains.sepolia.id]: "https://sepolia.gateway.tenderly.co",
   [chains.base.id]: "https://base.llamarpc.com",
-  [chains.avalanche.id]: "https://avalanche.drpc.org",
+  [chains.avalanche.id]: "https://avalanche.gateway.tenderly.co/",
+  [chains.optimism.id]: "https://optimism.gateway.tenderly.co/",
+  [sonic.id]: "https://sonic.drpc.org",
 };
 
 export const getRpcFallbackUrl = (chainId: number) => {
