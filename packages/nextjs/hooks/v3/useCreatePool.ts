@@ -68,9 +68,9 @@ export const useCreatePool = () => {
       name,
       symbol,
       swapFeePercentage: parseUnits(swapFeePercentage, SWAP_FEE_PERCENTAGE_DECIMALS),
-      swapFeeManager: swapFeeManager === "" ? zeroAddress : (swapFeeManager as `0x${string}`),
-      pauseManager: pauseManager === "" ? zeroAddress : (pauseManager as `0x${string}`),
-      poolHooksContract: poolHooksContract === "" ? zeroAddress : (poolHooksContract as `0x${string}`),
+      swapFeeManager: swapFeeManager ? swapFeeManager : zeroAddress,
+      pauseManager: pauseManager ? pauseManager : zeroAddress,
+      poolHooksContract: poolHooksContract ? poolHooksContract : zeroAddress,
       enableDonation,
       disableUnbalancedLiquidity,
       tokens: tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => {
@@ -79,8 +79,8 @@ export const useCreatePool = () => {
         const tokenAddress = useBoostedVariant && boostedVariant ? boostedVariant.address : address;
         if (poolType === PoolType.Weighted && !weight) throw new Error("Weight is required for each token");
         return {
-          address: tokenAddress as `0x${string}`,
-          rateProvider: rateProvider as `0x${string}`,
+          address: tokenAddress,
+          rateProvider,
           tokenType,
           paysYieldFees,
           ...(poolType === PoolType.Weighted &&
@@ -130,5 +130,10 @@ export const useCreatePool = () => {
     return hash;
   }
 
-  return useMutation({ mutationFn: () => createPool() });
+  return useMutation({
+    mutationFn: () => createPool(),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };

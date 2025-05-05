@@ -31,10 +31,10 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     symbol,
     amplificationParameter,
     poolAddress,
-    isDelegatingPauseManagement,
-    isDelegatingSwapFeeManagement,
     isUsingHooks,
     reClammParams,
+    isDelegatingPauseManagement,
+    isDelegatingSwapFeeManagement,
   } = usePoolCreationStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidatePoolCreationInput();
@@ -63,7 +63,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         title="Tokens"
         isPreview={isPreview}
         isValid={isTokensValid}
-        isEmpty={tokenConfigs.every(token => token.address === "")}
+        isEmpty={tokenConfigs.every(token => token.address === zeroAddress)}
         content={
           <div className="flex flex-col gap-2">
             {sortedTokenConfigs.map((token, index) => (
@@ -121,7 +121,9 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>
-                {swapFeeManager ? (
+                {isDelegatingSwapFeeManagement ? (
+                  "Balancer"
+                ) : swapFeeManager ? (
                   <a
                     href={getBlockExplorerAddressLink(targetNetwork, swapFeeManager)}
                     target="_blank"
@@ -131,8 +133,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {abbreviateAddress(swapFeeManager)}
                     <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </a>
-                ) : isDelegatingSwapFeeManagement ? (
-                  "Balancer"
                 ) : (
                   "-"
                 )}
@@ -141,7 +141,9 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             <div className="flex justify-between">
               <div className="">Pause Manager</div>
               <div>
-                {pauseManager ? (
+                {isDelegatingPauseManagement ? (
+                  "Balancer"
+                ) : pauseManager ? (
                   <a
                     href={getBlockExplorerAddressLink(targetNetwork, pauseManager)}
                     target="_blank"
@@ -151,8 +153,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                     {abbreviateAddress(pauseManager)}
                     <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                   </a>
-                ) : isDelegatingPauseManagement ? (
-                  "Balancer"
                 ) : (
                   "-"
                 )}
