@@ -35,6 +35,12 @@ export const RPC_CHAIN_NAMES: Record<number, string> = {
   [chains.avalanche.id]: "avax-mainnet",
 };
 
+export const getAlchemyHttpUrl = (chainId: number) => {
+  return scaffoldConfig.alchemyApiKey && RPC_CHAIN_NAMES[chainId]
+    ? `https://${RPC_CHAIN_NAMES[chainId]}.g.alchemy.com/v2/${scaffoldConfig.alchemyApiKey}`
+    : undefined;
+};
+
 export const INFURA_CHAIN_NAMES: Record<number, string> = {
   [chains.mainnet.id]: "mainnet",
   [chains.sepolia.id]: "sepolia",
@@ -43,6 +49,12 @@ export const INFURA_CHAIN_NAMES: Record<number, string> = {
   [chains.base.id]: "base-mainnet",
   [sonic.id]: "sonic-mainnet",
   [chains.optimism.id]: "optimism-mainnet",
+};
+
+export const getInfuraHttpUrl = (chainId: number) => {
+  return scaffoldConfig.infuraApiKey && INFURA_CHAIN_NAMES[chainId]
+    ? `https://${INFURA_CHAIN_NAMES[chainId]}.infura.io/v3/${scaffoldConfig.infuraApiKey}`
+    : undefined;
 };
 
 export const DRPC_CHAIN_NAMES: Record<number, string> = {
@@ -59,18 +71,6 @@ export const DRPC_CHAIN_NAMES: Record<number, string> = {
 export const getDrpcHttpUrl = (chainId: number) => {
   return scaffoldConfig.drpcApiKey && DRPC_CHAIN_NAMES[chainId]
     ? `https://lb.drpc.org/ogrpc?network=${DRPC_CHAIN_NAMES[chainId]}&dkey=${scaffoldConfig.drpcApiKey}`
-    : undefined;
-};
-
-export const getAlchemyHttpUrl = (chainId: number) => {
-  return scaffoldConfig.alchemyApiKey && RPC_CHAIN_NAMES[chainId]
-    ? `https://${RPC_CHAIN_NAMES[chainId]}.g.alchemy.com/v2/${scaffoldConfig.alchemyApiKey}`
-    : undefined;
-};
-
-export const getInfuraHttpUrl = (chainId: number) => {
-  return scaffoldConfig.infuraApiKey && INFURA_CHAIN_NAMES[chainId]
-    ? `https://${INFURA_CHAIN_NAMES[chainId]}.infura.io/v3/${scaffoldConfig.infuraApiKey}`
     : undefined;
 };
 

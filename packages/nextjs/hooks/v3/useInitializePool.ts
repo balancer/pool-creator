@@ -1,9 +1,18 @@
-import { InitPool, InitPoolDataProvider, InitPoolInput, Permit2Helper, PublicWalletClient } from "@balancer/sdk";
+import {
+  ChainId,
+  InitPool,
+  InitPoolDataProvider,
+  InitPoolInput,
+  Permit2Helper,
+  balancerV3Contracts,
+  permit2Abi,
+} from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, publicActions, walletActions } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { PERMIT2_ADDRESS } from "~~/utils/constants";
 
 /**
  * Handles sending the init pool transaction
@@ -49,28 +58,45 @@ export const useInitializePool = () => {
       minBptAmountOut: 0n,
       chainId,
     };
+    console.log("initPoolInput:", initPoolInput);
 
     // Fetch the necessary pool state
     const initPoolDataProvider = new InitPoolDataProvider(chainId, rpcUrl);
-    const poolState = await initPoolDataProvider.getInitPoolData(
-      poolAddress as `0x${string}`,
-      poolType,
-      protocolVersion,
-    );
+    const poolState = await initPoolDataProvider.getInitPoolData(poolAddress, poolType, protocolVersion);
+
+    console.log("poolState:", poolState);
+    console.log("client", walletClient.extend(publicActions).extend(walletActions));
+    console.log("owner", walletClient.account.address);
+
+    const nonces = [];
+    const isOptimism = chainId === ChainId.OPTIMISM;
+    const isSepolia = chainId === ChainId.SEPOLIA;
+
+    if (isOptimism || isSepolia) {
+      for (const token of poolState.tokens) {
+        const result = await publicClient.readContract({
+          abi: permit2Abi,
+          address: PERMIT2_ADDRESS,
+          functionName: "allowance",
+          args: [walletClient.account.address, token.address, balancerV3Contracts.Router[chainId]],
+        });
+        const nonce = result[2];
+        nonces.push(nonce);
+      }
+    }
+
+    console.log("nonces:", nonces);
 
     const permit2 = await Permit2Helper.signInitPoolApproval({
       ...initPoolInput,
-      client: walletClient.extend(publicActions).extend(walletActions) as unknown as PublicWalletClient, // TODO: upgrade viem/wagmi to match SDK version of viem to fix type casting
-      owner: walletClient.account.address as `0x${string}`,
+      client: walletClient.extend(publicActions),
+      owner: walletClient.account.address,
+      nonces: isOptimism || isSepolia ? nonces : undefined,
     });
-
-    console.log("initPoolInput", initPoolInput);
-    console.log("poolState", poolState);
-    console.log("permit2", permit2);
+    console.log("permit2:", permit2);
 
     const initPool = new InitPool();
     const call = initPool.buildCallWithPermit2(initPoolInput, poolState, permit2);
-
     console.log("initPool call:", call);
 
     const hash = await writeTx(
@@ -91,5 +117,10 @@ export const useInitializePool = () => {
     return hash;
   }
 
-  return useMutation({ mutationFn: () => initializePool() });
+  return useMutation({
+    mutationFn: () => initializePool(),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };

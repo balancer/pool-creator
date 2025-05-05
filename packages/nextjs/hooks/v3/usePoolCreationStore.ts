@@ -82,7 +82,7 @@ export interface PoolCreationStore {
 }
 
 export const initialTokenConfig: TokenConfig = {
-  address: "",
+  address: zeroAddress,
   rateProvider: zeroAddress,
   currentRate: undefined,
   isValidRateProvider: false,
@@ -119,10 +119,10 @@ export const initialPoolCreationState = {
   symbol: "",
   poolType: undefined,
   tokenConfigs: [initialTokenConfig, initialTokenConfig],
-  swapFeePercentage: "" as const, // store as human readable % to be converted later
-  swapFeeManager: "" as const,
-  pauseManager: "" as const,
-  poolHooksContract: "" as const,
+  swapFeePercentage: "", // store as human readable % to be converted later
+  swapFeeManager: zeroAddress,
+  pauseManager: zeroAddress,
+  poolHooksContract: zeroAddress,
   disableUnbalancedLiquidity: false,
   enableDonation: false,
   // For stable and stableSurge

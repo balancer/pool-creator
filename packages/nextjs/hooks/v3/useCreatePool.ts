@@ -13,7 +13,7 @@ import {
   weightedPoolFactoryAbiExtended_V3,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { parseUnits, zeroAddress } from "viem";
+import { parseUnits } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
@@ -68,9 +68,9 @@ export const useCreatePool = () => {
       name,
       symbol,
       swapFeePercentage: parseUnits(swapFeePercentage, SWAP_FEE_PERCENTAGE_DECIMALS),
-      swapFeeManager: swapFeeManager === "" ? zeroAddress : (swapFeeManager as `0x${string}`),
-      pauseManager: pauseManager === "" ? zeroAddress : (pauseManager as `0x${string}`),
-      poolHooksContract: poolHooksContract === "" ? zeroAddress : (poolHooksContract as `0x${string}`),
+      swapFeeManager,
+      pauseManager,
+      poolHooksContract,
       enableDonation,
       disableUnbalancedLiquidity,
       tokens: tokenConfigs.map(({ address, weight, rateProvider, tokenType, paysYieldFees, useBoostedVariant }) => {
@@ -130,5 +130,10 @@ export const useCreatePool = () => {
     return hash;
   }
 
-  return useMutation({ mutationFn: () => createPool() });
+  return useMutation({
+    mutationFn: () => createPool(),
+    onError: error => {
+      console.error(error);
+    },
+  });
 };

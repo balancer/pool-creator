@@ -63,7 +63,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         title="Tokens"
         isPreview={isPreview}
         isValid={isTokensValid}
-        isEmpty={tokenConfigs.every(token => token.address === "")}
+        isEmpty={tokenConfigs.every(token => token.address === zeroAddress)}
         content={
           <div className="flex flex-col gap-2">
             {sortedTokenConfigs.map((token, index) => (
@@ -121,7 +121,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             <div className="flex justify-between">
               <div className="">Swap Fee Manager</div>
               <div>
-                {swapFeeManager ? (
+                {swapFeeManager !== zeroAddress ? (
                   <a
                     href={getBlockExplorerAddressLink(targetNetwork, swapFeeManager)}
                     target="_blank"
@@ -141,7 +141,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
             <div className="flex justify-between">
               <div className="">Pause Manager</div>
               <div>
-                {pauseManager ? (
+                {pauseManager !== zeroAddress ? (
                   <a
                     href={getBlockExplorerAddressLink(targetNetwork, pauseManager)}
                     target="_blank"
