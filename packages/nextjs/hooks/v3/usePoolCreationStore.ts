@@ -5,7 +5,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { type TabType } from "~~/app/v3/_components/PoolConfiguration";
 import { type Token } from "~~/hooks/token";
-import { SupportedPoolTypes } from "~~/utils";
+import { SupportedPoolTypes } from "~~/utils/constants";
 import { sortTokenConfigs } from "~~/utils/helpers";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
