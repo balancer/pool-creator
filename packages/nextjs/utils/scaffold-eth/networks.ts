@@ -1,6 +1,5 @@
 import * as chains from "viem/chains";
 import scaffoldConfig from "~~/scaffold.config";
-import { sonic } from "~~/utils/customChains";
 
 type ChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -47,7 +46,7 @@ export const INFURA_CHAIN_NAMES: Record<number, string> = {
   [chains.arbitrum.id]: "arbitrum-mainnet",
   [chains.avalanche.id]: "avalanche-mainnet",
   [chains.base.id]: "base-mainnet",
-  [sonic.id]: "sonic-mainnet",
+  [chains.sonic.id]: "sonic-mainnet",
   [chains.optimism.id]: "optimism-mainnet",
 };
 
@@ -58,7 +57,7 @@ export const getInfuraHttpUrl = (chainId: number) => {
 };
 
 export const DRPC_CHAIN_NAMES: Record<number, string> = {
-  [sonic.id]: "sonic",
+  [chains.sonic.id]: "sonic",
   [chains.arbitrum.id]: "arbitrum",
   [chains.base.id]: "base",
   [chains.mainnet.id]: "ethereum",
@@ -82,7 +81,7 @@ export const RPC_FALLBACKS: Record<number, string> = {
   [chains.base.id]: "https://base.llamarpc.com",
   [chains.avalanche.id]: "https://avalanche.gateway.tenderly.co/",
   [chains.optimism.id]: "https://optimism.gateway.tenderly.co/",
-  [sonic.id]: "https://sonic.drpc.org",
+  [chains.sonic.id]: "https://sonic.drpc.org",
 };
 
 export const getRpcFallbackUrl = (chainId: number) => {
