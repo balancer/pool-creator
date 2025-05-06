@@ -26,7 +26,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isChooseTokenAmountsModalOpen, setIsChooseTokenAmountsModalOpen] = useState(false);
 
-  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain } = usePoolCreationStore();
+  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain, poolAddress } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -141,7 +141,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
         <div
           className="absolute w-full h-full"
           onClick={() => {
-            if (initPoolTx.wagmiHash || initPoolTx.safeHash) return; // don't let user close modal to try to edit amounts after init tx has been sent
+            if (initPoolTx.wagmiHash || initPoolTx.safeHash || poolAddress) return; // don't let user close modal to try to edit amounts after init tx has been sent
             setIsModalOpen(false);
           }}
         />

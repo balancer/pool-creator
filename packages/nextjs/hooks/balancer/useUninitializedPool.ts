@@ -34,7 +34,6 @@ export function useUninitializedPool() {
   // console.log("isValidAddress", isValidAddress);
 
   const { data: pool } = useReadPool(address as Address, chainId);
-  console.log("pool", pool);
   const chain = Object.values(chains).find(chain => chain.id === chainId);
 
   useEffect(() => {

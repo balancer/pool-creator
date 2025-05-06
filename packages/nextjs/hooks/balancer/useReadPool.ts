@@ -73,8 +73,6 @@ export const useReadPool = (pool: Address | null, chainId: number) => {
         //   .catch(() => undefined), // return undefined if pool has not been registered
       ]);
 
-      console.log("normalizedWeights", normalizedWeights);
-
       const tokenConfigs = [];
 
       for (let i = 0; i < poolTokenInfo[0].length; i++) {

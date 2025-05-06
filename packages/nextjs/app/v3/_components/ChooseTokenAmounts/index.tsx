@@ -1,6 +1,7 @@
 import React from "react";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
 import { ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { usePoolCreationStore, useUserDataStore, useValidateInitializationInputs } from "~~/hooks/v3";
@@ -21,7 +22,10 @@ export function ChooseTokenAmounts({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-[100]">
-      <div className="bg-base-300 rounded-xl flex flex-col gap-7 p-7 min-w-[550px]">
+      <div className="bg-base-300 rounded-xl flex flex-col gap-7 p-7 min-w-[550px] relative">
+        <button className="absolute top-4 right-4" onClick={() => setIsChooseTokenAmountsModalOpen(false)}>
+          <XMarkIcon className="w-6 h-6" />
+        </button>
         <div className="font-bold text-2xl text-center">Choose Token Amounts</div>
         <div className="flex flex-col gap-5 bg-base-100 p-4 rounded-xl">
           {sortedTokenConfigs.map((tokenConfig, index) => (
