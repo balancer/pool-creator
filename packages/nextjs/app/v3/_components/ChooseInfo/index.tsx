@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { PoolType } from "@balancer/sdk";
+import { sonic } from "viem/chains";
 import { TextField } from "~~/components/common";
 import { useBoostableWhitelist, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { BEETS_MAX_POOL_NAME_LENGTH, MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
-import { sonic } from "~~/utils/customChains";
 
 /**
  * @dev Gauge creation reverts if the name is longer than 32 characters
