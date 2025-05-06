@@ -12,6 +12,7 @@ import type { NextPage } from "next";
 import { useWalletClient } from "wagmi";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
+import { useUninitializedPool } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore, useUserDataStoreDebug } from "~~/hooks/v3";
 import { availableNetworks } from "~~/utils";
@@ -24,6 +25,8 @@ const BalancerV3: NextPage = () => {
 
   usePoolStoreDebug();
   useUserDataStoreDebug();
+
+  useUninitializedPool(); // TODO: refactor content so this page is only beets logo and page title
 
   return (
     <div className="flex justify-center">

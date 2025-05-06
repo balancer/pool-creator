@@ -6,7 +6,13 @@ import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import { type TokenConfig, useBoostableWhitelist, usePoolCreationStore, useValidateCreationInputs } from "~~/hooks/v3";
+import {
+  type TokenConfig,
+  useBoostableWhitelist,
+  usePoolCreationStore,
+  useUserDataStore,
+  useValidateCreationInputs,
+} from "~~/hooks/v3";
 import { abbreviateAddress, sortTokenConfigs } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
@@ -31,6 +37,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
   } = usePoolCreationStore();
+
+  const { isOnlyInitializingPool } = useUserDataStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidateCreationInputs();
   const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
@@ -67,126 +75,128 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           </div>
         }
       />
-      <DetailSection
-        title="Parameters"
-        isPreview={isPreview}
-        isValid={isParametersValid}
-        isEmpty={false}
-        content={
-          <div>
-            {isGyroEclp && (
-              <div className="mb-3">
-                <EclpChartDisplay size="mini" />
-              </div>
-            )}
-            {isStablePool && (
-              <div className="flex justify-between">
-                <div className="">Amplification Parameter</div>
-                <div>{amplificationParameter ? amplificationParameter : "-"}</div>
-              </div>
-            )}
-            {isReClamm && (
-              <>
-                <div className="flex justify-between">
-                  <div className="">Initial Target Price</div>
-                  <div>{initialTargetPrice ? initialTargetPrice : "-"}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Initial Min Price</div>
-                  <div>{initialMinPrice ? initialMinPrice : "-"}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Initial Max Price</div>
-                  <div>{initialMaxPrice ? initialMaxPrice : "-"}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Price Shift Daily Rate</div>
-                  <div>{priceShiftDailyRate ? priceShiftDailyRate : "-"}</div>
-                </div>
-                <div className="flex justify-between">
-                  <div className="">Centeredness Margin</div>
-                  <div>{centerednessMargin ? centerednessMargin : "-"}</div>
-                </div>
-              </>
-            )}
-            <div className="flex justify-between">
-              <div className="">Swap Fee %</div>
-              <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
-            </div>
-            <div className="flex justify-between">
-              <div className="">Swap Fee Manager</div>
-              <div>
-                {isDelegatingSwapFeeManagement ? (
-                  "Balancer"
-                ) : swapFeeManager ? (
-                  <a
-                    href={getBlockExplorerAddressLink(targetNetwork, swapFeeManager)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-info hover:underline"
-                  >
-                    {abbreviateAddress(swapFeeManager)}
-                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                  </a>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </div>
-            <div className="flex justify-between">
-              <div className="">Pause Manager</div>
-              <div>
-                {isDelegatingPauseManagement ? (
-                  "Balancer"
-                ) : pauseManager ? (
-                  <a
-                    href={getBlockExplorerAddressLink(targetNetwork, pauseManager)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-info hover:underline"
-                  >
-                    {abbreviateAddress(pauseManager)}
-                    <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                  </a>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </div>
-
+      {!isOnlyInitializingPool && (
+        <DetailSection
+          title="Parameters"
+          isPreview={isPreview}
+          isValid={isParametersValid}
+          isEmpty={false}
+          content={
             <div>
-              {isUsingHooks && (
-                <div className="flex justify-between">
-                  <div className="">Pool Hooks Contract</div>
-                  <div>
-                    {poolHooksContract ? (
-                      <a
-                        className="link text-info no-underline flex gap-1 items-center"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={getBlockExplorerAddressLink(targetNetwork, poolHooksContract)}
-                      >
-                        {abbreviateAddress(poolHooksContract)}
-                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                      </a>
-                    ) : (
-                      "-"
-                    )}
-                  </div>
+              {isGyroEclp && (
+                <div className="mb-3">
+                  <EclpChartDisplay size="mini" />
                 </div>
               )}
+              {isStablePool && (
+                <div className="flex justify-between">
+                  <div className="">Amplification Parameter</div>
+                  <div>{amplificationParameter ? amplificationParameter : "-"}</div>
+                </div>
+              )}
+              {isReClamm && (
+                <>
+                  <div className="flex justify-between">
+                    <div className="">Initial Target Price</div>
+                    <div>{initialTargetPrice ? initialTargetPrice : "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Initial Min Price</div>
+                    <div>{initialMinPrice ? initialMinPrice : "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Initial Max Price</div>
+                    <div>{initialMaxPrice ? initialMaxPrice : "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Price Shift Daily Rate</div>
+                    <div>{priceShiftDailyRate ? priceShiftDailyRate : "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Centeredness Margin</div>
+                    <div>{centerednessMargin ? centerednessMargin : "-"}</div>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between">
-                <div className="">Disable Unbalanced Liquidity</div>
-                <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+                <div className="">Swap Fee %</div>
+                <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
               </div>
               <div className="flex justify-between">
-                <div className="">Donations Enabled</div>
-                <div>{enableDonation ? "true" : "false"}</div>
+                <div className="">Swap Fee Manager</div>
+                <div>
+                  {isDelegatingSwapFeeManagement ? (
+                    "Balancer"
+                  ) : swapFeeManager ? (
+                    <a
+                      href={getBlockExplorerAddressLink(targetNetwork, swapFeeManager)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-info hover:underline"
+                    >
+                      {abbreviateAddress(swapFeeManager)}
+                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    "-"
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <div className="">Pause Manager</div>
+                <div>
+                  {isDelegatingPauseManagement ? (
+                    "Balancer"
+                  ) : pauseManager ? (
+                    <a
+                      href={getBlockExplorerAddressLink(targetNetwork, pauseManager)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-info hover:underline"
+                    >
+                      {abbreviateAddress(pauseManager)}
+                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    "-"
+                  )}
+                </div>
+              </div>
+
+              <div>
+                {isUsingHooks && (
+                  <div className="flex justify-between">
+                    <div className="">Pool Hooks Contract</div>
+                    <div>
+                      {poolHooksContract ? (
+                        <a
+                          className="link text-info no-underline flex gap-1 items-center"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={getBlockExplorerAddressLink(targetNetwork, poolHooksContract)}
+                        >
+                          {abbreviateAddress(poolHooksContract)}
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <div className="">Disable Unbalanced Liquidity</div>
+                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+                </div>
+                <div className="flex justify-between">
+                  <div className="">Donations Enabled</div>
+                  <div>{enableDonation ? "true" : "false"}</div>
+                </div>
               </div>
             </div>
-          </div>
-        }
-      />
+          }
+        />
+      )}
       <DetailSection
         title="Information"
         isPreview={isPreview}

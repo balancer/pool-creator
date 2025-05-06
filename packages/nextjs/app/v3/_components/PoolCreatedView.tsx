@@ -1,3 +1,4 @@
+import { usePathname, useRouter } from "next/navigation";
 import { optimism, sepolia, sonic } from "viem/chains";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/utils";
@@ -5,6 +6,8 @@ import { bgBeigeGradient, bgBeigeGradientHover, bgPrimaryGradient } from "~~/uti
 export const PoolCreatedView = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) => {
   const { poolAddress, chain, clearPoolStore } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const chainId = chain?.id;
 
@@ -32,6 +35,7 @@ export const PoolCreatedView = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: b
           clearPoolStore();
           clearUserData();
           setIsModalOpen(false);
+          router.push(pathname);
         }}
         className={`btn w-full rounded-xl text-lg ${bgPrimaryGradient} text-neutral-700`}
       >

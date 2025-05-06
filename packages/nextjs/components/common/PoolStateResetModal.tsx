@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 interface PoolStateResetModalProps {
   clearState: () => void;
@@ -8,6 +10,12 @@ interface PoolStateResetModalProps {
 
 export const PoolStateResetModal = ({ clearState, trigger }: PoolStateResetModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { clearPoolStore } = usePoolCreationStore();
+  const { clearUserData } = useUserDataStore();
+
+  const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <>
@@ -38,7 +46,10 @@ export const PoolStateResetModal = ({ clearState, trigger }: PoolStateResetModal
               <button
                 onClick={() => {
                   clearState();
+                  clearPoolStore();
+                  clearUserData();
                   setIsModalOpen(false);
+                  router.push(pathname); // clear search params if user doing init only flow
                 }}
                 className="btn btn-error font-bold text-neutral-800 px-5 py-3 rounded-xl w-24"
               >

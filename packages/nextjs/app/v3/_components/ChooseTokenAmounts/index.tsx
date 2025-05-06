@@ -2,6 +2,7 @@ import React from "react";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { Alert, TransactionButton } from "~~/components/common";
+import { ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { usePoolCreationStore, useUserDataStore, useValidateInitializationInputs } from "~~/hooks/v3";
 import { sortTokenConfigs } from "~~/utils/helpers";
 
@@ -10,8 +11,8 @@ export function ChooseTokenAmounts({
 }: {
   setIsChooseTokenAmountsModalOpen: (isOpen: boolean) => void;
 }) {
-  const { tokenConfigs, poolType, updatePool, step } = usePoolCreationStore();
-  const { updateUserData, hasAgreedToWarning } = useUserDataStore();
+  const { tokenConfigs, poolType, updatePool, step, clearPoolStore } = usePoolCreationStore();
+  const { updateUserData, hasAgreedToWarning, clearUserData } = useUserDataStore();
 
   // Sorting token configs is necessary for consistent auto-fill of other token amount for gyro ECLP
   const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
@@ -53,6 +54,18 @@ export function ChooseTokenAmounts({
           isDisabled={!isInitializePoolInputsValid}
           isPending={false}
         />
+
+        <div className="flex justify-center gap-2 items-center">
+          <ContactSupportModal />
+          <div className="text-xl">·</div>
+          <PoolStateResetModal
+            clearState={() => {
+              clearPoolStore();
+              clearUserData();
+            }}
+            trigger={<span className="hover:underline">Reset Progress</span>}
+          />
+        </div>
       </div>
     </div>
   );

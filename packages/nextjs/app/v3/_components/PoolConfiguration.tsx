@@ -19,7 +19,7 @@ export type TabType = (typeof TABS)[number];
 export function PoolConfiguration() {
   const [isPoolCreationModalOpen, setIsPoolCreationModalOpen] = useState(false);
 
-  const { selectedTab, updatePool, createPoolTx, poolType, tokenConfigs } = usePoolCreationStore();
+  const { selectedTab, updatePool, createPoolTx, poolType, tokenConfigs, poolAddress } = usePoolCreationStore();
   const { targetNetwork } = useTargetNetwork();
   const { prev, next } = getAdjacentTabs(selectedTab);
   const { isParametersValid, isTypeValid, isTokensValid, isPoolCreationInputValid } = useValidateCreationInputs();
@@ -58,8 +58,8 @@ export function PoolConfiguration() {
 
   // Force modal to open if user has already sent "init pool" transaction so they dont attempt init twice and are forced to view on balancer or start new pool creation
   useEffect(() => {
-    if (createPoolTx.wagmiHash || createPoolTx.safeHash) setIsPoolCreationModalOpen(true);
-  }, [createPoolTx.wagmiHash, createPoolTx.safeHash]);
+    if (createPoolTx.wagmiHash || createPoolTx.safeHash || poolAddress) setIsPoolCreationModalOpen(true);
+  }, [createPoolTx.wagmiHash, createPoolTx.safeHash, poolAddress]);
 
   return (
     <>

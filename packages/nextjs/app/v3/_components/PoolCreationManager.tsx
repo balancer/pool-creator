@@ -17,7 +17,6 @@ import {
   useMultiSwap,
   useMultiSwapTxHash,
   usePoolCreationStore,
-  useUserDataStore,
 } from "~~/hooks/v3/";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 
@@ -27,9 +26,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isChooseTokenAmountsModalOpen, setIsChooseTokenAmountsModalOpen] = useState(false);
 
-  const { step, tokenConfigs, clearPoolStore, createPoolTx, swapToBoostedTx, initPoolTx, chain } =
-    usePoolCreationStore();
-  const { clearUserData } = useUserDataStore();
+  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -169,8 +166,6 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
                   <div className="text-xl">·</div>
                   <PoolStateResetModal
                     clearState={() => {
-                      clearPoolStore();
-                      clearUserData();
                       setIsModalOpen(false);
                     }}
                     trigger={<span className="hover:underline">Reset Progress</span>}

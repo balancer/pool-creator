@@ -69,8 +69,6 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     isError: isUsdValueError,
   } = useTokenUsdValue(tokenInfo?.address, amount);
 
-  console.log("tokenUsdValue", tokenUsdValue);
-
   let usdValue = null;
   // Handle edge case of if user altered token values for gyro eclp
   if (poolType === PoolType.GyroE) {
