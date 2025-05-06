@@ -1,5 +1,4 @@
 import * as chains from "viem/chains";
-import { sonic } from "~~/utils/customChains";
 
 export type ScaffoldConfig = {
   targetNetworks: readonly chains.Chain[];
@@ -22,7 +21,7 @@ const scaffoldConfig = {
     chains.base,
     chains.avalanche,
     chains.optimism,
-    sonic,
+    chains.sonic,
   ],
 
   // If using chains.foundry as your targetNetwork, you must specify a network to fork
