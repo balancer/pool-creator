@@ -12,9 +12,9 @@ import { type Token, useFetchTokenList } from "~~/hooks/token";
 import {
   initialEclpParams,
   useBoostableWhitelist,
+  useFetchTokenRate,
   usePoolCreationStore,
   useUserDataStore,
-  useValidateRateProvider,
 } from "~~/hooks/v3";
 
 /**
@@ -31,18 +31,11 @@ export function ChooseToken({ index }: { index: number }) {
 
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, updatePool, updateTokenConfig, poolType } = usePoolCreationStore();
-  const {
-    tokenType,
-    rateProvider,
-    isValidRateProvider,
-    tokenInfo,
-    address,
-    useBoostedVariant,
-    isWeightLocked,
-    weight,
-  } = tokenConfigs[index];
+  const { tokenType, rateProvider, tokenInfo, address, useBoostedVariant, isWeightLocked, weight } =
+    tokenConfigs[index];
 
-  useValidateRateProvider(rateProvider, index); // temp fix to trigger fetch, otherwise address user enters for rate provider is invalid
+  const { data: rate } = useFetchTokenRate(rateProvider); // if undefined, rate provider is invalid
+  const isValidRateProvider = rate !== undefined;
 
   const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();
@@ -71,7 +64,6 @@ export function ChooseToken({ index }: { index: number }) {
       tokenType: TokenType.STANDARD,
       rateProvider: zeroAddress,
       currentRate: undefined,
-      isValidRateProvider: false,
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
       paysYieldFees: false,
@@ -159,7 +151,7 @@ export function ChooseToken({ index }: { index: number }) {
     }
 
     // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
-    if (rateProviderData && !showBoostOpportunityModal && !token.isValidRateProvider) {
+    if (rateProviderData && !showBoostOpportunityModal) {
       // Constant rate providers are special case only used for gyro pools
       if (rateProviderData.name !== "ConstantRateProvider") {
         setShowRateProviderModal(true);

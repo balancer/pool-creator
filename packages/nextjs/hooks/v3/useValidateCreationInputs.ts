@@ -1,10 +1,13 @@
 import { PoolType, STABLE_POOL_CONSTRAINTS, TokenType } from "@balancer/sdk";
+import { useQueryClient } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import { useEclpParamValidations } from "~~/hooks/gyro";
 import { usePoolCreationStore, useValidateHooksContract } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 
 export function useValidateCreationInputs() {
+  const queryClient = useQueryClient();
+
   const {
     poolType,
     tokenConfigs,
@@ -40,7 +43,8 @@ export function useValidateCreationInputs() {
 
       // Check tanstack query cache for rate provider validity
       if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
-        if (!token.isValidRateProvider) return false;
+        const cachedRate = queryClient.getQueryData(["fetchTokenRate", token.rateProvider]);
+        if (cachedRate === undefined) return false;
       }
       return true;
     }) && isValidTokenWeights;

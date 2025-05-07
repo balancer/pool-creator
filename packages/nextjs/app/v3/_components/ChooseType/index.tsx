@@ -7,22 +7,16 @@ import { type SupportedPoolTypes, poolTypeMap } from "~~/utils/constants";
 export function ChooseType() {
   const { poolType } = usePoolCreationStore();
 
-  const poolTypes = Object.keys(poolTypeMap) as SupportedPoolTypes[];
-  const firstRowTypes = poolTypes.slice(0, 3);
-  const secondRowTypes = poolTypes.slice(3, 5);
+  // TODO: unslice to offer reclamm pool type
+  const poolTypes = Object.keys(poolTypeMap).slice(0, 4) as SupportedPoolTypes[];
 
   return (
     <>
       <div className="flex flex-col justify-center h-full gap-10">
         <div className="flex flex-col gap-5">
           <div className="text-xl">Choose a pool type:</div>
-          <div className="grid grid-cols-3 gap-5">
-            {firstRowTypes.map((type: SupportedPoolTypes) => (
-              <PoolTypeButton key={type} selectedPoolType={type} />
-            ))}
-          </div>
           <div className="grid grid-cols-2 gap-5">
-            {secondRowTypes.map((type: SupportedPoolTypes) => (
+            {poolTypes.map((type: SupportedPoolTypes) => (
               <PoolTypeButton key={type} selectedPoolType={type} />
             ))}
           </div>

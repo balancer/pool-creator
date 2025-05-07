@@ -69,7 +69,7 @@ export const TextField: React.FC<TextFieldProps> = ({
           `}
         />
         {!!value && !isValid && (
-          <div className="absolute -top-7 right-2 text-red-400 flex items-center gap-1">
+          <div className="absolute bottom-0 right-2 text-red-400 flex items-center gap-1">
             <ExclamationTriangleIcon className="w-4 h-4" />
             {getErrorMessage()}
           </div>

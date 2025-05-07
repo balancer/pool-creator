@@ -14,8 +14,9 @@ export const useEclpTokenOrder = () => {
   const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
     address: token.address,
     symbol: token.tokenInfo?.symbol,
-    currentRate: token.currentRate,
     underlyingTokenAddress: token.tokenInfo?.underlyingTokenAddress,
+    rateProvider: token.rateProvider,
+    useBoostedVariant: token.useBoostedVariant,
   }));
   if (isEclpParamsInverted) sortedTokens.reverse();
 

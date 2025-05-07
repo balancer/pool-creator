@@ -12,7 +12,6 @@ export type TokenConfig = {
   address: Address;
   rateProvider: Address;
   currentRate: bigint | undefined;
-  isValidRateProvider: boolean;
   paysYieldFees: boolean;
   tokenType: TokenType;
   weight: string;
@@ -82,7 +81,6 @@ export const initialTokenConfig: TokenConfig = {
   address: zeroAddress,
   rateProvider: zeroAddress,
   currentRate: undefined,
-  isValidRateProvider: false,
   paysYieldFees: false,
   tokenType: TokenType.STANDARD,
   isWeightLocked: false,
