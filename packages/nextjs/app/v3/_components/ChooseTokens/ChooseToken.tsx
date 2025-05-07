@@ -244,6 +244,7 @@ export function ChooseToken({ index }: { index: number }) {
               }
               checked={tokenType === TokenType.TOKEN_WITH_RATE}
               onChange={handleTokenTypeToggle}
+              disabled={useBoostedVariant}
             />
           </div>
         </div>
@@ -256,6 +257,7 @@ export function ChooseToken({ index }: { index: number }) {
               placeholder={`Enter rate provider address for ${tokenInfo?.symbol}`}
               value={rateProvider !== zeroAddress ? rateProvider : ""}
               onChange={e => updateTokenConfig(index, { rateProvider: e.target.value.trim() as Address })}
+              isDisabled={useBoostedVariant}
             />
 
             {rateProvider.toLowerCase() !== tokenInfo?.priceRateProviderData?.address.toLowerCase() &&
