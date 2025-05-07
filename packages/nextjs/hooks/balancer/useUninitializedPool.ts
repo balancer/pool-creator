@@ -30,14 +30,11 @@ export function useUninitializedPool() {
   const address = searchParams.get("address") || "";
   const isValidAddress = isAddress(address);
 
-  // console.log("address", address);
-  // console.log("isValidAddress", isValidAddress);
-
   const { data: pool } = useReadPool(address as Address, chainId);
   const chain = Object.values(chains).find(chain => chain.id === chainId);
 
   useEffect(() => {
-    if (isConnected && chainId && pool?.isRegistered && !pool.poolConfig?.isPoolInitialized) {
+    if (isConnected && chainId && pool?.isRegistered && !pool.poolConfig?.isPoolInitialized && type) {
       // prompt user to connect to the correct network
       setTimeout(() => {
         switchChain({ chainId: chainId });
@@ -81,5 +78,3 @@ export function useUninitializedPool() {
     type,
   ]);
 }
-
-// 1 & 0x504a4D7D63b172F41d6fc7D077Da58F35991AF11

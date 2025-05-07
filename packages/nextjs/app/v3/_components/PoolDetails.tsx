@@ -5,6 +5,7 @@ import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
+import { useSortTokenConfigs } from "~~/hooks/gyro";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
   type TokenConfig,
@@ -13,11 +14,12 @@ import {
   useUserDataStore,
   useValidateCreationInputs,
 } from "~~/hooks/v3";
-import { abbreviateAddress, sortTokenConfigs } from "~~/utils/helpers";
+import { abbreviateAddress } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const { targetNetwork } = useTargetNetwork();
+  const sortTokenConfigs = useSortTokenConfigs();
 
   const {
     poolType,

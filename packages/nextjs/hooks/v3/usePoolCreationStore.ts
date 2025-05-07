@@ -6,7 +6,6 @@ import { persist } from "zustand/middleware";
 import { type TabType } from "~~/app/v3/_components/PoolConfiguration";
 import { type Token } from "~~/hooks/token";
 import { SupportedPoolTypes } from "~~/utils/constants";
-import { sortTokenConfigs } from "~~/utils/helpers";
 import { ChainWithAttributes } from "~~/utils/scaffold-eth";
 
 export type TokenConfig = {
@@ -151,7 +150,7 @@ export const usePoolCreationStore = create(
         set(state => {
           const newTokenConfigs = [...state.tokenConfigs];
           newTokenConfigs[index] = { ...newTokenConfigs[index], ...updates };
-          return { ...state, tokenConfigs: sortTokenConfigs(newTokenConfigs) }; // ensure token configs are always sorted in state
+          return { ...state, tokenConfigs: newTokenConfigs };
         }),
       updateEclpParam: (updates: Partial<EclpParams>) =>
         set(state => ({

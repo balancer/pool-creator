@@ -3,8 +3,8 @@ import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
+import { useSortTokenConfigs } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore, useValidateInitializationInputs } from "~~/hooks/v3";
-import { sortTokenConfigs } from "~~/utils/helpers";
 
 export function ChooseTokenAmounts({
   setIsChooseTokenAmountsModalOpen,
@@ -15,6 +15,7 @@ export function ChooseTokenAmounts({
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
 
   // Sorting token configs is necessary for consistent auto-fill of other token amount for gyro ECLP
+  const sortTokenConfigs = useSortTokenConfigs();
   const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
 
   const { isInitializePoolInputsValid } = useValidateInitializationInputs();
