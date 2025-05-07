@@ -220,6 +220,7 @@ export function ChooseToken({ index }: { index: number }) {
                     value={weight}
                     onChange={e => handleWeightChange(Math.max(0, Number(e.target.value.trim())).toString())}
                     className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[60px]"
+                    placeholder="0"
                   />
                   <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
                 </div>

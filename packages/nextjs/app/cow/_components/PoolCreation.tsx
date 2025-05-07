@@ -276,12 +276,7 @@ export const PoolCreation = ({ poolCreation, updatePoolCreation, clearPoolCreati
             <div className="flex justify-center gap-2 items-center">
               <ContactSupportModal />
               <div className="text-xl">·</div>
-              <PoolStateResetModal
-                clearState={() => {
-                  clearPoolCreation();
-                }}
-                trigger={<span className="hover:underline">Reset Progress</span>}
-              />
+              <PoolStateResetModal callback={clearPoolCreation} />
             </div>
           )}
 

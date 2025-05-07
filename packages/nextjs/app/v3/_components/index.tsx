@@ -10,3 +10,4 @@ export * from "./UserExperienceAlerts";
 export * from "./ChooseNetwork";
 export * from "./PoolCreatedView";
 export * from "./ChooseTokenAmounts";
+export * from "./SupportAndResetModals";

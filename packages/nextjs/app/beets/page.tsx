@@ -6,22 +6,22 @@ import {
   PoolConfiguration,
   PoolDetails,
   StartedOnDifferentNetworkAlert,
+  SupportAndResetModals,
   UserExperienceAlerts,
 } from "../v3/_components";
 import type { NextPage } from "next";
 import { useWalletClient } from "wagmi";
 import { BeetsLogo } from "~~/components/assets/BeetsLogo";
-import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
+import { Alert } from "~~/components/common";
 import { useUninitializedPool } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore } from "~~/hooks/v3";
+import { usePoolCreationStore, usePoolStoreDebug } from "~~/hooks/v3";
 import { availableNetworks } from "~~/utils";
 
 const BalancerV3: NextPage = () => {
-  const { clearPoolStore, chain } = usePoolCreationStore();
+  const { chain } = usePoolCreationStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
   const { data: walletClient } = useWalletClient();
-  const { clearUserData } = useUserDataStore();
   usePoolStoreDebug();
 
   useUninitializedPool(); // TODO: refactor content so this page is only beets logo and page title
@@ -64,17 +64,7 @@ const BalancerV3: NextPage = () => {
                     </div>
                   </div>
                   <PoolDetails isPreview={true} />
-                  <div className="flex justify-center mt-4 gap-2 items-center">
-                    <ContactSupportModal />
-                    <div className="text-xl">·</div>
-                    <PoolStateResetModal
-                      clearState={() => {
-                        clearPoolStore();
-                        clearUserData();
-                      }}
-                      trigger={<span className="hover:underline">Reset Progress</span>}
-                    />
-                  </div>
+                  <SupportAndResetModals />
                 </div>
               </div>
 

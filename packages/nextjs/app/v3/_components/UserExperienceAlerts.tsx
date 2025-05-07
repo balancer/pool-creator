@@ -1,10 +1,10 @@
 import { useState } from "react";
 import Link from "next/link";
+import { SupportAndResetModals } from ".";
 import { useSwitchChain } from "wagmi";
 import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { Alert } from "~~/components/common";
-import { PoolStateResetModal } from "~~/components/common";
-import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { usePoolCreationStore } from "~~/hooks/v3";
 
 export function UserExperienceAlerts() {
   const [isInfoAlertVisible, setIsInfoAlertVisible] = useState(true);
@@ -13,7 +13,7 @@ export function UserExperienceAlerts() {
     <>
       {isInfoAlertVisible && (
         <div className="flex justify-center">
-          <div className="w-[1110px] relative">
+          <div className="w-[1140px] relative">
             <Alert type="info">
               <div className="flex items-center gap-2">
                 For tips and guidance on pool configuration and creation, check out our
@@ -56,8 +56,7 @@ export function ConnectWalletAlert() {
 }
 
 export function StartedOnDifferentNetworkAlert() {
-  const { chain, clearPoolStore } = usePoolCreationStore();
-  const { clearUserData } = useUserDataStore();
+  const { chain } = usePoolCreationStore();
   const { switchChain } = useSwitchChain();
 
   return (
@@ -82,13 +81,7 @@ export function StartedOnDifferentNetworkAlert() {
           <Alert type="info">
             <div className="flex items-center gap-2">
               To start over on a new network, you must first
-              <PoolStateResetModal
-                trigger={<span className="underline">reset all progress</span>}
-                clearState={() => {
-                  clearPoolStore();
-                  clearUserData();
-                }}
-              />
+              <SupportAndResetModals hideSupport={true} />
             </div>
           </Alert>
         </div>

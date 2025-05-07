@@ -1,13 +1,6 @@
 import { useState } from "react";
-import { ApproveOnTokenManager, PoolCreatedView } from ".";
-import { ChooseTokenAmounts, PoolDetails } from "~~/app/v3/_components";
-import {
-  Alert,
-  ContactSupportModal,
-  PoolStateResetModal,
-  PoolStepsDisplay,
-  TransactionButton,
-} from "~~/components/common";
+import { ApproveOnTokenManager, ChooseTokenAmounts, PoolCreatedView, PoolDetails, SupportAndResetModals } from ".";
+import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import {
   useBoostableWhitelist,
   useCreatePool,
@@ -161,16 +154,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
                   <PoolCreatedView setIsModalOpen={setIsModalOpen} />
                 )}
 
-                <div className="flex justify-center gap-2 items-center">
-                  <ContactSupportModal />
-                  <div className="text-xl">·</div>
-                  <PoolStateResetModal
-                    clearState={() => {
-                      setIsModalOpen(false);
-                    }}
-                    trigger={<span className="hover:underline">Reset Progress</span>}
-                  />
-                </div>
+                <SupportAndResetModals callback={() => setIsModalOpen(false)} />
               </div>
               {step > poolCreationSteps.length && (
                 <Alert type="success">
