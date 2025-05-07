@@ -1,7 +1,7 @@
 import { erc20Abi } from "viem";
 import { useReadContract } from "wagmi";
+import { useSortTokenConfigs } from "~~/hooks/gyro";
 import { usePoolCreationStore } from "~~/hooks/v3";
-import { sortTokenConfigs } from "~~/utils/helpers";
 
 /**
  * Handles sorting tokens according to alphanumeric AND state of isEclpParamsInverted
@@ -9,12 +9,14 @@ import { sortTokenConfigs } from "~~/utils/helpers";
 export const useEclpTokenOrder = () => {
   const { eclpParams, tokenConfigs } = usePoolCreationStore();
   const { isEclpParamsInverted } = eclpParams;
+  const sortTokenConfigs = useSortTokenConfigs();
 
   const sortedTokens = sortTokenConfigs(tokenConfigs).map(token => ({
     address: token.address,
     symbol: token.tokenInfo?.symbol,
-    currentRate: token.currentRate,
     underlyingTokenAddress: token.tokenInfo?.underlyingTokenAddress,
+    rateProvider: token.rateProvider,
+    useBoostedVariant: token.useBoostedVariant,
   }));
   if (isEclpParamsInverted) sortedTokens.reverse();
 

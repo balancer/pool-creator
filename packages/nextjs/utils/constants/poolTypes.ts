@@ -40,6 +40,7 @@ export const poolTypeMap: Record<SupportedPoolTypes, PoolTypeDetails> = {
   [PoolType.ReClamm]: {
     label: "Readjusting CLAMM",
     maxTokens: 2,
-    description: "A concentrated liquidity pool that adjusts the range of liquidity provided as price moves",
+    description:
+      "A concentrated liquidity pool that automates adjustments to the range of liquidity provided as price moves",
   },
 };

@@ -6,24 +6,27 @@ import {
   PoolConfiguration,
   PoolDetails,
   StartedOnDifferentNetworkAlert,
+  SupportAndResetModals,
   UserExperienceAlerts,
 } from "./_components";
 import type { NextPage } from "next";
 import { useWalletClient } from "wagmi";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
-import { Alert, ContactSupportModal, PoolStateResetModal } from "~~/components/common";
+import { Alert } from "~~/components/common";
+import { useUninitializedPool } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { usePoolCreationStore, usePoolStoreDebug, useUserDataStore, useUserDataStoreDebug } from "~~/hooks/v3";
+import { usePoolCreationStore, usePoolStoreDebug, useUserDataStoreDebug } from "~~/hooks/v3";
 import { availableNetworks } from "~~/utils";
 
 const BalancerV3: NextPage = () => {
-  const { clearPoolStore, chain } = usePoolCreationStore();
+  const { chain } = usePoolCreationStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
   const { data: walletClient } = useWalletClient();
-  const { clearUserData } = useUserDataStore();
 
   usePoolStoreDebug();
   useUserDataStoreDebug();
+
+  useUninitializedPool(); // TODO: refactor content so this page is only beets logo and page title
 
   return (
     <div className="flex justify-center">
@@ -49,8 +52,8 @@ const BalancerV3: NextPage = () => {
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />
 
-                <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit">
-                  <div className="flex justify-between items-center gap-2 mb-3 mr-2">
+                <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit flex flex-col gap-3">
+                  <div className="flex justify-between items-center gap-2 mr-2">
                     <div className="font-bold text-2xl">Pool Preview</div>
                     {chain && typeof selectedNetwork.color === "string" && (
                       <div className="text-xl font-bold" style={{ color: selectedNetwork.color }}>
@@ -59,17 +62,7 @@ const BalancerV3: NextPage = () => {
                     )}
                   </div>
                   <PoolDetails isPreview={true} />
-                  <div className="flex justify-center mt-4 gap-2 items-center">
-                    <ContactSupportModal />
-                    <div className="text-xl">·</div>
-                    <PoolStateResetModal
-                      clearState={() => {
-                        clearPoolStore();
-                        clearUserData();
-                      }}
-                      trigger={<span className="hover:underline">Reset Progress</span>}
-                    />
-                  </div>
+                  <SupportAndResetModals />
                 </div>
               </div>
 

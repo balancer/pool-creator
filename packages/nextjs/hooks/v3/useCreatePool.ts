@@ -1,6 +1,7 @@
 import {
   CreatePool,
   CreatePoolGyroECLPInput,
+  CreatePoolReClammInput,
   CreatePoolStableSurgeInput,
   CreatePoolV3BaseInput,
   CreatePoolV3StableInput,
@@ -19,6 +20,13 @@ import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 import { getParsedEclpParams } from "~~/utils/gryo/helpers";
 
+type SupportedPoolTypeInputs =
+  | CreatePoolV3StableInput
+  | CreatePoolStableSurgeInput
+  | CreatePoolV3WeightedInput
+  | CreatePoolGyroECLPInput
+  | CreatePoolReClammInput;
+
 export const poolFactoryAbi = {
   [PoolType.Weighted]: weightedPoolFactoryAbiExtended_V3,
   [PoolType.Stable]: stablePoolFactoryAbiExtended,
@@ -30,14 +38,13 @@ export const poolFactoryAbi = {
 const SWAP_FEE_PERCENTAGE_DECIMALS = 16;
 const TOKEN_WEIGHT_DECIMALS = 16;
 
-/**
- * Handles sending the create pool transaction
- */
 export const useCreatePool = () => {
   const { data: walletClient } = useWalletClient();
   const publicClient = usePublicClient();
   const writeTx = useTransactor();
 
+  const poolTypeSpecificParams = usePoolTypeSpecificParams();
+  const { data: boostableWhitelist } = useBoostableWhitelist();
   const {
     tokenConfigs,
     name,
@@ -49,16 +56,11 @@ export const useCreatePool = () => {
     swapFeeManager,
     enableDonation,
     disableUnbalancedLiquidity,
-    amplificationParameter,
     updatePool,
     createPoolTx,
-    eclpParams,
   } = usePoolCreationStore();
 
-  const { data: boostableWhitelist } = useBoostableWhitelist();
-  function createPoolInput(
-    poolType: PoolType,
-  ): CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput {
+  function createPoolInput() {
     if (poolType === undefined) throw new Error("No pool type provided!");
     if (!publicClient) throw new Error("Public client must be available!");
 
@@ -77,6 +79,7 @@ export const useCreatePool = () => {
         // Conditionally creates pool with boosted variant addresses if useBoostedVariant is true
         const boostedVariant = boostableWhitelist?.[address];
         const tokenAddress = useBoostedVariant && boostedVariant ? boostedVariant.address : address;
+        // Handle case where only weighted pools have 'weight' property as part of token config
         if (poolType === PoolType.Weighted && !weight) throw new Error("Weight is required for each token");
         return {
           address: tokenAddress,
@@ -89,19 +92,11 @@ export const useCreatePool = () => {
       }),
     };
 
-    const parsedEclpParams = getParsedEclpParams(eclpParams);
-
     return {
       ...baseInput,
+      ...poolTypeSpecificParams,
       poolType,
-      ...((poolType === PoolType.Stable || poolType === PoolType.StableSurge) && {
-        amplificationParameter: BigInt(amplificationParameter),
-      }),
-      ...(poolType === PoolType.GyroE && {
-        eclpParams: parsedEclpParams,
-        derivedEclpParams: calcDerivedParams(parsedEclpParams),
-      }),
-    } as CreatePoolV3StableInput | CreatePoolV3WeightedInput | CreatePoolStableSurgeInput | CreatePoolGyroECLPInput;
+    } as SupportedPoolTypeInputs;
   }
 
   async function createPool() {
@@ -110,9 +105,8 @@ export const useCreatePool = () => {
     if (poolType === undefined) throw new Error("No pool type provided!");
 
     const createPool = new CreatePool();
-    const input = createPoolInput(poolType);
+    const input = createPoolInput();
     const call = createPool.buildCall(input);
-
     const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
@@ -137,3 +131,33 @@ export const useCreatePool = () => {
     },
   });
 };
+
+/**
+ * Returns pool-specific parameters based on the pool type
+ */
+function usePoolTypeSpecificParams() {
+  const { poolType, amplificationParameter, eclpParams, reClammParams } = usePoolCreationStore();
+
+  const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
+
+  if (isStablePool) return { amplificationParameter: BigInt(amplificationParameter) };
+
+  if (poolType === PoolType.GyroE) {
+    const parsedEclpParams = getParsedEclpParams(eclpParams);
+    return {
+      eclpParams: parsedEclpParams,
+      derivedEclpParams: calcDerivedParams(parsedEclpParams),
+    };
+  }
+
+  if (poolType === PoolType.ReClamm)
+    return {
+      initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
+      initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
+      initialMaxPrice: parseUnits(reClammParams.initialMaxPrice, 18),
+      priceShiftDailyRate: parseUnits(reClammParams.priceShiftDailyRate, 18),
+      centerednessMargin: parseUnits(reClammParams.centerednessMargin, 18),
+    };
+
+  return {};
+}

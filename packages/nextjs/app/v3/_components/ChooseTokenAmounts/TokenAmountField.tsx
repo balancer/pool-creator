@@ -11,7 +11,7 @@ interface TokenFieldProps {
   usdValue: number | null | undefined;
   isUsdValueLoading: boolean;
   isUsdValueError: boolean;
-  balance?: bigint;
+  userTokenBalance?: bigint;
   selectedToken: Token | null;
   sufficientAmount?: boolean;
   isDisabled?: boolean;
@@ -24,7 +24,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
   usdValue,
   isUsdValueLoading,
   isUsdValueError,
-  balance,
+  userTokenBalance,
   selectedToken,
   sufficientAmount,
   isDisabled,
@@ -32,7 +32,7 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
   setAmountToUserBalance,
 }) => {
   const amountGreaterThanBalance =
-    balance !== undefined && parseUnits(inputValue ?? "0", selectedToken?.decimals || 0) > balance;
+    userTokenBalance !== undefined && parseUnits(inputValue ?? "0", selectedToken?.decimals || 0) > userTokenBalance;
 
   return (
     <>
@@ -60,19 +60,16 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
               {selectedToken?.symbol}
             </div>
 
-            {selectedToken && balance !== undefined && (
+            {selectedToken && userTokenBalance !== undefined && (
               <div className={`flex items-center gap-2 text-neutral-400`}>
                 <div
                   onClick={setAmountToUserBalance}
                   className="flex items-center gap-1 hover:text-accent hover:cursor-pointer"
                 >
-                  <WalletIcon className="h-4 w-4 mt-0.5" /> {formatUnits(balance, selectedToken?.decimals || 0)}
+                  <WalletIcon className="h-4 w-4 mt-0.5" />{" "}
+                  {formatUnits(userTokenBalance, selectedToken?.decimals || 0)}
                 </div>
-                {amountGreaterThanBalance && (
-                  <div className="flex items-center gap-1 text-red-400">
-                    <ExclamationTriangleIcon className="w-4 h-4 mt-0.5" /> Insufficient balance
-                  </div>
-                )}
+
                 {sufficientAmount !== undefined && !sufficientAmount && (
                   <div className="flex items-center gap-1 text-red-400">
                     <ExclamationTriangleIcon className="w-4 h-4 mt-0.5" />
@@ -83,8 +80,13 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
             )}
           </div>
         </div>
+
         <div className="absolute bottom-1 right-5 text-neutral-400">
-          {typeof usdValue === "number" ? (
+          {amountGreaterThanBalance ? (
+            <div className="flex items-center gap-1 text-red-400">
+              <ExclamationTriangleIcon className="w-4 h-4 mt-0.5" /> Insufficient balance
+            </div>
+          ) : typeof usdValue === "number" ? (
             isUsdValueLoading ? (
               <div>...</div>
             ) : isUsdValueError ? (

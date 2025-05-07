@@ -2,17 +2,16 @@ import { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface PoolStateResetModalProps {
-  clearState: () => void;
-  trigger: React.ReactNode;
+  callback: () => void;
 }
 
-export const PoolStateResetModal = ({ clearState, trigger }: PoolStateResetModalProps) => {
+export const PoolStateResetModal = ({ callback }: PoolStateResetModalProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
       <div onClick={() => setIsModalOpen(true)} className="text-center hover:underline cursor-pointer">
-        {trigger}
+        Reset Progress
       </div>
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-20">
@@ -35,13 +34,7 @@ export const PoolStateResetModal = ({ clearState, trigger }: PoolStateResetModal
               >
                 Cancel
               </button>
-              <button
-                onClick={() => {
-                  clearState();
-                  setIsModalOpen(false);
-                }}
-                className="btn btn-error font-bold text-neutral-800 px-5 py-3 rounded-xl w-24"
-              >
+              <button onClick={callback} className="btn btn-error font-bold text-neutral-800 px-5 py-3 rounded-xl w-24">
                 Reset
               </button>
             </div>

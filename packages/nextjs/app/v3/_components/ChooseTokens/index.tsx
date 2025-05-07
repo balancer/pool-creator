@@ -1,16 +1,24 @@
 import React from "react";
 import { ChooseToken } from "./ChooseToken";
 import { PlusIcon } from "@heroicons/react/24/outline";
+import { Alert } from "~~/components/common";
 import { initialTokenConfig, usePoolCreationStore } from "~~/hooks/v3";
+import { useValidateCreationInputs } from "~~/hooks/v3";
 import { poolTypeMap } from "~~/utils/constants";
 
 export function ChooseTokens() {
   const { tokenConfigs, poolType, updatePool } = usePoolCreationStore();
+  const { isValidTokenWeights } = useValidateCreationInputs();
 
   const maxNumberOfTokens = poolType ? poolTypeMap[poolType].maxTokens : 2;
 
   function handleAddToken() {
-    updatePool({ tokenConfigs: [...tokenConfigs, { ...initialTokenConfig }] });
+    // keep weight math simple by clearing weights if user adds tokens
+    const updatedTokenConfigs = tokenConfigs.map(token => ({
+      ...token,
+      weight: token.isWeightLocked ? token.weight : "",
+    }));
+    updatePool({ tokenConfigs: [...updatedTokenConfigs, { ...initialTokenConfig }] });
   }
 
   return (
@@ -30,6 +38,10 @@ export function ChooseTokens() {
           <ChooseToken key={index} index={index} />
         ))}
       </div>
+
+      {!isValidTokenWeights && (
+        <Alert type="error">Minimum token weight is 1% and sum of all token weights must be 100%</Alert>
+      )}
     </div>
   );
 }

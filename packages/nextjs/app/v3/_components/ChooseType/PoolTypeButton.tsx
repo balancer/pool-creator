@@ -15,7 +15,7 @@ export function PoolTypeButton({ selectedPoolType }: { selectedPoolType: Support
     <button
       className={`${
         selectedPoolType === poolType ? `${selectedPoolStyles}` : `bg-base-100 ${hoverPoolStyles} shadow-lg`
-      } p-4 w-full rounded-xl`}
+      } p-4 w-full rounded-xl h-20`}
       onClick={handlePoolTypeSelection}
     >
       <div className="flex flex-col text-center">

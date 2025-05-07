@@ -7,9 +7,8 @@ import { type SupportedPoolTypes, poolTypeMap } from "~~/utils/constants";
 export function ChooseType() {
   const { poolType } = usePoolCreationStore();
 
+  // TODO: unslice to offer reclamm pool type
   const poolTypes = Object.keys(poolTypeMap).slice(0, 4) as SupportedPoolTypes[];
-  // const firstRowTypes = poolTypes.slice(0, 3);
-  // const secondRowTypes = poolTypes.slice(3, 5);
 
   return (
     <>

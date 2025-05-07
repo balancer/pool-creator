@@ -1,17 +1,16 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { LockClosedIcon, LockOpenIcon } from "@heroicons/react/24/outline";
 import { useEclpSpotPrice } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { tokenConfigs, poolType, updatePool, updateTokenConfig, eclpParams } = usePoolCreationStore();
-  const { tokenInfo, amount, address, isWeightLocked, weight } = tokenConfig;
+  const { poolType, updateTokenConfig, eclpParams } = usePoolCreationStore();
+  const { tokenInfo, amount, address, weight } = tokenConfig;
   const { isEclpParamsInverted } = eclpParams;
 
   const { usdPerToken0, usdPerToken1 } = useEclpSpotPrice();
@@ -64,39 +63,6 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     updateTokenConfig(index, { amount: formatUnits(userTokenBalance || 0n, tokenInfo?.decimals || 0) });
   };
 
-  const isUpdatingWeights = useRef(false);
-
-  const handleWeightChange = (newWeight: number) => {
-    if (isUpdatingWeights.current) return;
-    isUpdatingWeights.current = true;
-
-    // The user's choice for the selected token's weight
-    const adjustedWeight = Math.min(newWeight, 99);
-
-    // Calculate total weight of locked tokens (excluding current token)
-    const lockedWeight = tokenConfigs.reduce(
-      (sum, token, i) => (i !== index && token.isWeightLocked ? sum + (token?.weight ?? 0) : sum),
-      0,
-    );
-
-    // Count unlocked tokens (excluding current token)
-    const unlockedTokenCount = tokenConfigs.reduce(
-      (count, token, i) => (i !== index && !token.isWeightLocked ? count + 1 : count),
-      0,
-    );
-
-    const remainingWeight = 100 - adjustedWeight - lockedWeight;
-    const evenWeight = unlockedTokenCount > 0 ? remainingWeight / unlockedTokenCount : 0;
-
-    const updatedTokenConfigs = tokenConfigs.map((token, i) => ({
-      ...token,
-      weight: i === index ? adjustedWeight : token.isWeightLocked ? token.weight : evenWeight,
-    }));
-
-    updatePool({ tokenConfigs: updatedTokenConfigs });
-    isUpdatingWeights.current = false;
-  };
-
   const {
     tokenUsdValue,
     isLoading: isUsdValueLoading,
@@ -106,38 +72,27 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   let usdValue = null;
   // Handle edge case of if user altered token values for gyro eclp
   if (poolType === PoolType.GyroE) {
-    if (index === 0) usdValue = isEclpParamsInverted ? Number(usdPerToken1) : Number(usdPerToken0);
-    if (index === 1) usdValue = isEclpParamsInverted ? Number(usdPerToken0) : Number(usdPerToken1);
+    const usdPerTokenAmount1 = Number(usdPerToken1) * Number(amount);
+    const usdPerTokenAmount0 = Number(usdPerToken0) * Number(amount);
+    if (index === 0) usdValue = isEclpParamsInverted ? usdPerTokenAmount1 : usdPerTokenAmount0;
+    if (index === 1) usdValue = isEclpParamsInverted ? usdPerTokenAmount0 : usdPerTokenAmount1;
   } else {
     usdValue = tokenUsdValue;
   }
 
   return (
-    <div className="bg-base-100 p-3 rounded-lg flex flex-col gap-3">
+    <div className="rounded-lg">
       <div className="flex gap-3 w-full items-center">
         {poolType === PoolType.Weighted && (
           <>
-            <div className="flex flex-col gap-5 justify-between items-center">
-              {isWeightLocked ? (
-                <LockClosedIcon
-                  onClick={() => updateTokenConfig(index, { isWeightLocked: false })}
-                  className="w-5 h-5 cursor-pointer"
-                />
-              ) : (
-                <LockOpenIcon
-                  onClick={() => updateTokenConfig(index, { isWeightLocked: true })}
-                  className="w-5 h-5 cursor-pointer"
-                />
-              )}
-            </div>
             <div className="w-full max-w-[80px] h-full flex flex-col relative">
               <input
                 type="number"
                 min="1"
                 max="99"
                 value={weight}
-                onChange={e => handleWeightChange(Math.max(0, Number(e.target.value.trim())))}
-                className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px]"
+                disabled={true}
+                className="input text-2xl text-center shadow-inner bg-base-300 rounded-xl w-full h-[77px] disabled:text-base-content"
               />
               <div className="absolute top-1.5 right-1.5 text-md text-neutral-400">%</div>
             </div>
@@ -153,7 +108,7 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
             selectedToken={tokenInfo}
             onChange={handleAmountChange}
             setAmountToUserBalance={setAmountToUserBalance}
-            balance={userTokenBalance}
+            userTokenBalance={userTokenBalance}
           />
         </div>
       </div>
