@@ -44,7 +44,7 @@ export function useValidateCreationInputs() {
       // Check tanstack query cache for rate provider validity
       if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
         const cachedRate = queryClient.getQueryData(["fetchTokenRate", token.rateProvider]);
-        if (cachedRate === undefined) return false;
+        if (!cachedRate) return false;
       }
       return true;
     }) && isValidTokenWeights;

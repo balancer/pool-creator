@@ -20,7 +20,7 @@ export const useFetchTokenRate = (address: Address | undefined) => {
         });
         return rate;
       } catch {
-        return null;
+        throw new Error("Invalid rate provider");
       }
     },
     enabled: !!address && isValidAddress,

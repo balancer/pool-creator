@@ -34,8 +34,7 @@ export function ChooseToken({ index }: { index: number }) {
   const { tokenType, rateProvider, tokenInfo, address, useBoostedVariant, isWeightLocked, weight } =
     tokenConfigs[index];
 
-  const { data: rate } = useFetchTokenRate(rateProvider); // if undefined, rate provider is invalid
-  const isValidRateProvider = rate !== undefined;
+  const { isSuccess: isValidRateProvider } = useFetchTokenRate(rateProvider); // if undefined, rate provider is invalid
 
   const { address: connectedAddress } = useAccount();
   const { data } = useFetchTokenList();
