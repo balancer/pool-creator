@@ -6,8 +6,7 @@ import {
   PoolConfiguration,
   PoolDetails,
   StartedOnDifferentNetworkAlert,
-  SupportAndResetModals,
-  UserExperienceAlerts,
+  SupportAndResetModals, // UserExperienceAlerts,
 } from "./_components";
 import type { NextPage } from "next";
 import { useWalletClient } from "wagmi";
@@ -47,7 +46,7 @@ const BalancerV3: NextPage = () => {
             <StartedOnDifferentNetworkAlert />
           ) : (
             <>
-              <UserExperienceAlerts />
+              {/* <UserExperienceAlerts /> */}
 
               <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
                 <PoolConfiguration />
