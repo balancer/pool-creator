@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { PoolDetails } from "../PoolDetails";
 import { SupportAndResetModals } from "../SupportAndResetModals";
 import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
@@ -21,9 +20,17 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const [isChooseTokenAmountsModalOpen, setIsChooseTokenAmountsModalOpen] = useState(false);
-
-  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain, poolAddress } = usePoolCreationStore();
+  const {
+    step,
+    tokenConfigs,
+    createPoolTx,
+    swapToBoostedTx,
+    initPoolTx,
+    chain,
+    poolAddress,
+    isChooseTokenAmountsModalOpen,
+    setIsChooseTokenAmountsModalOpen,
+  } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -35,15 +42,9 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const { mutate: initPool, isPending: isInitPoolPending, error: initPoolError } = useInitializePool();
   const { isFetching: isInitPoolTxHashPending, error: initPoolTxHashError } = useInitializePoolTxHash();
 
-  const poolDeploymentUrl = createPoolTx.wagmiHash
-    ? getBlockExplorerTxLink(chain?.id, createPoolTx.wagmiHash)
-    : undefined;
-  const multiSwapUrl = swapToBoostedTx.wagmiHash
-    ? getBlockExplorerTxLink(chain?.id, swapToBoostedTx.wagmiHash)
-    : undefined;
-  const poolInitializationUrl = initPoolTx.wagmiHash
-    ? getBlockExplorerTxLink(chain?.id, initPoolTx.wagmiHash)
-    : undefined;
+  const poolDeploymentUrl = createPoolTx.wagmiHash && getBlockExplorerTxLink(chain?.id, createPoolTx.wagmiHash);
+  const multiSwapUrl = swapToBoostedTx.wagmiHash && getBlockExplorerTxLink(chain?.id, swapToBoostedTx.wagmiHash);
+  const poolInitializationUrl = initPoolTx.wagmiHash && getBlockExplorerTxLink(chain?.id, initPoolTx.wagmiHash);
 
   const deployStep = transactionButtonManager({
     label: "Deploy Pool",
@@ -80,9 +81,9 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     };
   });
 
-  const swapToBoosted = [];
+  const swapToBoostedStep = [];
   if (tokenConfigs.some(token => token.useBoostedVariant === true)) {
-    swapToBoosted.push(
+    swapToBoostedStep.push(
       transactionButtonManager({
         label: "Swap to Boosted",
         onSubmit: multiSwap,
@@ -127,7 +128,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     deployStep,
     chooseAmountsStep,
     ...approveOnTokenSteps,
-    ...swapToBoosted,
+    ...swapToBoostedStep,
     ...approveOnBoostedVariantSteps,
     initializeStep,
   ];
@@ -173,26 +174,26 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
           </div>
         </div>
       </div>
-      {isChooseTokenAmountsModalOpen && (
-        <ChooseTokenAmounts setIsChooseTokenAmountsModalOpen={setIsChooseTokenAmountsModalOpen} />
-      )}
+      {isChooseTokenAmountsModalOpen && <ChooseTokenAmounts />}
     </>
   );
 }
 
-export function transactionButtonManager({
-  label,
-  blockExplorerUrl,
-  onSubmit,
-  isPending,
-  error,
-}: {
+interface TransactionButtonManagerProps {
   label: string;
   blockExplorerUrl?: string;
   onSubmit: () => void;
   isPending: boolean;
   error: Error | null;
-}) {
+}
+
+function transactionButtonManager({
+  label,
+  blockExplorerUrl,
+  onSubmit,
+  isPending,
+  error,
+}: TransactionButtonManagerProps) {
   return {
     label,
     blockExplorerUrl,
