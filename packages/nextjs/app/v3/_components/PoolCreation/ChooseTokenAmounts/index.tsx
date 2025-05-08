@@ -6,12 +6,8 @@ import { Alert, TransactionButton } from "~~/components/common";
 import { useSortTokenConfigs } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore, useValidateInitializationInputs } from "~~/hooks/v3";
 
-export function ChooseTokenAmounts({
-  setIsChooseTokenAmountsModalOpen,
-}: {
-  setIsChooseTokenAmountsModalOpen: (isOpen: boolean) => void;
-}) {
-  const { tokenConfigs, poolType, updatePool, step } = usePoolCreationStore();
+export function ChooseTokenAmounts() {
+  const { tokenConfigs, poolType, updatePool, step, setIsChooseTokenAmountsModalOpen } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
   const { isInitializePoolInputsValid } = useValidateInitializationInputs();
 

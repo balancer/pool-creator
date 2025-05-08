@@ -3,7 +3,12 @@
 import { EclpChartDisplay } from "./PoolConfiguration/ChooseParameters/EclpParams";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+  CheckCircleIcon,
+  PencilSquareIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
 import { useSortTokenConfigs } from "~~/hooks/gyro";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -38,6 +43,9 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     reClammParams,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
+    step,
+    setIsChooseTokenAmountsModalOpen,
+    selectedTab,
   } = usePoolCreationStore();
 
   const { isOnlyInitializingPool } = useUserDataStore();
@@ -55,6 +63,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   // Display tokenConfigs in sorted order for sanity check debugging of gyro ECLP
   const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
 
+  const showMiniEclpChart = isGyroEclp && selectedTab === "Information";
+
   return (
     <div className="flex flex-col gap-3">
       <DetailSection
@@ -70,7 +80,17 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isValid={isTokensValid}
         isEmpty={tokenConfigs.every(token => token.address === zeroAddress)}
         content={
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 relative">
+            {(step === 2 || step === 3) && (
+              <div className="absolute -top-10 -right-1">
+                <div
+                  className="btn btn-sm btn-ghost text-info rounded-lg"
+                  onClick={() => setIsChooseTokenAmountsModalOpen(true)}
+                >
+                  <PencilSquareIcon className="w-5 h-5" />
+                </div>
+              </div>
+            )}
             {sortedTokenConfigs.map((token, index) => (
               <TokenDetails key={index} token={token} />
             ))}
@@ -85,7 +105,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           isEmpty={false}
           content={
             <div>
-              {isGyroEclp && (
+              {showMiniEclpChart && (
                 <div className="mb-3">
                   <EclpChartDisplay size="mini" />
                 </div>
