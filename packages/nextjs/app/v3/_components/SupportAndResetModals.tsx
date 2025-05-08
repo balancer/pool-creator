@@ -2,13 +2,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { ContactSupportModal, PoolStateResetModal } from "~~/components/common";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
-export function SupportAndResetModals({
-  callback,
-  hideSupport = false,
-}: {
+interface SupportAndResetModalsProps {
   callback?: () => void;
   hideSupport?: boolean;
-}) {
+}
+
+export function SupportAndResetModals({ callback, hideSupport = false }: SupportAndResetModalsProps) {
   const { clearPoolStore } = usePoolCreationStore();
   const { clearUserData } = useUserDataStore();
 

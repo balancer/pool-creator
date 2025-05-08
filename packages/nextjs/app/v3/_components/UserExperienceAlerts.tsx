@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
-import { SupportAndResetModals } from ".";
+import { SupportAndResetModals } from "./SupportAndResetModals";
 import { useSwitchChain } from "wagmi";
 import { ArrowUpRightIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import { Alert } from "~~/components/common";
@@ -86,6 +86,16 @@ export function StartedOnDifferentNetworkAlert() {
           </Alert>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function MobileNotSupportedAlert() {
+  return (
+    <div className="sm:hidden">
+      <Alert type="warning">
+        <div className="flex items-center gap-2">Pool creation not available on mobile</div>
+      </Alert>
     </div>
   );
 }
