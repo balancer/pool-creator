@@ -2,8 +2,9 @@ import { type TokenConfig } from "~~/hooks/v3";
 import { useBoostableWhitelist } from "~~/hooks/v3/";
 
 /**
- * This fixes edge case for gyro token sorting where
+ * This fixes edge case for gyro token sorting where:
  * the underlying token address is before other token but the boosted variant is after
+ * what matters is sorting by the token addresses that actually go in the pool
  */
 export function useSortTokenConfigs() {
   const { data: boostableWhitelist } = useBoostableWhitelist();

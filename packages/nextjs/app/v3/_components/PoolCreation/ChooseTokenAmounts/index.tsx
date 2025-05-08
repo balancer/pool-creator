@@ -21,8 +21,6 @@ export function ChooseTokenAmounts({
   const sortTokenConfigs = useSortTokenConfigs();
   const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
 
-  console.log("hello from ChooseTokenAmounts");
-
   // sort the token configs in state as well because ChooseTokenAmount's handleAmountChange needs consistent index order
   useEffect(() => {
     if (!hasInitialized.current) {
