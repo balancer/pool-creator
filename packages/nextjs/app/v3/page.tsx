@@ -1,31 +1,13 @@
 "use client";
 
-import {
-  ChooseNetwork,
-  ConnectWalletAlert,
-  PoolConfiguration,
-  PoolDetails,
-  StartedOnDifferentNetworkAlert,
-  SupportAndResetModals, // UserExperienceAlerts,
-} from "./_components";
+import { UserFlowManager } from "./_components/UserFlowManager";
 import type { NextPage } from "next";
-import { useWalletClient } from "wagmi";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
-import { Alert } from "~~/components/common";
-import { useUninitializedPool } from "~~/hooks/balancer";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { usePoolCreationStore, usePoolStoreDebug, useUserDataStoreDebug } from "~~/hooks/v3";
-import { availableNetworks } from "~~/utils";
+import { usePoolStoreDebug, useUserDataStoreDebug } from "~~/hooks/v3";
 
 const BalancerV3: NextPage = () => {
-  const { chain } = usePoolCreationStore();
-  const { targetNetwork: selectedNetwork } = useTargetNetwork();
-  const { data: walletClient } = useWalletClient();
-
   usePoolStoreDebug();
   useUserDataStoreDebug();
-
-  useUninitializedPool(); // TODO: refactor content so this page is only beets logo and page title
 
   return (
     <div className="flex justify-center">
@@ -35,43 +17,7 @@ const BalancerV3: NextPage = () => {
             <BalancerLogo width="55px" />
             <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer</h1>
           </div>
-
-          {!walletClient ? (
-            <ConnectWalletAlert />
-          ) : !chain ? (
-            <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
-              <ChooseNetwork options={availableNetworks.balancerV3} />
-            </div>
-          ) : chain && selectedNetwork.id !== chain.id ? (
-            <StartedOnDifferentNetworkAlert />
-          ) : (
-            <>
-              {/* <UserExperienceAlerts /> */}
-
-              <div className="hidden sm:flex flex-wrap gap-5 w-full justify-center">
-                <PoolConfiguration />
-
-                <div className="bg-base-200 w-full max-w-[420px] rounded-xl shadow-lg p-5 h-fit flex flex-col gap-3">
-                  <div className="flex justify-between items-center gap-2 mr-2">
-                    <div className="font-bold text-2xl">Pool Preview</div>
-                    {chain && typeof selectedNetwork.color === "string" && (
-                      <div className="text-xl font-bold" style={{ color: selectedNetwork.color }}>
-                        {chain?.name}
-                      </div>
-                    )}
-                  </div>
-                  <PoolDetails isPreview={true} />
-                  <SupportAndResetModals />
-                </div>
-              </div>
-
-              <div className="sm:hidden">
-                <Alert type="warning">
-                  <div className="flex items-center gap-2">Pool creation not available on mobile</div>
-                </Alert>
-              </div>
-            </>
-          )}
+          <UserFlowManager />
         </div>
       </div>
     </div>

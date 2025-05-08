@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ConnectWalletAlert } from "../v3/_components";
+import { ConnectWalletAlert } from "../v3/_components/UserExperienceAlerts";
 import { PoolConfiguration, PoolCreation } from "./_components";
 import { ChooseNetwork } from "./_components";
 import type { NextPage } from "next";

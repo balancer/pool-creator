@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChooseInfo, ChooseParameters, ChooseTokens, ChooseType, PoolCreationManager } from "./";
-import { ArrowLeftIcon, ArrowRightIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import { Alert, TransactionButton } from "~~/components/common";
+import { PoolCreation } from "../PoolCreation";
+import { ChooseInfo } from "./ChooseInfo";
+import { ChooseParameters } from "./ChooseParameters";
+import { ChooseTokens } from "./ChooseTokens";
+import { ChooseType } from "./ChooseType";
+import { ExistingPoolsWarning } from "./ExistingPoolsWarning";
+import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import { TransactionButton } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
-import {
-  type ExistingPool,
-  useCheckIfV3PoolExists,
-  usePoolCreationStore,
-  useValidateCreationInputs,
-} from "~~/hooks/v3";
+import { useCheckIfV3PoolExists, usePoolCreationStore, useValidateCreationInputs } from "~~/hooks/v3";
 import { bgBeigeGradient } from "~~/utils";
 
 export const TABS = ["Type", "Tokens", "Parameters", "Information"] as const;
@@ -123,50 +123,7 @@ export function PoolConfiguration() {
         )}
       </div>
 
-      {isPoolCreationModalOpen && <PoolCreationManager setIsModalOpen={setIsPoolCreationModalOpen} />}
+      {isPoolCreationModalOpen && <PoolCreation setIsModalOpen={setIsPoolCreationModalOpen} />}
     </>
-  );
-}
-
-function ExistingPoolsWarning({ existingPools }: { existingPools: ExistingPool[] }) {
-  return (
-    <div>
-      <Alert type="warning">Warning: Pools with a similar configuration have already been created</Alert>
-      <div className="overflow-x-auto mt-5">
-        <table className="table w-full text-lg">
-          <thead>
-            <tr className="text-lg">
-              <th className="border border-neutral-500 px-2 py-1">Name</th>
-              <th className="border border-neutral-500 px-2 py-1">Type</th>
-              <th className="border border-neutral-500 px-2 py-1">Link</th>
-            </tr>
-          </thead>
-          <tbody>
-            {existingPools.map(pool => {
-              const chainName = pool.chain.toLowerCase();
-              const baseURL = chainName === "sepolia" ? "https://test.balancer.fi" : "https://balancer.fi";
-              const poolURL = `${baseURL}/pools/${chainName}/v3/${pool.address}`;
-              return (
-                <tr key={pool.address}>
-                  <td className="border border-neutral-500 px-2 py-1">{pool.name.slice(0, 20)}</td>
-                  <td className="border border-neutral-500 px-2 py-1">{pool.type}</td>
-                  <td className="text-right border border-neutral-500 px-2 py-1">
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline text-info flex items-center gap-2"
-                      href={poolURL}
-                    >
-                      See Details
-                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                    </a>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { EclpChartDisplay } from "./ChooseParameters/EclpParams";
+import { EclpChartDisplay } from "./PoolConfiguration/ChooseParameters/EclpParams";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";

@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { ApproveOnTokenManager, ChooseTokenAmounts, PoolCreatedView, PoolDetails, SupportAndResetModals } from ".";
+import { PoolDetails } from "../PoolDetails";
+import { SupportAndResetModals } from "../SupportAndResetModals";
+import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
+import { ChooseTokenAmounts } from "./ChooseTokenAmounts";
+import { PoolCreatedView } from "./PoolCreatedView";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import {
   useBoostableWhitelist,
@@ -16,7 +20,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 /**
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
-export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
+export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
   const [isChooseTokenAmountsModalOpen, setIsChooseTokenAmountsModalOpen] = useState(false);
 
   const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain, poolAddress } = usePoolCreationStore();
@@ -134,7 +138,7 @@ export function PoolCreationManager({ setIsModalOpen }: { setIsModalOpen: (isOpe
         <div
           className="absolute w-full h-full"
           onClick={() => {
-            if (initPoolTx.wagmiHash || initPoolTx.safeHash || poolAddress) return; // don't let user close modal to try to edit amounts after init tx has been sent
+            if (createPoolTx.wagmiHash || createPoolTx.safeHash || poolAddress) return;
             setIsModalOpen(false);
           }}
         />
