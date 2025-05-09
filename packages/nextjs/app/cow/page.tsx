@@ -8,7 +8,7 @@ import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import { CowAMM } from "~~/components/assets/CowAMM";
 import { usePoolCreationStore } from "~~/hooks/cow";
-import { availableNetworks } from "~~/utils";
+import { supportedNetworks } from "~~/utils/supportedNetworks";
 
 const CowAmm: NextPage = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -19,7 +19,7 @@ const CowAmm: NextPage = () => {
     setIsMounted(true);
   }, []);
 
-  const supportedChainIds = availableNetworks.cowAmm.map(network => network.id);
+  const supportedChainIds = supportedNetworks.cowAmm.map(network => network.id);
 
   const isConnectedToSupportedChain = chainId
     ? supportedChainIds.includes(chainId as (typeof supportedChainIds)[number])
@@ -35,7 +35,7 @@ const CowAmm: NextPage = () => {
             {!isConnected ? (
               <ConnectWalletAlert />
             ) : !isConnectedToSupportedChain ? (
-              <ChooseNetwork options={availableNetworks.cowAmm} />
+              <ChooseNetwork options={supportedNetworks.cowAmm} />
             ) : !isMounted ? (
               <CowLoadingSkeleton />
             ) : !poolCreation ? (

@@ -3,6 +3,7 @@
 import { UserFlowManager } from "../v3/_components/UserFlowManager";
 import type { NextPage } from "next";
 import { BeetsLogo } from "~~/components/assets/BeetsLogo";
+import { supportedNetworks } from "~~/utils";
 
 const Beets: NextPage = () => {
   return (
@@ -14,7 +15,7 @@ const Beets: NextPage = () => {
             <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Beets</h1>
           </div>
 
-          <UserFlowManager />
+          <UserFlowManager supportedNetworks={supportedNetworks.beets} />
         </div>
       </div>
     </div>
