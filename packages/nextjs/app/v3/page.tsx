@@ -4,6 +4,7 @@ import { UserFlowManager } from "./_components/UserFlowManager";
 import type { NextPage } from "next";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
 import { usePoolStoreDebug, useUserDataStoreDebug } from "~~/hooks/v3";
+import { supportedNetworks } from "~~/utils";
 
 const BalancerV3: NextPage = () => {
   usePoolStoreDebug();
@@ -17,7 +18,7 @@ const BalancerV3: NextPage = () => {
             <BalancerLogo width="55px" />
             <h1 className="text-3xl md:text-5xl font-bold text-center mb-0">Balancer</h1>
           </div>
-          <UserFlowManager />
+          <UserFlowManager supportedNetworks={supportedNetworks.balancerV3} />
         </div>
       </div>
     </div>
