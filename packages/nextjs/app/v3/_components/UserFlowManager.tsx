@@ -3,13 +3,13 @@ import { PoolConfiguration } from "./PoolConfiguration";
 import { PoolDetails } from "./PoolDetails";
 import { SupportAndResetModals } from "./SupportAndResetModals";
 import { ConnectWalletAlert, MobileNotSupportedAlert, StartedOnDifferentNetworkAlert } from "./UserExperienceAlerts";
+import { type Chain } from "viem/chains";
 import { useWalletClient } from "wagmi";
 import { useUninitializedPool } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { usePoolCreationStore } from "~~/hooks/v3";
-import { availableNetworks } from "~~/utils";
 
-export function UserFlowManager() {
+export function UserFlowManager({ supportedNetworks }: { supportedNetworks: Chain[] }) {
   useUninitializedPool();
 
   const { chain } = usePoolCreationStore();
@@ -18,7 +18,7 @@ export function UserFlowManager() {
 
   if (!walletClient) return <ConnectWalletAlert />;
 
-  if (!chain) return <ChooseNetwork options={availableNetworks.balancerV3} />;
+  if (!chain) return <ChooseNetwork options={supportedNetworks} />;
 
   if (chain && selectedNetwork.id !== chain.id) return <StartedOnDifferentNetworkAlert />;
 

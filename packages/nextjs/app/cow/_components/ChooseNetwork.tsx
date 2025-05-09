@@ -1,7 +1,7 @@
-import * as chains from "viem/chains";
+import { type Chain } from "viem/chains";
 import { useSwitchChain } from "wagmi";
 
-export const ChooseNetwork = ({ options }: { options: chains.Chain[] }) => {
+export const ChooseNetwork = ({ options }: { options: Chain[] }) => {
   const { switchChain } = useSwitchChain();
 
   return (
