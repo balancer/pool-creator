@@ -3,7 +3,6 @@ import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { useEclpSpotPrice } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
@@ -11,9 +10,11 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { poolType, updateTokenConfig, eclpParams } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
-  const { isEclpParamsInverted } = eclpParams;
+  const { isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
 
-  const { usdPerToken0, usdPerToken1 } = useEclpSpotPrice();
+  const usdPerToken0 = Number(usdPerTokenInput0);
+  const usdPerToken1 = Number(usdPerTokenInput1);
+
   const { address: connectedAddress } = useAccount();
 
   const { data: userTokenBalance } = useReadContract({
@@ -72,8 +73,8 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   let usdValue = null;
   // Handle edge case of if user altered token values for gyro eclp
   if (poolType === PoolType.GyroE) {
-    const usdPerTokenAmount1 = Number(usdPerToken1) * Number(amount);
-    const usdPerTokenAmount0 = Number(usdPerToken0) * Number(amount);
+    const usdPerTokenAmount1 = usdPerToken1 * Number(amount);
+    const usdPerTokenAmount0 = usdPerToken0 * Number(amount);
     if (index === 0) usdValue = isEclpParamsInverted ? usdPerTokenAmount1 : usdPerTokenAmount0;
     if (index === 1) usdValue = isEclpParamsInverted ? usdPerTokenAmount0 : usdPerTokenAmount1;
   } else {

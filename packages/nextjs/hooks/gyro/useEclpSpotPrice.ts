@@ -31,15 +31,19 @@ export const useEclpSpotPrice = () => {
 
   // auto-fill usd per token input field values to start
   useEffect(() => {
-    updateEclpParam({ usdPerTokenInput0: (valueToken0 ?? "").toString() });
-  }, [valueToken0, updateEclpParam]);
+    updateEclpParam({
+      usdPerTokenInput0: usdPerTokenInput0 ? usdPerTokenInput0 : valueToken0 ? valueToken0.toString() : "",
+    });
+  }, [valueToken0, updateEclpParam, usdPerTokenInput0]);
 
   useEffect(() => {
-    updateEclpParam({ usdPerTokenInput1: (valueToken1 ?? "").toString() });
-  }, [valueToken1, updateEclpParam]);
+    updateEclpParam({
+      usdPerTokenInput1: usdPerTokenInput1 ? usdPerTokenInput1 : valueToken1 ? valueToken1.toString() : "",
+    });
+  }, [valueToken1, updateEclpParam, usdPerTokenInput1]);
 
   const poolSpotPrice =
     usdPerTokenInput0 && usdPerTokenInput1 ? Number(usdPerTokenInput0) / Number(usdPerTokenInput1) : null;
 
-  return { poolSpotPrice, usdPerToken0, usdPerToken1 };
+  return { poolSpotPrice };
 };

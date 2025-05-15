@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
+import { usePoolCreationStore } from "../v3";
 import { GyroECLPMath } from "@balancer-labs/balancer-maths";
 import { calcDerivedParams } from "@balancer/sdk";
+import { PoolType } from "@balancer/sdk";
 import { parseUnits } from "viem";
 
 /**
  * Hacky solution that helps determine if base or derived params are invalid
  */
 export function useEclpParamValidations(params: { alpha: string; beta: string; c: string; s: string; lambda: string }) {
+  const { poolType } = usePoolCreationStore();
   const { alpha, beta, c, s, lambda } = params;
   const [baseParamsError, setBaseParamsError] = useState<string | null>(null);
   const [derivedParamsError, setDerivedParamsError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (poolType !== PoolType.GyroE) return;
     if (!alpha || !beta || !c || !s || !lambda) {
       console.error("useEclpParamValidations missing required ECLP params", params);
       setBaseParamsError("Missing required ECLP params for validations");
@@ -48,7 +52,7 @@ export function useEclpParamValidations(params: { alpha: string; beta: string; c
         setDerivedParamsError("An unknown error occurred");
       }
     }
-  }, [alpha, beta, c, s, lambda]);
+  }, [alpha, beta, c, s, lambda, params, poolType]);
 
   return {
     baseParamsError,
