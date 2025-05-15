@@ -62,7 +62,7 @@ export const useReadPool = (pool: Address | null, chainId: number) => {
             functionName: "getNormalizedWeights",
             args: [],
           })
-          .catch(() => undefined), // return undefined if pool has not been registered
+          .catch(() => undefined), // return undefined if pool does not have normalized weights
         // client
         //   .readContract({
         //     abi: vaultExtensionAbi_V3,

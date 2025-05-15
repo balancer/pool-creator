@@ -143,6 +143,10 @@ function usePoolTypeSpecificParams() {
   if (isStablePool) return { amplificationParameter: BigInt(amplificationParameter) };
 
   if (poolType === PoolType.GyroE) {
+    if (!eclpParams.s || !eclpParams.c || !eclpParams.lambda || !eclpParams.beta || !eclpParams.alpha) {
+      console.error("UseCreatePool missing required ECLP params", eclpParams);
+      return;
+    }
     const parsedEclpParams = getParsedEclpParams(eclpParams);
     return {
       eclpParams: parsedEclpParams,
