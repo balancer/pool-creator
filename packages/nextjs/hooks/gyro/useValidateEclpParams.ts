@@ -12,6 +12,12 @@ export function useEclpParamValidations(params: { alpha: string; beta: string; c
   const [derivedParamsError, setDerivedParamsError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!alpha || !beta || !c || !s || !lambda) {
+      console.error("useEclpParamValidations missing required ECLP params", params);
+      setBaseParamsError("Missing required ECLP params for validations");
+      return;
+    }
+
     const rawEclpParams = {
       alpha: parseUnits(alpha, 18),
       beta: parseUnits(beta, 18),
