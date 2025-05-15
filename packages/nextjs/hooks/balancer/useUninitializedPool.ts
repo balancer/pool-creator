@@ -28,7 +28,7 @@ export function useUninitializedPool() {
   const chainIdString = searchParams.get("chainId") || searchParams.get("chainID");
   const chainId = chainIdString ? parseInt(chainIdString) : 0; // 0 is falsy to prevent useEffect execution
   const address = searchParams.get("address") || "";
-  const checkSumAddress = getAddress(address);
+  const checkSumAddress = address && getAddress(address);
   const isValidAddress = isAddress(checkSumAddress);
 
   const chain = Object.values(chains).find(chain => chain.id === chainId);

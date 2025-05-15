@@ -4,7 +4,7 @@ import { type Address, erc20Abi, formatUnits, parseAbi } from "viem";
 import { usePublicClient } from "wagmi";
 import { useFetchTokenList } from "~~/hooks/token";
 
-export const useReadPool = (pool: Address | null, chainId: number) => {
+export const useReadPool = (pool: Address | "", chainId: number) => {
   const client = usePublicClient();
   const vaultAddress = chainId
     ? balancerV3Contracts.Vault[chainId as keyof typeof balancerV3Contracts.Vault]
