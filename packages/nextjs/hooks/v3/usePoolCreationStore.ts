@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { TokenType } from "@balancer/sdk";
 import { Address, zeroAddress } from "viem";
 import { create } from "zustand";
@@ -174,11 +173,3 @@ export const usePoolCreationStore = create(
     },
   ),
 );
-
-export function usePoolStoreDebug() {
-  const poolState = usePoolCreationStore();
-
-  useEffect(() => {
-    console.log("Pool Store:", poolState);
-  }, [poolState]);
-}
