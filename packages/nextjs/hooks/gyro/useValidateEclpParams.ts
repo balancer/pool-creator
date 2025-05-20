@@ -17,7 +17,6 @@ export function useEclpParamValidations(params: { alpha: string; beta: string; c
   useEffect(() => {
     if (poolType !== PoolType.GyroE) return;
     if (!alpha || !beta || !c || !s || !lambda) {
-      console.error("useEclpParamValidations missing required ECLP params", params);
       setBaseParamsError("Missing required ECLP params for validations");
       return;
     }
