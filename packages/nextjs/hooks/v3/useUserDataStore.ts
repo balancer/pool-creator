@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Address } from "viem";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -37,11 +36,3 @@ export const useUserDataStore = create(
     },
   ),
 );
-
-export function useUserDataStoreDebug() {
-  const userDataState = useUserDataStore();
-
-  useEffect(() => {
-    console.log("User Data Store:", userDataState);
-  }, [userDataState]);
-}

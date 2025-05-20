@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useReadPool } from "./useReadPool";
-import { Address, isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import * as chains from "viem/chains";
 import { useAccount, useSwitchChain } from "wagmi";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
@@ -28,10 +28,12 @@ export function useUninitializedPool() {
   const chainIdString = searchParams.get("chainId") || searchParams.get("chainID");
   const chainId = chainIdString ? parseInt(chainIdString) : 0; // 0 is falsy to prevent useEffect execution
   const address = searchParams.get("address") || "";
-  const isValidAddress = isAddress(address);
+  const checkSumAddress = address && getAddress(address);
+  const isValidAddress = isAddress(checkSumAddress);
 
-  const { data: pool } = useReadPool(address as Address, chainId);
   const chain = Object.values(chains).find(chain => chain.id === chainId);
+
+  const { data: pool } = useReadPool(checkSumAddress, chainId);
 
   useEffect(() => {
     if (isConnected && chainId && pool?.isRegistered && !pool.poolConfig?.isPoolInitialized && type) {
