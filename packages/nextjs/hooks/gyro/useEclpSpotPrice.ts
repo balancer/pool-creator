@@ -42,8 +42,10 @@ export const useEclpSpotPrice = () => {
     });
   }, [valueToken1, updateEclpParam, usdPerTokenInput1]);
 
+  const parsedUsdPerTokenInput0 = Number(usdPerTokenInput0);
+  const parsedUsdPerTokenInput1 = Number(usdPerTokenInput1);
   const poolSpotPrice =
-    usdPerTokenInput0 && usdPerTokenInput1 ? Number(usdPerTokenInput0) / Number(usdPerTokenInput1) : null;
+    parsedUsdPerTokenInput0 && parsedUsdPerTokenInput1 ? parsedUsdPerTokenInput0 / parsedUsdPerTokenInput1 : null;
 
   return { poolSpotPrice };
 };

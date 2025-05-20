@@ -13,6 +13,8 @@ Big.RM = Big.roundHalfUp;
  *          with 18 decimal precision for on-chain compatibility
  */
 export function calculateRotationComponents(rotationAngleTangent: string): { c: string; s: string } {
+  if (!rotationAngleTangent || Number(rotationAngleTangent) === 0) return { c: "", s: "" };
+
   // Convert input to precise decimal representation of tan(θ)
   const tanθ = new Big(rotationAngleTangent);
 
@@ -33,7 +35,9 @@ export function calculateRotationComponents(rotationAngleTangent: string): { c: 
   };
 }
 
-export function invertEclpParams({ alpha, beta, peakPrice, c, s }: EclpParams) {
+export function invertEclpParams(params: EclpParams) {
+  const { alpha, beta, peakPrice, c, s, lambda, isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = params;
+
   // take reciprocal and flip alpha to beta
   const invertedAlpha = 1 / Number(beta);
   // take reciprocal and flip beta to alpha
@@ -45,9 +49,12 @@ export function invertEclpParams({ alpha, beta, peakPrice, c, s }: EclpParams) {
     alpha: formatEclpParamValues(invertedAlpha),
     beta: formatEclpParamValues(invertedBeta),
     peakPrice: formatEclpParamValues(invertedPeakPrice),
-    // flip c and s
-    c: s,
-    s: c,
+    c: s, // flip c and s
+    s: c, // flip s and c
+    isEclpParamsInverted: !isEclpParamsInverted,
+    usdPerTokenInput0: usdPerTokenInput1,
+    usdPerTokenInput1: usdPerTokenInput0,
+    lambda, // stays the same
   };
 }
 
@@ -85,10 +92,3 @@ export const parseEclpParams = ({
     lambda: parseUnits(lambda, 18),
   };
 };
-
-// Handle inverting eclp params if needed
-export function getParsedEclpParams(inputs: EclpParams) {
-  const { alpha, beta, c, s, lambda, isEclpParamsInverted } = inputs;
-  const eclpParams = isEclpParamsInverted ? { ...invertEclpParams(inputs), lambda } : { alpha, beta, c, s, lambda };
-  return parseEclpParams(eclpParams);
-}
