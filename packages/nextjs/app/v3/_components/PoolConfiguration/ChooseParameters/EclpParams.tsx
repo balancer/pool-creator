@@ -47,16 +47,8 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
   const { eclpParams, updateEclpParam } = usePoolCreationStore();
 
   const handleInvertEclpParams = () => {
-    const { usdPerTokenInput0, usdPerTokenInput1, isEclpParamsInverted } = eclpParams;
     const invertedParams = invertEclpParams(eclpParams);
-
-    // invert eclp params, flip inputs, and keep track of inverted state
-    updateEclpParam({
-      ...invertedParams,
-      usdPerTokenInput0: usdPerTokenInput1,
-      usdPerTokenInput1: usdPerTokenInput0,
-      isEclpParamsInverted: !isEclpParamsInverted,
-    });
+    updateEclpParam(invertedParams);
   };
 
   return (

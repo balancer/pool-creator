@@ -18,7 +18,7 @@ import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
-import { getParsedEclpParams } from "~~/utils/gryo/helpers";
+import { invertEclpParams, parseEclpParams } from "~~/utils/gryo/helpers";
 
 type SupportedPoolTypeInputs =
   | CreatePoolV3StableInput
@@ -132,29 +132,31 @@ export const useCreatePool = () => {
   });
 };
 
-/**
- * Returns pool-specific parameters based on the pool type
- */
+// Returns pool type specific parameters necesary for the create pool input
 function usePoolTypeSpecificParams() {
   const { poolType, amplificationParameter, eclpParams, reClammParams } = usePoolCreationStore();
 
+  const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
+  const isReClamm = poolType === PoolType.ReClamm;
 
   if (isStablePool) return { amplificationParameter: BigInt(amplificationParameter) };
 
-  if (poolType === PoolType.GyroE) {
-    if (!eclpParams.s || !eclpParams.c || !eclpParams.lambda || !eclpParams.beta || !eclpParams.alpha) {
-      console.error("UseCreatePool missing required ECLP params", eclpParams);
-      return;
-    }
-    const parsedEclpParams = getParsedEclpParams(eclpParams);
+  if (isGyroEclp) {
+    const { alpha, beta, c, s, lambda, isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+
+    if (!alpha || !beta || !c || !s || !lambda || !usdPerTokenInput0 || !usdPerTokenInput1) return;
+
+    const unInvertedEclpParams = isEclpParamsInverted ? invertEclpParams(eclpParams) : eclpParams;
+    const parsedEclpParams = parseEclpParams(unInvertedEclpParams);
+
     return {
       eclpParams: parsedEclpParams,
       derivedEclpParams: calcDerivedParams(parsedEclpParams),
     };
   }
 
-  if (poolType === PoolType.ReClamm)
+  if (isReClamm)
     return {
       initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
       initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
