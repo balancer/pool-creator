@@ -22,13 +22,13 @@ export const poolTypeMap: Record<SupportedPoolTypes, PoolTypeDetails> = {
   },
   [PoolType.Stable]: {
     label: "Stable",
-    maxTokens: 4,
+    maxTokens: 5,
     description:
       "Stable pools are perfect for tightly correlated assets like stablecoins, ensuring seamless trading with minimal slippage",
   },
   [PoolType.StableSurge]: {
     label: "Stable Surge",
-    maxTokens: 4,
+    maxTokens: 5,
     description: "A stable pool that uses the stable surge hook deployed by Balancer's official stable surge factory",
   },
   [PoolType.GyroE]: {
