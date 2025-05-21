@@ -31,7 +31,7 @@ export function ChooseToken({ index }: { index: number }) {
 
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { tokenConfigs, updatePool, updateTokenConfig, poolType } = usePoolCreationStore();
-  const { tokenType, rateProvider, tokenInfo, address, useBoostedVariant, isWeightLocked, weight } =
+  const { tokenType, rateProvider, tokenInfo, address, useBoostedVariant, isWeightLocked, weight, paysYieldFees } =
     tokenConfigs[index];
 
   const { isSuccess: isValidRateProvider } = useFetchTokenRate(rateProvider); // if undefined, rate provider is invalid
@@ -249,7 +249,7 @@ export function ChooseToken({ index }: { index: number }) {
           </div>
         </div>
         {tokenInfo && tokenType === TokenType.TOKEN_WITH_RATE && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col items-end gap-3">
             <TextField
               isRateProvider={true}
               isValidRateProvider={isValidRateProvider}
@@ -281,6 +281,12 @@ export function ChooseToken({ index }: { index: number }) {
                   </a>
                 </Alert>
               )}
+
+            <Checkbox
+              label={`Should yield fees be paid on this token?`}
+              checked={paysYieldFees}
+              onChange={() => updateTokenConfig(index, { paysYieldFees: !paysYieldFees })}
+            />
           </div>
         )}
       </div>
