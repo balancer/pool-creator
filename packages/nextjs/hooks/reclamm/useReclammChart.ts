@@ -12,132 +12,151 @@ export function useReclAmmChart() {
   const { centerednessMargin, initialBalanceA, initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
 
   const currentChartData = useMemo(() => {
-    try {
-      if (
-        !Number(centerednessMargin) ||
-        !Number(initialBalanceA) ||
-        !Number(initialMinPrice) ||
-        !Number(initialMaxPrice) ||
-        !Number(initialTargetPrice) ||
-        Number(initialMinPrice) >= Number(initialMaxPrice) + 5
-      )
-        return;
+    if (
+      !Number(centerednessMargin) ||
+      !Number(initialBalanceA) ||
+      !Number(initialMinPrice) ||
+      !Number(initialMaxPrice) ||
+      !Number(initialTargetPrice) ||
+      Number(initialMinPrice) >= Number(initialMaxPrice) + 5
+    )
+      return null;
 
-      const { balanceA, balanceB, virtualBalanceA, virtualBalanceB } = calculateInitialBalances({
-        minPrice: Number(initialMinPrice),
-        maxPrice: Number(initialMaxPrice),
-        targetPrice: Number(initialTargetPrice),
-        initialBalanceA: Number(initialBalanceA),
-      });
+    const { balanceA, balanceB, virtualBalanceA, virtualBalanceB } = calculateInitialBalances({
+      minPrice: Number(initialMinPrice),
+      maxPrice: Number(initialMaxPrice),
+      targetPrice: Number(initialTargetPrice),
+      initialBalanceA: Number(initialBalanceA),
+    });
 
-      console.log({ balanceA, balanceB, virtualBalanceA, virtualBalanceB });
+    console.log({ balanceA, balanceB, virtualBalanceA, virtualBalanceB });
 
-      const margin = centerednessMargin;
+    const margin = centerednessMargin;
 
-      const invariant = bn(bn(balanceA).plus(virtualBalanceA)).times(bn(balanceB).plus(virtualBalanceB));
+    const invariant = bn(bn(balanceA).plus(virtualBalanceA)).times(bn(balanceB).plus(virtualBalanceB));
 
-      // Mathematical function for the curve: y = invariant / x
-      const curveFunction = (x: number): number => {
-        return invariant.div(bn(x)).toNumber();
-      };
+    // Mathematical function for the curve: y = invariant / x
+    const curveFunction = (x: number): number => {
+      return invariant.div(bn(x)).toNumber();
+    };
 
-      const xForPointB = bn(invariant).div(virtualBalanceB);
+    const xForPointB = bn(invariant).div(virtualBalanceB);
 
-      const curvePoints = Array.from({ length: 100 }, (_, i) => {
-        const x = bn(0.7)
-          .times(virtualBalanceA)
-          .plus(
-            bn(i)
-              .times(bn(1.3).times(xForPointB).minus(bn(0.7).times(virtualBalanceA)))
-              .div(bn(100)),
-          );
-        const y = curveFunction(x.toNumber());
+    const curvePoints = Array.from({ length: 100 }, (_, i) => {
+      const x = bn(0.7)
+        .times(virtualBalanceA)
+        .plus(
+          bn(i)
+            .times(bn(1.3).times(xForPointB).minus(bn(0.7).times(virtualBalanceA)))
+            .div(bn(100)),
+        );
+      const y = curveFunction(x.toNumber());
 
-        return [x.toNumber(), y];
-      });
+      return [x.toNumber(), y];
+    });
 
-      const vBalanceA = Number(virtualBalanceA);
-      const vBalanceB = Number(virtualBalanceB);
-      const xForMinPrice = bn(invariant).div(virtualBalanceB).toNumber();
+    const vBalanceA = Number(virtualBalanceA);
+    const vBalanceB = Number(virtualBalanceB);
+    const xForMinPrice = bn(invariant).div(virtualBalanceB).toNumber();
 
-      const lowerMargin = calculateLowerMargin({
-        margin: Number(margin),
-        invariant: invariant.toNumber(),
-        virtualBalanceA: vBalanceA,
-        virtualBalanceB: vBalanceB,
-      });
+    const lowerMargin = calculateLowerMargin({
+      margin: Number(margin),
+      invariant: invariant.toNumber(),
+      virtualBalanceA: vBalanceA,
+      virtualBalanceB: vBalanceB,
+    });
 
-      const upperMargin = calculateUpperMargin({
-        margin: Number(margin),
-        invariant: invariant.toNumber(),
-        virtualBalanceA: vBalanceA,
-        virtualBalanceB: vBalanceB,
-      });
+    const upperMargin = calculateUpperMargin({
+      margin: Number(margin),
+      invariant: invariant.toNumber(),
+      virtualBalanceA: vBalanceA,
+      virtualBalanceB: vBalanceB,
+    });
 
-      const currentBalance = bn(balanceA).plus(virtualBalanceA).toNumber();
+    const currentBalance = bn(balanceA).plus(virtualBalanceA).toNumber();
 
-      const minPriceValue = bn(virtualBalanceB).pow(2).div(invariant).toNumber();
-      const maxPriceValue = bn(invariant).div(bn(virtualBalanceA).pow(2)).toNumber();
+    const minPriceValue = bn(virtualBalanceB).pow(2).div(invariant).toNumber();
+    const maxPriceValue = bn(invariant).div(bn(virtualBalanceA).pow(2)).toNumber();
 
-      const lowerMarginValue = bn(invariant).div(bn(lowerMargin).pow(2)).toNumber();
-      const upperMarginValue = bn(invariant).div(bn(upperMargin).pow(2)).toNumber();
+    const lowerMarginValue = bn(invariant).div(bn(lowerMargin).pow(2)).toNumber();
+    const upperMarginValue = bn(invariant).div(bn(upperMargin).pow(2)).toNumber();
 
-      const currentPriceValue = bn(bn(balanceB).plus(virtualBalanceB))
-        .div(bn(balanceA).plus(virtualBalanceA))
-        .toNumber();
+    const currentPriceValue = bn(bn(balanceB).plus(virtualBalanceB)).div(bn(balanceA).plus(virtualBalanceA)).toNumber();
 
-      const markPoints = [
-        { name: "upper limit", x: vBalanceA, color: "#FF4560", priceValue: maxPriceValue },
-        { name: "lower limit", x: xForMinPrice, color: "#FF4560", priceValue: minPriceValue },
-        {
-          name: "higher target",
-          x: lowerMargin,
-          color: "#E67E22",
-          priceValue: lowerMarginValue,
-        },
-        {
-          name: "lower target",
-          x: upperMargin,
-          color: "#E67E22",
-          priceValue: upperMarginValue,
-        },
-        {
-          name: "current",
-          x: currentBalance,
-          priceValue: currentPriceValue,
+    const markPoints = [
+      { name: "upper limit", x: vBalanceA, color: "#FF4560", priceValue: maxPriceValue },
+      { name: "lower limit", x: xForMinPrice, color: "#FF4560", priceValue: minPriceValue },
+      {
+        name: "higher target",
+        x: lowerMargin,
+        color: "#E67E22",
+        priceValue: lowerMarginValue,
+      },
+      {
+        name: "lower target",
+        x: upperMargin,
+        color: "#E67E22",
+        priceValue: upperMarginValue,
+      },
+      {
+        name: "current",
+        x: currentBalance,
+        priceValue: currentPriceValue,
 
-          color: "#00E396",
-        },
-      ].map(point => {
-        return {
-          name: point.name,
-          coord: [point.x, curveFunction(point.x)],
-          itemStyle: {
-            color: point.color,
-          },
-          emphasis: {
-            disabled: true,
-          },
-          silent: true,
-          priceValue: point.priceValue,
-        };
-      });
-
+        color: "#00E396",
+      },
+    ].map(point => {
       return {
-        series: curvePoints,
-        markPoints,
-        min: xForMinPrice,
-        max: vBalanceA,
-        lowerMargin,
-        upperMargin,
+        name: point.name,
+        coord: [point.x, curveFunction(point.x)],
+        itemStyle: {
+          color: point.color,
+        },
+        emphasis: {
+          disabled: true,
+        },
+        silent: true,
+        priceValue: point.priceValue,
       };
-    } catch (e) {
-      console.error(e);
-    }
+    });
+
+    return {
+      series: curvePoints,
+      markPoints,
+      min: xForMinPrice,
+      max: vBalanceA,
+      lowerMargin,
+      upperMargin,
+    };
   }, [centerednessMargin, initialBalanceA, initialMinPrice, initialMaxPrice, initialTargetPrice]);
 
   const option = useMemo(() => {
-    if (!currentChartData) return {};
+    if (!currentChartData?.series?.length || !currentChartData?.markPoints?.length) {
+      return {
+        grid: {
+          left: "3%",
+          right: "18%",
+          bottom: "5%",
+          top: "10%",
+          containLabel: true,
+        },
+        xAxis: {
+          type: "value",
+          axisLabel: { show: true },
+        },
+        yAxis: {
+          type: "value",
+          axisLabel: { show: true },
+        },
+        series: [
+          {
+            type: "line",
+            data: [],
+          },
+        ],
+      };
+    }
+    console.log({ currentChartData });
 
     const series = currentChartData.series;
     if (!series) return {};
