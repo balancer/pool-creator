@@ -38,6 +38,7 @@ export type ReClammParams = {
   initialMaxPrice: string;
   priceShiftDailyRate: string;
   centerednessMargin: string;
+  initialBalanceA: string;
 };
 
 export interface TransactionDetails {
@@ -127,11 +128,12 @@ export const initialPoolCreationState = {
   eclpParams: initialEclpParams,
   // For ReClamm
   reClammParams: {
-    initialTargetPrice: "",
-    initialMinPrice: "",
-    initialMaxPrice: "",
-    priceShiftDailyRate: "",
-    centerednessMargin: "",
+    initialTargetPrice: "2",
+    initialMinPrice: "0.5",
+    initialMaxPrice: "8",
+    priceShiftDailyRate: "100",
+    centerednessMargin: "25",
+    initialBalanceA: "100",
   },
   // isSuccess is only flipped to true after parsing tx receipt for status
   createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
