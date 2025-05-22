@@ -37,7 +37,7 @@ export function NumberInput({
 
   return (
     <div className="w-full flex flex-col gap-1">
-      {label && <label className="ml-1 text-lg font-bold">{label}</label>}
+      {label && <label className="ml-1 font-bold">{label}</label>}
       <div className="relative">
         <input
           type="number"
@@ -54,7 +54,9 @@ export function NumberInput({
             ${!isValid ? "ring-2 ring-red-400 focus:ring-red-400" : "focus:ring-primary"}
           `}
         />
-        {isPercentage && <span className="absolute right-3 top-1/2 transform -translate-y-1/2">%</span>}
+        {isPercentage && (
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400">%</span>
+        )}
         {!isValid && (
           <div className="absolute left-1 top-full text-red-400 text-sm mt-0 whitespace-nowrap overflow-hidden text-ellipsis">
             {getErrorMessage()}

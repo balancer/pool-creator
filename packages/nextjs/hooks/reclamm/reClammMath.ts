@@ -277,7 +277,7 @@ export function calculateInitialBalances({
   targetPrice: number;
   initialBalanceA: number;
 }) {
-  const defaultMaxBalanceA = 3000;
+  const defaultMaxBalanceA = 3000; // arbitrary default from reclamm math simulator repo
 
   // 1. Calculate price ratio
   const priceRatio = maxPrice / minPrice;
@@ -298,27 +298,18 @@ export function calculateInitialBalances({
   // 6. Calculate ideal proportion
   const idealProportion = idealBalanceB / idealBalanceA;
 
-  // 8. Calculate the actual balances based on ideal proportions
-  const balanceB = initialBalanceA * idealProportion;
+  // 7. Calculate the actual balances based on ideal proportions
+  const initialBalanceB = initialBalanceA * idealProportion;
 
+  // 8. Calculate the virtual balances
   const maxBalanceA = (initialBalanceA / idealBalanceA) * defaultMaxBalanceA;
-
   const virtualBalanceA = maxBalanceA / (Math.sqrt(priceRatio) - 1);
   const virtualBalanceB = minPrice * (maxBalanceA + virtualBalanceA);
 
-  console.log({
-    balanceA: initialBalanceA,
-    balanceB: balanceB,
-    virtualBalanceA,
-    virtualBalanceB,
-    idealProportion: idealProportion,
-  });
-
   return {
     balanceA: initialBalanceA,
-    balanceB,
+    balanceB: initialBalanceB,
     virtualBalanceA,
     virtualBalanceB,
-    idealProportion,
   };
 }

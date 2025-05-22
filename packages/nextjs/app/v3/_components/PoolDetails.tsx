@@ -10,7 +10,7 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
-import { useSortTokenConfigs } from "~~/hooks/gyro";
+import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
   type TokenConfig,
@@ -24,7 +24,6 @@ import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
 export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const { targetNetwork } = useTargetNetwork();
-  const sortTokenConfigs = useSortTokenConfigs();
 
   const {
     poolType,
@@ -48,6 +47,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     selectedTab,
   } = usePoolCreationStore();
 
+  const sortedTokenConfigs = useSortedTokenConfigs();
+
   const { isOnlyInitializingPool } = useUserDataStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidateCreationInputs();
@@ -59,9 +60,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
   const isReClamm = poolType === PoolType.ReClamm;
-
-  // Display tokenConfigs in sorted order for sanity check debugging of gyro ECLP
-  const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
 
   const showMiniEclpChart = isGyroEclp && selectedTab === "Information";
 

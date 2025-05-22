@@ -39,6 +39,8 @@ export type ReClammParams = {
   priceShiftDailyRate: string;
   centerednessMargin: string;
   initialBalanceA: string;
+  usdPerTokenInputA: string;
+  usdPerTokenInputB: string;
 };
 
 export interface TransactionDetails {
@@ -104,6 +106,17 @@ export const initialEclpParams: EclpParams = {
   usdPerTokenInput1: "",
 };
 
+export const initialReClammParams: ReClammParams = {
+  initialTargetPrice: "",
+  initialMinPrice: "",
+  initialMaxPrice: "",
+  priceShiftDailyRate: "150",
+  centerednessMargin: "25",
+  initialBalanceA: "100",
+  usdPerTokenInputA: "",
+  usdPerTokenInputB: "",
+};
+
 export const initialPoolCreationState = {
   chain: undefined,
   step: 1,
@@ -122,19 +135,10 @@ export const initialPoolCreationState = {
   poolHooksContract: "" as Address,
   disableUnbalancedLiquidity: false,
   enableDonation: false,
-  // For stable and stableSurge
-  amplificationParameter: "", // only used for stable pools
-  // For gyroECLP
+  // Pool type specific params
+  amplificationParameter: "", // used for stable and stable surge pool types
   eclpParams: initialEclpParams,
-  // For ReClamm
-  reClammParams: {
-    initialTargetPrice: "2",
-    initialMinPrice: "0.5",
-    initialMaxPrice: "8",
-    priceShiftDailyRate: "100",
-    centerednessMargin: "25",
-    initialBalanceA: "100",
-  },
+  reClammParams: initialReClammParams,
   // isSuccess is only flipped to true after parsing tx receipt for status
   createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },

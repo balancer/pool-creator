@@ -2,23 +2,29 @@
 import { useMemo } from "react";
 import { usePoolCreationStore } from "../v3";
 import { calculateInitialBalances, calculateLowerMargin, calculateUpperMargin } from "./reClammMath";
+import { useInitialPricingParams } from "./useInitialPricingParams";
 import { bn } from "~~/utils/numbers";
 
 /**
  * Using math from reclamm simulator and chart from frontend monorepo
  */
 export function useReclAmmChart() {
+  useInitialPricingParams();
+
   const { reClammParams } = usePoolCreationStore();
   const { centerednessMargin, initialBalanceA, initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
 
   const currentChartData = useMemo(() => {
+    // TODO: review validation logic for reclamm params
     if (
       !Number(centerednessMargin) ||
       !Number(initialBalanceA) ||
       !Number(initialMinPrice) ||
       !Number(initialMaxPrice) ||
       !Number(initialTargetPrice) ||
-      Number(initialMinPrice) >= Number(initialMaxPrice) + 5
+      Number(initialMinPrice) >= Number(initialMaxPrice) ||
+      Number(initialMinPrice) > Number(initialTargetPrice) ||
+      Number(initialTargetPrice) > Number(initialMaxPrice)
     )
       return null;
 
@@ -28,11 +34,7 @@ export function useReclAmmChart() {
       targetPrice: Number(initialTargetPrice),
       initialBalanceA: Number(initialBalanceA),
     });
-
-    console.log({ balanceA, balanceB, virtualBalanceA, virtualBalanceB });
-
     const margin = centerednessMargin;
-
     const invariant = bn(bn(balanceA).plus(virtualBalanceA)).times(bn(balanceB).plus(virtualBalanceB));
 
     // Mathematical function for the curve: y = invariant / x
@@ -84,24 +86,24 @@ export function useReclAmmChart() {
     const currentPriceValue = bn(bn(balanceB).plus(virtualBalanceB)).div(bn(balanceA).plus(virtualBalanceA)).toNumber();
 
     const markPoints = [
-      { name: "upper limit", x: vBalanceA, color: "#FF4560", priceValue: maxPriceValue },
-      { name: "lower limit", x: xForMinPrice, color: "#FF4560", priceValue: minPriceValue },
+      { name: "upper limit", x: vBalanceA, color: "#FF4560", priceValue: maxPriceValue.toFixed(3) },
+      { name: "lower limit", x: xForMinPrice, color: "#FF4560", priceValue: minPriceValue.toFixed(3) },
       {
         name: "higher target",
         x: lowerMargin,
         color: "#E67E22",
-        priceValue: lowerMarginValue,
+        priceValue: lowerMarginValue.toFixed(3),
       },
       {
         name: "lower target",
         x: upperMargin,
         color: "#E67E22",
-        priceValue: upperMarginValue,
+        priceValue: upperMarginValue.toFixed(3),
       },
       {
         name: "current",
         x: currentBalance,
-        priceValue: currentPriceValue,
+        priceValue: currentPriceValue.toFixed(3),
 
         color: "#00E396",
       },
@@ -156,7 +158,6 @@ export function useReclAmmChart() {
         ],
       };
     }
-    console.log({ currentChartData });
 
     const series = currentChartData.series;
     if (!series) return {};

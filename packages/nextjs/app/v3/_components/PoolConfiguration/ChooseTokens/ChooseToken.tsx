@@ -11,6 +11,7 @@ import { Alert, TokenImage, TokenSelectModal } from "~~/components/common";
 import { type Token, useFetchTokenList } from "~~/hooks/token";
 import {
   initialEclpParams,
+  initialReClammParams,
   useBoostableWhitelist,
   useFetchTokenRate,
   usePoolCreationStore,
@@ -67,7 +68,9 @@ export function ChooseToken({ index }: { index: number }) {
       useBoostedVariant: false,
       paysYieldFees: false,
     });
-    updatePool({ eclpParams: initialEclpParams }); // Don't remember why but this is needed?
+
+    // Gross pattern but works for triggering new autofill of pool type specific params?
+    updatePool({ eclpParams: initialEclpParams, reClammParams: initialReClammParams });
 
     // If user switches token, these flags are reset to force auto-generation of pool name and symbol, at which point user can decide to modify
     updateUserData({

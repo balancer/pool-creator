@@ -10,7 +10,9 @@ export function SwapFeePercentage({ handleNumberInputChange }: { handleNumberInp
 
   const { poolType, swapFeePercentage, updatePool } = usePoolCreationStore();
 
-  const MIN_SWAP_FEE_PERCENTAGE = poolType === PoolType.Stable ? 0.0001 : 0.001;
+  let minSwapFeePercentage = 0.001; // Weighted & GyroECLP
+  if (poolType === PoolType.Stable || poolType === PoolType.StableSurge) minSwapFeePercentage = 0.0001;
+  if (poolType === PoolType.ReClamm) minSwapFeePercentage = 0.1;
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -36,12 +38,12 @@ export function SwapFeePercentage({ handleNumberInputChange }: { handleNumberInp
         ))}
         <div>
           <NumberInput
-            placeholder={`${MIN_SWAP_FEE_PERCENTAGE} - 10`}
+            placeholder={`${minSwapFeePercentage} - 10`}
             value={swapFeePercentage}
-            onChange={e => handleNumberInputChange(e, "swapFeePercentage", MIN_SWAP_FEE_PERCENTAGE, 10)}
-            min={MIN_SWAP_FEE_PERCENTAGE}
+            onChange={e => handleNumberInputChange(e, "swapFeePercentage", minSwapFeePercentage, 10)}
+            min={minSwapFeePercentage}
             max={10}
-            step={MIN_SWAP_FEE_PERCENTAGE}
+            step={minSwapFeePercentage}
             isPercentage={true}
           />
         </div>

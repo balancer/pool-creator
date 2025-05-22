@@ -161,8 +161,8 @@ function usePoolTypeSpecificParams() {
       initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
       initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
       initialMaxPrice: parseUnits(reClammParams.initialMaxPrice, 18),
-      priceShiftDailyRate: parseUnits(reClammParams.priceShiftDailyRate, 18),
-      centerednessMargin: parseUnits(reClammParams.centerednessMargin, 18),
+      priceShiftDailyRate: parseUnits(reClammParams.priceShiftDailyRate, 16),
+      centerednessMargin: parseUnits((Number(reClammParams.centerednessMargin) / 2).toString(), 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%
     };
 
   return {};

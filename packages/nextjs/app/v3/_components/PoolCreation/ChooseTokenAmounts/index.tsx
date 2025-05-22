@@ -3,7 +3,7 @@ import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
-import { useSortTokenConfigs } from "~~/hooks/gyro";
+import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { usePoolCreationStore, useUserDataStore, useValidateInitializationInputs } from "~~/hooks/v3";
 
 export function ChooseTokenAmounts() {
@@ -13,11 +13,12 @@ export function ChooseTokenAmounts() {
 
   const hasInitialized = useRef(false);
 
-  // Sorting token configs is necessary for consistent auto-fill of other token amount for gyro ECLP
-  const sortTokenConfigs = useSortTokenConfigs();
-  const sortedTokenConfigs = sortTokenConfigs(tokenConfigs);
+  /**
+   * use sorted token configs for consistent auto-fill of other token amount for gyro ECLP
+   * must sort the token configs in state because ChooseTokenAmount's handleAmountChange needs consistent index order
+   */
+  const sortedTokenConfigs = useSortedTokenConfigs();
 
-  // sort the token configs in state as well because ChooseTokenAmount's handleAmountChange needs consistent index order
   useEffect(() => {
     if (!hasInitialized.current) {
       updatePool({ tokenConfigs: sortedTokenConfigs });
