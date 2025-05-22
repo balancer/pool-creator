@@ -117,16 +117,34 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               {isReClamm && (
                 <>
                   <div className="flex justify-between">
-                    <div className="">Initial Target Price</div>
-                    <div>{initialTargetPrice ? initialTargetPrice : "-"}</div>
+                    <div className="">Initial Min Price</div>
+                    <div>
+                      {initialMinPrice
+                        ? initialMinPrice.length > 15
+                          ? initialMinPrice.slice(0, 15) + "..."
+                          : initialMinPrice
+                        : "-"}
+                    </div>
                   </div>
                   <div className="flex justify-between">
-                    <div className="">Initial Min Price</div>
-                    <div>{initialMinPrice ? initialMinPrice : "-"}</div>
+                    <div className="">Initial Target Price</div>
+                    <div>
+                      {initialTargetPrice
+                        ? initialTargetPrice.length > 15
+                          ? initialTargetPrice.slice(0, 15) + "..."
+                          : initialTargetPrice
+                        : "-"}
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <div className="">Initial Max Price</div>
-                    <div>{initialMaxPrice ? initialMaxPrice : "-"}</div>
+                    <div>
+                      {initialMaxPrice
+                        ? initialMaxPrice.length > 15
+                          ? initialMaxPrice.slice(0, 15) + "..."
+                          : initialMaxPrice
+                        : "-"}
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <div className="">Price Shift Daily Rate</div>

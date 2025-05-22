@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useMemo } from "react";
+import { useSortedTokenConfigs } from "../balancer";
 import { usePoolCreationStore } from "../v3";
 import { calculateInitialBalances, calculateLowerMargin, calculateUpperMargin } from "./reClammMath";
 import { useInitialPricingParams } from "./useInitialPricingParams";
@@ -10,6 +11,8 @@ import { bn } from "~~/utils/numbers";
  */
 export function useReclAmmChart() {
   useInitialPricingParams();
+
+  const sortedTokenConfigs = useSortedTokenConfigs();
 
   const { reClammParams } = usePoolCreationStore();
   const { centerednessMargin, initialBalanceA, initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
@@ -248,12 +251,12 @@ export function useReclAmmChart() {
         axisTick: {
           show: true,
         },
-        name: "A",
+        name: sortedTokenConfigs[0].tokenInfo?.symbol,
         nameLocation: "end",
         nameTextStyle: {
           align: "right",
           verticalAlign: "bottom",
-          padding: [0, 15, -20, 0],
+          padding: [0, -30, -20, 0],
           fontSize: 12,
           color: "#999",
         },
@@ -288,12 +291,12 @@ export function useReclAmmChart() {
         axisTick: {
           show: true,
         },
-        name: "B",
+        name: sortedTokenConfigs[1].tokenInfo?.symbol,
         nameLocation: "end",
         nameTextStyle: {
           align: "left",
           verticalAlign: "top",
-          padding: [-20, 0, 0, -40],
+          padding: [-10, 0, 0, -40],
           fontSize: 12,
           color: "#999",
         },
