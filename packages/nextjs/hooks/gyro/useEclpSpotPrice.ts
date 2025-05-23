@@ -4,6 +4,7 @@ import { useEclpTokenOrder } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { useFetchTokenRate, usePoolCreationStore } from "~~/hooks/v3";
 
+// TODO: simplify to just always adjust usd value for token by rate if a rate provider is being used?
 export const useEclpSpotPrice = () => {
   const { updateEclpParam, eclpParams } = usePoolCreationStore();
   const { usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;

@@ -89,7 +89,7 @@ function EclpParamInputs() {
     <>
       <div className="flex flex-col gap-4 mt-3">
         {tokenHasRateProvider ? (
-          <Alert type="warning">For yield bearing assets, you set the USD value for the underlying token</Alert>
+          <Alert type="eureka">USD values for tokens with rate providers are adjusted to reflect underlying</Alert>
         ) : (
           <Alert type="eureka">Stretching factor controls depth of liquidity around peak price</Alert>
         )}

@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
 import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
+import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
+import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
@@ -11,6 +13,9 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const { poolType, updateTokenConfig, eclpParams } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
   const { isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+
+  const queryClient = useQueryClient();
+  const sortedTokenConfigs = useSortedTokenConfigs();
 
   const usdPerToken0 = Number(usdPerTokenInput0);
   const usdPerToken1 = Number(usdPerTokenInput1);
@@ -36,19 +41,25 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
         // Use USD values to calculate proper amount for other token
         const otherIndex = index === 0 ? 1 : 0;
 
-        // TODO: this is gross, make it better
-        // If order is inverted, swap which price corresponds to which index
-        const currentTokenPrice =
-          index === 0
-            ? Number(isEclpParamsInverted ? usdPerToken1 : usdPerToken0)
-            : Number(isEclpParamsInverted ? usdPerToken0 : usdPerToken1);
+        const referenceRateProvider = sortedTokenConfigs[index].rateProvider;
+        const otherRateProvider = sortedTokenConfigs[otherIndex].rateProvider;
 
-        const otherTokenPrice =
-          index === 0
-            ? Number(isEclpParamsInverted ? usdPerToken0 : usdPerToken1)
-            : Number(isEclpParamsInverted ? usdPerToken1 : usdPerToken0);
+        const referenceRate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", referenceRateProvider]);
+        const otherRate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", otherRateProvider]);
 
-        const calculatedAmount = (Number(inputValue) * currentTokenPrice) / otherTokenPrice;
+        const tokenIndexToPrice = {
+          0: isEclpParamsInverted ? usdPerToken1 : usdPerToken0,
+          1: isEclpParamsInverted ? usdPerToken0 : usdPerToken1,
+        };
+
+        // Since using token per usd input values which will always be underlying or rate adjusted down, must adjust for rate here to properly calculate proportion
+        let referenceTokenPrice = Number(tokenIndexToPrice[index as keyof typeof tokenIndexToPrice]);
+        if (referenceRate) referenceTokenPrice = referenceTokenPrice * Number(formatUnits(referenceRate, 18));
+
+        let otherTokenPrice = Number(tokenIndexToPrice[otherIndex]);
+        if (otherRate) otherTokenPrice = otherTokenPrice * Number(formatUnits(otherRate, 18));
+
+        const calculatedAmount = (Number(inputValue) * referenceTokenPrice) / otherTokenPrice;
 
         updateTokenConfig(index, { amount: inputValue });
         updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() });
