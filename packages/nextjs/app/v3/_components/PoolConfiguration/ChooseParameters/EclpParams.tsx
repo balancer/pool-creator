@@ -1,9 +1,11 @@
 import ReactECharts from "echarts-for-react";
+import { formatUnits } from "viem";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
 import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart, useEclpTokenOrder } from "~~/hooks/gyro";
-import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 import { calculateRotationComponents, invertEclpParams } from "~~/utils/gryo";
+import { truncateNumber } from "~~/utils/helpers";
 
 export function EclpParams() {
   const { eclpParams } = usePoolCreationStore();
@@ -73,7 +75,7 @@ function EclpParamInputs() {
   const { alpha, beta, lambda, peakPrice, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
   const sortedTokens = useEclpTokenOrder();
-  const tokenHasRateProvider = sortedTokens.some(token => token.underlyingTokenAddress);
+  const hasRateProvider = sortedTokens.some(token => token.rateProvider);
 
   useAutofillStarterParams();
 
@@ -85,11 +87,23 @@ function EclpParamInputs() {
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
 
+  const rateProviderToken0 = sortedTokens[0].rateProvider;
+  const rateProviderToken1 = sortedTokens[1].rateProvider;
+  const { data: rateProviderToken0Rate } = useFetchTokenRate(rateProviderToken0);
+  const { data: rateProviderToken1Rate } = useFetchTokenRate(rateProviderToken1);
+
+  const usdPerToken0 = rateProviderToken0Rate
+    ? Number(usdPerTokenInput0) * Number(formatUnits(rateProviderToken0Rate, 18))
+    : Number(usdPerTokenInput0);
+  const usdPerToken1 = rateProviderToken1Rate
+    ? Number(usdPerTokenInput1) * Number(formatUnits(rateProviderToken1Rate, 18))
+    : Number(usdPerTokenInput1);
+
   return (
     <>
       <div className="flex flex-col gap-4 mt-3">
-        {tokenHasRateProvider ? (
-          <Alert type="eureka">USD values for tokens with rate providers are adjusted to reflect underlying</Alert>
+        {hasRateProvider ? (
+          <Alert type="info">For boosted pools, price bounds are based on the rate adjusted USD values</Alert>
         ) : (
           <Alert type="eureka">Stretching factor controls depth of liquidity around peak price</Alert>
         )}
@@ -103,6 +117,7 @@ function EclpParamInputs() {
           label={`${sortedTokens[0].symbol} / USD`}
           value={usdPerTokenInput0}
           isDollarValue={true}
+          usdPerToken={truncateNumber(usdPerToken0)}
           onChange={e => {
             updateEclpParam({ usdPerTokenInput0: sanitizeNumberInput(e.target.value) });
             // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
@@ -113,6 +128,7 @@ function EclpParamInputs() {
           label={`${sortedTokens[1].symbol} / USD`}
           value={usdPerTokenInput1}
           isDollarValue={true}
+          usdPerToken={truncateNumber(usdPerToken1)}
           onChange={e => {
             updateEclpParam({ usdPerTokenInput1: sanitizeNumberInput(e.target.value) });
             // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
@@ -123,7 +139,7 @@ function EclpParamInputs() {
 
       <div className="grid grid-cols-2 gap-5 mb-2">
         <TextField
-          label="Lowest Price"
+          label="Lower Bound"
           value={alpha.toString()}
           onChange={e => {
             updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) });
@@ -131,7 +147,7 @@ function EclpParamInputs() {
           }}
         />
         <TextField
-          label="Highest Price"
+          label="Upper Bound"
           value={beta.toString()}
           onChange={e => {
             updateEclpParam({ beta: sanitizeNumberInput(e.target.value) });

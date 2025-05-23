@@ -21,7 +21,7 @@ module.exports = {
           "base-200": "rgb(245, 243, 239)",
           "base-300": "#EBE8E0", // bg color
           "base-content": "rgb(45, 55, 72)",
-          info: "#457dff",
+          info: "#93c6ff",
           success: "#00d395",
           warning: "#fed7aa",
           error: "#f9b5a8",

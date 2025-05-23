@@ -21,7 +21,7 @@ const alertTypeMap = {
     icon: <ExclamationTriangleIcon className="w-6 h-6" />,
   },
   success: { styles: "bg-success", icon: <CheckCircleIcon className="w-6 h-6" /> },
-  info: { styles: "bg-[#b3aef5]", icon: <InformationCircleIcon className="w-6 h-6" /> },
+  info: { styles: "bg-info", icon: <InformationCircleIcon className="w-6 h-6" /> },
   eureka: { styles: "bg-[#b3aef5]", icon: <LightBulbIcon className="w-6 h-6" /> },
 };
 

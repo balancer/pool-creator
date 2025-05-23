@@ -17,6 +17,7 @@ interface TextFieldProps {
   isPoolHooksContract?: boolean;
   isDollarValue?: boolean;
   isPercentage?: boolean;
+  usdPerToken?: string;
 }
 
 export const TextField: React.FC<TextFieldProps> = ({
@@ -27,6 +28,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   isDisabled,
   mustBeAddress,
   maxLength,
+  usdPerToken,
   isRateProvider = false,
   isValidRateProvider = false,
   isPoolHooksContract = false,
@@ -71,6 +73,9 @@ export const TextField: React.FC<TextFieldProps> = ({
             ${isDollarValue ? "pl-7" : ""}
           `}
         />
+        {usdPerToken && (
+          <div className="absolute right-3 -top-4 transform -translate-y-1/2 text-info">$ {usdPerToken}</div>
+        )}
         {!!value && !isValid && (
           <div className="absolute bottom-0 right-2 text-red-400 flex items-center gap-1">
             <ExclamationTriangleIcon className="w-4 h-4" />

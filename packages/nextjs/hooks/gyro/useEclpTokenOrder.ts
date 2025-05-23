@@ -1,5 +1,5 @@
-import { erc20Abi } from "viem";
-import { useReadContract } from "wagmi";
+// import { erc20Abi } from "viem";
+// import { useReadContract } from "wagmi";
 import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
@@ -22,24 +22,26 @@ export const useEclpTokenOrder = () => {
   // reverse token order if user has inverted the params
   if (isEclpParamsInverted) sortedTokens.reverse();
 
+  return sortedTokens;
+
   // fetch underlying token symbols for chart display
-  const { data: underlyingToken0Symbol } = useReadContract({
-    address: sortedTokens[0].underlyingTokenAddress,
-    abi: erc20Abi,
-    functionName: "symbol",
-  });
+  // const { data: underlyingToken0Symbol } = useReadContract({
+  //   address: sortedTokens[0].underlyingTokenAddress,
+  //   abi: erc20Abi,
+  //   functionName: "symbol",
+  // });
 
-  const { data: underlyingToken1Symbol } = useReadContract({
-    address: sortedTokens[1].underlyingTokenAddress,
-    abi: erc20Abi,
-    functionName: "symbol",
-  });
+  // const { data: underlyingToken1Symbol } = useReadContract({
+  //   address: sortedTokens[1].underlyingTokenAddress,
+  //   abi: erc20Abi,
+  //   functionName: "symbol",
+  // });
 
-  const symbolForToken0 = underlyingToken0Symbol ? underlyingToken0Symbol : sortedTokens[0].symbol;
-  const symbolForToken1 = underlyingToken1Symbol ? underlyingToken1Symbol : sortedTokens[1].symbol;
+  // const symbolForToken0 = underlyingToken0Symbol ? underlyingToken0Symbol : sortedTokens[0].symbol;
+  // const symbolForToken1 = underlyingToken1Symbol ? underlyingToken1Symbol : sortedTokens[1].symbol;
 
-  return sortedTokens.map((token, index) => ({
-    ...token,
-    symbol: index === 0 ? symbolForToken0 : symbolForToken1,
-  }));
+  // return sortedTokens.map((token, index) => ({
+  //   ...token,
+  //   symbol: index === 0 ? symbolForToken0 : symbolForToken1,
+  // }));
 };
