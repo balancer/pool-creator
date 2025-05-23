@@ -74,7 +74,9 @@ export const TextField: React.FC<TextFieldProps> = ({
           `}
         />
         {usdPerToken && (
-          <div className="absolute right-3 -top-4 transform -translate-y-1/2 text-info">$ {usdPerToken}</div>
+          <div className="absolute right-2 -top-4 transform -translate-y-1/2 badge badge-info badge-outline rounded-md">
+            $ {usdPerToken}
+          </div>
         )}
         {!!value && !isValid && (
           <div className="absolute bottom-0 right-2 text-red-400 flex items-center gap-1">

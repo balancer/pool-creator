@@ -103,7 +103,7 @@ function EclpParamInputs() {
     <>
       <div className="flex flex-col gap-4 mt-3">
         {hasRateProvider ? (
-          <Alert type="info">For boosted pools, price bounds are based on the rate adjusted USD values</Alert>
+          <Alert type="info">Price bound parameters are based on rate adjusted USD value inputs</Alert>
         ) : (
           <Alert type="eureka">Stretching factor controls depth of liquidity around peak price</Alert>
         )}
@@ -117,7 +117,7 @@ function EclpParamInputs() {
           label={`${sortedTokens[0].symbol} / USD`}
           value={usdPerTokenInput0}
           isDollarValue={true}
-          usdPerToken={truncateNumber(usdPerToken0)}
+          usdPerToken={rateProviderToken0Rate ? truncateNumber(usdPerToken0) : undefined}
           onChange={e => {
             updateEclpParam({ usdPerTokenInput0: sanitizeNumberInput(e.target.value) });
             // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
@@ -128,7 +128,7 @@ function EclpParamInputs() {
           label={`${sortedTokens[1].symbol} / USD`}
           value={usdPerTokenInput1}
           isDollarValue={true}
-          usdPerToken={truncateNumber(usdPerToken1)}
+          usdPerToken={rateProviderToken1Rate ? truncateNumber(usdPerToken1) : undefined}
           onChange={e => {
             updateEclpParam({ usdPerTokenInput1: sanitizeNumberInput(e.target.value) });
             // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
