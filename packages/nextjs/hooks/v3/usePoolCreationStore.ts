@@ -27,7 +27,6 @@ export type EclpParams = {
   s: string;
   lambda: string;
   peakPrice: string;
-  isEclpParamsInverted: boolean;
   usdPerTokenInput0: string;
   usdPerTokenInput1: string;
 };
@@ -101,7 +100,6 @@ export const initialEclpParams: EclpParams = {
   s: "",
   lambda: "",
   peakPrice: "", // peak price only for UX purposes, not sent in tx
-  isEclpParamsInverted: false, // inverted relative to alphanumeric (used for chart toggle)
   usdPerTokenInput0: "",
   usdPerTokenInput1: "",
 };

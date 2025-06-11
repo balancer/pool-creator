@@ -4,18 +4,16 @@ import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { poolType, updateTokenConfig, eclpParams } = usePoolCreationStore();
+  const { poolType, updateTokenConfig, eclpParams, tokenConfigs } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
-  const { isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+  const { usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
 
   const queryClient = useQueryClient();
-  const sortedTokenConfigs = useSortedTokenConfigs();
 
   const usdPerToken0 = Number(usdPerTokenInput0);
   const usdPerToken1 = Number(usdPerTokenInput1);
@@ -41,25 +39,25 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
         // Use USD values to calculate proper amount for other token
         const otherIndex = index === 0 ? 1 : 0;
 
-        const referenceRateProvider = sortedTokenConfigs[index].rateProvider;
-        const otherRateProvider = sortedTokenConfigs[otherIndex].rateProvider;
+        const referenceRateProvider = tokenConfigs[index].rateProvider;
+        const otherRateProvider = tokenConfigs[otherIndex].rateProvider;
 
         const referenceRate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", referenceRateProvider]);
         const otherRate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", otherRateProvider]);
 
-        const tokenIndexToPrice = {
-          0: isEclpParamsInverted ? usdPerToken1 : usdPerToken0,
-          1: isEclpParamsInverted ? usdPerToken0 : usdPerToken1,
-        };
+        // Get the correct USD price for each token based on their index
+        const referenceTokenPrice = index === 0 ? usdPerToken0 : usdPerToken1;
+        const otherTokenPrice = otherIndex === 0 ? usdPerToken0 : usdPerToken1;
 
         // Since using token per usd input values which will always be underlying or rate adjusted down, must adjust for rate here to properly calculate proportion
-        let referenceTokenPrice = Number(tokenIndexToPrice[index as keyof typeof tokenIndexToPrice]);
-        if (referenceRate) referenceTokenPrice = referenceTokenPrice * Number(formatUnits(referenceRate, 18));
+        let adjustedReferenceTokenPrice = referenceTokenPrice;
+        if (referenceRate)
+          adjustedReferenceTokenPrice = adjustedReferenceTokenPrice * Number(formatUnits(referenceRate, 18));
 
-        let otherTokenPrice = Number(tokenIndexToPrice[otherIndex]);
-        if (otherRate) otherTokenPrice = otherTokenPrice * Number(formatUnits(otherRate, 18));
+        let adjustedOtherTokenPrice = otherTokenPrice;
+        if (otherRate) adjustedOtherTokenPrice = adjustedOtherTokenPrice * Number(formatUnits(otherRate, 18));
 
-        const calculatedAmount = (Number(inputValue) * referenceTokenPrice) / otherTokenPrice;
+        const calculatedAmount = (Number(inputValue) * adjustedReferenceTokenPrice) / adjustedOtherTokenPrice;
 
         updateTokenConfig(index, { amount: inputValue });
         updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() });
@@ -84,10 +82,8 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   let usdValue = null;
   // Handle edge case of if user altered token values for gyro eclp
   if (poolType === PoolType.GyroE) {
-    const usdPerTokenAmount1 = usdPerToken1 * Number(amount);
-    const usdPerTokenAmount0 = usdPerToken0 * Number(amount);
-    if (index === 0) usdValue = isEclpParamsInverted ? usdPerTokenAmount1 : usdPerTokenAmount0;
-    if (index === 1) usdValue = isEclpParamsInverted ? usdPerTokenAmount0 : usdPerTokenAmount1;
+    const usdPerTokenAmount = index === 0 ? usdPerToken0 * Number(amount) : usdPerToken1 * Number(amount);
+    usdValue = usdPerTokenAmount;
   } else {
     usdValue = tokenUsdValue;
   }
