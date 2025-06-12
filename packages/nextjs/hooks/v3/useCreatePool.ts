@@ -7,7 +7,6 @@ import {
   CreatePoolV3StableInput,
   CreatePoolV3WeightedInput,
   PoolType,
-  calcDerivedParams,
   gyroECLPPoolFactoryAbiExtended,
   stablePoolFactoryAbiExtended,
   stableSurgeFactoryAbiExtended,
@@ -18,7 +17,6 @@ import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
-import { invertEclpParams, parseEclpParams } from "~~/utils/gryo/helpers";
 
 type SupportedPoolTypeInputs =
   | CreatePoolV3StableInput
@@ -143,16 +141,18 @@ function usePoolTypeSpecificParams() {
   if (isStablePool) return { amplificationParameter: BigInt(amplificationParameter) };
 
   if (isGyroEclp) {
-    const { alpha, beta, c, s, lambda, isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+    const { alpha, beta, c, s, lambda, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
 
     if (!alpha || !beta || !c || !s || !lambda || !usdPerTokenInput0 || !usdPerTokenInput1) return;
 
-    const unInvertedEclpParams = isEclpParamsInverted ? invertEclpParams(eclpParams) : eclpParams;
-    const parsedEclpParams = parseEclpParams(unInvertedEclpParams);
-
     return {
-      eclpParams: parsedEclpParams,
-      derivedEclpParams: calcDerivedParams(parsedEclpParams),
+      eclpParams: {
+        alpha: parseUnits(alpha, 18),
+        beta: parseUnits(beta, 18),
+        c: parseUnits(c, 18),
+        s: parseUnits(s, 18),
+        lambda: parseUnits(lambda, 18),
+      },
     };
   }
 

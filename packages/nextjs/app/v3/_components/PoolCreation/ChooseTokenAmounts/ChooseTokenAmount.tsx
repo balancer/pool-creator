@@ -1,21 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { poolType, updateTokenConfig, eclpParams } = usePoolCreationStore();
+  const { poolType, updateTokenConfig, eclpParams, tokenConfigs } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
-  const { isEclpParamsInverted, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+  const { usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+
+  const [usdValue, setUsdValue] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
-  const sortedTokenConfigs = useSortedTokenConfigs();
 
   const usdPerToken0 = Number(usdPerTokenInput0);
   const usdPerToken1 = Number(usdPerTokenInput1);
@@ -34,35 +34,29 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userTokenBalance, address]);
 
+  // Helper function to get rate-adjusted USD price for a token
+  const getRateAdjustedUsdPrice = (tokenIndex: number) => {
+    const rateProvider = tokenConfigs[tokenIndex].rateProvider;
+    const rate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", rateProvider]);
+    const basePrice = tokenIndex === 0 ? usdPerToken0 : usdPerToken1;
+
+    if (!rate) return basePrice;
+    return basePrice * Number(formatUnits(rate, 18));
+  };
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.trim();
     if (Number(inputValue) >= 0) {
       if (poolType === PoolType.GyroE) {
-        // Use USD values to calculate proper amount for other token
         const otherIndex = index === 0 ? 1 : 0;
 
-        const referenceRateProvider = sortedTokenConfigs[index].rateProvider;
-        const otherRateProvider = sortedTokenConfigs[otherIndex].rateProvider;
-
-        const referenceRate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", referenceRateProvider]);
-        const otherRate: bigint | undefined = queryClient.getQueryData(["fetchTokenRate", otherRateProvider]);
-
-        const tokenIndexToPrice = {
-          0: isEclpParamsInverted ? usdPerToken1 : usdPerToken0,
-          1: isEclpParamsInverted ? usdPerToken0 : usdPerToken1,
-        };
-
-        // Since using token per usd input values which will always be underlying or rate adjusted down, must adjust for rate here to properly calculate proportion
-        let referenceTokenPrice = Number(tokenIndexToPrice[index as keyof typeof tokenIndexToPrice]);
-        if (referenceRate) referenceTokenPrice = referenceTokenPrice * Number(formatUnits(referenceRate, 18));
-
-        let otherTokenPrice = Number(tokenIndexToPrice[otherIndex]);
-        if (otherRate) otherTokenPrice = otherTokenPrice * Number(formatUnits(otherRate, 18));
+        const referenceTokenPrice = getRateAdjustedUsdPrice(index);
+        const otherTokenPrice = getRateAdjustedUsdPrice(otherIndex);
 
         const calculatedAmount = (Number(inputValue) * referenceTokenPrice) / otherTokenPrice;
 
         updateTokenConfig(index, { amount: inputValue });
-        updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() });
+        updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() }); // update other token input to be proportional
       } else {
         updateTokenConfig(index, { amount: inputValue });
       }
@@ -81,16 +75,17 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     isError: isUsdValueError,
   } = useTokenUsdValue(tokenInfo?.address, amount);
 
-  let usdValue = null;
-  // Handle edge case of if user altered token values for gyro eclp
-  if (poolType === PoolType.GyroE) {
-    const usdPerTokenAmount1 = usdPerToken1 * Number(amount);
-    const usdPerTokenAmount0 = usdPerToken0 * Number(amount);
-    if (index === 0) usdValue = isEclpParamsInverted ? usdPerTokenAmount1 : usdPerTokenAmount0;
-    if (index === 1) usdValue = isEclpParamsInverted ? usdPerTokenAmount0 : usdPerTokenAmount1;
-  } else {
-    usdValue = tokenUsdValue;
-  }
+  // Update USD value when amount changes
+  useEffect(() => {
+    if (poolType === PoolType.GyroE && amount) {
+      const rateAdjustedPrice = getRateAdjustedUsdPrice(index);
+      const rateAdjustedUsdValue = Number(amount) * rateAdjustedPrice;
+      setUsdValue(rateAdjustedUsdValue);
+    } else {
+      setUsdValue(tokenUsdValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [poolType, amount, index, tokenUsdValue]);
 
   return (
     <div className="rounded-lg">

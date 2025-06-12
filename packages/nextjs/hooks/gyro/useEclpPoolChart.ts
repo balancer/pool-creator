@@ -1,13 +1,12 @@
 import { useMemo } from "react";
 import { useEclpSpotPrice } from "./useEclpSpotPrice";
 import { useGetECLPLiquidityProfile } from "./useGetECLPLiquidityProfile";
-import { useEclpTokenOrder } from "~~/hooks/gyro";
+import { usePoolCreationStore } from "~~/hooks/v3";
 import { bn, fNum } from "~~/utils/numbers";
 
 export function useEclpPoolChart() {
-  // use token order from state for consistent "Price ( token0 / token1 )" label on chart
-  const sortedTokens = useEclpTokenOrder();
   const { poolSpotPrice } = useEclpSpotPrice();
+  const { tokenConfigs } = usePoolCreationStore();
 
   const { data, xMin, xMax, yMax } = useGetECLPLiquidityProfile();
   const markPointMargin = 0.005;
@@ -55,7 +54,7 @@ export function useEclpPoolChart() {
       },
       xAxis: {
         type: "value",
-        name: `Price ( ${sortedTokens.map(token => token.symbol).join(" / ")} )`,
+        name: `Price ( ${tokenConfigs.map(config => config.tokenInfo?.symbol).join(" / ")} )`,
         nameLocation: "end",
         nameGap: 5,
         nameTextStyle: {

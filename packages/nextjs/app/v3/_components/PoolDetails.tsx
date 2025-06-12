@@ -10,7 +10,6 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
-import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
   type TokenConfig,
@@ -46,8 +45,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     setIsChooseTokenAmountsModalOpen,
     selectedTab,
   } = usePoolCreationStore();
-
-  const sortedTokenConfigs = useSortedTokenConfigs();
 
   const { isOnlyInitializingPool } = useUserDataStore();
 
@@ -89,7 +86,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 </div>
               </div>
             )}
-            {sortedTokenConfigs.map((token, index) => (
+            {tokenConfigs.map((token, index) => (
               <TokenDetails key={index} token={token} />
             ))}
           </div>

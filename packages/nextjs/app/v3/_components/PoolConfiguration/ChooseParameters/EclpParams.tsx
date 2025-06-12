@@ -1,10 +1,10 @@
 import ReactECharts from "echarts-for-react";
-import { formatUnits } from "viem";
+import { formatUnits, parseUnits } from "viem";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { Alert, TextField } from "~~/components/common";
-import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart, useEclpTokenOrder } from "~~/hooks/gyro";
+import { useAutofillStarterParams, useEclpParamValidations, useEclpPoolChart } from "~~/hooks/gyro";
 import { useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
-import { calculateRotationComponents, invertEclpParams } from "~~/utils/gryo";
+import { calculateRotationComponents, formatEclpParamValues } from "~~/utils/gryo";
 import { truncateNumber } from "~~/utils/helpers";
 
 export function EclpParams() {
@@ -46,11 +46,40 @@ export function EclpParams() {
 
 export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
   const { options } = useEclpPoolChart();
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { eclpParams, updateEclpParam, updatePool, tokenConfigs } = usePoolCreationStore();
 
+  /**
+   * SDK handles un-inversion for on chain call,
+   * so we just want to:
+   * 1. flip the tokenConfig order in pool creation store
+   * 2. invert the eclp params
+   * 3. make sure all parts of app rely on order of tokens in tokenConfigs
+   */
   const handleInvertEclpParams = () => {
-    const invertedParams = invertEclpParams(eclpParams);
+    const D18 = 10n ** 18n;
+
+    const { alpha, beta, peakPrice, c, s, lambda, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
+
+    // take reciprocal and flip alpha to beta
+    const invertedAlpha = Number(formatUnits((D18 * D18) / parseUnits(beta, 18), 18));
+    // take reciprocal and flip beta to alpha
+    const invertedBeta = Number(formatUnits((D18 * D18) / parseUnits(alpha, 18), 18));
+    // take reciprocal of peakPrice
+    const invertedPeakPrice = Number(formatUnits((D18 * D18) / parseUnits(peakPrice, 18), 18));
+
+    const invertedParams = {
+      alpha: formatEclpParamValues(invertedAlpha),
+      beta: formatEclpParamValues(invertedBeta),
+      peakPrice: formatEclpParamValues(invertedPeakPrice),
+      c: s, // flip c and s
+      s: c, // flip s and c
+      usdPerTokenInput0: usdPerTokenInput1,
+      usdPerTokenInput1: usdPerTokenInput0,
+      lambda, // stays the same
+    };
+
     updateEclpParam(invertedParams);
+    updatePool({ tokenConfigs: [...tokenConfigs].reverse() });
   };
 
   return (
@@ -71,11 +100,10 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 }
 
 function EclpParamInputs() {
-  const { eclpParams, updateEclpParam } = usePoolCreationStore();
+  const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
   const { alpha, beta, lambda, peakPrice, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
-  const sortedTokens = useEclpTokenOrder();
-  const hasRateProvider = sortedTokens.some(token => token.rateProvider);
+  const hasRateProvider = tokenConfigs.some(token => token.rateProvider);
 
   useAutofillStarterParams();
 
@@ -87,8 +115,8 @@ function EclpParamInputs() {
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
 
-  const rateProviderToken0 = sortedTokens[0].rateProvider;
-  const rateProviderToken1 = sortedTokens[1].rateProvider;
+  const rateProviderToken0 = tokenConfigs[0].rateProvider;
+  const rateProviderToken1 = tokenConfigs[1].rateProvider;
   const { data: rateProviderToken0Rate } = useFetchTokenRate(rateProviderToken0);
   const { data: rateProviderToken1Rate } = useFetchTokenRate(rateProviderToken1);
 
@@ -103,7 +131,7 @@ function EclpParamInputs() {
     <>
       <div className="flex flex-col gap-4 mt-3">
         {hasRateProvider ? (
-          <Alert type="info">Price bound parameters are based on rate adjusted USD value inputs</Alert>
+          <Alert type="info">Price bound parameters are based on underlying token / USD values</Alert>
         ) : (
           <Alert type="eureka">Stretching factor controls depth of liquidity around peak price</Alert>
         )}
@@ -114,7 +142,7 @@ function EclpParamInputs() {
 
       <div className="grid grid-cols-2 gap-5 mt-5 mb-2">
         <TextField
-          label={`${sortedTokens[0].symbol} / USD`}
+          label={`${tokenConfigs[0].tokenInfo?.symbol} / USD`}
           value={usdPerTokenInput0}
           isDollarValue={true}
           usdPerToken={rateProviderToken0Rate ? truncateNumber(usdPerToken0) : undefined}
@@ -125,7 +153,7 @@ function EclpParamInputs() {
           }}
         />
         <TextField
-          label={`${sortedTokens[1].symbol} / USD`}
+          label={`${tokenConfigs[1].tokenInfo?.symbol} / USD`}
           value={usdPerTokenInput1}
           isDollarValue={true}
           usdPerToken={rateProviderToken1Rate ? truncateNumber(usdPerToken1) : undefined}
