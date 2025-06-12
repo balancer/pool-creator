@@ -22,7 +22,7 @@ import {
  * This component manages:
  * 1. Token selection
  * 2. Optional rate provider
- * 3. Optional boost opportunity for underlying tokens that have whitelisted boosted variants
+ * 3. Optional boost opportunity for underlying tokens that have whitelisted boosted variants (unless pool type is Gyro E-CLP then not allowed)
  * 4. If weighted pool, input to decide token weight
  */
 export function ChooseToken({ index }: { index: number }) {
@@ -153,6 +153,7 @@ export function ChooseToken({ index }: { index: number }) {
     }
 
     // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
+    // UNLESS the pool type is gyro ECLP
     if (rateProviderData && !showBoostOpportunityModal) {
       // Constant rate providers are special case only used for gyro pools
       if (rateProviderData.name !== "ConstantRateProvider") {
@@ -165,7 +166,7 @@ export function ChooseToken({ index }: { index: number }) {
   return (
     <>
       <div className="bg-base-100 p-5 rounded-xl flex flex-col gap-3 relative">
-        {boostedVariant && (
+        {boostedVariant && poolType !== PoolType.GyroE && (
           <div
             className={`flex justify-end items-center gap-1 cursor-pointer absolute top-2 right-5 text-lg ${
               useBoostedVariant ? "text-success" : "text-info"
@@ -304,7 +305,7 @@ export function ChooseToken({ index }: { index: number }) {
       {showRateProviderModal && tokenInfo && (
         <RateProviderModal setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
       )}
-      {showBoostOpportunityModal && tokenInfo && boostedVariant && (
+      {showBoostOpportunityModal && tokenInfo && boostedVariant && poolType !== PoolType.GyroE && (
         <BoostOpportunityModal
           tokenIndex={index}
           standardVariant={tokenInfo}

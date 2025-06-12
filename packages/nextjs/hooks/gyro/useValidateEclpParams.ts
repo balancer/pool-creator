@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePoolCreationStore } from "../v3";
 import { GyroECLPMath } from "@balancer-labs/balancer-maths";
-import { calcDerivedParams } from "@balancer/sdk";
+import { computeDerivedEclpParams } from "@balancer/sdk";
 import { PoolType } from "@balancer/sdk";
 import { parseUnits } from "viem";
 
@@ -41,7 +41,7 @@ export function useEclpParamValidations(params: { alpha: string; beta: string; c
     }
 
     try {
-      const derivedParams = calcDerivedParams(rawEclpParams);
+      const derivedParams = computeDerivedEclpParams(rawEclpParams);
       GyroECLPMath.validateDerivedParams(rawEclpParams, derivedParams);
       setDerivedParamsError(null);
     } catch (error) {

@@ -32,7 +32,7 @@ export const poolTypeMap: Record<SupportedPoolTypes, PoolTypeDetails> = {
       "Weighted pools support up to 8 tokens with customizable weightings, allowing for fine-tuned exposure to multiple assets",
   },
   [PoolType.GyroE]: {
-    label: "Gyro Elliptic CLP",
+    label: "Gyro E-CLP",
     maxTokens: 2,
     description:
       "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",

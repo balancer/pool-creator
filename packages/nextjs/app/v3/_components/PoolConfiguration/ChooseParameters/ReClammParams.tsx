@@ -42,12 +42,15 @@ export const ReClammParams = () => {
         </a>
       </div>
 
-      <div className="bg-base-200 w-full h-96 rounded-xl mb-3">
+      <div className="bg-base-200 w-full h-96 rounded-xl mb-4">
         <ReClammChart />
       </div>
 
       <div className="flex flex-col gap-4">
-        <Alert type="info">USD per token inputs are used to calculate the initial prices</Alert>
+        <Alert type="info">
+          Initial prices represent the value of {sortedTokenConfigs[0].tokenInfo?.symbol} denominated in{" "}
+          {sortedTokenConfigs[1].tokenInfo?.symbol}
+        </Alert>
 
         <div className="grid grid-cols-2 gap-4">
           <TextField
@@ -67,10 +70,6 @@ export const ReClammParams = () => {
             }}
           />
         </div>
-        <Alert type="info">
-          Initial prices represent the value of {sortedTokenConfigs[0].tokenInfo?.symbol} denominated in{" "}
-          {sortedTokenConfigs[1].tokenInfo?.symbol}
-        </Alert>
 
         <div className="grid grid-cols-3 gap-4">
           <TextField

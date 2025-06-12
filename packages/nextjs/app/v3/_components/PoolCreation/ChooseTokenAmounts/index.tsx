@@ -1,30 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Alert, TransactionButton } from "~~/components/common";
-import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { usePoolCreationStore, useUserDataStore, useValidateInitializationInputs } from "~~/hooks/v3";
 
 export function ChooseTokenAmounts() {
   const { tokenConfigs, poolType, updatePool, step, setIsChooseTokenAmountsModalOpen } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
   const { isInitializePoolInputsValid } = useValidateInitializationInputs();
-
-  const hasInitialized = useRef(false);
-
-  /**
-   * use sorted token configs for consistent auto-fill of other token amount for gyro ECLP
-   * must sort the token configs in state because ChooseTokenAmount's handleAmountChange needs consistent index order
-   */
-  const sortedTokenConfigs = useSortedTokenConfigs();
-
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      updatePool({ tokenConfigs: sortedTokenConfigs });
-      hasInitialized.current = true;
-    }
-  }, [sortedTokenConfigs, updatePool]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex gap-7 justify-center items-center z-[100]">
