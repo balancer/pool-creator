@@ -131,7 +131,7 @@ function EclpParamInputs() {
     <>
       <div className="flex flex-col gap-4 mt-3">
         {hasRateProvider ? (
-          <Alert type="info">Price bound parameters are based on rate adjusted USD value inputs</Alert>
+          <Alert type="info">Price bound parameters are based on underlying token / USD values</Alert>
         ) : (
           <Alert type="eureka">Stretching factor controls depth of liquidity around peak price</Alert>
         )}

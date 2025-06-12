@@ -3,13 +3,9 @@
 import { UserFlowManager } from "./_components/UserFlowManager";
 import type { NextPage } from "next";
 import { BalancerLogo } from "~~/components/assets/BalancerLogo";
-import { usePoolCreationStore } from "~~/hooks/v3";
 import { supportedNetworks } from "~~/utils";
 
 const BalancerV3: NextPage = () => {
-  const poolCreationStore = usePoolCreationStore();
-  console.log("poolCreationStore", poolCreationStore);
-
   return (
     <div className="flex justify-center">
       <div className="flex justify-center py-10 px-5 lg:px-10 w-full max-w-screen-2xl">
