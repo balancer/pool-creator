@@ -13,10 +13,11 @@ import {
   weightedPoolFactoryAbiExtended_V3,
 } from "@balancer/sdk";
 import { useMutation } from "@tanstack/react-query";
-import { parseUnits, zeroAddress } from "viem";
+import { Hex, parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
+import { hyperEVM } from "~~/utils/";
 
 type SupportedPoolTypeInputs =
   | CreatePoolV3StableInput
@@ -102,15 +103,44 @@ export const useCreatePool = () => {
     if (!walletClient) throw new Error("Wallet client must be connected!");
     if (poolType === undefined) throw new Error("No pool type provided!");
 
+    const isHyperEVM = walletClient.chain.id === hyperEVM.id;
+    let gasPrice: bigint | undefined;
+    if (isHyperEVM) {
+      const bigBlockGasPrice: Hex = await publicClient.transport.request({
+        method: "eth_bigBlockGasPrice",
+        params: [],
+      });
+      console.log("bigBlockGasPrice", BigInt(bigBlockGasPrice));
+      gasPrice = BigInt(bigBlockGasPrice);
+
+      const isUsingBigBlocks: boolean = await publicClient.transport.request({
+        method: "eth_usingBigBlocks",
+        params: [walletClient.account.address],
+      });
+
+      console.log("isUsingBigBlocks", isUsingBigBlocks);
+    }
+
     const createPool = new CreatePool();
     const input = createPoolInput();
     const call = createPool.buildCall(input);
+
+    const estimatedGas = await publicClient.estimateGas({
+      account: walletClient.account,
+      to: call.to,
+      data: call.callData,
+    });
+
+    console.log("estimatedGas", estimatedGas);
+
     const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
           data: call.callData,
           to: call.to,
+          gas: estimatedGas * 2n,
+          gasPrice,
         }),
       {
         // callbacks to save tx hash's to store

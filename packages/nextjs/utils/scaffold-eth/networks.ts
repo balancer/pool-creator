@@ -1,3 +1,5 @@
+// import { hyperEVM } from "../constants";
+import { hyperEVM } from "../constants";
 import * as chains from "viem/chains";
 import scaffoldConfig from "~~/scaffold.config";
 
@@ -65,6 +67,7 @@ export const DRPC_CHAIN_NAMES: Record<number, string> = {
   [chains.gnosis.id]: "gnosis",
   [chains.sepolia.id]: "sepolia",
   [chains.optimism.id]: "optimism",
+  // [hyperEVM.id]: "hyperliquid",
 };
 
 export const getDrpcHttpUrl = (chainId: number) => {
@@ -82,6 +85,7 @@ export const RPC_FALLBACKS: Record<number, string> = {
   [chains.avalanche.id]: "https://avalanche.gateway.tenderly.co/",
   [chains.optimism.id]: "https://optimism.gateway.tenderly.co/",
   [chains.sonic.id]: "https://sonic.drpc.org",
+  // [hyperEVM.id]: "https://rpc.hyperliquid.xyz/evm",
 };
 
 export const getRpcFallbackUrl = (chainId: number) => {
@@ -148,6 +152,8 @@ export function getBlockExplorerTxLink(chainId: number | undefined, txnHash: str
     return wagmiChain.id === chainId;
   });
 
+  console.log("targetChainArr", targetChainArr);
+
   if (targetChainArr.length === 0) {
     return "";
   }
@@ -157,6 +163,10 @@ export function getBlockExplorerTxLink(chainId: number | undefined, txnHash: str
 
   if (!blockExplorerTxURL) {
     return "";
+  }
+
+  if (chainId === hyperEVM.id) {
+    return `https://hyperevmscan.io/tx/${txnHash}`;
   }
 
   return `${blockExplorerTxURL}/tx/${txnHash}`;
