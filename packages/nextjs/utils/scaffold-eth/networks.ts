@@ -152,8 +152,6 @@ export function getBlockExplorerTxLink(chainId: number | undefined, txnHash: str
     return wagmiChain.id === chainId;
   });
 
-  console.log("targetChainArr", targetChainArr);
-
   if (targetChainArr.length === 0) {
     return "";
   }

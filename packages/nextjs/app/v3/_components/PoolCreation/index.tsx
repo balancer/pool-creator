@@ -4,6 +4,8 @@ import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
 import { ChooseTokenAmounts } from "./ChooseTokenAmounts";
 import { PoolCreatedView } from "./PoolCreatedView";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
+import { ExternalLinkButton } from "~~/components/common";
+import { useHyperLiquid } from "~~/hooks/hyperliquid";
 import {
   useBoostableWhitelist,
   useCreatePool,
@@ -124,7 +126,22 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     blockExplorerUrl: poolInitializationUrl,
   });
 
+  const useBigBlocksStep = {
+    component: (
+      <div className="flex flex-col gap-3">
+        <Alert type="warning">
+          HyperEVM requires your HyperCore wallet configuration be set to use big blocks in order to deploy a contract
+        </Alert>
+        <ExternalLinkButton href="https://hyperevm-block-toggle.vercel.app/" text="Use Big Blocks" />
+      </div>
+    ),
+    label: "Use Big Blocks",
+  };
+
+  const { isUsingBigBlocks, isHyperEvm } = useHyperLiquid();
+
   const poolCreationSteps = [
+    ...(isHyperEvm && !isUsingBigBlocks ? [useBigBlocksStep] : []),
     deployStep,
     chooseAmountsStep,
     ...approveOnTokenSteps,
