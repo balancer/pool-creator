@@ -15,6 +15,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
+import { useHyperLiquid } from "~~/hooks/hyperliquid";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
@@ -57,6 +58,8 @@ export const useCreatePool = () => {
     updatePool,
     createPoolTx,
   } = usePoolCreationStore();
+
+  const { bigBlockGasPrice, isHyperEvm } = useHyperLiquid();
 
   function createPoolInput() {
     if (poolType === undefined) throw new Error("No pool type provided!");
@@ -105,12 +108,21 @@ export const useCreatePool = () => {
     const createPool = new CreatePool();
     const input = createPoolInput();
     const call = createPool.buildCall(input);
+
+    const estimatedGas = await publicClient.estimateGas({
+      account: walletClient.account,
+      to: call.to,
+      data: call.callData,
+    });
+
     const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
           data: call.callData,
           to: call.to,
+          gas: isHyperEvm ? estimatedGas * 2n : undefined,
+          gasPrice: isHyperEvm && bigBlockGasPrice ? BigInt(bigBlockGasPrice) : undefined,
         }),
       {
         // callbacks to save tx hash's to store

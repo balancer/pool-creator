@@ -1,3 +1,4 @@
+import { hyperEVM } from "./utils/constants";
 import * as chains from "viem/chains";
 
 export type ScaffoldConfig = {
@@ -22,6 +23,7 @@ const scaffoldConfig = {
     chains.avalanche,
     chains.optimism,
     chains.sonic,
+    hyperEVM,
   ],
 
   // If using chains.foundry as your targetNetwork, you must specify a network to fork
