@@ -168,14 +168,19 @@ function usePoolTypeSpecificParams() {
     };
   }
 
-  if (isReClamm)
+  if (isReClamm) {
     return {
-      initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
-      initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
-      initialMaxPrice: parseUnits(reClammParams.initialMaxPrice, 18),
-      priceShiftDailyRate: parseUnits(reClammParams.priceShiftDailyRate, 16),
+      priceParams: {
+        initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
+        initialMaxPrice: parseUnits(reClammParams.initialMaxPrice, 18),
+        initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
+        tokenAPriceIncludesRate: reClammParams.tokenAPriceIncludesRate,
+        tokenBPriceIncludesRate: reClammParams.tokenBPriceIncludesRate,
+      },
+      priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name but on chain is same as creation ui
       centerednessMargin: parseUnits((Number(reClammParams.centerednessMargin) / 2).toString(), 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%
     };
+  }
 
   return {};
 }

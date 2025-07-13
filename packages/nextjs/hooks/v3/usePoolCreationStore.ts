@@ -35,11 +35,13 @@ export type ReClammParams = {
   initialTargetPrice: string;
   initialMinPrice: string;
   initialMaxPrice: string;
-  priceShiftDailyRate: string;
-  centerednessMargin: string;
-  initialBalanceA: string;
+  tokenAPriceIncludesRate: boolean;
+  tokenBPriceIncludesRate: boolean;
   usdPerTokenInputA: string;
   usdPerTokenInputB: string;
+  dailyPriceShiftExponent: string;
+  centerednessMargin: string;
+  initialBalanceA: string;
 };
 
 export interface TransactionDetails {
@@ -108,9 +110,11 @@ export const initialReClammParams: ReClammParams = {
   initialTargetPrice: "",
   initialMinPrice: "",
   initialMaxPrice: "",
-  priceShiftDailyRate: "150",
+  tokenAPriceIncludesRate: false,
+  tokenBPriceIncludesRate: false,
+  dailyPriceShiftExponent: "150",
   centerednessMargin: "25",
-  initialBalanceA: "100",
+  initialBalanceA: "100", // TODO: removed input. could this be hard coded?
   usdPerTokenInputA: "",
   usdPerTokenInputB: "",
 };

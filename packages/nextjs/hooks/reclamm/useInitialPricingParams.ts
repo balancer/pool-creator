@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useSortedTokenConfigs } from "~~/hooks/balancer";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
@@ -9,13 +8,12 @@ import { usePoolCreationStore } from "~~/hooks/v3";
  * 3. Figure out how much higher and lower to set min and max price relative to target price
  */
 export function useInitialPricingParams() {
-  const sortedTokenConfigs = useSortedTokenConfigs();
-  const { updateReClammParam, reClammParams } = usePoolCreationStore();
+  const { updateReClammParam, reClammParams, tokenConfigs } = usePoolCreationStore();
 
   const { initialTargetPrice, usdPerTokenInputA, usdPerTokenInputB } = reClammParams;
 
-  const { tokenUsdValue: usdPerTokenA } = useTokenUsdValue(sortedTokenConfigs[0].address, "1");
-  const { tokenUsdValue: usdPerTokenB } = useTokenUsdValue(sortedTokenConfigs[1].address, "1");
+  const { tokenUsdValue: usdPerTokenA } = useTokenUsdValue(tokenConfigs[0].address, "1");
+  const { tokenUsdValue: usdPerTokenB } = useTokenUsdValue(tokenConfigs[1].address, "1");
 
   // update usd per token inputs if API data available and user has not already set them
   useEffect(() => {

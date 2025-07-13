@@ -157,6 +157,13 @@ function gyroPriceFormat(val: Numberish): string {
   return numeral(val.toString()).format("0");
 }
 
+function clpPriceFormat(val: Numberish): string {
+  if (bn(val).lt(0.001)) return numeral(val.toString()).format("0.00000");
+  if (bn(val).lt(10)) return numeral(val.toString()).format("0.0000");
+  if (bn(val).lt(100)) return numeral(val.toString()).format("0.00");
+
+  return numeral(val.toString()).format("0");
+}
 // Sums an array of numbers safely using bignumber.js.
 export function safeSum(amounts: Numberish[]): string {
   return amounts.reduce((a, b) => bn(a).plus(b.toString()), bn(0)).toString();
@@ -180,7 +187,8 @@ type NumberFormat =
   | "sharePercent"
   | "stakedPercentage"
   | "boost"
-  | "gyroPrice";
+  | "gyroPrice"
+  | "clpPrice";
 
 // General number formatting function.
 export function fNum(format: NumberFormat, val: Numberish, opts?: FormatOpts): string {
@@ -209,6 +217,8 @@ export function fNum(format: NumberFormat, val: Numberish, opts?: FormatOpts): s
       return boostFormat(val);
     case "gyroPrice":
       return gyroPriceFormat(val);
+    case "clpPrice":
+      return clpPriceFormat(val);
     default:
       throw new Error(`Number format not implemented: ${format}`);
   }

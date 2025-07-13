@@ -1,21 +1,19 @@
 import ReactECharts from "echarts-for-react";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
-import { Alert, NumberInput, TextField } from "~~/components/common";
-import { useSortedTokenConfigs } from "~~/hooks/balancer";
+import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/20/solid";
+import { NumberInput, TextField } from "~~/components/common";
 import { useReclAmmChart } from "~~/hooks/reclamm/useReclammChart";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 export const ReClammParams = () => {
-  const { reClammParams, updateReClammParam } = usePoolCreationStore();
-  const sortedTokenConfigs = useSortedTokenConfigs();
+  const { reClammParams, updateReClammParam, tokenConfigs } = usePoolCreationStore();
 
   const {
     initialTargetPrice,
     initialMinPrice,
     initialMaxPrice,
-    priceShiftDailyRate,
+    dailyPriceShiftExponent,
     centerednessMargin,
-    initialBalanceA,
+    // initialBalanceA,
     usdPerTokenInputA,
     usdPerTokenInputB,
   } = reClammParams;
@@ -42,19 +40,12 @@ export const ReClammParams = () => {
         </a>
       </div>
 
-      <div className="bg-base-200 w-full h-96 rounded-xl mb-4">
-        <ReClammChart />
-      </div>
+      <ReClammChart />
 
       <div className="flex flex-col gap-4">
-        <Alert type="info">
-          Initial prices represent the value of {sortedTokenConfigs[0].tokenInfo?.symbol} denominated in{" "}
-          {sortedTokenConfigs[1].tokenInfo?.symbol}
-        </Alert>
-
         <div className="grid grid-cols-2 gap-4">
           <TextField
-            label={`${sortedTokenConfigs[0].tokenInfo?.symbol} / USD`}
+            label={`${tokenConfigs[0].tokenInfo?.symbol} / USD`}
             value={usdPerTokenInputA}
             isDollarValue={true}
             onChange={e => {
@@ -62,7 +53,7 @@ export const ReClammParams = () => {
             }}
           />
           <TextField
-            label={`${sortedTokenConfigs[1].tokenInfo?.symbol} / USD`}
+            label={`${tokenConfigs[1].tokenInfo?.symbol} / USD`}
             value={usdPerTokenInputB}
             isDollarValue={true}
             onChange={e => {
@@ -88,7 +79,7 @@ export const ReClammParams = () => {
             onChange={e => updateReClammParam({ initialMaxPrice: sanitizeNumberInput(e.target.value) })}
           />
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <NumberInput
             label="Centeredness Margin"
             min={0}
@@ -99,19 +90,19 @@ export const ReClammParams = () => {
             onChange={e => updateReClammParam({ centerednessMargin: sanitizeNumberInput(e.target.value) })}
           />
           <NumberInput
-            label="Price Shift Daily Rate"
+            label="Daily Price Shift Exponent"
             min={0}
             max={300}
             isPercentage={true}
-            value={priceShiftDailyRate}
+            value={dailyPriceShiftExponent}
             placeholder="0 - 300"
-            onChange={e => updateReClammParam({ priceShiftDailyRate: sanitizeNumberInput(e.target.value) })}
+            onChange={e => updateReClammParam({ dailyPriceShiftExponent: sanitizeNumberInput(e.target.value) })}
           />
-          <TextField
-            label={`Initial Balance of ${sortedTokenConfigs[0].tokenInfo?.symbol}`}
+          {/* <TextField
+            label={`Initial Balance of ${tokenConfigs[0].tokenInfo?.symbol}`}
             value={initialBalanceA}
             onChange={e => updateReClammParam({ initialBalanceA: sanitizeNumberInput(e.target.value) })}
-          />
+          /> */}
         </div>
       </div>
     </div>
@@ -119,7 +110,35 @@ export const ReClammParams = () => {
 };
 
 function ReClammChart() {
-  const { option } = useReclAmmChart();
+  const { options } = useReclAmmChart();
 
-  return <ReactECharts option={option} style={{ height: "100%", width: "100%" }} />;
+  const { tokenConfigs, updatePool, updateReClammParam, reClammParams } = usePoolCreationStore();
+
+  const handleInvertReClammParams = () => {
+    const { initialTargetPrice, initialMinPrice, initialMaxPrice, usdPerTokenInputA, usdPerTokenInputB } =
+      reClammParams;
+
+    updateReClammParam({
+      initialTargetPrice: (1 / Number(initialTargetPrice)).toString(),
+      initialMinPrice: (1 / Number(initialMaxPrice)).toString(),
+      initialMaxPrice: (1 / Number(initialMinPrice)).toString(),
+      usdPerTokenInputA: usdPerTokenInputB,
+      usdPerTokenInputB: usdPerTokenInputA,
+    });
+    updatePool({ tokenConfigs: [...tokenConfigs].reverse() });
+  };
+
+  return (
+    <div className="bg-base-300 rounded-lg relative">
+      <div className="bg-base-200 w-full h-72 rounded-xl mb-4">
+        <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
+        <div
+          className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
+          onClick={handleInvertReClammParams}
+        >
+          <ArrowsRightLeftIcon className="w-[15px] h-[15px]" />
+        </div>
+      </div>
+    </div>
+  );
 }

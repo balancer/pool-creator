@@ -150,7 +150,7 @@ export const recalculateVirtualBalances = (params: {
   currentPriceRatio: number;
   poolParams: {
     margin: number;
-    priceShiftDailyRate: number;
+    dailyPriceShiftExponent: number;
   };
   updateQ0Params: {
     startTime: number;
@@ -239,7 +239,7 @@ export const recalculateVirtualBalances = (params: {
   }
 
   if (poolCenteredness <= params.poolParams.margin / 100) {
-    const tau = params.poolParams.priceShiftDailyRate / timeFix;
+    const tau = params.poolParams.dailyPriceShiftExponent / timeFix;
 
     if (isPoolAboveCenter) {
       newVirtualBalanceB = newVirtualBalanceB * Math.pow(1 - tau, fixedSecondsSinceLastInteraction);
