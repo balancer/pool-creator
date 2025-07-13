@@ -1,7 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useMemo } from "react";
 import { usePoolCreationStore } from "../v3";
-import { calculateInitialBalances, calculateLowerMargin, calculateUpperMargin } from "./reClammMath";
+import {
+  calculateInitialBalances,
+  calculateLowerMargin,
+  calculateUpperMargin,
+  computeCenteredness,
+} from "./reClammMath";
 import { useInitialPricingParams } from "./useInitialPricingParams";
 import { bn, fNum } from "~~/utils/numbers";
 
@@ -17,6 +21,8 @@ function getGradientColor(colorStops: string[]) {
 }
 
 const isMobile = false;
+const GREEN = "#93F6D2";
+const ORANGE = "rgb(253, 186, 116)";
 
 /**
  * Using math from reclamm simulator and chart from frontend monorepo
@@ -25,10 +31,6 @@ export function useReclAmmChart() {
   useInitialPricingParams();
 
   const { tokenConfigs } = usePoolCreationStore();
-
-  const dynamicXAxisNamePadding = isMobile
-    ? [0, 30, -128, 0] // mobile
-    : [0, 55, -75, 0]; // desktop
 
   const tokens = useMemo(() => {
     const tokenSymbols = tokenConfigs.map(token => token.tokenInfo?.symbol);
@@ -67,27 +69,27 @@ export function useReclAmmChart() {
       targetPrice: Number(initialTargetPrice),
       initialBalanceA: Number(initialBalanceA),
     });
-    const margin = centerednessMargin;
     const invariant = bn(bn(balanceA).plus(virtualBalanceA)).times(bn(balanceB).plus(virtualBalanceB));
 
-    const vBalanceA = Number(virtualBalanceA);
-    const vBalanceB = Number(virtualBalanceB);
+    const rBalanceA = balanceA;
+    const rBalanceB = balanceB;
+    const vBalanceA = virtualBalanceA;
+    const vBalanceB = virtualBalanceB;
+    const marginValue = Number(centerednessMargin);
 
     const lowerMargin = calculateLowerMargin({
-      margin: Number(margin),
+      margin: marginValue,
       invariant: invariant.toNumber(),
       virtualBalanceA: vBalanceA,
       virtualBalanceB: vBalanceB,
     });
 
     const upperMargin = calculateUpperMargin({
-      margin: Number(margin),
+      margin: marginValue,
       invariant: invariant.toNumber(),
       virtualBalanceA: vBalanceA,
       virtualBalanceB: vBalanceB,
     });
-
-    // const currentBalance = bn(balanceA).plus(virtualBalanceA).toNumber();
 
     const minPriceValue = bn(virtualBalanceB).pow(2).div(invariant).toNumber();
     const maxPriceValue = bn(invariant).div(bn(virtualBalanceA).pow(2)).toNumber();
@@ -101,6 +103,13 @@ export function useReclAmmChart() {
       (currentPriceValue > minPriceValue && currentPriceValue < lowerMarginValue) ||
       (currentPriceValue > upperMarginValue && currentPriceValue < maxPriceValue);
 
+    const { poolCenteredness, isPoolAboveCenter } = computeCenteredness({
+      balanceA: rBalanceA,
+      balanceB: rBalanceB,
+      virtualBalanceA: vBalanceA,
+      virtualBalanceB: vBalanceB,
+    });
+
     return {
       maxPriceValue,
       minPriceValue,
@@ -108,21 +117,72 @@ export function useReclAmmChart() {
       upperMarginValue,
       currentPriceValue,
       isPoolWithinRange,
+      usdPerTokenInputA,
+      usdPerTokenInputB,
+      poolCenteredness,
+      isPoolAboveCenter,
+      marginValue,
     };
-  }, [centerednessMargin, initialBalanceA, initialMinPrice, initialMaxPrice, initialTargetPrice, tokenConfigs]);
+  }, [
+    centerednessMargin,
+    initialBalanceA,
+    initialMinPrice,
+    initialMaxPrice,
+    initialTargetPrice,
+    usdPerTokenInputA,
+    usdPerTokenInputB,
+  ]);
 
   const options = useMemo(() => {
-    const { maxPriceValue, minPriceValue, lowerMarginValue, upperMarginValue, currentPriceValue } = currentChartData;
+    const {
+      maxPriceValue,
+      minPriceValue,
+      lowerMarginValue,
+      upperMarginValue,
+      currentPriceValue,
+      marginValue, // is a true percentage
+      isPoolWithinRange,
+    } = currentChartData;
+
+    let showTargetValues = true;
+    let showMinMaxValues = true;
+    const totalGreenAndOrangeBars = 52;
+
+    // always have a minimum of 1 orange bar
+    const baseOrangeBarCount =
+      marginValue && marginValue < 4 ? 1 : Math.floor((totalGreenAndOrangeBars * (marginValue || 0)) / 100 / 2);
+
+    // if the margin is very small or very big, show only the target values or min/max values depending on the pool state
+    if (marginValue && marginValue < 4) {
+      if (isPoolWithinRange) {
+        showTargetValues = true;
+        showMinMaxValues = false;
+      } else if (isPoolWithinRange) {
+        showTargetValues = false;
+        showMinMaxValues = true;
+      }
+    } else if (marginValue && marginValue > 92) {
+      showTargetValues = false;
+      showMinMaxValues = true;
+    }
+
+    const baseGreenBarCount = totalGreenAndOrangeBars - 2 * baseOrangeBarCount;
+    const baseGreyBarCount = 9;
+    const totalBars = 2 * baseGreyBarCount + 2 * baseOrangeBarCount + baseGreenBarCount;
+
+    // for some reason the number of orange (or green) bars matters to echarts in the grid
+    const gridBottomDesktop = baseOrangeBarCount % 2 === 0 ? "32%" : "15%";
+    const gridBottomMobile = baseOrangeBarCount % 2 === 0 && !(showMinMaxValues && !showTargetValues) ? "30%" : "22%";
 
     const baseGreyBarConfig = {
-      count: 10,
-      value: 3,
+      count: baseGreyBarCount,
+      value: isMobile ? 1 : 3,
       gradientColors: ["rgba(160, 174, 192, 0.5)", "rgba(160, 174, 192, 0.1)"],
       borderRadius: 20,
     };
 
     const baseOrangeBarConfig = {
-      count: 8,
+      count: baseOrangeBarCount,
       value: 100,
       gradientColors: ["rgb(253, 186, 116)", "rgba(151, 111, 69, 0.5)"],
       borderRadius: 20,
@@ -130,7 +190,7 @@ export function useReclAmmChart() {
 
     const greenBarConfig = {
       name: "Green",
-      count: 42,
+      count: baseGreenBarCount,
       value: 100,
       gradientColors: ["rgb(99, 242, 190)", "rgba(57, 140, 110, 0.5)"],
       borderRadius: 20,
@@ -150,20 +210,18 @@ export function useReclAmmChart() {
 
     // Calculate which bar the current price corresponds to
     const getCurrentPriceBarIndex = () => {
-      const { minPriceValue, maxPriceValue, currentPriceValue } = currentChartData;
+      const { poolCenteredness = 0, isPoolAboveCenter = false } = currentChartData || {};
 
-      if (minPriceValue === undefined || maxPriceValue === undefined || currentPriceValue === undefined) {
-        return 50; // Default to middle if values are not available
+      const totalGreenAndOrangeBars = 2 * baseOrangeBarCount + baseGreenBarCount;
+      let barIndex = 0;
+
+      if (isPoolAboveCenter) {
+        barIndex = Math.floor((poolCenteredness / 2) * totalGreenAndOrangeBars);
+      } else {
+        barIndex = Math.floor(((2 - poolCenteredness) / 2) * totalGreenAndOrangeBars);
       }
 
-      const priceRange = maxPriceValue - minPriceValue;
-      const pricePerBar = priceRange / 58; // 58 bars in the colored section (8 orange + 42 green + 8 orange)
-      const barsFromMin = (currentPriceValue - minPriceValue) / pricePerBar;
-
-      // Add the initial 10 grey bars and round to nearest bar
-      const barIndex = Math.min(Math.max(0, Math.round(barsFromMin)), 57) + 10;
-
-      return barIndex;
+      return barIndex + baseGreyBarCount;
     };
 
     const currentPriceBarIndex = getCurrentPriceBarIndex();
@@ -186,8 +244,10 @@ export function useReclAmmChart() {
           return {
             value: segment.value,
             itemStyle: {
-              color: isCurrentPriceBar
-                ? "#93F6D2" // Solid color for current price bar
+              color: isCurrentPriceBar // Solid color for current price bar
+                ? isPoolWithinRange
+                  ? GREEN
+                  : ORANGE
                 : getGradientColor(segment.gradientColors),
               borderRadius: segment.borderRadius,
             },
@@ -216,13 +276,13 @@ export function useReclAmmChart() {
       },
       current: {
         ...baseRichProps,
-        color: "#63F2BE",
+        color: isPoolWithinRange ? GREEN : ORANGE,
       },
       currentTriangle: {
         ...baseRichProps,
         fontSize: 10,
         lineHeight: 12,
-        color: "#63F2BE",
+        color: isPoolWithinRange ? GREEN : ORANGE,
       },
       withRightPadding: {
         ...baseRichProps,
@@ -234,7 +294,7 @@ export function useReclAmmChart() {
       },
       withTopRightPadding: {
         ...baseRichProps,
-        padding: [100, paddingRight, 0, 0],
+        padding: [showMinMaxValues && !showTargetValues ? 0 : 100, paddingRight, 0, 0],
       },
     };
 
@@ -243,8 +303,8 @@ export function useReclAmmChart() {
       grid: {
         left: isMobile ? "-7%" : "-3%",
         right: "1%",
-        top: isMobile ? "50px" : "20%",
-        bottom: isMobile ? "-20px" : "15%",
+        top: isMobile ? "80px" : "25%",
+        bottom: isMobile ? gridBottomMobile : gridBottomDesktop,
         containLabel: true,
       },
       xAxis: {
@@ -258,7 +318,7 @@ export function useReclAmmChart() {
           show: true,
           interval: 0,
           formatter: (value: string, index: number) => {
-            if (index === 10) {
+            if (showMinMaxValues && index === baseGreyBarCount) {
               return `{${isMobile ? "triangleMobile" : "triangle"}|▲}\n{${
                 isMobile ? "labelTextMobile" : "labelText"
               }|Min price}\n{${isMobile ? "priceValueMobile" : "priceValue"}|${
@@ -266,19 +326,19 @@ export function useReclAmmChart() {
               }}`;
             }
 
-            if (index === 18) {
+            if (showTargetValues && index === baseGreyBarCount + baseOrangeBarCount) {
               return `{triangle|▲}\n{labelText|Low target}\n{priceValue|${
                 upperMarginValue !== undefined ? fNum("clpPrice", upperMarginValue) : "N/A"
               }}`;
             }
 
-            if (index === 60) {
+            if (showTargetValues && index === totalBars - baseGreyBarCount - baseOrangeBarCount) {
               return `{triangle|▲}\n{labelText|High target}\n{priceValue|${
                 lowerMarginValue !== undefined ? fNum("clpPrice", lowerMarginValue) : "N/A"
               }}`;
             }
 
-            if (index === 68) {
+            if (showMinMaxValues && index === totalBars - baseGreyBarCount) {
               return `{${isMobile ? "triangleMobile" : "triangle"}|▲}\n{${
                 isMobile ? "labelTextMobile" : "labelText"
               }|Max price}\n{${isMobile ? "priceValueMobile" : "priceValue"}|${
@@ -311,7 +371,7 @@ export function useReclAmmChart() {
             },
             priceValueMobile: {
               ...richStyles.base,
-              padding: [110, 10, 0, 0],
+              padding: [showMinMaxValues && !showTargetValues ? 0 : 110, 10, 0, 0],
             },
           },
         },
@@ -321,8 +381,8 @@ export function useReclAmmChart() {
         nameTextStyle: {
           align: "right",
           verticalAlign: "bottom",
-          padding: dynamicXAxisNamePadding,
-          color: baseRichProps.color,
+          padding: showMinMaxValues && !showTargetValues ? [0, 50, -85, 0] : [0, 50, -80, 0],
+          color: "#A0AEC0",
         },
       },
       yAxis: {
@@ -366,7 +426,7 @@ export function useReclAmmChart() {
         },
       ],
     };
-  }, [currentChartData, tokens, isMobile]);
+  }, [currentChartData, tokens]);
 
   return { options };
 }

@@ -12,7 +12,7 @@ import { PoolType } from "@balancer/sdk";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 export const ChooseParameters = () => {
-  const { poolType, updatePool } = usePoolCreationStore();
+  const { poolType, updatePool, reClammParams } = usePoolCreationStore();
 
   const handleNumberInputChange: HandleNumberInputChange = (e, field, min, max) => {
     const value = e.target.value;
@@ -31,6 +31,10 @@ export const ChooseParameters = () => {
     } else {
       if (field === "amplificationParameter") {
         updatePool({ [field]: Math.round(numberValue).toString() });
+      } else if (field === "dailyPriceShiftExponent" || field === "centerednessMargin") {
+        updatePool({
+          reClammParams: { ...reClammParams, [field]: Math.round(numberValue).toString() },
+        });
       } else {
         updatePool({ [field]: value.toString() });
       }
@@ -42,7 +46,7 @@ export const ChooseParameters = () => {
       <div className="text-xl">Choose pool parameters:</div>
 
       {poolType === PoolType.GyroE && <EclpParams />}
-      {poolType === PoolType.ReClamm && <ReClammParams />}
+      {poolType === PoolType.ReClamm && <ReClammParams handleNumberInputChange={handleNumberInputChange} />}
       {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
         <AmplificationParameter handleNumberInputChange={handleNumberInputChange} />
       )}

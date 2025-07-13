@@ -1,10 +1,11 @@
+import { type HandleNumberInputChange } from "./types";
 import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/20/solid";
 import { NumberInput, TextField } from "~~/components/common";
 import { useReclAmmChart } from "~~/hooks/reclamm/useReclammChart";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
-export const ReClammParams = () => {
+export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputChange: HandleNumberInputChange }) => {
   const { reClammParams, updateReClammParam, tokenConfigs } = usePoolCreationStore();
 
   const {
@@ -83,20 +84,20 @@ export const ReClammParams = () => {
           <NumberInput
             label="Centeredness Margin"
             min={0}
-            max={100}
+            max={90}
             isPercentage={true}
             value={centerednessMargin}
-            placeholder="0 - 100"
-            onChange={e => updateReClammParam({ centerednessMargin: sanitizeNumberInput(e.target.value) })}
+            placeholder="0 - 90"
+            onChange={e => handleNumberInputChange(e, "centerednessMargin", 0, 90)}
           />
           <NumberInput
             label="Daily Price Shift Exponent"
             min={0}
-            max={300}
+            max={100}
             isPercentage={true}
             value={dailyPriceShiftExponent}
-            placeholder="0 - 300"
-            onChange={e => updateReClammParam({ dailyPriceShiftExponent: sanitizeNumberInput(e.target.value) })}
+            placeholder="0 - 100"
+            onChange={e => handleNumberInputChange(e, "dailyPriceShiftExponent", 0, 100)}
           />
           {/* <TextField
             label={`Initial Balance of ${tokenConfigs[0].tokenInfo?.symbol}`}

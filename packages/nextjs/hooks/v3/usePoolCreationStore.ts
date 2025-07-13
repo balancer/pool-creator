@@ -112,8 +112,8 @@ export const initialReClammParams: ReClammParams = {
   initialMaxPrice: "",
   tokenAPriceIncludesRate: false,
   tokenBPriceIncludesRate: false,
-  dailyPriceShiftExponent: "150",
-  centerednessMargin: "25",
+  dailyPriceShiftExponent: "25",
+  centerednessMargin: "50",
   initialBalanceA: "100", // TODO: removed input. could this be hard coded?
   usdPerTokenInputA: "",
   usdPerTokenInputB: "",
