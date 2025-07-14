@@ -172,7 +172,6 @@ function usePoolTypeSpecificParams() {
     // if tokenConfigs "out of order", invert the min max and target price
     // TODO: account for if user is using boosted variant which means address will be underling so gotta look at other addy
     const isTokenConfigsInOrder = tokenConfigs[0].address.toLowerCase() < tokenConfigs[1].address.toLowerCase();
-    console.log({ isTokenConfigsInOrder });
 
     const { initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
 
@@ -185,8 +184,6 @@ function usePoolTypeSpecificParams() {
       maxPrice = 1 / Number(initialMinPrice);
       targetPrice = 1 / Number(initialTargetPrice);
     }
-
-    console.log({ minPrice, maxPrice, targetPrice });
 
     return {
       priceParams: {

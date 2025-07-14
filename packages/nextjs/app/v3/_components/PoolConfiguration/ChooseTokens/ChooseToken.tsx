@@ -163,10 +163,13 @@ export function ChooseToken({ index }: { index: number }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token.tokenInfo?.priceRateProviderData, token.useBoostedVariant, token.address, showBoostOpportunityModal]);
 
+  // Prevent user from boosting underlying for gyro and reclamm cus logic too prone to bugs
+  const shouldHideBoostUnderlying = poolType === PoolType.GyroE || poolType === PoolType.ReClamm;
+
   return (
     <>
       <div className="bg-base-100 p-5 rounded-xl flex flex-col gap-3 relative">
-        {boostedVariant && poolType !== PoolType.GyroE && (
+        {boostedVariant && !shouldHideBoostUnderlying && (
           <div
             className={`flex justify-end items-center gap-1 cursor-pointer absolute top-2 right-5 text-lg ${
               useBoostedVariant ? "text-success" : "text-info"
@@ -305,7 +308,7 @@ export function ChooseToken({ index }: { index: number }) {
       {showRateProviderModal && tokenInfo && (
         <RateProviderModal setShowRateProviderModal={setShowRateProviderModal} tokenIndex={index} />
       )}
-      {showBoostOpportunityModal && tokenInfo && boostedVariant && poolType !== PoolType.GyroE && (
+      {showBoostOpportunityModal && tokenInfo && boostedVariant && !shouldHideBoostUnderlying && (
         <BoostOpportunityModal
           tokenIndex={index}
           standardVariant={tokenInfo}

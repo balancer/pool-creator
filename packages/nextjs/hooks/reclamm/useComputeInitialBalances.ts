@@ -23,9 +23,6 @@ export const useComputeInitialBalances = (
 
       const rawAmount = parseUnits(humanAmount, tokenDecimals);
 
-      console.log("tokenAddress", tokenAddress);
-      console.log("rawAmount", rawAmount);
-
       return await client.readContract({
         address: poolAddress,
         abi: parseAbi(["function computeInitialBalancesRaw(address, uint256) view returns (uint256[])"]),

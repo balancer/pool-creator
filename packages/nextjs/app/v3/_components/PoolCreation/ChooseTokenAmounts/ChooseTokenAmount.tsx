@@ -44,18 +44,25 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   }, [userTokenBalance, address]);
 
   useEffect(() => {
-    // TODO: fix for if tokenConfigs are "out of order"
     if (poolType === PoolType.ReClamm && initAmountsRaw && !isLoadingReclammInitAmounts) {
-      console.log("initAmountsRaw", initAmountsRaw);
-      const otherIndex = index === 0 ? 1 : 0;
-      console.log("index", index);
+      const otherTokenIndex = index === 0 ? 1 : 0;
+
+      // create array of ordered token addresses
+      const tokenAddresses = tokenConfigs.map(tokenConfig => tokenConfig.address.toLowerCase());
+      const sortedTokenAddresses = tokenAddresses.sort((a, b) => a.localeCompare(b));
+
+      // find index of other token within sorted token configs
+      const addressOfOtherToken = tokenConfigs[otherTokenIndex].address.toLowerCase();
+      const indexOfOtherTokenAmount = sortedTokenAddresses.indexOf(addressOfOtherToken);
+
+      // use indexOfOtherTokenAmount to access the initAmounts array (which comes sorted from on chain call)
       const otherTokenAmount = formatUnits(
-        initAmountsRaw[otherIndex],
-        tokenConfigs[otherIndex]?.tokenInfo?.decimals || 0,
+        initAmountsRaw[indexOfOtherTokenAmount],
+        tokenConfigs[otherTokenIndex]?.tokenInfo?.decimals || 0,
       );
 
       if (lastUpdatedAmountByIndex.current === index) {
-        updateTokenConfig(otherIndex, { amount: otherTokenAmount });
+        updateTokenConfig(otherTokenIndex, { amount: otherTokenAmount });
         lastUpdatedAmountByIndex.current = null;
       }
     }
