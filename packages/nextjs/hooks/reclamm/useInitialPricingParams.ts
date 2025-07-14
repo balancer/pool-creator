@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
+import { fNumCustom } from "~~/utils/numbers";
 
 /**
  * 1. fetch usd per token A and B from API
@@ -31,9 +32,9 @@ export function useInitialPricingParams() {
       const newInitialTargetPrice = Number(usdPerTokenInputA) / Number(usdPerTokenInputB);
 
       updateReClammParam({
-        initialTargetPrice: newInitialTargetPrice.toString(),
-        initialMinPrice: (newInitialTargetPrice * 0.9).toString(),
-        initialMaxPrice: (newInitialTargetPrice * 1.1).toString(),
+        initialTargetPrice: fNumCustom(newInitialTargetPrice, "0.[00000]"),
+        initialMinPrice: fNumCustom(newInitialTargetPrice * 0.9, "0.[00000]"),
+        initialMaxPrice: fNumCustom(newInitialTargetPrice * 1.1, "0.[00000]"),
       });
     }
   }, [updateReClammParam, usdPerTokenInputA, usdPerTokenInputB, initialTargetPrice]);
