@@ -144,7 +144,7 @@ export const useCreatePool = () => {
 
 // Returns pool type specific parameters necesary for the create pool input
 function usePoolTypeSpecificParams() {
-  const { poolType, amplificationParameter, eclpParams, reClammParams } = usePoolCreationStore();
+  const { poolType, amplificationParameter, eclpParams, reClammParams, tokenConfigs } = usePoolCreationStore();
 
   const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
@@ -169,16 +169,35 @@ function usePoolTypeSpecificParams() {
   }
 
   if (isReClamm) {
+    // if tokenConfigs "out of order", invert the min max and target price
+    // TODO: account for if user is using boosted variant which means address will be underling so gotta look at other addy
+    const isTokenConfigsInOrder = tokenConfigs[0].address.toLowerCase() < tokenConfigs[1].address.toLowerCase();
+    console.log({ isTokenConfigsInOrder });
+
+    const { initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
+
+    let minPrice = Number(initialMinPrice);
+    let maxPrice = Number(initialMaxPrice);
+    let targetPrice = Number(initialTargetPrice);
+
+    if (!isTokenConfigsInOrder) {
+      minPrice = 1 / Number(initialMaxPrice);
+      maxPrice = 1 / Number(initialMinPrice);
+      targetPrice = 1 / Number(initialTargetPrice);
+    }
+
+    console.log({ minPrice, maxPrice, targetPrice });
+
     return {
       priceParams: {
-        initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
-        initialMaxPrice: parseUnits(reClammParams.initialMaxPrice, 18),
-        initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
+        initialMinPrice: parseUnits(minPrice.toString(), 18),
+        initialMaxPrice: parseUnits(maxPrice.toString(), 18),
+        initialTargetPrice: parseUnits(targetPrice.toString(), 18),
         tokenAPriceIncludesRate: reClammParams.tokenAPriceIncludesRate,
         tokenBPriceIncludesRate: reClammParams.tokenBPriceIncludesRate,
       },
       priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name but on chain is same as creation ui
-      centerednessMargin: parseUnits((Number(reClammParams.centerednessMargin) / 2).toString(), 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%
+      centerednessMargin: parseUnits(reClammParams.centerednessMargin, 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%
     };
   }
 

@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TokenAmountField } from "./TokenAmountField";
 import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
+import { useComputeInitialBalances } from "~~/hooks/reclamm";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
-  const { poolType, updateTokenConfig, eclpParams, tokenConfigs } = usePoolCreationStore();
+  const { poolType, updateTokenConfig, eclpParams, tokenConfigs, poolAddress } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
   const { usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
 
@@ -29,10 +30,37 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     args: connectedAddress ? [connectedAddress] : undefined,
   });
 
+  const { data: initAmountsRaw, isLoading: isLoadingReclammInitAmounts } = useComputeInitialBalances(
+    poolAddress,
+    address,
+    amount,
+    tokenInfo?.decimals,
+  );
+  const lastUpdatedAmountByIndex = useRef<number | null>(null);
+
   useEffect(() => {
     updateUserData({ userTokenBalances: { ...userTokenBalances, [address]: userTokenBalance?.toString() ?? "0" } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userTokenBalance, address]);
+
+  useEffect(() => {
+    // TODO: fix for if tokenConfigs are "out of order"
+    if (poolType === PoolType.ReClamm && initAmountsRaw && !isLoadingReclammInitAmounts) {
+      console.log("initAmountsRaw", initAmountsRaw);
+      const otherIndex = index === 0 ? 1 : 0;
+      console.log("index", index);
+      const otherTokenAmount = formatUnits(
+        initAmountsRaw[otherIndex],
+        tokenConfigs[otherIndex]?.tokenInfo?.decimals || 0,
+      );
+
+      if (lastUpdatedAmountByIndex.current === index) {
+        updateTokenConfig(otherIndex, { amount: otherTokenAmount });
+        lastUpdatedAmountByIndex.current = null;
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initAmountsRaw, isLoadingReclammInitAmounts, poolType, index, lastUpdatedAmountByIndex]);
 
   // Helper function to get rate-adjusted USD price for a token
   const getRateAdjustedUsdPrice = (tokenIndex: number) => {
@@ -49,17 +77,16 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     if (Number(inputValue) >= 0) {
       if (poolType === PoolType.GyroE) {
         const otherIndex = index === 0 ? 1 : 0;
-
         const referenceTokenPrice = getRateAdjustedUsdPrice(index);
         const otherTokenPrice = getRateAdjustedUsdPrice(otherIndex);
-
         const calculatedAmount = (Number(inputValue) * referenceTokenPrice) / otherTokenPrice;
 
-        updateTokenConfig(index, { amount: inputValue });
         updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() }); // update other token input to be proportional
-      } else {
-        updateTokenConfig(index, { amount: inputValue });
       }
+
+      if (poolType === PoolType.ReClamm) lastUpdatedAmountByIndex.current = index;
+
+      updateTokenConfig(index, { amount: inputValue });
     } else {
       updateTokenConfig(index, { amount: "" });
     }

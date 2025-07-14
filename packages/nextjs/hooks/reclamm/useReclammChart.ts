@@ -97,6 +97,7 @@ export function useReclAmmChart() {
     const lowerMarginValue = bn(invariant).div(bn(lowerMargin).pow(2)).toNumber();
     const upperMarginValue = bn(invariant).div(bn(upperMargin).pow(2)).toNumber();
 
+    // Using usd per token inputs populated by fetch (or user) to calc current price
     const currentPriceValue = Number(usdPerTokenInputA) / Number(usdPerTokenInputB);
 
     const isPoolWithinRange =
@@ -210,18 +211,21 @@ export function useReclAmmChart() {
 
     // Calculate which bar the current price corresponds to
     const getCurrentPriceBarIndex = () => {
-      const { poolCenteredness = 0, isPoolAboveCenter = false } = currentChartData || {};
+      const { minPriceValue, maxPriceValue, currentPriceValue } = currentChartData || {};
 
-      const totalGreenAndOrangeBars = 2 * baseOrangeBarCount + baseGreenBarCount;
-      let barIndex = 0;
-
-      if (isPoolAboveCenter) {
-        barIndex = Math.floor((poolCenteredness / 2) * totalGreenAndOrangeBars);
-      } else {
-        barIndex = Math.floor(((2 - poolCenteredness) / 2) * totalGreenAndOrangeBars);
+      if (!minPriceValue || !maxPriceValue || !currentPriceValue) {
+        return baseGreyBarCount; // Default to first green bar
       }
 
-      return barIndex + baseGreyBarCount;
+      // Calculate position based on current price relative to min/max
+      const priceRange = maxPriceValue - minPriceValue;
+      const currentPricePosition = (currentPriceValue - minPriceValue) / priceRange;
+
+      // Map to bar index
+      const totalGreenAndOrangeBars = 2 * baseOrangeBarCount + baseGreenBarCount;
+      const barIndex = Math.floor(currentPricePosition * totalGreenAndOrangeBars);
+
+      return Math.max(0, Math.min(barIndex + baseGreyBarCount, totalBars - 1));
     };
 
     const currentPriceBarIndex = getCurrentPriceBarIndex();
