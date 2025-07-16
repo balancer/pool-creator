@@ -15,7 +15,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useHyperLiquid } from "~~/hooks/hyperliquid";
+import { useBigBlockGasPrice, useIsHyperEvm } from "~~/hooks/hyperliquid";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
@@ -59,7 +59,8 @@ export const useCreatePool = () => {
     createPoolTx,
   } = usePoolCreationStore();
 
-  const { bigBlockGasPrice, isHyperEvm } = useHyperLiquid();
+  const isHyperEvm = useIsHyperEvm();
+  const { data: bigBlockGasPrice } = useBigBlockGasPrice();
 
   function createPoolInput() {
     if (poolType === undefined) throw new Error("No pool type provided!");

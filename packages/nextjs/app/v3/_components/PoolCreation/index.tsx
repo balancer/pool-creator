@@ -4,8 +4,7 @@ import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
 import { ChooseTokenAmounts } from "./ChooseTokenAmounts";
 import { PoolCreatedView } from "./PoolCreatedView";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
-import { ExternalLinkButton } from "~~/components/common";
-import { useHyperLiquid } from "~~/hooks/hyperliquid";
+import { useIsHyperEvm, useIsUsingBigBlocks, useToggleBlockSize } from "~~/hooks/hyperliquid";
 import {
   useBoostableWhitelist,
   useCreatePool,
@@ -126,19 +125,42 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     blockExplorerUrl: poolInitializationUrl,
   });
 
+  const {
+    mutate: toggleBlockSize,
+    isPending: isToggleBlockSizePending,
+    error: toggleBlockSizeError,
+  } = useToggleBlockSize();
+
+  const isHyperEvm = useIsHyperEvm();
+  const { data: isUsingBigBlocks, refetch: refetchIsUsingBigBlocks } = useIsUsingBigBlocks();
+
   const useBigBlocksStep = {
     component: (
       <div className="flex flex-col gap-3">
-        <Alert type="warning">
-          HyperEVM requires your HyperCore wallet configuration be set to use big blocks in order to deploy a contract
-        </Alert>
-        <ExternalLinkButton href="https://hyperevm-block-toggle.vercel.app/" text="Use Big Blocks" />
+        <TransactionButton
+          onClick={async () => {
+            toggleBlockSize();
+            await refetchIsUsingBigBlocks();
+          }}
+          title="Use big blocks"
+          isDisabled={isToggleBlockSizePending}
+          isPending={isToggleBlockSizePending}
+        />
+        {toggleBlockSizeError ? (
+          <Alert type="error">
+            <div className="flex items-center gap-2 break-words max-w-full">
+              Error: {(toggleBlockSizeError as { shortMessage?: string }).shortMessage || toggleBlockSizeError.message}
+            </div>
+          </Alert>
+        ) : (
+          <Alert type="warning">
+            HyperEVM requires your HyperCore wallet configuration be set to use big blocks in order to deploy a contract
+          </Alert>
+        )}
       </div>
     ),
     label: "Use Big Blocks",
   };
-
-  const { isUsingBigBlocks, isHyperEvm } = useHyperLiquid();
 
   const poolCreationSteps = [
     ...(isHyperEvm && !isUsingBigBlocks ? [useBigBlocksStep] : []),
