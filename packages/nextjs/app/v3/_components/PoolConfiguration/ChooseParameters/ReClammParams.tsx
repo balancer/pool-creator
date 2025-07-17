@@ -3,11 +3,12 @@ import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/20/solid";
 import { NumberInput, TextField } from "~~/components/common";
 import { useReclAmmChart } from "~~/hooks/reclamm/useReclammChart";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputChange: HandleNumberInputChange }) => {
   const { reClammParams, updateReClammParam, tokenConfigs } = usePoolCreationStore();
 
+  const { updateUserData } = useUserDataStore();
   const {
     initialTargetPrice,
     initialMinPrice,
@@ -51,6 +52,8 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
             isDollarValue={true}
             onChange={e => {
               updateReClammParam({ usdPerTokenInputA: sanitizeNumberInput(e.target.value) });
+              // if user changes usd price per token, this triggers useInitialPricingParams hook to move price params to surround new "current price" of pool
+              if (usdPerTokenInputA !== e.target.value) updateUserData({ hasEditedReclammParams: false });
             }}
           />
           <TextField
@@ -59,6 +62,8 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
             isDollarValue={true}
             onChange={e => {
               updateReClammParam({ usdPerTokenInputB: sanitizeNumberInput(e.target.value) });
+              // if user changes usd price per token, this triggers useInitialPricingParams hook to move price params to surround new "current price" of pool
+              if (usdPerTokenInputB !== e.target.value) updateUserData({ hasEditedReclammParams: false });
             }}
           />
         </div>
@@ -67,17 +72,26 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
           <TextField
             label="Initial Min Price"
             value={initialMinPrice}
-            onChange={e => updateReClammParam({ initialMinPrice: sanitizeNumberInput(e.target.value) })}
+            onChange={e => {
+              updateReClammParam({ initialMinPrice: sanitizeNumberInput(e.target.value) });
+              updateUserData({ hasEditedReclammParams: true });
+            }}
           />
           <TextField
             label="Initial Target Price"
             value={initialTargetPrice}
-            onChange={e => updateReClammParam({ initialTargetPrice: sanitizeNumberInput(e.target.value) })}
+            onChange={e => {
+              updateReClammParam({ initialTargetPrice: sanitizeNumberInput(e.target.value) });
+              updateUserData({ hasEditedReclammParams: true });
+            }}
           />
           <TextField
             label="Initial Max Price"
             value={initialMaxPrice}
-            onChange={e => updateReClammParam({ initialMaxPrice: sanitizeNumberInput(e.target.value) })}
+            onChange={e => {
+              updateReClammParam({ initialMaxPrice: sanitizeNumberInput(e.target.value) });
+              updateUserData({ hasEditedReclammParams: true });
+            }}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">

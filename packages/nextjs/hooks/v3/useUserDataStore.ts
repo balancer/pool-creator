@@ -8,6 +8,7 @@ export type UserDataStore = {
   hasEditedPoolSymbol: boolean;
   hasAgreedToWarning: boolean;
   hasEditedEclpParams: boolean;
+  hasEditedReclammParams: boolean;
   isOnlyInitializingPool: boolean;
   updateUserData: (updates: Partial<UserDataStore>) => void;
   clearUserData: () => void;
@@ -19,6 +20,7 @@ export const initialUserDataStore = {
   hasEditedPoolName: false,
   hasEditedPoolSymbol: false,
   hasEditedEclpParams: false,
+  hasEditedReclammParams: false,
   isOnlyInitializingPool: false,
 };
 

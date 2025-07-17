@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { usePoolCreationStore } from "~~/hooks/v3";
+import { useUserDataStore } from "~~/hooks/v3";
 import { fNumCustom } from "~~/utils/numbers";
 
 /**
@@ -10,7 +11,7 @@ import { fNumCustom } from "~~/utils/numbers";
  */
 export function useInitialPricingParams() {
   const { updateReClammParam, reClammParams, tokenConfigs } = usePoolCreationStore();
-
+  const { hasEditedReclammParams } = useUserDataStore();
   const { initialTargetPrice, usdPerTokenInputA, usdPerTokenInputB } = reClammParams;
 
   const { tokenUsdValue: usdPerTokenA } = useTokenUsdValue(tokenConfigs[0].address, "1");
@@ -28,7 +29,7 @@ export function useInitialPricingParams() {
 
   // update initial target price if user has not already set it
   useEffect(() => {
-    if (!initialTargetPrice && Number(usdPerTokenInputA) && Number(usdPerTokenInputB)) {
+    if (!hasEditedReclammParams && Number(usdPerTokenInputA) && Number(usdPerTokenInputB)) {
       const newInitialTargetPrice = Number(usdPerTokenInputA) / Number(usdPerTokenInputB);
 
       updateReClammParam({
@@ -37,5 +38,5 @@ export function useInitialPricingParams() {
         initialMaxPrice: fNumCustom(newInitialTargetPrice * 1.1, "0.[00000]"),
       });
     }
-  }, [updateReClammParam, usdPerTokenInputA, usdPerTokenInputB, initialTargetPrice]);
+  }, [updateReClammParam, usdPerTokenInputA, usdPerTokenInputB, initialTargetPrice, hasEditedReclammParams]);
 }
