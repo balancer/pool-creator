@@ -7,6 +7,7 @@ import {
   computeCenteredness,
 } from "./reClammMath";
 import { useInitialPricingParams } from "./useInitialPricingParams";
+import { useReadToken } from "~~/hooks/token";
 import { bn, fNum } from "~~/utils/numbers";
 
 function getGradientColor(colorStops: string[]) {
@@ -32,11 +33,22 @@ export function useReclAmmChart() {
 
   const { tokenConfigs } = usePoolCreationStore();
 
+  const { symbol: underlyingTokenASymbol } = useReadToken(tokenConfigs[0].tokenInfo?.underlyingTokenAddress);
+  const { symbol: underlyingTokenBSymbol } = useReadToken(tokenConfigs[1].tokenInfo?.underlyingTokenAddress);
+
   const tokens = useMemo(() => {
-    const tokenSymbols = tokenConfigs.map(token => token.tokenInfo?.symbol);
+    const tokenSymbols = tokenConfigs.map((token, idx) => {
+      if (idx === 0 && underlyingTokenASymbol) {
+        return underlyingTokenASymbol;
+      }
+      if (idx === 1 && underlyingTokenBSymbol) {
+        return underlyingTokenBSymbol;
+      }
+      return token.tokenInfo?.symbol;
+    });
 
     return tokenSymbols.join(" / ");
-  }, [tokenConfigs]);
+  }, [tokenConfigs, underlyingTokenASymbol, underlyingTokenBSymbol]);
 
   const { reClammParams } = usePoolCreationStore();
   const {

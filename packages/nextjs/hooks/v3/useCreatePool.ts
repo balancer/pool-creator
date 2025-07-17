@@ -175,19 +175,24 @@ function usePoolTypeSpecificParams() {
 
   if (isReClamm) {
     // if tokenConfigs "out of order", invert the min max and target price
-    // TODO: account for if user is using boosted variant which means address will be underling so gotta look at other addy
+    // TODO: account for if user is using boosted variant which means address will be underling so gotta look at other addy?
     const isTokenConfigsInOrder = tokenConfigs[0].address.toLowerCase() < tokenConfigs[1].address.toLowerCase();
 
     const { initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
 
+    // TODO: make re-usable invert function to share with handleInvertReClammParams
     let minPrice = Number(initialMinPrice);
     let maxPrice = Number(initialMaxPrice);
     let targetPrice = Number(initialTargetPrice);
+    let tokenAPriceIncludesRate = reClammParams.tokenAPriceIncludesRate;
+    let tokenBPriceIncludesRate = reClammParams.tokenBPriceIncludesRate;
 
     if (!isTokenConfigsInOrder) {
       minPrice = 1 / Number(initialMaxPrice);
       maxPrice = 1 / Number(initialMinPrice);
       targetPrice = 1 / Number(initialTargetPrice);
+      tokenAPriceIncludesRate = reClammParams.tokenBPriceIncludesRate;
+      tokenBPriceIncludesRate = reClammParams.tokenAPriceIncludesRate;
     }
 
     return {
@@ -195,8 +200,8 @@ function usePoolTypeSpecificParams() {
         initialMinPrice: parseUnits(minPrice.toString(), 18),
         initialMaxPrice: parseUnits(maxPrice.toString(), 18),
         initialTargetPrice: parseUnits(targetPrice.toString(), 18),
-        tokenAPriceIncludesRate: reClammParams.tokenAPriceIncludesRate,
-        tokenBPriceIncludesRate: reClammParams.tokenBPriceIncludesRate,
+        tokenAPriceIncludesRate,
+        tokenBPriceIncludesRate,
       },
       priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name but on chain is same as creation ui
       centerednessMargin: parseUnits(reClammParams.centerednessMargin, 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import { formatUnits } from "viem";
 import { useTokenUsdValue } from "~~/hooks/token";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { useFetchTokenRate, usePoolCreationStore } from "~~/hooks/v3";
 import { useUserDataStore } from "~~/hooks/v3";
 import { fNumCustom } from "~~/utils/numbers";
 
@@ -14,20 +15,42 @@ export function useInitialPricingParams() {
   const { hasEditedReclammParams } = useUserDataStore();
   const { initialTargetPrice, usdPerTokenInputA, usdPerTokenInputB } = reClammParams;
 
+  console.log("tokenConfigs", tokenConfigs);
+
   const { tokenUsdValue: usdPerTokenA } = useTokenUsdValue(tokenConfigs[0].address, "1");
   const { tokenUsdValue: usdPerTokenB } = useTokenUsdValue(tokenConfigs[1].address, "1");
 
+  const { data: currentRateTokenA } = useFetchTokenRate(tokenConfigs[0].rateProvider);
+  const { data: currentRateTokenB } = useFetchTokenRate(tokenConfigs[1].rateProvider);
+
+  useEffect(() => {
+    if (currentRateTokenA) {
+      updateReClammParam({ tokenAPriceIncludesRate: true });
+    }
+    if (currentRateTokenB) {
+      updateReClammParam({ tokenBPriceIncludesRate: true });
+    }
+  }, [currentRateTokenA, currentRateTokenB, updateReClammParam]);
+
+  const valueTokenA = usdPerTokenInputA ? Number(usdPerTokenInputA) : usdPerTokenA ? usdPerTokenA : null;
+  const valueTokenB = usdPerTokenInputB ? Number(usdPerTokenInputB) : usdPerTokenB ? usdPerTokenB : null;
+
+  const adjustedUsdPerTokenA =
+    currentRateTokenA && valueTokenA ? valueTokenA / Number(formatUnits(currentRateTokenA, 18)) : valueTokenA;
+  const adjustedUsdPerTokenB =
+    currentRateTokenB && valueTokenB ? valueTokenB / Number(formatUnits(currentRateTokenB, 18)) : valueTokenB;
+
   // update usd per token inputs if API data available and user has not already set them
   useEffect(() => {
-    if (usdPerTokenA && !usdPerTokenInputA) {
-      updateReClammParam({ usdPerTokenInputA: usdPerTokenA.toString() });
+    if (adjustedUsdPerTokenA && !usdPerTokenInputA) {
+      updateReClammParam({ usdPerTokenInputA: adjustedUsdPerTokenA.toString() });
     }
-    if (usdPerTokenB && !usdPerTokenInputB) {
-      updateReClammParam({ usdPerTokenInputB: usdPerTokenB.toString() });
+    if (adjustedUsdPerTokenB && !usdPerTokenInputB) {
+      updateReClammParam({ usdPerTokenInputB: adjustedUsdPerTokenB.toString() });
     }
-  }, [usdPerTokenA, usdPerTokenB, usdPerTokenInputA, usdPerTokenInputB, updateReClammParam]);
+  }, [adjustedUsdPerTokenA, adjustedUsdPerTokenB, usdPerTokenInputA, usdPerTokenInputB, updateReClammParam]);
 
-  // update initial target price if user has not already set it
+  // update initial price params if user has not dirtied them
   useEffect(() => {
     if (!hasEditedReclammParams && Number(usdPerTokenInputA) && Number(usdPerTokenInputB)) {
       const newInitialTargetPrice = Number(usdPerTokenInputA) / Number(usdPerTokenInputB);

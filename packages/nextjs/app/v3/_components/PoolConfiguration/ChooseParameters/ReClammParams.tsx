@@ -3,6 +3,7 @@ import ReactECharts from "echarts-for-react";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/20/solid";
 import { NumberInput, TextField } from "~~/components/common";
 import { useReclAmmChart } from "~~/hooks/reclamm/useReclammChart";
+import { useReadToken } from "~~/hooks/token";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputChange: HandleNumberInputChange }) => {
@@ -28,6 +29,19 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
 
+  let tokenASymbol = tokenConfigs[0].tokenInfo?.symbol;
+  let tokenBSymbol = tokenConfigs[1].tokenInfo?.symbol;
+
+  const { symbol: underlyingTokenASymbol } = useReadToken(tokenConfigs[0].tokenInfo?.underlyingTokenAddress);
+  const { symbol: underlyingTokenBSymbol } = useReadToken(tokenConfigs[1].tokenInfo?.underlyingTokenAddress);
+
+  if (underlyingTokenASymbol) {
+    tokenASymbol = underlyingTokenASymbol;
+  }
+  if (underlyingTokenBSymbol) {
+    tokenBSymbol = underlyingTokenBSymbol;
+  }
+
   return (
     <div className="bg-base-100 p-5 rounded-xl">
       <div className="text-lg font-bold mb-3 inline-flex">
@@ -47,7 +61,7 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
           <TextField
-            label={`${tokenConfigs[0].tokenInfo?.symbol} / USD`}
+            label={`${tokenASymbol} / USD`}
             value={usdPerTokenInputA}
             isDollarValue={true}
             onChange={e => {
@@ -57,7 +71,7 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
             }}
           />
           <TextField
-            label={`${tokenConfigs[1].tokenInfo?.symbol} / USD`}
+            label={`${tokenBSymbol} / USD`}
             value={usdPerTokenInputB}
             isDollarValue={true}
             onChange={e => {
@@ -129,9 +143,17 @@ function ReClammChart() {
 
   const { tokenConfigs, updatePool, updateReClammParam, reClammParams } = usePoolCreationStore();
 
+  // TODO: make re-usable invert function to share with usePoolTypeSpecificParams
   const handleInvertReClammParams = () => {
-    const { initialTargetPrice, initialMinPrice, initialMaxPrice, usdPerTokenInputA, usdPerTokenInputB } =
-      reClammParams;
+    const {
+      initialTargetPrice,
+      initialMinPrice,
+      initialMaxPrice,
+      usdPerTokenInputA,
+      usdPerTokenInputB,
+      tokenAPriceIncludesRate,
+      tokenBPriceIncludesRate,
+    } = reClammParams;
 
     updateReClammParam({
       initialTargetPrice: (1 / Number(initialTargetPrice)).toString(),
@@ -139,9 +161,13 @@ function ReClammChart() {
       initialMaxPrice: (1 / Number(initialMinPrice)).toString(),
       usdPerTokenInputA: usdPerTokenInputB,
       usdPerTokenInputB: usdPerTokenInputA,
+      tokenAPriceIncludesRate: tokenBPriceIncludesRate,
+      tokenBPriceIncludesRate: tokenAPriceIncludesRate,
     });
     updatePool({ tokenConfigs: [...tokenConfigs].reverse() });
   };
+
+  console.log("reClammParams", reClammParams);
 
   return (
     <div className="bg-base-300 rounded-lg relative">
