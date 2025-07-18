@@ -134,6 +134,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const isHyperEvm = useIsHyperEvm();
   const { data: isUsingBigBlocks, refetch: refetchIsUsingBigBlocks } = useIsUsingBigBlocks();
 
+  console.log("isUsingBigBlocks", isUsingBigBlocks);
   const useBigBlocksStep = {
     component: (
       <div className="flex flex-col gap-3">
