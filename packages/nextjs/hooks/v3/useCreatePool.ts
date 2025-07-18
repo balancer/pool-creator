@@ -110,14 +110,15 @@ export const useCreatePool = () => {
     const input = createPoolInput();
     const call = createPool.buildCall(input);
 
+    // why is esimateGas reverting only on hyperliquid?
     const estimatedGas = await publicClient.estimateGas({
       account: walletClient.account,
       to: call.to,
       data: call.callData,
     });
 
-    const gas = isHyperEvm ? estimatedGas * 2n : undefined;
-    const gasPrice = isHyperEvm && bigBlockGasPrice ? BigInt(bigBlockGasPrice) : undefined;
+    const gas = isHyperEvm ? BigInt(estimatedGas) * 2n : undefined; // required to double the gas?
+    const gasPrice = isHyperEvm && bigBlockGasPrice ? bigBlockGasPrice : undefined; // big block gas price higher than smol block gas price
 
     const hash = await writeTx(
       () =>
