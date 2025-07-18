@@ -16,7 +16,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { parseUnits, zeroAddress } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
-import { useHyperLiquid } from "~~/hooks/hyperliquid";
+import { useBigBlockGasPrice, useIsHyperEvm } from "~~/hooks/hyperliquid";
 import { useTransactor } from "~~/hooks/scaffold-eth";
 import { useBoostableWhitelist, usePoolCreationStore } from "~~/hooks/v3";
 
@@ -60,7 +60,8 @@ export const useCreatePool = () => {
     createPoolTx,
   } = usePoolCreationStore();
 
-  const { bigBlockGasPrice, isHyperEvm } = useHyperLiquid();
+  const isHyperEvm = useIsHyperEvm();
+  const { data: bigBlockGasPrice } = useBigBlockGasPrice();
 
   function createPoolInput() {
     if (poolType === undefined) throw new Error("No pool type provided!");
@@ -114,20 +115,24 @@ export const useCreatePool = () => {
     const isReClamm = input.poolType === PoolType.ReClamm;
     const to = isReClamm ? ReClammPoolFactory[input.chainId as keyof typeof ReClammPoolFactory] : call.to;
 
+    // why is esimateGas reverting only on hyperliquid?
     const estimatedGas = await publicClient.estimateGas({
       account: walletClient.account,
       to,
       data: call.callData,
     });
 
+    const gas = isHyperEvm ? BigInt(estimatedGas) * 2n : undefined; // required to double the gas?
+    const gasPrice = isHyperEvm && bigBlockGasPrice ? bigBlockGasPrice : undefined; // big block gas price higher than smol block gas price
+
     const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
           data: call.callData,
+          gas,
+          gasPrice,
           to,
-          gas: isHyperEvm ? estimatedGas * 2n : undefined,
-          gasPrice: isHyperEvm && bigBlockGasPrice ? BigInt(bigBlockGasPrice) : undefined,
         }),
       {
         // callbacks to save tx hash's to store
