@@ -1,15 +1,15 @@
+import { useIsHyperEvm } from "./useIsHyperEvm";
 import { ChainId } from "@balancer/sdk";
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { useAccount } from "wagmi";
 
-export const useHyperLiquid = () => {
+export const useIsUsingBigBlocks = () => {
+  const isHyperEvm = useIsHyperEvm();
   const publicClient = usePublicClient();
   const { address } = useAccount();
 
-  const isHyperEvm = publicClient?.chain.id === ChainId.HYPER_EVM;
-
-  const { data: isUsingBigBlocks } = useQuery({
+  return useQuery({
     queryKey: ["isUsingBigBlocks", publicClient?.chain.id, address],
     queryFn: async () => {
       if (!publicClient || !address) return false;
@@ -25,15 +25,4 @@ export const useHyperLiquid = () => {
     refetchInterval: 5000, // Refetch every 5 seconds
     refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
-
-  const { data: bigBlockGasPrice } = useQuery({
-    queryKey: ["bigBlockGasPrice", publicClient?.chain.id, address],
-    queryFn: async () => {
-      if (!publicClient || !address) return undefined;
-      if (publicClient.chain.id !== ChainId.HYPER_EVM) return false;
-    },
-    enabled: isHyperEvm,
-  });
-
-  return { isUsingBigBlocks, bigBlockGasPrice, isHyperEvm };
 };
