@@ -116,14 +116,17 @@ export const useCreatePool = () => {
       data: call.callData,
     });
 
+    const gas = isHyperEvm ? estimatedGas * 2n : undefined;
+    const gasPrice = isHyperEvm && bigBlockGasPrice ? BigInt(bigBlockGasPrice) : undefined;
+
     const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
           data: call.callData,
           to: call.to,
-          gas: isHyperEvm ? estimatedGas * 2n : undefined,
-          gasPrice: isHyperEvm && bigBlockGasPrice ? BigInt(bigBlockGasPrice) : undefined,
+          gas,
+          gasPrice,
         }),
       {
         // callbacks to save tx hash's to store

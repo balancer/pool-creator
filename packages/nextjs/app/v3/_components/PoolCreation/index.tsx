@@ -132,17 +132,14 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   } = useToggleBlockSize();
 
   const isHyperEvm = useIsHyperEvm();
-  const { data: isUsingBigBlocks, refetch: refetchIsUsingBigBlocks } = useIsUsingBigBlocks();
+  const { data: isUsingBigBlocks } = useIsUsingBigBlocks();
 
   console.log("isUsingBigBlocks", isUsingBigBlocks);
   const useBigBlocksStep = {
     component: (
       <div className="flex flex-col gap-3">
         <TransactionButton
-          onClick={async () => {
-            toggleBlockSize();
-            await refetchIsUsingBigBlocks();
-          }}
+          onClick={toggleBlockSize}
           title="Use big blocks"
           isDisabled={isToggleBlockSizePending}
           isPending={isToggleBlockSizePending}
