@@ -1,5 +1,4 @@
 import {
-  ChainId,
   CreatePool,
   CreatePoolGyroECLPInput,
   CreatePoolReClammInput,
@@ -111,19 +110,17 @@ export const useCreatePool = () => {
     const input = createPoolInput();
     const call = createPool.buildCall(input);
 
-    // TODO: remove this and use call.to again after SDK update is released
-    const isReClamm = input.poolType === PoolType.ReClamm;
-    const to = isReClamm ? ReClammPoolFactory[input.chainId as keyof typeof ReClammPoolFactory] : call.to;
-
-    // why is esimateGas reverting only on hyperliquid?
     const estimatedGas = await publicClient.estimateGas({
       account: walletClient.account,
-      to,
+      to: call.to,
       data: call.callData,
     });
 
-    const gas = isHyperEvm ? BigInt(estimatedGas) * 2n : undefined; // required to double the gas?
-    const gasPrice = isHyperEvm && bigBlockGasPrice ? bigBlockGasPrice : undefined; // big block gas price higher than smol block gas price
+    // hyperEVM big blocks require more gas?
+    // https://github.com/zekraken-bot/HyperEVM/blob/1a1a4468f0029ae9d80f846bf401ef1e219f1b63/stable_deploy_hyper.py#L132-L163
+    const gas = isHyperEvm ? BigInt(estimatedGas) * 2n : undefined;
+    // big block gas price higher than smol block gas price
+    const gasPrice = isHyperEvm && bigBlockGasPrice ? bigBlockGasPrice : undefined;
 
     const hash = await writeTx(
       () =>
@@ -132,7 +129,7 @@ export const useCreatePool = () => {
           data: call.callData,
           gas,
           gasPrice,
-          to,
+          to: call.to,
         }),
       {
         // callbacks to save tx hash's to store
@@ -215,15 +212,3 @@ function usePoolTypeSpecificParams() {
 
   return {};
 }
-
-const ReClammPoolFactory: Partial<Record<ChainId, `0x${string}`>> = {
-  [ChainId.ARBITRUM_ONE]: "0x355bD33F0033066BB3DE396a6d069be57353AD95",
-  [ChainId.AVALANCHE]: "0x309abcAeFa19CA6d34f0D8ff4a4103317c138657",
-  [ChainId.BASE]: "0x201efd508c8DfE9DE1a13c2452863A78CB2a86Cc",
-  [ChainId.GNOSIS_CHAIN]: "0xc86eF81E57492BE65BFCa9b0Ed53dCBAfDBe6100",
-  [ChainId.HYPER_EVM]: "0x4BB42f71CAB7Bd13e9f958dA4351B9fa2d3A42FF",
-  [ChainId.MAINNET]: "0xDaa273AeEc06e9CCb7428a77E2abb1E4659B16D2",
-  [ChainId.OPTIMISM]: "0x891EC9B34829276a9a8ef2F8A9cEAF2486017e0d",
-  [ChainId.SEPOLIA]: "0xf58A574530Ea5cEB727095e6039170c1e8068fcA",
-  [ChainId.SONIC]: "0x99c13B259138a8ad8badbBfB87A4074591310De0",
-};

@@ -56,10 +56,15 @@ export function useInitialPricingParams() {
       const newInitialTargetPrice = Number(usdPerTokenInputA) / Number(usdPerTokenInputB);
 
       updateReClammParam({
-        initialTargetPrice: fNumCustom(newInitialTargetPrice, "0.[00000]"),
-        initialMinPrice: fNumCustom(newInitialTargetPrice * 0.9, "0.[00000]"),
-        initialMaxPrice: fNumCustom(newInitialTargetPrice * 1.1, "0.[00000]"),
+        initialTargetPrice: formatPriceParam(newInitialTargetPrice),
+        initialMinPrice: formatPriceParam(newInitialTargetPrice * 0.9),
+        initialMaxPrice: formatPriceParam(newInitialTargetPrice * 1.1),
       });
     }
   }, [updateReClammParam, usdPerTokenInputA, usdPerTokenInputB, initialTargetPrice, hasEditedReclammParams]);
+}
+
+function formatPriceParam(price: number) {
+  const decimals = price > 1 ? "0.[00000]" : "0.[0000000000]";
+  return fNumCustom(price, decimals);
 }
