@@ -49,9 +49,12 @@ export const useFetchTokenList = () => {
 
       const blacklist: string[] = tokenBlacklist[chainName as keyof typeof tokenBlacklist] || [];
 
-      const tokenList = json.data.tokenGetTokens.filter(
-        (token: Token) => token.address !== NATIVE_ASSET_ADDRESS && !blacklist.includes(token.address.toLowerCase()),
-      );
+      const tokenList = json.data.tokenGetTokens.filter((token: Token) => {
+        const isNativeAsset = token.address === NATIVE_ASSET_ADDRESS;
+        const isHyperEvmNativeAsset = chainName === "HYPEREVM" && token.address === HYPE_NATIVE_ASSET_ADDRESS;
+
+        return !isNativeAsset && !isHyperEvmNativeAsset && !blacklist.includes(token.address.toLowerCase());
+      });
 
       return tokenList;
     },
@@ -59,3 +62,4 @@ export const useFetchTokenList = () => {
 };
 
 const NATIVE_ASSET_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+const HYPE_NATIVE_ASSET_ADDRESS = "0x2222222222222222222222222222222222222222";
