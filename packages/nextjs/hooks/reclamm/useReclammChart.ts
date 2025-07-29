@@ -7,7 +7,6 @@ import {
   computeCenteredness,
 } from "./reClammMath";
 import { useInitialPricingParams } from "./useInitialPricingParams";
-import { useReadToken } from "~~/hooks/token";
 import { bn, fNum } from "~~/utils/numbers";
 
 function getGradientColor(colorStops: string[]) {
@@ -31,26 +30,7 @@ const ORANGE = "rgb(253, 186, 116)";
 export function useReclAmmChart() {
   useInitialPricingParams();
 
-  const { tokenConfigs } = usePoolCreationStore();
-
-  const { symbol: underlyingTokenASymbol } = useReadToken(tokenConfigs[0].tokenInfo?.underlyingTokenAddress);
-  const { symbol: underlyingTokenBSymbol } = useReadToken(tokenConfigs[1].tokenInfo?.underlyingTokenAddress);
-
-  const tokens = useMemo(() => {
-    const tokenSymbols = tokenConfigs.map((token, idx) => {
-      if (idx === 0 && underlyingTokenASymbol) {
-        return underlyingTokenASymbol;
-      }
-      if (idx === 1 && underlyingTokenBSymbol) {
-        return underlyingTokenBSymbol;
-      }
-      return token.tokenInfo?.symbol;
-    });
-
-    return tokenSymbols.join(" / ");
-  }, [tokenConfigs, underlyingTokenASymbol, underlyingTokenBSymbol]);
-
-  const { reClammParams } = usePoolCreationStore();
+  const { tokenConfigs, reClammParams } = usePoolCreationStore();
   const {
     centerednessMargin,
     initialBalanceA,
@@ -60,6 +40,11 @@ export function useReclAmmChart() {
     usdPerTokenInputA,
     usdPerTokenInputB,
   } = reClammParams;
+
+  const tokens = useMemo(() => {
+    const tokenSymbols = tokenConfigs.map(token => token.tokenInfo?.symbol);
+    return tokenSymbols.join(" / ");
+  }, [tokenConfigs]);
 
   const currentChartData = useMemo(() => {
     // TODO: review validation logic for reclamm params
@@ -184,8 +169,8 @@ export function useReclAmmChart() {
     const totalBars = 2 * baseGreyBarCount + 2 * baseOrangeBarCount + baseGreenBarCount;
 
     // for some reason the number of orange (or green) bars matters to echarts in the grid
-    const gridBottomDesktop = baseOrangeBarCount % 2 === 0 ? "32%" : "15%";
-    const gridBottomMobile = baseOrangeBarCount % 2 === 0 && !(showMinMaxValues && !showTargetValues) ? "30%" : "22%";
+    const gridTopDesktop = baseOrangeBarCount % 2 === 0 ? "35%" : "35%";
+    const gridTopMobile = baseOrangeBarCount % 2 === 0 && !(showMinMaxValues && !showTargetValues) ? "30%" : "22%";
 
     const baseGreyBarConfig = {
       count: baseGreyBarCount,
@@ -316,11 +301,23 @@ export function useReclAmmChart() {
 
     return {
       tooltip: { show: false },
+      title: {
+        text: `${tokens}`,
+        textAlign: "left",
+        textVerticalAlign: "top",
+        textStyle: {
+          color: "#A0AEC0",
+          fontSize: 14,
+          fontWeight: "normal",
+        },
+        right: "9%",
+        top: "5%",
+      },
       grid: {
         left: isMobile ? "-7%" : "-3%",
         right: "1%",
-        top: isMobile ? "80px" : "25%",
-        bottom: isMobile ? gridBottomMobile : gridBottomDesktop,
+        top: isMobile ? gridTopMobile : gridTopDesktop,
+        bottom: "5%",
         containLabel: true,
       },
       xAxis: {
@@ -390,15 +387,6 @@ export function useReclAmmChart() {
               padding: [showMinMaxValues && !showTargetValues ? 0 : 110, 10, 0, 0],
             },
           },
-        },
-        name: `Price: ${tokens}`,
-        nameLocation: "end",
-        nameGap: 5,
-        nameTextStyle: {
-          align: "right",
-          verticalAlign: "bottom",
-          padding: showMinMaxValues && !showTargetValues ? [0, 50, -85, 0] : [0, 50, -80, 0],
-          color: "#A0AEC0",
         },
       },
       yAxis: {

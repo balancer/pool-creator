@@ -108,6 +108,7 @@ export const useCreatePool = () => {
 
     const createPool = new CreatePool();
     const input = createPoolInput();
+    console.log("create pool input:", input);
     const call = createPool.buildCall(input);
 
     const estimatedGas = await publicClient.estimateGas({

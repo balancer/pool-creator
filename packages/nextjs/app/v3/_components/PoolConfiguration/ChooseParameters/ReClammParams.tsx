@@ -1,10 +1,11 @@
 import { type HandleNumberInputChange } from "./types";
 import ReactECharts from "echarts-for-react";
+import { formatUnits } from "viem";
 import { ArrowTopRightOnSquareIcon, ArrowsRightLeftIcon } from "@heroicons/react/20/solid";
 import { NumberInput, TextField } from "~~/components/common";
 import { useReclAmmChart } from "~~/hooks/reclamm/useReclammChart";
-import { useReadToken } from "~~/hooks/token";
-import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { useTokenUsdValue } from "~~/hooks/token";
+import { useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputChange: HandleNumberInputChange }) => {
   const { reClammParams, updateReClammParam, tokenConfigs } = usePoolCreationStore();
@@ -19,7 +20,14 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
     // initialBalanceA,
     usdPerTokenInputA,
     usdPerTokenInputB,
+    tokenAPriceIncludesRate,
+    tokenBPriceIncludesRate,
   } = reClammParams;
+
+  const { data: currentRateTokenA } = useFetchTokenRate(tokenConfigs[0].rateProvider);
+  const { data: currentRateTokenB } = useFetchTokenRate(tokenConfigs[1].rateProvider);
+  const { tokenUsdValue: usdPerTokenA } = useTokenUsdValue(tokenConfigs[0].address, "1");
+  const { tokenUsdValue: usdPerTokenB } = useTokenUsdValue(tokenConfigs[1].address, "1");
 
   const sanitizeNumberInput = (input: string) => {
     // Remove non-numeric characters except decimal point
@@ -28,19 +36,6 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
     const parts = sanitized.split(".");
     return parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
   };
-
-  let tokenASymbol = tokenConfigs[0].tokenInfo?.symbol;
-  let tokenBSymbol = tokenConfigs[1].tokenInfo?.symbol;
-
-  const { symbol: underlyingTokenASymbol } = useReadToken(tokenConfigs[0].tokenInfo?.underlyingTokenAddress);
-  const { symbol: underlyingTokenBSymbol } = useReadToken(tokenConfigs[1].tokenInfo?.underlyingTokenAddress);
-
-  if (underlyingTokenASymbol) {
-    tokenASymbol = underlyingTokenASymbol;
-  }
-  if (underlyingTokenBSymbol) {
-    tokenBSymbol = underlyingTokenBSymbol;
-  }
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -60,26 +55,66 @@ export const ReClammParams = ({ handleNumberInputChange }: { handleNumberInputCh
 
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
-          <TextField
-            label={`${tokenASymbol} / USD`}
-            value={usdPerTokenInputA}
-            isDollarValue={true}
-            onChange={e => {
-              updateReClammParam({ usdPerTokenInputA: sanitizeNumberInput(e.target.value) });
-              // if user changes usd price per token, this triggers useInitialPricingParams hook to move price params to surround new "current price" of pool
-              if (usdPerTokenInputA !== e.target.value) updateUserData({ hasEditedReclammParams: false });
-            }}
-          />
-          <TextField
-            label={`${tokenBSymbol} / USD`}
-            value={usdPerTokenInputB}
-            isDollarValue={true}
-            onChange={e => {
-              updateReClammParam({ usdPerTokenInputB: sanitizeNumberInput(e.target.value) });
-              // if user changes usd price per token, this triggers useInitialPricingParams hook to move price params to surround new "current price" of pool
-              if (usdPerTokenInputB !== e.target.value) updateUserData({ hasEditedReclammParams: false });
-            }}
-          />
+          <div className="relative">
+            <TextField
+              label={`${tokenConfigs[0].tokenInfo?.symbol}`}
+              value={usdPerTokenInputA}
+              isDollarValue={true}
+              onChange={e => {
+                updateReClammParam({ usdPerTokenInputA: sanitizeNumberInput(e.target.value) });
+                // if user changes usd price per token, this triggers useInitialPricingParams hook to move price params to surround new "current price" of pool
+                if (usdPerTokenInputA !== e.target.value) updateUserData({ hasEditedReclammParams: false });
+              }}
+            />
+            {!!currentRateTokenA && (
+              <TogglePriceIncludesRate
+                tokenPriceIncludesRate={tokenAPriceIncludesRate}
+                onChange={() => {
+                  const updatedTokenAPriceIncludesRate = !tokenAPriceIncludesRate;
+                  const updatedUsdPerTokenA = usdPerTokenA
+                    ? updatedTokenAPriceIncludesRate
+                      ? (usdPerTokenA / Number(formatUnits(currentRateTokenA, 18))).toString()
+                      : usdPerTokenA.toString()
+                    : usdPerTokenInputA;
+
+                  updateReClammParam({
+                    tokenAPriceIncludesRate: updatedTokenAPriceIncludesRate,
+                    usdPerTokenInputA: updatedUsdPerTokenA,
+                  });
+                }}
+              />
+            )}
+          </div>
+          <div className="relative">
+            <TextField
+              label={`${tokenConfigs[1].tokenInfo?.symbol}`}
+              value={usdPerTokenInputB}
+              isDollarValue={true}
+              onChange={e => {
+                updateReClammParam({ usdPerTokenInputB: sanitizeNumberInput(e.target.value) });
+                // if user changes usd price per token, this triggers useInitialPricingParams hook to move price params to surround new "current price" of pool
+                if (usdPerTokenInputB !== e.target.value) updateUserData({ hasEditedReclammParams: false });
+              }}
+            />
+            {!!currentRateTokenB && (
+              <TogglePriceIncludesRate
+                tokenPriceIncludesRate={tokenBPriceIncludesRate}
+                onChange={() => {
+                  const updatedTokenBPriceIncludesRate = !tokenBPriceIncludesRate;
+                  const updatedUsdPerTokenB = usdPerTokenB
+                    ? updatedTokenBPriceIncludesRate
+                      ? (usdPerTokenB / Number(formatUnits(currentRateTokenB, 18))).toString()
+                      : usdPerTokenB.toString()
+                    : usdPerTokenInputB;
+
+                  updateReClammParam({
+                    tokenBPriceIncludesRate: updatedTokenBPriceIncludesRate,
+                    usdPerTokenInputB: updatedUsdPerTokenB,
+                  });
+                }}
+              />
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -167,19 +202,43 @@ function ReClammChart() {
     updatePool({ tokenConfigs: [...tokenConfigs].reverse() });
   };
 
-  console.log("reClammParams", reClammParams);
-
   return (
-    <div className="bg-base-300 rounded-lg relative">
+    <div className="bg-base-300 rounded-xl relative">
       <div className="bg-base-200 w-full h-72 rounded-xl mb-4">
         <ReactECharts option={options} style={{ height: "100%", width: "100%" }} />
         <div
-          className="btn btn-sm rounded-lg absolute bottom-3 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
+          className="btn btn-sm rounded-lg absolute top-2 right-3 btn-primary px-2 py-0.5 text-neutral-700 bg-gradient-to-r from-violet-300 via-violet-200 to-orange-300  [box-shadow:0_0_10px_5px_rgba(139,92,246,0.5)] border-none"
           onClick={handleInvertReClammParams}
         >
           <ArrowsRightLeftIcon className="w-[15px] h-[15px]" />
         </div>
       </div>
+    </div>
+  );
+}
+
+function TogglePriceIncludesRate({
+  tokenPriceIncludesRate,
+  onChange,
+}: {
+  tokenPriceIncludesRate: boolean;
+  onChange: () => void;
+}) {
+  return (
+    <div className="absolute -top-2 right-0">
+      <fieldset className="fieldset ">
+        <label className="label cursor-pointer gap-2">
+          <span className={`label-text ${tokenPriceIncludesRate ? "text-success" : "text-stone-400"}`}>
+            {tokenPriceIncludesRate ? "price includes rate" : "price without rate"}
+          </span>
+          <input
+            type="checkbox"
+            checked={tokenPriceIncludesRate}
+            onChange={onChange}
+            className={`toggle toggle-sm ${tokenPriceIncludesRate ? "toggle-success" : "toggle-error"}`}
+          />
+        </label>
+      </fieldset>
     </div>
   );
 }

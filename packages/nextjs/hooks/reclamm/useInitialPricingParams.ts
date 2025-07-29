@@ -13,9 +13,8 @@ import { fNumCustom } from "~~/utils/numbers";
 export function useInitialPricingParams() {
   const { updateReClammParam, reClammParams, tokenConfigs } = usePoolCreationStore();
   const { hasEditedReclammParams } = useUserDataStore();
-  const { initialTargetPrice, usdPerTokenInputA, usdPerTokenInputB } = reClammParams;
-
-  console.log("tokenConfigs", tokenConfigs);
+  const { initialTargetPrice, usdPerTokenInputA, usdPerTokenInputB, tokenAPriceIncludesRate, tokenBPriceIncludesRate } =
+    reClammParams;
 
   const { tokenUsdValue: usdPerTokenA } = useTokenUsdValue(tokenConfigs[0].address, "1");
   const { tokenUsdValue: usdPerTokenB } = useTokenUsdValue(tokenConfigs[1].address, "1");
@@ -35,20 +34,31 @@ export function useInitialPricingParams() {
   const valueTokenA = usdPerTokenInputA ? Number(usdPerTokenInputA) : usdPerTokenA ? usdPerTokenA : null;
   const valueTokenB = usdPerTokenInputB ? Number(usdPerTokenInputB) : usdPerTokenB ? usdPerTokenB : null;
 
-  const adjustedUsdPerTokenA =
+  const initialUsdPerTokenA =
     currentRateTokenA && valueTokenA ? valueTokenA / Number(formatUnits(currentRateTokenA, 18)) : valueTokenA;
-  const adjustedUsdPerTokenB =
+  const initialUsdPerTokenB =
     currentRateTokenB && valueTokenB ? valueTokenB / Number(formatUnits(currentRateTokenB, 18)) : valueTokenB;
 
   // update usd per token inputs if API data available and user has not already set them
   useEffect(() => {
-    if (adjustedUsdPerTokenA && !usdPerTokenInputA) {
-      updateReClammParam({ usdPerTokenInputA: adjustedUsdPerTokenA.toString() });
+    if (!usdPerTokenInputA && initialUsdPerTokenA) {
+      updateReClammParam({ usdPerTokenInputA: initialUsdPerTokenA.toString() });
     }
-    if (adjustedUsdPerTokenB && !usdPerTokenInputB) {
-      updateReClammParam({ usdPerTokenInputB: adjustedUsdPerTokenB.toString() });
+
+    if (!usdPerTokenInputB && initialUsdPerTokenB) {
+      updateReClammParam({ usdPerTokenInputB: initialUsdPerTokenB.toString() });
     }
-  }, [adjustedUsdPerTokenA, adjustedUsdPerTokenB, usdPerTokenInputA, usdPerTokenInputB, updateReClammParam]);
+  }, [
+    initialUsdPerTokenA,
+    initialUsdPerTokenB,
+    usdPerTokenInputA,
+    usdPerTokenInputB,
+    updateReClammParam,
+    valueTokenA,
+    valueTokenB,
+    tokenAPriceIncludesRate,
+    tokenBPriceIncludesRate,
+  ]);
 
   // update initial price params if user has not dirtied them
   useEffect(() => {
