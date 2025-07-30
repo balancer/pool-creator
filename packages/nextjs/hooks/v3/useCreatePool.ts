@@ -199,11 +199,12 @@ function usePoolTypeSpecificParams() {
         initialMinPrice: parseUnits(minPrice.toString(), 18),
         initialMaxPrice: parseUnits(maxPrice.toString(), 18),
         initialTargetPrice: parseUnits(targetPrice.toString(), 18),
-        tokenAPriceIncludesRate: false, // hardcoded until reclam v3 deployments. false means price is in terms of underlying
-        tokenBPriceIncludesRate: false, // hardcoded until reclam v3 deployments. false means price is in terms of underlying
+        // hardcoded price to not include rate until new reclamm deployments. without rate means boosted must be priced in terms of underlying
+        tokenAPriceIncludesRate: false,
+        tokenBPriceIncludesRate: false,
       },
-      priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name but on chain is same as creation ui
-      centerednessMargin: parseUnits(reClammParams.centerednessMargin, 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%
+      priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name "priceShiftDailyRate" but on chain is same as creation ui
+      centerednessMargin: parseUnits(reClammParams.centerednessMargin, 16),
     };
   }
 
