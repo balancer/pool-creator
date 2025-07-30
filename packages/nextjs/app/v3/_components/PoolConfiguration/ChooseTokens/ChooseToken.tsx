@@ -152,13 +152,19 @@ export function ChooseToken({ index }: { index: number }) {
       rateProviderData = boostedVariant?.priceRateProviderData;
     }
 
-    // if rate provider data exists for the token and user is not currently seeing the boost opportunity modal, show rate provider modal
-    // UNLESS the pool type is gyro ECLP
-    if (rateProviderData && !showBoostOpportunityModal) {
-      // Constant rate providers are special case only used for gyro pools
-      if (rateProviderData.name !== "ConstantRateProvider") {
-        setShowRateProviderModal(true);
-      }
+    const rateProviderName = rateProviderData?.name.toLowerCase();
+    const alreadyHasRateProvider = token.rateProvider !== zeroAddress;
+
+    const shouldShowRateProviderModal =
+      rateProviderData &&
+      rateProviderName &&
+      !showBoostOpportunityModal &&
+      !alreadyHasRateProvider &&
+      !rateProviderName.includes("constant") &&
+      !rateProviderName.includes("dynamic");
+
+    if (shouldShowRateProviderModal) {
+      setShowRateProviderModal(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token.tokenInfo?.priceRateProviderData, token.useBoostedVariant, token.address, showBoostOpportunityModal]);
