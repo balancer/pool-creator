@@ -187,15 +187,11 @@ function usePoolTypeSpecificParams() {
     let minPrice = Number(initialMinPrice);
     let maxPrice = Number(initialMaxPrice);
     let targetPrice = Number(initialTargetPrice);
-    let tokenAPriceIncludesRate = reClammParams.tokenAPriceIncludesRate;
-    let tokenBPriceIncludesRate = reClammParams.tokenBPriceIncludesRate;
 
     if (!isTokenConfigsInOrder) {
       minPrice = 1 / Number(initialMaxPrice);
       maxPrice = 1 / Number(initialMinPrice);
       targetPrice = 1 / Number(initialTargetPrice);
-      tokenAPriceIncludesRate = reClammParams.tokenBPriceIncludesRate;
-      tokenBPriceIncludesRate = reClammParams.tokenAPriceIncludesRate;
     }
 
     return {
@@ -203,8 +199,8 @@ function usePoolTypeSpecificParams() {
         initialMinPrice: parseUnits(minPrice.toString(), 18),
         initialMaxPrice: parseUnits(maxPrice.toString(), 18),
         initialTargetPrice: parseUnits(targetPrice.toString(), 18),
-        tokenAPriceIncludesRate,
-        tokenBPriceIncludesRate,
+        tokenAPriceIncludesRate: false, // hardcoded until reclam v3 deployments. false means price is in terms of underlying
+        tokenBPriceIncludesRate: false, // hardcoded until reclam v3 deployments. false means price is in terms of underlying
       },
       priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name but on chain is same as creation ui
       centerednessMargin: parseUnits(reClammParams.centerednessMargin, 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%

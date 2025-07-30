@@ -5,6 +5,7 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useValidateHooksContract } from "~~/hooks/v3";
 
 interface TextFieldProps {
+  tooltip?: React.ReactNode;
   label?: string;
   placeholder?: string;
   value: string | undefined;
@@ -22,6 +23,7 @@ interface TextFieldProps {
 
 export const TextField: React.FC<TextFieldProps> = ({
   label,
+  tooltip,
   placeholder,
   value,
   onChange,
@@ -55,7 +57,10 @@ export const TextField: React.FC<TextFieldProps> = ({
 
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-center gap-1 px-2">{label && <label className="font-bold">{label}</label>}</div>
+      <div className="mb-1 flex items-center gap-1 px-2">
+        {label && <label className="font-bold">{label}</label>}
+        {tooltip}
+      </div>
       <div className="relative">
         {isDollarValue && <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400">$</div>}
         {isPercentage && <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400">%</div>}

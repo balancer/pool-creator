@@ -169,8 +169,10 @@ export function useReclAmmChart() {
     const totalBars = 2 * baseGreyBarCount + 2 * baseOrangeBarCount + baseGreenBarCount;
 
     // for some reason the number of orange (or green) bars matters to echarts in the grid
-    const gridTopDesktop = baseOrangeBarCount % 2 === 0 ? "35%" : "35%";
-    const gridTopMobile = baseOrangeBarCount % 2 === 0 && !(showMinMaxValues && !showTargetValues) ? "30%" : "22%";
+    const orangeBarCountEven = baseOrangeBarCount % 2 === 0;
+    const gridTopDesktop = orangeBarCountEven ? "40%" : "35%";
+
+    const gridTopMobile = orangeBarCountEven && !(showMinMaxValues && !showTargetValues) ? "30%" : "22%";
 
     const baseGreyBarConfig = {
       count: baseGreyBarCount,
@@ -317,7 +319,7 @@ export function useReclAmmChart() {
         left: isMobile ? "-7%" : "-3%",
         right: "1%",
         top: isMobile ? gridTopMobile : gridTopDesktop,
-        bottom: "5%",
+        bottom: orangeBarCountEven ? "20%" : "8%",
         containLabel: true,
       },
       xAxis: {

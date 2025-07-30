@@ -46,7 +46,7 @@ export const ChooseParameters = () => {
       <div className="text-xl">Choose pool parameters:</div>
 
       {poolType === PoolType.GyroE && <EclpParams />}
-      {poolType === PoolType.ReClamm && <ReClammParams handleNumberInputChange={handleNumberInputChange} />}
+      {poolType === PoolType.ReClamm && <ReClammParams />}
       {(poolType === PoolType.Stable || poolType === PoolType.StableSurge) && (
         <AmplificationParameter handleNumberInputChange={handleNumberInputChange} />
       )}
