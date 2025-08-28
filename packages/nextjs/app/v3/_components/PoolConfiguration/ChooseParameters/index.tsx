@@ -12,7 +12,7 @@ import { PoolType } from "@balancer/sdk";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 export const ChooseParameters = () => {
-  const { poolType, updatePool } = usePoolCreationStore();
+  const { poolType, updatePool, reClammParams } = usePoolCreationStore();
 
   const handleNumberInputChange: HandleNumberInputChange = (e, field, min, max) => {
     const value = e.target.value;
@@ -31,6 +31,10 @@ export const ChooseParameters = () => {
     } else {
       if (field === "amplificationParameter") {
         updatePool({ [field]: Math.round(numberValue).toString() });
+      } else if (field === "dailyPriceShiftExponent" || field === "centerednessMargin") {
+        updatePool({
+          reClammParams: { ...reClammParams, [field]: Math.round(numberValue).toString() },
+        });
       } else {
         updatePool({ [field]: value.toString() });
       }
