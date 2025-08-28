@@ -15,7 +15,6 @@ export function useValidateCreationInputs() {
     name,
     symbol,
     amplificationParameter,
-    isUsingHooks,
     isDelegatingSwapFeeManagement,
     isDelegatingPauseManagement,
     swapFeeManager,
@@ -50,7 +49,7 @@ export function useValidateCreationInputs() {
     }) && isValidTokenWeights;
 
   // Check tanstack query cache for pool hooks contract validity
-  const { data: isValidPoolHooksContract } = useValidateHooksContract(isUsingHooks, poolHooksContract);
+  const { isValidPoolHooksContract } = useValidateHooksContract(poolHooksContract);
 
   const isGyroEclpParamsValid = !baseParamsError && !derivedParamsError;
   const isReClammParamsValid = Object.values(reClammParams).every(value => value !== "");
@@ -60,7 +59,7 @@ export function useValidateCreationInputs() {
     !!swapFeePercentage && Number(swapFeePercentage) > 0 && Number(swapFeePercentage) <= 10,
     isDelegatingSwapFeeManagement || isAddress(swapFeeManager),
     isDelegatingPauseManagement || isAddress(pauseManager),
-    !isUsingHooks || isValidPoolHooksContract,
+    isValidPoolHooksContract,
     // Stable and StableSurge require valid amplification parameter
     (poolType !== PoolType.Stable && poolType !== PoolType.StableSurge) ||
       (!!amplificationParameter &&

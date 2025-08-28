@@ -12,3 +12,4 @@ export * from "./useMultiSwapTxHash";
 export * from "./useInitializePoolTxHash";
 export * from "./useValidateInitializationInputs";
 export * from "./useFetchTokenRate";
+export * from "./usePoolHooksWhitelist";

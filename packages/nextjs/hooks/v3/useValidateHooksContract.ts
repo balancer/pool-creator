@@ -1,21 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
-import { Address, isAddress } from "viem";
+import { Address, isAddress, zeroAddress } from "viem";
 import { usePublicClient } from "wagmi";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
-export const useValidateHooksContract = (isPoolHooksContract: boolean | undefined, value: string | undefined) => {
+export const useValidateHooksContract = (address: string | undefined): { isValidPoolHooksContract: boolean } => {
   const publicClient = usePublicClient();
   const { updatePool } = usePoolCreationStore();
 
-  const isValidAddress = value ? isAddress(value) : false;
+  const isValidAddress = address ? isAddress(address) : false;
+  const isZeroAddress = address === zeroAddress;
+  const enabled = !!address && isValidAddress && !isZeroAddress;
 
-  return useQuery({
-    queryKey: ["validatePoolHooks", value],
+  const { data } = useQuery({
+    queryKey: ["validatePoolHooks", address],
     queryFn: async (): Promise<HookFlags | false> => {
       try {
         if (!publicClient) throw new Error("No public client for validatePoolHooks");
         const hookFlags = (await publicClient.readContract({
-          address: value as Address,
+          address: address as Address,
           abi: HooksAbi,
           functionName: "getHookFlags",
           args: [],
@@ -30,8 +32,12 @@ export const useValidateHooksContract = (isPoolHooksContract: boolean | undefine
         return false;
       }
     },
-    enabled: isPoolHooksContract && !!value && isValidAddress,
+    enabled,
   });
+
+  const isValidPoolHooksContract = !!data || isZeroAddress;
+
+  return { isValidPoolHooksContract };
 };
 
 export interface HookFlags {

@@ -43,7 +43,7 @@ export function SwapFeeManger() {
       />
       <RadioInput
         name="swap-fee-manager"
-        label="Choose a different swap fee manager"
+        label="Choose a custom swap fee manager"
         checked={!isDelegatingSwapFeeManagement && swapFeeManager !== connectedWalletAddress}
         onChange={() => updatePool({ isDelegatingSwapFeeManagement: false, swapFeeManager: "" as Address })}
       />

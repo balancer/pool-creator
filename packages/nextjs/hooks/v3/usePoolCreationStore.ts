@@ -53,7 +53,6 @@ export interface PoolCreationStore {
   selectedTab: TabType;
   isDelegatingPauseManagement: boolean;
   isDelegatingSwapFeeManagement: boolean;
-  isUsingHooks: boolean;
   poolAddress: Address | undefined;
   poolType: SupportedPoolTypes | undefined;
   tokenConfigs: TokenConfig[];
@@ -120,7 +119,6 @@ export const initialPoolCreationState = {
   step: 1,
   isDelegatingPauseManagement: true,
   isDelegatingSwapFeeManagement: true,
-  isUsingHooks: false,
   poolAddress: undefined, // set after pool deployment by parsing the tx hash
   selectedTab: "Type" as const,
   name: "",
@@ -130,7 +128,7 @@ export const initialPoolCreationState = {
   swapFeePercentage: "", // store as human readable % to be converted later
   swapFeeManager: "" as Address,
   pauseManager: "" as Address,
-  poolHooksContract: "" as Address,
+  poolHooksContract: zeroAddress,
   disableUnbalancedLiquidity: false,
   enableDonation: false,
   // Pool type specific params

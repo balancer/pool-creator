@@ -35,7 +35,7 @@ export const TextField: React.FC<TextFieldProps> = ({
   isDollarValue = false,
   isPercentage = false,
 }) => {
-  const { data: isValidPoolHooksContract } = useValidateHooksContract(isPoolHooksContract, value);
+  const { isValidPoolHooksContract } = useValidateHooksContract(isPoolHooksContract ? value : undefined);
   const isValidAddress = !mustBeAddress || !value || isAddress(value);
   const isValidLength = maxLength ? value?.length && value.length <= maxLength : true;
 

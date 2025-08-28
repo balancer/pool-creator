@@ -18,6 +18,7 @@ import {
   useUserDataStore,
   useValidateCreationInputs,
 } from "~~/hooks/v3";
+import { usePoolHooksWhitelist } from "~~/hooks/v3";
 import { abbreviateAddress } from "~~/utils/helpers";
 import { getBlockExplorerAddressLink } from "~~/utils/scaffold-eth/";
 
@@ -37,14 +38,15 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     symbol,
     amplificationParameter,
     poolAddress,
-    isUsingHooks,
     reClammParams,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
     step,
     setIsChooseTokenAmountsModalOpen,
     selectedTab,
+    chain,
   } = usePoolCreationStore();
+  const { poolHooksWhitelist } = usePoolHooksWhitelist(chain?.id);
 
   const { isOnlyInitializingPool } = useUserDataStore();
 
@@ -59,6 +61,10 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const isReClamm = poolType === PoolType.ReClamm;
 
   const showMiniEclpChart = isGyroEclp && selectedTab === "Information";
+
+  const poolHooksName = poolHooksWhitelist.find(
+    hook => hook.value.toLowerCase() === poolHooksContract.toLowerCase(),
+  )?.label;
 
   return (
     <div className="flex flex-col gap-3">
@@ -154,8 +160,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 </>
               )}
               <div className="flex justify-between">
-                <div className="">Swap Fee %</div>
-                <div>{swapFeePercentage ? swapFeePercentage : "-"}</div>
+                <div className="">Swap Fee</div>
+                <div>{swapFeePercentage ? swapFeePercentage + "%" : "-"}</div>
               </div>
               <div className="flex justify-between">
                 <div className="">Swap Fee Manager</div>
@@ -199,33 +205,34 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
               </div>
 
               <div>
-                {isUsingHooks && (
-                  <div className="flex justify-between">
-                    <div className="">Pool Hooks Contract</div>
-                    <div>
-                      {poolHooksContract ? (
-                        <a
-                          className="link text-info no-underline flex gap-1 items-center"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          href={getBlockExplorerAddressLink(targetNetwork, poolHooksContract)}
-                        >
-                          {abbreviateAddress(poolHooksContract)}
-                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </div>
-                  </div>
-                )}
                 <div className="flex justify-between">
-                  <div className="">Disable Unbalanced Liquidity</div>
-                  <div>{disableUnbalancedLiquidity ? "true" : "false"}</div>
+                  <div className="">Pool Hooks Contract</div>
+                  <div>
+                    {poolHooksContract === zeroAddress ? (
+                      "None"
+                    ) : !poolHooksContract ? (
+                      "-"
+                    ) : (
+                      <a
+                        className="link text-info no-underline flex gap-1 items-center"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={getBlockExplorerAddressLink(targetNetwork, poolHooksContract)}
+                      >
+                        {poolHooksName ? poolHooksName : abbreviateAddress(poolHooksContract)}
+                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex justify-between">
+                  <div className="">Allow unbalanced</div>
+                  <div>{disableUnbalancedLiquidity ? "no" : "yes"}</div>
                 </div>
                 <div className="flex justify-between">
-                  <div className="">Donations Enabled</div>
-                  <div>{enableDonation ? "true" : "false"}</div>
+                  <div className="">Allow donations</div>
+                  <div>{enableDonation ? "yes" : "no"}</div>
                 </div>
               </div>
             </div>

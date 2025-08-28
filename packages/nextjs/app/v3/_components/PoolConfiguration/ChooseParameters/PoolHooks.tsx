@@ -1,11 +1,16 @@
 import { PoolType } from "@balancer/sdk";
-import { type Address } from "viem";
+import { type Address, zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { RadioInput, TextField } from "~~/components/common";
-import { usePoolCreationStore } from "~~/hooks/v3";
+import { usePoolCreationStore, usePoolHooksWhitelist } from "~~/hooks/v3";
 
 export function PoolHooks() {
-  const { isUsingHooks, poolHooksContract, updatePool, poolType } = usePoolCreationStore();
+  const { poolHooksContract, updatePool, poolType, chain } = usePoolCreationStore();
+  const { poolHooksWhitelist } = usePoolHooksWhitelist(chain?.id);
+
+  const isUsingCustomHook =
+    poolHooksContract !== zeroAddress &&
+    !poolHooksWhitelist.map(hook => hook.value.toLowerCase()).includes(poolHooksContract.toLowerCase());
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">
@@ -31,25 +36,33 @@ export function PoolHooks() {
       ) : (
         <>
           <RadioInput
-            name="pool-hooks"
+            name="no-hooks"
             label="I do not want this pool to use any hooks"
-            checked={!isUsingHooks}
+            checked={poolHooksContract === zeroAddress}
             onChange={() => {
               updatePool({
-                isUsingHooks: false,
-                poolHooksContract: "" as Address,
+                poolHooksContract: zeroAddress,
                 disableUnbalancedLiquidity: false,
                 enableDonation: false,
               });
             }}
           />
+          {poolHooksWhitelist.map(hook => (
+            <RadioInput
+              key={hook.value}
+              name={hook.label}
+              label={hook.label}
+              checked={poolHooksContract.toLowerCase() === hook.value.toLowerCase()}
+              onChange={() => updatePool({ poolHooksContract: hook.value })}
+            />
+          ))}
           <RadioInput
-            name="pool-hooks"
-            label="I want this pool to use a hooks contract"
-            checked={isUsingHooks}
-            onChange={() => updatePool({ isUsingHooks: true })}
+            name="custom-hooks"
+            label="Choose a custom hooks contract"
+            checked={isUsingCustomHook}
+            onChange={() => updatePool({ poolHooksContract: "" })}
           />
-          {isUsingHooks && (
+          {isUsingCustomHook && (
             <div>
               <div className="mb-4">
                 <TextField
