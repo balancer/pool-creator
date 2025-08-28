@@ -11,8 +11,7 @@ export const Checkbox = ({ label, checked, onChange, disabled = false }: Checkbo
   return (
     <div className="form-control">
       <div className="flex items-center">
-        <span className="label-text text-lg">{label}</span>
-        <label className="cursor-pointer flex items-center">
+        <label className="cursor-pointer flex items-center gap-3 ">
           <input
             type="checkbox"
             disabled={disabled}
@@ -20,6 +19,7 @@ export const Checkbox = ({ label, checked, onChange, disabled = false }: Checkbo
             onChange={onChange}
             className="checkbox ml-2 rounded-md"
           />
+          <span className="label-text text-lg">{label}</span>
         </label>
       </div>
     </div>

@@ -177,7 +177,7 @@ export function ChooseToken({ index }: { index: number }) {
       <div className="bg-base-100 p-5 rounded-xl flex flex-col gap-3 relative">
         {boostedVariant && !shouldHideBoostUnderlying && (
           <div
-            className={`flex justify-end items-center gap-1 cursor-pointer absolute top-2 right-5 text-lg ${
+            className={`flex justify-end items-center gap-1 cursor-pointer absolute top-4 right-5 text-lg ${
               useBoostedVariant ? "text-success" : "text-info"
             }`}
             onClick={() => setShowBoostOpportunityModal(true)}
@@ -243,26 +243,25 @@ export function ChooseToken({ index }: { index: number }) {
                 {<ChevronDownIcon className="w-4 h-4 mt-0.5" />}
               </button>
             </div>
-
-            <Checkbox
-              label={
-                <a
-                  href="https://docs-v3.balancer.fi/partner-onboarding/onboarding-overview/rate-providers.html"
-                  className="link no-underline flex items-center gap-1 text-lg"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Use a <span className="underline">rate provider</span>?
-                </a>
-              }
-              checked={tokenType === TokenType.TOKEN_WITH_RATE}
-              onChange={handleTokenTypeToggle}
-              disabled={useBoostedVariant}
-            />
           </div>
         </div>
+        <Checkbox
+          label={
+            <a
+              href="https://docs-v3.balancer.fi/partner-onboarding/onboarding-overview/rate-providers.html"
+              className="link no-underline flex items-center gap-1 text-lg"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Use a <span className="underline">rate provider</span>?
+            </a>
+          }
+          checked={tokenType === TokenType.TOKEN_WITH_RATE}
+          onChange={handleTokenTypeToggle}
+          disabled={useBoostedVariant}
+        />
         {tokenInfo && tokenType === TokenType.TOKEN_WITH_RATE && (
-          <div className="flex flex-col items-end gap-3">
+          <div className="flex flex-col items-start gap-3">
             <TextField
               isRateProvider={true}
               isValidRateProvider={isValidRateProvider}
@@ -296,7 +295,7 @@ export function ChooseToken({ index }: { index: number }) {
               )}
 
             <Checkbox
-              label={`Should yield fees be paid on this token?`}
+              label={`Share yield with balancer protocol`}
               checked={paysYieldFees}
               onChange={() => updateTokenConfig(index, { paysYieldFees: !paysYieldFees })}
             />

@@ -43,7 +43,7 @@ export function PauseManager() {
       />
       <RadioInput
         name="pause-manager"
-        label="Choose a different pause manager"
+        label="Choose a custom pause manager"
         checked={!isDelegatingPauseManagement && pauseManager !== connectedWalletAddress}
         onChange={() => updatePool({ isDelegatingPauseManagement: false, pauseManager: "" as Address })}
       />

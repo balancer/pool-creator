@@ -47,13 +47,13 @@ export function LiquidityManagement() {
             ) : (
               <Checkbox
                 disabled={hookFlags?.enableHookAdjustedAmounts}
-                label="Should this pool disable unbalanced liquidity operations?"
-                checked={disableUnbalancedLiquidity}
+                label="Allow unbalanced liquidity operations"
+                checked={!disableUnbalancedLiquidity}
                 onChange={() => updatePool({ disableUnbalancedLiquidity: !disableUnbalancedLiquidity })}
               />
             )}
             <Checkbox
-              label="Should this pool accept donations?"
+              label="Allow donations"
               checked={enableDonation}
               onChange={() => updatePool({ enableDonation: !enableDonation })}
             />
