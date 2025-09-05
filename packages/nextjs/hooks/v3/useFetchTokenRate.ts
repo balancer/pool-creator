@@ -24,5 +24,9 @@ export const useFetchTokenRate = (address: Address | undefined) => {
       }
     },
     enabled: !!address && isValidAddress,
+    // staleTime: 0, // Always consider data stale
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 };
