@@ -134,16 +134,10 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const isHyperEvm = useIsHyperEvm();
   const { data: isUsingBigBlocks } = useIsUsingBigBlocks();
 
-  console.log("isUsingBigBlocks", isUsingBigBlocks);
-  const useBigBlocksStep = {
+  const blockSizeLabel = isUsingBigBlocks ? "Small" : "Big";
+  const useToggleBlockSizeStep = {
     component: (
-      <div className="flex flex-col gap-3">
-        <TransactionButton
-          onClick={toggleBlockSize}
-          title="Use big blocks"
-          isDisabled={isToggleBlockSizePending}
-          isPending={isToggleBlockSizePending}
-        />
+      <div className="flex flex-col gap-4">
         {toggleBlockSizeError ? (
           <Alert type="error">
             <div className="flex items-center gap-2 break-words max-w-full">
@@ -151,18 +145,30 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
             </div>
           </Alert>
         ) : (
-          <Alert type="warning">
-            HyperEVM requires your HyperCore wallet configuration be set to use big blocks in order to deploy a contract
+          <Alert type="info">
+            {!isUsingBigBlocks
+              ? "HyperEVM requires your wallet configuration be set to use big blocks in order to deploy a pool contract"
+              : "Your HyperEVM wallet is currently using big blocks. Switch to small blocks for faster transaction speeds"}
           </Alert>
         )}
+        <TransactionButton
+          onClick={toggleBlockSize}
+          title={`Use ${blockSizeLabel} blocks`}
+          isDisabled={isToggleBlockSizePending}
+          isPending={isToggleBlockSizePending}
+        />
       </div>
     ),
-    label: "Use Big Blocks",
+    label: `Use ${blockSizeLabel} Blocks`,
   };
 
+  const showUseBigBlocksStep = isHyperEvm && !isUsingBigBlocks && step === 1;
+  const showUseSmallBlocksStep = isHyperEvm && isUsingBigBlocks && step > 1;
+
   const poolCreationSteps = [
-    ...(isHyperEvm && !isUsingBigBlocks ? [useBigBlocksStep] : []),
+    ...(showUseBigBlocksStep ? [useToggleBlockSizeStep] : []),
     deployStep,
+    ...(showUseSmallBlocksStep ? [useToggleBlockSizeStep] : []),
     chooseAmountsStep,
     ...approveOnTokenSteps,
     ...swapToBoostedStep,
