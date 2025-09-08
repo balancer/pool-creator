@@ -5,12 +5,12 @@ import { SupportAndResetModals } from "./SupportAndResetModals";
 import { ConnectWalletAlert, MobileNotSupportedAlert, StartedOnDifferentNetworkAlert } from "./UserExperienceAlerts";
 import { type Chain } from "viem/chains";
 import { useWalletClient } from "wagmi";
-import { useUninitializedPool } from "~~/hooks/balancer";
+// import { useUninitializedPool } from "~~/hooks/balancer";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { usePoolCreationStore } from "~~/hooks/v3";
 
 export function UserFlowManager({ supportedNetworks }: { supportedNetworks: Chain[] }) {
-  useUninitializedPool();
+  // useUninitializedPool();
 
   const { chain } = usePoolCreationStore();
   const { targetNetwork: selectedNetwork } = useTargetNetwork();
