@@ -1,5 +1,4 @@
 import { useState } from "react";
-import CopyToClipboard from "react-copy-to-clipboard";
 import { getAddress } from "viem";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { Alert, ExternalLinkButton, TransactionButton } from "~~/components/common/";
@@ -23,6 +22,18 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
   const domainName = extractDomain(etherscanURL || "");
   const blockExplorerName = domainName.split(".")[0];
 
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(checkSumAddress);
+      setAddressCopied(true);
+      setTimeout(() => {
+        setAddressCopied(false);
+      }, 800);
+    } catch (err) {
+      console.error("Failed to copy address:", err);
+    }
+  };
+
   return (
     <>
       <div className="bg-base-200 w-full p-6 rounded-xl flex flex-col gap-6 shadow-xl justify-center items-center">
@@ -38,22 +49,12 @@ export const PoolCreated = ({ etherscanURL, poolAddress, chainId, clearState }: 
                 />
               </div>
             ) : (
-              <CopyToClipboard
-                text={checkSumAddress}
-                onCopy={() => {
-                  setAddressCopied(true);
-                  setTimeout(() => {
-                    setAddressCopied(false);
-                  }, 800);
-                }}
-              >
-                <div className="!rounded-xl flex">
-                  <DocumentDuplicateIcon
-                    className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
-                    aria-hidden="true"
-                  />
-                </div>
-              </CopyToClipboard>
+              <div className="!rounded-xl flex cursor-pointer" onClick={handleCopyAddress}>
+                <DocumentDuplicateIcon
+                  className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
+                  aria-hidden="true"
+                />
+              </div>
             )}
           </div>
         </div>

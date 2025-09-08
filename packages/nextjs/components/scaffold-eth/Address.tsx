@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Address as AddressType, getAddress, isAddress } from "viem";
 import { hardhat } from "viem/chains";
 import { normalize } from "viem/ens";
@@ -90,6 +89,18 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
     displayAddress = checkSumAddress;
   }
 
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(checkSumAddress);
+      setAddressCopied(true);
+      setTimeout(() => {
+        setAddressCopied(false);
+      }, 800);
+    } catch (err) {
+      console.error("Failed to copy address:", err);
+    }
+  };
+
   return (
     <div className="flex items-center flex-shrink-0">
       <div className="flex-shrink-0">
@@ -121,20 +132,11 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
           aria-hidden="true"
         />
       ) : (
-        <CopyToClipboard
-          text={checkSumAddress}
-          onCopy={() => {
-            setAddressCopied(true);
-            setTimeout(() => {
-              setAddressCopied(false);
-            }, 800);
-          }}
-        >
-          <DocumentDuplicateIcon
-            className="ml-1.5 text-xl font-normal text-sky-600 h-5 w-5 cursor-pointer flex-shrink-0"
-            aria-hidden="true"
-          />
-        </CopyToClipboard>
+        <DocumentDuplicateIcon
+          className="ml-1.5 text-xl font-normal text-sky-600 h-5 w-5 cursor-pointer flex-shrink-0"
+          aria-hidden="true"
+          onClick={handleCopyAddress}
+        />
       )}
     </div>
   );

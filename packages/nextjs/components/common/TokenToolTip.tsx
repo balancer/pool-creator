@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import CopyToClipboard from "react-copy-to-clipboard";
 import { ArrowTopRightOnSquareIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -16,12 +15,23 @@ interface TokenToolTipProps {
 
 export function TokenToolTip({ token }: TokenToolTipProps) {
   const [addressCopied, setAddressCopied] = useState(false);
-
   const [isOpen, setIsOpen] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const { targetNetwork } = useTargetNetwork();
   const blockExplorerLink = getBlockExplorerAddressLink(targetNetwork, token.address);
+
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(token.address);
+      setAddressCopied(true);
+      setTimeout(() => {
+        setAddressCopied(false);
+      }, 800);
+    } catch (err) {
+      console.error("Failed to copy address:", err);
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -72,22 +82,18 @@ export function TokenToolTip({ token }: TokenToolTipProps) {
                     />
                   </div>
                 ) : (
-                  <CopyToClipboard
-                    text={token.address}
-                    onCopy={() => {
-                      setAddressCopied(true);
-                      setTimeout(() => {
-                        setAddressCopied(false);
-                      }, 800);
+                  <div
+                    className="!rounded-xl flex cursor-pointer"
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleCopyAddress();
                     }}
                   >
-                    <div className="!rounded-xl flex" onClick={e => e.stopPropagation()}>
-                      <DocumentDuplicateIcon
-                        className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
-                        aria-hidden="true"
-                      />
-                    </div>
-                  </CopyToClipboard>
+                    <DocumentDuplicateIcon
+                      className="text-xl font-normal h-6 w-4 cursor-pointer ml-2 sm:ml-0"
+                      aria-hidden="true"
+                    />
+                  </div>
                 )}
               </div>
               <Link
