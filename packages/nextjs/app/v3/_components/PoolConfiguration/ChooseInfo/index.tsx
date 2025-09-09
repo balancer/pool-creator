@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { ChooseTokenAmounts } from "../../PoolCreation/ChooseTokenAmounts";
 import { PoolType } from "@balancer/sdk";
 import { sonic } from "viem/chains";
 import { TextField } from "~~/components/common";
@@ -66,6 +67,7 @@ export const ChooseInfo = () => {
           </div>
         </div>
       </div>
+      <ChooseTokenAmounts />
     </div>
   );
 };

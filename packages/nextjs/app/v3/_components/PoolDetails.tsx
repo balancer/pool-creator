@@ -3,12 +3,7 @@
 import { EclpChartDisplay } from "./PoolConfiguration/ChooseParameters/EclpParams";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
-import {
-  ArrowTopRightOnSquareIcon,
-  CheckCircleIcon,
-  PencilSquareIcon,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { TokenImage, TokenToolTip } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
 import {
@@ -41,8 +36,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     reClammParams,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
-    step,
-    setIsChooseTokenAmountsModalOpen,
     selectedTab,
     chain,
   } = usePoolCreationStore();
@@ -81,17 +74,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
         isValid={isTokensValid}
         isEmpty={tokenConfigs.every(token => token.address === zeroAddress)}
         content={
-          <div className="flex flex-col gap-2 relative">
-            {(step === 2 || step === 3) && (
-              <div className="absolute -top-10 -right-1">
-                <div
-                  className="btn btn-sm btn-ghost text-info rounded-lg"
-                  onClick={() => setIsChooseTokenAmountsModalOpen(true)}
-                >
-                  <PencilSquareIcon className="w-5 h-5" />
-                </div>
-              </div>
-            )}
+          <div className="flex flex-col gap-2">
             {tokenConfigs.map((token, index) => (
               <TokenDetails key={index} token={token} />
             ))}
