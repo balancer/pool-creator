@@ -12,7 +12,6 @@ export function SwapFeePercentage({ handleNumberInputChange }: { handleNumberInp
 
   let minSwapFeePercentage = 0.001; // Weighted & GyroECLP
   if (poolType === PoolType.Stable || poolType === PoolType.StableSurge) minSwapFeePercentage = 0.0001;
-  if (poolType === PoolType.ReClamm) minSwapFeePercentage = 0.1;
 
   return (
     <div className="bg-base-100 p-5 rounded-xl">

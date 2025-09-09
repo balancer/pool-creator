@@ -1,6 +1,7 @@
 import { usePoolCreationStore } from "~~/hooks/v3";
 import { useBoostableWhitelist } from "~~/hooks/v3/";
 
+// TODO: figure out this logic for boosted variant for reclamm pool creation
 export function useSortedTokenConfigs() {
   const { data: boostableWhitelist } = useBoostableWhitelist();
 

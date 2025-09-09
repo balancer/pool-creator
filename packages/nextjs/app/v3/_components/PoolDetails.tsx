@@ -51,7 +51,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
   const { isOnlyInitializingPool } = useUserDataStore();
 
   const { isParametersValid, isTypeValid, isInfoValid, isTokensValid } = useValidateCreationInputs();
-  const { initialTargetPrice, initialMinPrice, initialMaxPrice, priceShiftDailyRate, centerednessMargin } =
+  const { initialTargetPrice, initialMinPrice, initialMaxPrice, dailyPriceShiftExponent, centerednessMargin } =
     reClammParams;
 
   const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(targetNetwork, poolAddress) : undefined;
@@ -151,7 +151,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                   </div>
                   <div className="flex justify-between">
                     <div className="">Price Shift Daily Rate</div>
-                    <div>{priceShiftDailyRate ? priceShiftDailyRate : "-"}</div>
+                    <div>{dailyPriceShiftExponent ? dailyPriceShiftExponent : "-"}</div>
                   </div>
                   <div className="flex justify-between">
                     <div className="">Centeredness Margin</div>

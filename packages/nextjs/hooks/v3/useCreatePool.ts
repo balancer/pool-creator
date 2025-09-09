@@ -108,26 +108,29 @@ export const useCreatePool = () => {
 
     const createPool = new CreatePool();
     const input = createPoolInput();
+    console.log("create pool input:", input);
     const call = createPool.buildCall(input);
 
-    // why is esimateGas reverting only on hyperliquid?
     const estimatedGas = await publicClient.estimateGas({
       account: walletClient.account,
       to: call.to,
       data: call.callData,
     });
 
-    const gas = isHyperEvm ? BigInt(estimatedGas) * 2n : undefined; // required to double the gas?
-    const gasPrice = isHyperEvm && bigBlockGasPrice ? bigBlockGasPrice : undefined; // big block gas price higher than smol block gas price
+    // hyperEVM big blocks require more gas?
+    // https://github.com/zekraken-bot/HyperEVM/blob/1a1a4468f0029ae9d80f846bf401ef1e219f1b63/stable_deploy_hyper.py#L132-L163
+    const gas = isHyperEvm ? BigInt(estimatedGas) * 2n : undefined;
+    // big block gas price higher than smol block gas price
+    const gasPrice = isHyperEvm && bigBlockGasPrice ? bigBlockGasPrice : undefined;
 
     const hash = await writeTx(
       () =>
         walletClient.sendTransaction({
           account: walletClient.account,
           data: call.callData,
-          to: call.to,
           gas,
           gasPrice,
+          to: call.to,
         }),
       {
         // callbacks to save tx hash's to store
@@ -149,7 +152,7 @@ export const useCreatePool = () => {
 
 // Returns pool type specific parameters necesary for the create pool input
 function usePoolTypeSpecificParams() {
-  const { poolType, amplificationParameter, eclpParams, reClammParams } = usePoolCreationStore();
+  const { poolType, amplificationParameter, eclpParams, reClammParams, tokenConfigs } = usePoolCreationStore();
 
   const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
@@ -173,14 +176,37 @@ function usePoolTypeSpecificParams() {
     };
   }
 
-  if (isReClamm)
+  if (isReClamm) {
+    // if tokenConfigs "out of order", invert the min max and target price
+    // TODO: account for if user is using boosted variant which means address will be underling so gotta look at other addy?
+    const isTokenConfigsInOrder = tokenConfigs[0].address.toLowerCase() < tokenConfigs[1].address.toLowerCase();
+
+    const { initialMinPrice, initialMaxPrice, initialTargetPrice } = reClammParams;
+
+    // TODO: make re-usable invert function to share with handleInvertReClammParams
+    let minPrice = Number(initialMinPrice);
+    let maxPrice = Number(initialMaxPrice);
+    let targetPrice = Number(initialTargetPrice);
+
+    if (!isTokenConfigsInOrder) {
+      minPrice = 1 / Number(initialMaxPrice);
+      maxPrice = 1 / Number(initialMinPrice);
+      targetPrice = 1 / Number(initialTargetPrice);
+    }
+
     return {
-      initialTargetPrice: parseUnits(reClammParams.initialTargetPrice, 18),
-      initialMinPrice: parseUnits(reClammParams.initialMinPrice, 18),
-      initialMaxPrice: parseUnits(reClammParams.initialMaxPrice, 18),
-      priceShiftDailyRate: parseUnits(reClammParams.priceShiftDailyRate, 16),
-      centerednessMargin: parseUnits((Number(reClammParams.centerednessMargin) / 2).toString(), 16), // Charting UX based on pool math simulator setup allows 0 - 100% but on chain is 0 - 50%
+      priceParams: {
+        initialMinPrice: parseUnits(minPrice.toString(), 18),
+        initialMaxPrice: parseUnits(maxPrice.toString(), 18),
+        initialTargetPrice: parseUnits(targetPrice.toString(), 18),
+        // hardcoded price to not include rate until new reclamm deployments. without rate means boosted must be priced in terms of underlying
+        tokenAPriceIncludesRate: false,
+        tokenBPriceIncludesRate: false,
+      },
+      priceShiftDailyRate: parseUnits(reClammParams.dailyPriceShiftExponent, 16), // SDK kept OG var name "priceShiftDailyRate" but on chain is same as creation ui
+      centerednessMargin: parseUnits(reClammParams.centerednessMargin, 16),
     };
+  }
 
   return {};
 }

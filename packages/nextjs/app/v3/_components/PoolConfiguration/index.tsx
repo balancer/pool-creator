@@ -7,6 +7,8 @@ import { ChooseParameters } from "./ChooseParameters";
 import { ChooseTokens } from "./ChooseTokens";
 import { ChooseType } from "./ChooseType";
 import { ExistingPoolsWarning } from "./ExistingPoolsWarning";
+import { TokenType } from "@balancer/sdk";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { TransactionButton } from "~~/components/common";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -24,6 +26,7 @@ export function PoolConfiguration() {
   const { prev, next } = getAdjacentTabs(selectedTab);
   const { isParametersValid, isTypeValid, isTokensValid, isPoolCreationInputValid } = useValidateCreationInputs();
 
+  const queryClient = useQueryClient();
   const { existingPools } = useCheckIfV3PoolExists(
     poolType,
     tokenConfigs.map(token => token.address),
@@ -36,9 +39,18 @@ export function PoolConfiguration() {
     Information: <ChooseInfo />,
   };
 
+  const isRateProvidersValid = tokenConfigs.every(token => {
+    // Check tanstack query cache for rate provider validity
+    if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
+      const cachedRate = queryClient.getQueryData(["fetchTokenRate", token.rateProvider]);
+      if (!cachedRate) return false;
+    }
+    return true;
+  });
+
   function isNextDisabled() {
     if (selectedTab === "Type") return !isTypeValid;
-    if (selectedTab === "Tokens") return !isTokensValid;
+    if (selectedTab === "Tokens") return !isTokensValid || !isRateProvidersValid;
     if (selectedTab === "Parameters") return !isParametersValid;
     return false;
   }

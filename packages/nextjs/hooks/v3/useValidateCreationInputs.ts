@@ -1,13 +1,10 @@
 import { PoolType, STABLE_POOL_CONSTRAINTS, TokenType } from "@balancer/sdk";
-import { useQueryClient } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import { useEclpParamValidations } from "~~/hooks/gyro";
 import { usePoolCreationStore, useValidateHooksContract } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 
 export function useValidateCreationInputs() {
-  const queryClient = useQueryClient();
-
   const {
     poolType,
     tokenConfigs,
@@ -40,11 +37,6 @@ export function useValidateCreationInputs() {
       // Must have rate provider if token type is TOKEN_WITH_RATE
       if (token.tokenType === TokenType.TOKEN_WITH_RATE && !isAddress(token.rateProvider)) return false;
 
-      // Check tanstack query cache for rate provider validity
-      if (token.tokenType === TokenType.TOKEN_WITH_RATE) {
-        const cachedRate = queryClient.getQueryData(["fetchTokenRate", token.rateProvider]);
-        if (!cachedRate) return false;
-      }
       return true;
     }) && isValidTokenWeights;
 
@@ -52,7 +44,15 @@ export function useValidateCreationInputs() {
   const { isValidPoolHooksContract } = useValidateHooksContract(poolHooksContract);
 
   const isGyroEclpParamsValid = !baseParamsError && !derivedParamsError;
-  const isReClammParamsValid = Object.values(reClammParams).every(value => value !== "");
+
+  const isDailyPriceShiftExponentValid =
+    Number(reClammParams.dailyPriceShiftExponent) >= 0 && Number(reClammParams.dailyPriceShiftExponent) <= 100;
+  const isCenterednessMarginValid =
+    Number(reClammParams.centerednessMargin) >= 0 && Number(reClammParams.centerednessMargin) <= 90;
+  const isReClammParamsValid =
+    Object.values(reClammParams).every(value => value !== "") &&
+    isDailyPriceShiftExponentValid &&
+    isCenterednessMarginValid;
 
   const isParametersValid = [
     // Common param checks for all pool types
