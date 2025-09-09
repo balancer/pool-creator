@@ -47,19 +47,7 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.trim();
     if (Number(inputValue) >= 0) {
-      if (poolType === PoolType.GyroE) {
-        const otherIndex = index === 0 ? 1 : 0;
-
-        const referenceTokenPrice = getRateAdjustedUsdPrice(index);
-        const otherTokenPrice = getRateAdjustedUsdPrice(otherIndex);
-
-        const calculatedAmount = (Number(inputValue) * referenceTokenPrice) / otherTokenPrice;
-
-        updateTokenConfig(index, { amount: inputValue });
-        updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() }); // update other token input to be proportional
-      } else {
-        updateTokenConfig(index, { amount: inputValue });
-      }
+      updateTokenConfig(index, { amount: inputValue });
     } else {
       updateTokenConfig(index, { amount: "" });
     }
