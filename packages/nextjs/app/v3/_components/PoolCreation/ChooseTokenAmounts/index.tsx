@@ -1,17 +1,36 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { Alert } from "~~/components/common";
+import { useInvertEclpParams } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmounts() {
   const { tokenConfigs, poolType } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
 
+  const isTokenConfigsSorted = tokenConfigs.every((token, index) => {
+    if (index === 0) return true;
+    return token.address.toLowerCase() >= tokenConfigs[index - 1].address.toLowerCase();
+  });
+
+  const shouldInvertEclpParams = !isTokenConfigsSorted && poolType === PoolType.GyroE;
+
+  const { invertEclpParams } = useInvertEclpParams();
+  const hasInvertedRef = useRef(false);
+
+  // force token configs to be sorted in order before user enters amounts
+  useEffect(() => {
+    if (shouldInvertEclpParams && !hasInvertedRef.current) {
+      invertEclpParams();
+      hasInvertedRef.current = true;
+    }
+  }, [shouldInvertEclpParams, invertEclpParams]);
+
   return (
-    <div className="rounded-xl flex flex-col bg-base-100 p-4">
-      <div className="text-xl mb-3">Choose Token Amounts:</div>
-      <div className="flex flex-col gap-5 rounded-xl">
+    <div className="rounded-xl flex flex-col">
+      <div className="text-xl mb-3">Choose initialization amounts:</div>
+      <div className="flex flex-col gap-5 rounded-xl l bg-base-100 p-4">
         {tokenConfigs.map((tokenConfig, index) => (
           <ChooseTokenAmount key={tokenConfig.address} index={index} tokenConfig={tokenConfig} />
         ))}

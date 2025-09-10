@@ -39,8 +39,8 @@ export const ChooseInfo = () => {
     <div className="flex flex-col gap-5">
       <div>
         <div className="text-xl mb-3">Choose pool information:</div>
-        <div className="flex flex-col gap-4">
-          <div className="bg-base-100 p-3 rounded-xl">
+        <div className="flex flex-col gap-4 bg-base-100 p-3 pb-5 rounded-xl">
+          <div>
             <TextField
               label="Pool name"
               placeholder="Enter pool name"
@@ -53,7 +53,7 @@ export const ChooseInfo = () => {
             />
           </div>
 
-          <div className="bg-base-100 p-3 rounded-xl">
+          <div>
             <TextField
               label="Pool symbol"
               placeholder="Enter pool symbol"

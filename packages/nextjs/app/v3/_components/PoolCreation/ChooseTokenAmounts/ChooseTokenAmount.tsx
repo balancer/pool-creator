@@ -4,8 +4,9 @@ import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
+import { useEclpInitAmountsRatio } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
-import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { type TokenConfig, useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
@@ -44,22 +45,36 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     return basePrice * Number(formatUnits(rate, 18));
   };
 
+  const { data: rateTokenA } = useFetchTokenRate(tokenConfigs[0].rateProvider);
+  const { data: rateTokenB } = useFetchTokenRate(tokenConfigs[1].rateProvider);
+
+  const { alpha, beta, c, s, lambda } = eclpParams;
+
+  const initAmountsRatio = useEclpInitAmountsRatio({
+    alpha: Number(alpha),
+    beta: Number(beta),
+    c: Number(c),
+    s: Number(s),
+    lambda: Number(lambda),
+    rateA: rateTokenA ? +formatUnits(rateTokenA, 18) : 1,
+    rateB: rateTokenB ? +formatUnits(rateTokenB, 18) : 1,
+  });
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.trim();
-    if (Number(inputValue) >= 0) {
-      if (poolType === PoolType.GyroE) {
-        const otherIndex = index === 0 ? 1 : 0;
+    const referenceAmount = Number(e.target.value.trim());
+    if (referenceAmount >= 0) {
+      if (poolType === PoolType.GyroE && initAmountsRatio) {
+        // app forces tokens to be sorted before offering init amounts inputs
+        const isReferenceAmountForTokenA = index === 0;
+        const otherIndex = isReferenceAmountForTokenA ? 1 : 0;
 
-        const referenceTokenPrice = getRateAdjustedUsdPrice(index);
-        const otherTokenPrice = getRateAdjustedUsdPrice(otherIndex);
+        const otherTokenAmount = isReferenceAmountForTokenA
+          ? referenceAmount / initAmountsRatio // If entering tokenA, divide to get tokenB amount
+          : referenceAmount * initAmountsRatio; // If entering tokenB, multiply to get tokenA amount
 
-        const calculatedAmount = (Number(inputValue) * referenceTokenPrice) / otherTokenPrice;
-
-        updateTokenConfig(index, { amount: inputValue });
-        updateTokenConfig(otherIndex, { amount: calculatedAmount.toString() }); // update other token input to be proportional
-      } else {
-        updateTokenConfig(index, { amount: inputValue });
+        updateTokenConfig(otherIndex, { amount: Math.abs(otherTokenAmount).toString() });
       }
+      updateTokenConfig(index, { amount: referenceAmount.toString() });
     } else {
       updateTokenConfig(index, { amount: "" });
     }
