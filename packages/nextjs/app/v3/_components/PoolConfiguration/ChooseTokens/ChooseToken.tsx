@@ -67,6 +67,7 @@ export function ChooseToken({ index }: { index: number }) {
       tokenInfo: { ...tokenInfo },
       useBoostedVariant: false,
       paysYieldFees: false,
+      amount: "",
     });
 
     // Gross pattern but works for triggering new autofill of pool type specific params?

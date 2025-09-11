@@ -1,7 +1,6 @@
 import { PoolDetails } from "../PoolDetails";
 import { SupportAndResetModals } from "../SupportAndResetModals";
 import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
-import { ChooseTokenAmounts } from "./ChooseTokenAmounts";
 import { PoolCreatedView } from "./PoolCreatedView";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import { useIsHyperEvm, useIsUsingBigBlocks, useToggleBlockSize } from "~~/hooks/hyperliquid";
@@ -21,17 +20,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const {
-    step,
-    tokenConfigs,
-    createPoolTx,
-    swapToBoostedTx,
-    initPoolTx,
-    chain,
-    poolAddress,
-    isChooseTokenAmountsModalOpen,
-    setIsChooseTokenAmountsModalOpen,
-  } = usePoolCreationStore();
+  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain, poolAddress } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -54,18 +43,6 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     isPending: isCreatePoolPending || isFetchPoolAddressPending,
     error: createPoolError || fetchPoolAddressError,
   });
-
-  const chooseAmountsStep = {
-    label: "Choose Amounts",
-    component: (
-      <TransactionButton
-        onClick={() => setIsChooseTokenAmountsModalOpen(true)}
-        title="Choose Token Amounts"
-        isDisabled={false}
-        isPending={false}
-      />
-    ),
-  };
 
   const approveOnTokenSteps = tokenConfigs.map((token, idx) => {
     const { address, amount, tokenInfo } = token;
@@ -169,7 +146,6 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     ...(showUseBigBlocksStep ? [useToggleBlockSizeStep] : []),
     deployStep,
     ...(showUseSmallBlocksStep ? [useToggleBlockSizeStep] : []),
-    chooseAmountsStep,
     ...approveOnTokenSteps,
     ...swapToBoostedStep,
     ...approveOnBoostedVariantSteps,
@@ -217,7 +193,6 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
           </div>
         </div>
       </div>
-      {isChooseTokenAmountsModalOpen && <ChooseTokenAmounts />}
     </>
   );
 }

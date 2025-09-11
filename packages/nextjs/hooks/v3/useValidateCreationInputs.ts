@@ -2,7 +2,7 @@ import { PoolType, STABLE_POOL_CONSTRAINTS, TokenType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAddress } from "viem";
 import { useEclpParamValidations } from "~~/hooks/gyro";
-import { usePoolCreationStore, useValidateHooksContract } from "~~/hooks/v3";
+import { usePoolCreationStore, useValidateHooksContract, useValidateInitializationInputs } from "~~/hooks/v3";
 import { MAX_POOL_NAME_LENGTH, MAX_POOL_SYMBOL_LENGTH } from "~~/utils/constants";
 
 export function useValidateCreationInputs() {
@@ -26,6 +26,8 @@ export function useValidateCreationInputs() {
 
   const { baseParamsError, derivedParamsError } = useEclpParamValidations(eclpParams);
 
+  const { isInitializePoolInputsValid } = useValidateInitializationInputs();
+
   const isTypeValid = poolType !== undefined;
 
   const isValidTokenWeights =
@@ -47,7 +49,6 @@ export function useValidateCreationInputs() {
       }
       return true;
     }) && isValidTokenWeights;
-
   // Check tanstack query cache for pool hooks contract validity
   const { isValidPoolHooksContract } = useValidateHooksContract(poolHooksContract);
 
@@ -79,7 +80,8 @@ export function useValidateCreationInputs() {
     symbol.length <= MAX_POOL_SYMBOL_LENGTH &&
     isValidTokenWeights;
 
-  const isPoolCreationInputValid = isTypeValid && isTokensValid && isParametersValid && isInfoValid;
+  const isPoolCreationInputValid =
+    isTypeValid && isTokensValid && isParametersValid && isInfoValid && isInitializePoolInputsValid;
 
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights };
 }

@@ -70,8 +70,6 @@ export interface PoolCreationStore {
   swapToBoostedTx: TransactionDetails;
   eclpParams: EclpParams;
   reClammParams: ReClammParams;
-  isChooseTokenAmountsModalOpen: boolean;
-  setIsChooseTokenAmountsModalOpen: (isOpen: boolean) => void;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
   updateTokenConfig: (index: number, updates: Partial<TokenConfig>) => void;
   updateEclpParam: (updates: Partial<EclpParams>) => void;
@@ -149,8 +147,6 @@ export const usePoolCreationStore = create(
     set => ({
       ...initialPoolCreationState,
       updatePool: (updates: Partial<PoolCreationStore>) => set(state => ({ ...state, ...updates })),
-      setIsChooseTokenAmountsModalOpen: (isOpen: boolean) =>
-        set(state => ({ ...state, isChooseTokenAmountsModalOpen: isOpen })),
       updateTokenConfig: (index: number, updates: Partial<TokenConfig>) =>
         set(state => {
           const newTokenConfigs = [...state.tokenConfigs];

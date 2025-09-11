@@ -4,10 +4,19 @@ import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
+import { useEclpInitAmountsRatio } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
-import { type TokenConfig, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { type TokenConfig, useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
-export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
+export function ChooseTokenAmount({
+  index,
+  tokenConfig,
+  useSuggestedAmounts,
+}: {
+  index: number;
+  tokenConfig: TokenConfig;
+  useSuggestedAmounts: boolean;
+}) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { poolType, updateTokenConfig, eclpParams, tokenConfigs } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
@@ -16,7 +25,6 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const [usdValue, setUsdValue] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
-
   const usdPerToken0 = Number(usdPerTokenInput0);
   const usdPerToken1 = Number(usdPerTokenInput1);
 
@@ -44,10 +52,36 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
     return basePrice * Number(formatUnits(rate, 18));
   };
 
+  const { data: rateTokenA } = useFetchTokenRate(tokenConfigs[0].rateProvider);
+  const { data: rateTokenB } = useFetchTokenRate(tokenConfigs[1].rateProvider);
+
+  const { alpha, beta, c, s, lambda } = eclpParams;
+
+  const initAmountsRatio = useEclpInitAmountsRatio({
+    alpha: Number(alpha),
+    beta: Number(beta),
+    c: Number(c),
+    s: Number(s),
+    lambda: Number(lambda),
+    rateA: rateTokenA ? +formatUnits(rateTokenA, 18) : 1,
+    rateB: rateTokenB ? +formatUnits(rateTokenB, 18) : 1,
+  });
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.trim();
-    if (Number(inputValue) >= 0) {
-      updateTokenConfig(index, { amount: inputValue });
+    const referenceAmount = Number(e.target.value.trim());
+    if (referenceAmount >= 0) {
+      if (poolType === PoolType.GyroE && initAmountsRatio && useSuggestedAmounts) {
+        // app forces tokens to be sorted before offering init amounts inputs
+        const isReferenceAmountForTokenA = index === 0;
+        const otherIndex = isReferenceAmountForTokenA ? 1 : 0;
+
+        const otherTokenAmount = isReferenceAmountForTokenA
+          ? referenceAmount / initAmountsRatio // If entering tokenA, divide to get tokenB amount
+          : referenceAmount * initAmountsRatio; // If entering tokenB, multiply to get tokenA amount
+
+        updateTokenConfig(otherIndex, { amount: Math.abs(otherTokenAmount).toString() });
+      }
+      updateTokenConfig(index, { amount: referenceAmount.toString() });
     } else {
       updateTokenConfig(index, { amount: "" });
     }
