@@ -28,9 +28,9 @@ export function PoolHooks() {
 
       {poolType === PoolType.StableSurge ? (
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1 text-lg">
-            Stable surge pools must use Balancer&apos;s stable surge hook
+          <div className="flex items-center gap-3 text-lg">
             <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
+            Stable surge pools must use Balancer&apos;s stable surge hook
           </div>
         </div>
       ) : (

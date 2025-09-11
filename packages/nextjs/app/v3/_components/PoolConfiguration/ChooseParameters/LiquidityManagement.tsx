@@ -26,9 +26,9 @@ export function LiquidityManagement() {
       </label>
       {poolType === PoolType.StableSurge ? (
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1 text-lg">
-            Stable Surge pools must set disable unbalanced liquidity to false
-            <input type="checkbox" disabled={true} checked={false} className="checkbox ml-2 rounded-md" />
+          <div className="flex items-center gap-3 text-lg">
+            <input type="checkbox" disabled={true} checked={true} className="checkbox ml-2 rounded-md" />
+            Stable Surge pools must allow unbalanced liquidity operations
           </div>
           <Checkbox
             label="Should this pool accept donations?"
