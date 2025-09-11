@@ -36,5 +36,5 @@ export function useEclpInitAmountsRatio({ alpha, beta, c, s, lambda, rateA, rate
 }
 
 function getTau(price: number, c: number, s: number, lambda: number) {
-  return [(price * c) / (1 - s), (c + s * price) / lambda];
+  return [price * c - s, (c + s * price) / lambda];
 }
