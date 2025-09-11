@@ -1,6 +1,5 @@
 "use client";
 
-import { EclpChartDisplay } from "./PoolConfiguration/ChooseParameters/EclpParams";
 import { PoolType } from "@balancer/sdk";
 import { zeroAddress } from "viem";
 import { ArrowTopRightOnSquareIcon, CheckCircleIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
@@ -36,7 +35,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     reClammParams,
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
-    selectedTab,
     chain,
   } = usePoolCreationStore();
   const { poolHooksWhitelist } = usePoolHooksWhitelist(chain?.id);
@@ -49,11 +47,8 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
 
   const poolDeploymentUrl = poolAddress ? getBlockExplorerAddressLink(targetNetwork, poolAddress) : undefined;
 
-  const isGyroEclp = poolType === PoolType.GyroE;
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
   const isReClamm = poolType === PoolType.ReClamm;
-
-  const showMiniEclpChart = isGyroEclp && selectedTab === "Information";
 
   const poolHooksName = poolHooksWhitelist.find(
     hook => hook.value.toLowerCase() === poolHooksContract.toLowerCase(),
@@ -89,11 +84,6 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
           isEmpty={false}
           content={
             <div>
-              {showMiniEclpChart && (
-                <div className="mb-3">
-                  <EclpChartDisplay size="mini" />
-                </div>
-              )}
               {isStablePool && (
                 <div className="flex justify-between">
                   <div className="">Amplification Parameter</div>

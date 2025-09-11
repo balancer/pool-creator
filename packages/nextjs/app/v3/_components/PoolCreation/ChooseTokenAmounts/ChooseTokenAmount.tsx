@@ -17,7 +17,6 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const [usdValue, setUsdValue] = useState<number | null>(null);
 
   const queryClient = useQueryClient();
-
   const usdPerToken0 = Number(usdPerTokenInput0);
   const usdPerToken1 = Number(usdPerTokenInput1);
 

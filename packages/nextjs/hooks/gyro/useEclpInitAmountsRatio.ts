@@ -16,7 +16,7 @@ type UseEclpInitAmountsRatio = {
  */
 export function useEclpInitAmountsRatio({ alpha, beta, c, s, lambda, rateA, rateB }: UseEclpInitAmountsRatio) {
   const { poolSpotPrice: spotPriceWithoutRate } = useEclpSpotPrice();
-  if (!spotPriceWithoutRate) return undefined;
+  if (!spotPriceWithoutRate || !alpha || !beta || !c || !s || !lambda || !rateA || !rateB) return undefined;
 
   const rHint = 1000;
   const tauAlpha = getTau(alpha, c, s, lambda);
@@ -29,8 +29,6 @@ export function useEclpInitAmountsRatio({ alpha, beta, c, s, lambda, rateA, rate
     rateB * rHint * (-s * lambda * tauAlpha[0] + c * tauAlpha[1]) -
     (-s * lambda * tauSpotPrice[0] + c * tauSpotPrice[1]);
   const ratio = amountTokenA / amountTokenB;
-
-  console.log({ alpha, beta, c, s, lambda, rateA, rateB, spotPriceWithoutRate, amountTokenA, amountTokenB, ratio });
 
   return ratio;
 }
