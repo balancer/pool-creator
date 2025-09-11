@@ -8,7 +8,15 @@ import { useEclpInitAmountsRatio } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
-export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
+export function ChooseTokenAmount({
+  index,
+  tokenConfig,
+  useSuggestedAmounts,
+}: {
+  index: number;
+  tokenConfig: TokenConfig;
+  useSuggestedAmounts: boolean;
+}) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { poolType, updateTokenConfig, eclpParams, tokenConfigs } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
@@ -62,7 +70,7 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const referenceAmount = Number(e.target.value.trim());
     if (referenceAmount >= 0) {
-      if (poolType === PoolType.GyroE && initAmountsRatio) {
+      if (poolType === PoolType.GyroE && initAmountsRatio && useSuggestedAmounts) {
         // app forces tokens to be sorted before offering init amounts inputs
         const isReferenceAmountForTokenA = index === 0;
         const otherIndex = isReferenceAmountForTokenA ? 1 : 0;

@@ -1,13 +1,18 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { Alert } from "~~/components/common";
+import { Checkbox } from "~~/components/common";
 import { useInvertEclpParams } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmounts() {
+  const [useSuggestedAmounts, setUseSuggestedAmounts] = useState(false);
   const { tokenConfigs, poolType } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
+
+  const isGyroEclp = poolType === PoolType.GyroE;
+  const isWeightedPool = poolType === PoolType.Weighted;
 
   const isTokenConfigsSorted = tokenConfigs.every((token, index) => {
     if (index === 0) return true;
@@ -28,15 +33,30 @@ export function ChooseTokenAmounts() {
   }, [shouldInvertEclpParams, invertEclpParams]);
 
   return (
-    <div className="rounded-xl flex flex-col">
-      <div className="text-xl mb-3">Choose initialization amounts:</div>
+    <div className="rounded-xl flex flex-col gap-4">
+      <div className="text-xl">Choose initialization amounts:</div>
+
       <div className="flex flex-col gap-5 rounded-xl l bg-base-100 p-4">
+        {isGyroEclp && (
+          <Checkbox
+            label="Autofill other token amount based on ECLP parameters"
+            checked={useSuggestedAmounts}
+            onChange={() => {
+              setUseSuggestedAmounts(!useSuggestedAmounts);
+            }}
+          />
+        )}
         {tokenConfigs.map((tokenConfig, index) => (
-          <ChooseTokenAmount key={tokenConfig.address} index={index} tokenConfig={tokenConfig} />
+          <ChooseTokenAmount
+            key={tokenConfig.address}
+            index={index}
+            tokenConfig={tokenConfig}
+            useSuggestedAmounts={useSuggestedAmounts}
+          />
         ))}
       </div>
 
-      {poolType === PoolType.Weighted && (
+      {isWeightedPool && (
         <Alert type="warning">
           <label className="label cursor-pointer py-0 gap-3">
             <span className="font-bold">Please Confirm:</span> USD values are proportional to token weights?
