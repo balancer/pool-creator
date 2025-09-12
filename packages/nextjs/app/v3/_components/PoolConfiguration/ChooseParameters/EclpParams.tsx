@@ -68,7 +68,7 @@ export function EclpChartDisplay({ size }: { size: "full" | "mini" }) {
 }
 
 function EclpParamInputs() {
-  const { eclpParams, updateEclpParam, tokenConfigs } = usePoolCreationStore();
+  const { eclpParams, updateEclpParam, tokenConfigs, updatePool } = usePoolCreationStore();
   const { alpha, beta, lambda, peakPrice, usdPerTokenInput0, usdPerTokenInput1 } = eclpParams;
   const { updateUserData } = useUserDataStore();
   const hasRateProvider = tokenConfigs.some(token => token.rateProvider);
@@ -95,6 +95,10 @@ function EclpParamInputs() {
     ? Number(usdPerTokenInput1) * Number(formatUnits(rateProviderToken1Rate, 18))
     : Number(usdPerTokenInput1);
 
+  const resetInitializationAmounts = () => {
+    updatePool({ tokenConfigs: tokenConfigs.map(token => ({ ...token, amount: "" })) });
+  };
+
   return (
     <>
       <div className="flex flex-col gap-4 mt-3">
@@ -118,6 +122,7 @@ function EclpParamInputs() {
             updateEclpParam({ usdPerTokenInput0: sanitizeNumberInput(e.target.value) });
             // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
             if (usdPerTokenInput0 !== e.target.value) updateUserData({ hasEditedEclpParams: false });
+            resetInitializationAmounts();
           }}
         />
         <TextField
@@ -129,6 +134,7 @@ function EclpParamInputs() {
             updateEclpParam({ usdPerTokenInput1: sanitizeNumberInput(e.target.value) });
             // if user changes usd price per token, this triggers useAutofillStarterParams hook to move params to surround new "current price" of pool
             if (usdPerTokenInput1 !== e.target.value) updateUserData({ hasEditedEclpParams: false });
+            resetInitializationAmounts();
           }}
         />
       </div>
@@ -140,6 +146,7 @@ function EclpParamInputs() {
           onChange={e => {
             updateEclpParam({ alpha: sanitizeNumberInput(e.target.value) });
             updateUserData({ hasEditedEclpParams: true });
+            resetInitializationAmounts();
           }}
         />
         <TextField
@@ -148,6 +155,7 @@ function EclpParamInputs() {
           onChange={e => {
             updateEclpParam({ beta: sanitizeNumberInput(e.target.value) });
             updateUserData({ hasEditedEclpParams: true });
+            resetInitializationAmounts();
           }}
         />
       </div>
@@ -161,6 +169,7 @@ function EclpParamInputs() {
             const { c, s } = calculateRotationComponents(sanitizeNumberInput(e.target.value));
             updateEclpParam({ c, s });
             updateUserData({ hasEditedEclpParams: true });
+            resetInitializationAmounts();
           }}
         />
         <TextField
@@ -169,6 +178,7 @@ function EclpParamInputs() {
           onChange={e => {
             updateEclpParam({ lambda: sanitizeNumberInput(e.target.value) });
             updateUserData({ hasEditedEclpParams: true });
+            resetInitializationAmounts();
           }}
         />
       </div>

@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { Alert } from "~~/components/common";
-import { Checkbox } from "~~/components/common";
 import { useInvertEclpParams } from "~~/hooks/gyro";
 import { usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
 
 export function ChooseTokenAmounts() {
-  const [useSuggestedAmounts, setUseSuggestedAmounts] = useState(false);
   const { tokenConfigs, poolType } = usePoolCreationStore();
   const { updateUserData, hasAgreedToWarning } = useUserDataStore();
 
@@ -35,24 +33,13 @@ export function ChooseTokenAmounts() {
   return (
     <div className="rounded-xl flex flex-col gap-4">
       <div className="text-xl">Choose initialization amounts:</div>
+      {isGyroEclp && (
+        <Alert type="info">ECLP params influence proper initialization amounts. See the calculations here</Alert>
+      )}
 
       <div className="flex flex-col gap-5 rounded-xl l bg-base-100 p-4">
-        {isGyroEclp && (
-          <Checkbox
-            label="Autofill other token amount based on ECLP parameters"
-            checked={useSuggestedAmounts}
-            onChange={() => {
-              setUseSuggestedAmounts(!useSuggestedAmounts);
-            }}
-          />
-        )}
         {tokenConfigs.map((tokenConfig, index) => (
-          <ChooseTokenAmount
-            key={tokenConfig.address}
-            index={index}
-            tokenConfig={tokenConfig}
-            useSuggestedAmounts={useSuggestedAmounts}
-          />
+          <ChooseTokenAmount key={tokenConfig.address} index={index} tokenConfig={tokenConfig} />
         ))}
       </div>
 

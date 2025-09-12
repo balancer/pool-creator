@@ -33,14 +33,47 @@ export function calculateRotationComponents(rotationAngleTangent: string): { c: 
   };
 }
 
-/**
- * Handles formattinc eclp params for storage as strings in zustand store
- * Removes trailing zeros after decimal point (but keeps the decimal if needed)
- * `.toFixed` ensures numbers are decimal strings instead of scientific notation which breaks viem parseUnits
- */
 export const formatEclpParamValues = (num: number): string => {
   // First convert to fixed decimal string
-  const fixed = num.toFixed(18);
+  const fixed = num.toFixed(18); // ensurues number are decimal strings instead of scientific notation which breaks viem parseUnits
   // Then remove trailing zeros after decimal point (but keep the decimal if needed)
   return fixed.replace(/(\.\d*[1-9])0+$|\.0+$/, "$1");
 };
+
+type Params = {
+  alpha: number;
+  beta: number;
+  c: number;
+  s: number;
+  lambda: number;
+  rateA: number;
+  rateB: number;
+  spotPriceWithoutRate: number | null;
+};
+
+export function getEclpInitAmountsRatio({ alpha, beta, c, s, lambda, rateA, rateB, spotPriceWithoutRate }: Params) {
+  if (!spotPriceWithoutRate) return undefined;
+
+  const rHint = 1000;
+  const tauAlpha = getTau(alpha, c, s, lambda);
+  const tauBeta = getTau(beta, c, s, lambda);
+  const tauSpotPrice = getTau(spotPriceWithoutRate, c, s, lambda);
+
+  const amountTokenA =
+    rateA * rHint * (c * lambda * tauBeta[0] + s * tauBeta[1] - (c * lambda * tauSpotPrice[0] + s * tauSpotPrice[1]));
+  const amountTokenB =
+    rateB *
+    rHint *
+    (-s * lambda * tauAlpha[0] + c * tauAlpha[1] - (-s * lambda * tauSpotPrice[0] + c * tauSpotPrice[1]));
+  const ratio = amountTokenA / amountTokenB;
+
+  return ratio;
+}
+
+function getTau(price: number, c: number, s: number, lambda: number) {
+  const dSq = c * c + s * s;
+  const d = Math.sqrt(dSq);
+  const dPrice =
+    1 / Math.sqrt(Math.pow(c / d + (price * s) / d, 2) / (lambda * lambda) + Math.pow((price * c) / d - s / d, 2));
+  return [(price * c - s) * dPrice, ((c + s * price) * dPrice) / lambda];
+}

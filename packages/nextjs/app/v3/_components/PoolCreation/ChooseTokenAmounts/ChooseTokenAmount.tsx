@@ -4,19 +4,12 @@ import { PoolType } from "@balancer/sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { erc20Abi, formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
-import { useEclpInitAmountsRatio } from "~~/hooks/gyro";
+import { useEclpSpotPrice } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { getEclpInitAmountsRatio } from "~~/utils/gryo";
 
-export function ChooseTokenAmount({
-  index,
-  tokenConfig,
-  useSuggestedAmounts,
-}: {
-  index: number;
-  tokenConfig: TokenConfig;
-  useSuggestedAmounts: boolean;
-}) {
+export function ChooseTokenAmount({ index, tokenConfig }: { index: number; tokenConfig: TokenConfig }) {
   const { updateUserData, userTokenBalances } = useUserDataStore();
   const { poolType, updateTokenConfig, eclpParams, tokenConfigs } = usePoolCreationStore();
   const { tokenInfo, amount, address, weight } = tokenConfig;
@@ -55,25 +48,27 @@ export function ChooseTokenAmount({
   const { data: rateTokenA } = useFetchTokenRate(tokenConfigs[0].rateProvider);
   const { data: rateTokenB } = useFetchTokenRate(tokenConfigs[1].rateProvider);
 
-  const { alpha, beta, c, s, lambda } = eclpParams;
-
-  const initAmountsRatio = useEclpInitAmountsRatio({
-    alpha: Number(alpha),
-    beta: Number(beta),
-    c: Number(c),
-    s: Number(s),
-    lambda: Number(lambda),
-    rateA: rateTokenA ? +formatUnits(rateTokenA, 18) : 1,
-    rateB: rateTokenB ? +formatUnits(rateTokenB, 18) : 1,
-  });
+  const { poolSpotPrice } = useEclpSpotPrice();
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const referenceAmount = Number(e.target.value.trim());
     if (referenceAmount >= 0) {
-      if (poolType === PoolType.GyroE && initAmountsRatio && useSuggestedAmounts) {
+      if (poolType === PoolType.GyroE) {
         // app forces tokens to be sorted before offering init amounts inputs
         const isReferenceAmountForTokenA = index === 0;
         const otherIndex = isReferenceAmountForTokenA ? 1 : 0;
+
+        const initAmountsRatio = getEclpInitAmountsRatio({
+          alpha: Number(eclpParams.alpha),
+          beta: Number(eclpParams.beta),
+          c: Number(eclpParams.c),
+          s: Number(eclpParams.s),
+          lambda: Number(eclpParams.lambda),
+          rateA: rateTokenA ? +formatUnits(rateTokenA, 18) : 1,
+          rateB: rateTokenB ? +formatUnits(rateTokenB, 18) : 1,
+          spotPriceWithoutRate: poolSpotPrice,
+        });
+        if (!initAmountsRatio) return;
 
         const otherTokenAmount = isReferenceAmountForTokenA
           ? referenceAmount / initAmountsRatio // If entering tokenA, divide to get tokenB amount
