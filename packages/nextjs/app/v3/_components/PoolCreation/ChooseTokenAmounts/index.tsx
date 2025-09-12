@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import Link from "next/link";
 import { ChooseTokenAmount } from "./ChooseTokenAmount";
 import { PoolType } from "@balancer/sdk";
 import { Alert } from "~~/components/common";
@@ -34,7 +35,17 @@ export function ChooseTokenAmounts() {
     <div className="rounded-xl flex flex-col gap-4">
       <div className="text-xl">Choose initialization amounts:</div>
       {isGyroEclp && (
-        <Alert type="info">ECLP params influence proper initialization amounts. See the calculations here</Alert>
+        <Alert type="info">
+          ECLP params influence proper initialization amounts. See the calculations{" "}
+          <Link
+            className="link "
+            href="https://github.com/balancer/pool-creator/blob/ba3208b3036e5ace7cced30f29fb800b07d8539f/packages/nextjs/utils/gryo/helpers.ts#L54-L79"
+            target="_blank"
+            rel="noreferrer"
+          >
+            here
+          </Link>
+        </Alert>
       )}
 
       <div className="flex flex-col gap-5 rounded-xl l bg-base-100 p-4">
