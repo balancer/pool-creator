@@ -36,6 +36,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     isDelegatingPauseManagement,
     isDelegatingSwapFeeManagement,
     chain,
+    eclpParams,
   } = usePoolCreationStore();
   const { poolHooksWhitelist } = usePoolHooksWhitelist(chain?.id);
 
@@ -49,6 +50,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
 
   const isStablePool = poolType === PoolType.Stable || poolType === PoolType.StableSurge;
   const isReClamm = poolType === PoolType.ReClamm;
+  const isGyroEclp = poolType === PoolType.GyroE;
 
   const poolHooksName = poolHooksWhitelist.find(
     hook => hook.value.toLowerCase() === poolHooksContract.toLowerCase(),
@@ -89,6 +91,26 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                   <div className="">Amplification Parameter</div>
                   <div>{amplificationParameter ? amplificationParameter : "-"}</div>
                 </div>
+              )}
+              {isGyroEclp && (
+                <>
+                  <div className="flex justify-between">
+                    <div className="">Lower bound</div>
+                    <div>{eclpParams.alpha ?? "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Peak price</div>
+                    <div>{eclpParams.peakPrice ?? "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Upper bound</div>
+                    <div>{eclpParams.beta ?? "-"}</div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="">Stretching factor</div>
+                    <div>{eclpParams.lambda ?? "-"}</div>
+                  </div>
+                </>
               )}
               {isReClamm && (
                 <>
@@ -133,11 +155,11 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 </>
               )}
               <div className="flex justify-between">
-                <div className="">Swap Fee</div>
+                <div className="">Swap fee</div>
                 <div>{swapFeePercentage ? swapFeePercentage + "%" : "-"}</div>
               </div>
               <div className="flex justify-between">
-                <div className="">Swap Fee Manager</div>
+                <div className="">Swap fee manager</div>
                 <div>
                   {isDelegatingSwapFeeManagement ? (
                     "Balancer"
@@ -157,7 +179,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 </div>
               </div>
               <div className="flex justify-between">
-                <div className="">Pause Manager</div>
+                <div className="">Pause manager</div>
                 <div>
                   {isDelegatingPauseManagement ? (
                     "Balancer"
@@ -179,7 +201,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
 
               <div>
                 <div className="flex justify-between">
-                  <div className="">Pool Hooks Contract</div>
+                  <div className="">Pool hooks contract</div>
                   <div>
                     {poolHooksContract === zeroAddress ? (
                       "None"
