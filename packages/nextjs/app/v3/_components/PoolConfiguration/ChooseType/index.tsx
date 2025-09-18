@@ -11,7 +11,7 @@ export function ChooseType() {
         <div className="flex flex-col gap-5">
           <div className="text-xl mt-10">Choose a pool type:</div>
           <div className="grid grid-cols-2 gap-4">
-            {poolTypes.slice(0, 4).map((type: SupportedPoolTypes) => (
+            {poolTypes.slice(3, 4).map((type: SupportedPoolTypes) => (
               <PoolTypeButton key={type} selectedPoolType={type} />
             ))}
           </div>
