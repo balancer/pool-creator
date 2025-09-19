@@ -1,5 +1,5 @@
 // import { hyperEVM } from "../constants";
-import { hyperEVM } from "../constants";
+import { hyperEVM, plasma } from "../constants";
 import * as chains from "viem/chains";
 import scaffoldConfig from "~~/scaffold.config";
 
@@ -144,6 +144,10 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
  */
 export function getBlockExplorerTxLink(chainId: number | undefined, txnHash: string | undefined) {
   if (!chainId || !txnHash) return undefined;
+
+  if (chainId === plasma.id) {
+    return `https://plasmascan.to/tx/${txnHash}`;
+  }
 
   const chainNames = Object.keys(chains);
 
