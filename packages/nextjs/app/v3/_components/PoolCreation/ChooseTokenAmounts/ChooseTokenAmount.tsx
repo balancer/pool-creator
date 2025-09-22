@@ -51,8 +51,7 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
   const { poolSpotPrice } = useEclpSpotPrice();
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const referenceAmount = Number(e.target.value.trim());
-    if (referenceAmount >= 0) {
+    if (Number(e.target.value) >= 0) {
       if (poolType === PoolType.GyroE) {
         // app forces tokens to be sorted before offering init amounts inputs
         const isReferenceAmountForTokenA = index === 0;
@@ -70,13 +69,14 @@ export function ChooseTokenAmount({ index, tokenConfig }: { index: number; token
         });
         if (!initAmountsRatio) return;
 
+        const referenceAmount = Number(e.target.value);
         const otherTokenAmount = isReferenceAmountForTokenA
           ? referenceAmount / initAmountsRatio // If entering tokenA, divide to get tokenB amount
           : referenceAmount * initAmountsRatio; // If entering tokenB, multiply to get tokenA amount
 
         updateTokenConfig(otherIndex, { amount: Math.abs(otherTokenAmount).toString() });
       }
-      updateTokenConfig(index, { amount: referenceAmount.toString() });
+      updateTokenConfig(index, { amount: e.target.value });
     } else {
       updateTokenConfig(index, { amount: "" });
     }
