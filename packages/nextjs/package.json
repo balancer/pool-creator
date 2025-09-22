@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@balancer-labs/balancer-maths": "^0.0.25",
-    "@balancer/sdk": "4.4.0",
+    "@balancer/sdk": "4.8.0",
     "@heroicons/react": "^2.0.11",
     "@nktkas/hyperliquid": "^0.23.1",
     "@rainbow-me/rainbowkit": "2.1.2",
