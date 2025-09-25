@@ -2,6 +2,7 @@ import { PoolDetails } from "../PoolDetails";
 import { SupportAndResetModals } from "../SupportAndResetModals";
 import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
 import { PoolCreatedView } from "./PoolCreatedView";
+import { PoolType } from "@balancer/sdk";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import { useIsHyperEvm, useIsUsingBigBlocks, useToggleBlockSize } from "~~/hooks/hyperliquid";
 import {
@@ -13,6 +14,8 @@ import {
   useMultiSwap,
   useMultiSwapTxHash,
   usePoolCreationStore,
+  useSetMaxSurgeFee,
+  useSetMaxSurgeFeeTxHash,
 } from "~~/hooks/v3/";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 
@@ -20,7 +23,17 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain, poolAddress } = usePoolCreationStore();
+  const {
+    step,
+    tokenConfigs,
+    createPoolTx,
+    swapToBoostedTx,
+    initPoolTx,
+    chain,
+    poolAddress,
+    poolType,
+    setMaxSurgeFeeTx,
+  } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -32,9 +45,17 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const { mutate: initPool, isPending: isInitPoolPending, error: initPoolError } = useInitializePool();
   const { isFetching: isInitPoolTxHashPending, error: initPoolTxHashError } = useInitializePoolTxHash();
 
+  const {
+    mutate: setMaxSurgeFee,
+    isPending: isSetMaxSurgeFeePending,
+    error: setMaxSurgeFeeError,
+  } = useSetMaxSurgeFee();
+  const { isFetching: isSetMaxSurgeFeeTxHashPending, error: setMaxSurgeFeeTxHashError } = useSetMaxSurgeFeeTxHash();
+
   const poolDeploymentUrl = createPoolTx.wagmiHash && getBlockExplorerTxLink(chain?.id, createPoolTx.wagmiHash);
   const multiSwapUrl = swapToBoostedTx.wagmiHash && getBlockExplorerTxLink(chain?.id, swapToBoostedTx.wagmiHash);
   const poolInitializationUrl = initPoolTx.wagmiHash && getBlockExplorerTxLink(chain?.id, initPoolTx.wagmiHash);
+  const setMaxSurgeFeeUrl = setMaxSurgeFeeTx.wagmiHash && getBlockExplorerTxLink(chain?.id, setMaxSurgeFeeTx.wagmiHash);
 
   const deployStep = transactionButtonManager({
     label: "Deploy Pool",
@@ -142,6 +163,15 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const showUseBigBlocksStep = isHyperEvm && !isUsingBigBlocks && step === 1;
   const showUseSmallBlocksStep = isHyperEvm && isUsingBigBlocks && step > 1;
 
+  const maxSurgeFeeStep = transactionButtonManager({
+    label: "Set Max Fee",
+    onSubmit: setMaxSurgeFee,
+    isPending: isSetMaxSurgeFeePending || isSetMaxSurgeFeeTxHashPending,
+    error: setMaxSurgeFeeError || setMaxSurgeFeeTxHashError,
+    blockExplorerUrl: setMaxSurgeFeeUrl,
+    infoMsg: "You must set the max stable surge fee to 10% for aggregators to route through this pool",
+  });
+
   const poolCreationSteps = [
     ...(showUseBigBlocksStep ? [useToggleBlockSizeStep] : []),
     deployStep,
@@ -150,6 +180,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     ...swapToBoostedStep,
     ...approveOnBoostedVariantSteps,
     initializeStep,
+    ...(poolType === PoolType.StableSurge ? [maxSurgeFeeStep] : []),
   ];
 
   return (
@@ -203,6 +234,7 @@ interface TransactionButtonManagerProps {
   onSubmit: () => void;
   isPending: boolean;
   error: Error | null;
+  infoMsg?: string;
 }
 
 function transactionButtonManager({
@@ -211,12 +243,14 @@ function transactionButtonManager({
   onSubmit,
   isPending,
   error,
+  infoMsg,
 }: TransactionButtonManagerProps) {
   return {
     label,
     blockExplorerUrl,
     component: (
       <div className="flex flex-col gap-3">
+        {infoMsg && <Alert type="info">{infoMsg}</Alert>}
         <TransactionButton onClick={onSubmit} title={label} isDisabled={isPending} isPending={isPending} />
         {error && (
           <Alert type="error">
