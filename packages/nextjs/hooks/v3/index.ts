@@ -13,3 +13,5 @@ export * from "./useInitializePoolTxHash";
 export * from "./useValidateInitializationInputs";
 export * from "./useFetchTokenRate";
 export * from "./usePoolHooksWhitelist";
+export * from "./useSetMaxSurgeFee";
+export * from "./useSetMaxSurgeFeeTxHash";

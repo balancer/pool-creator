@@ -68,6 +68,7 @@ export interface PoolCreationStore {
   createPoolTx: TransactionDetails;
   initPoolTx: TransactionDetails;
   swapToBoostedTx: TransactionDetails;
+  setMaxSurgeFeeTx: TransactionDetails;
   eclpParams: EclpParams;
   reClammParams: ReClammParams;
   updatePool: (updates: Partial<PoolCreationStore>) => void;
@@ -137,6 +138,7 @@ export const initialPoolCreationState = {
   createPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   initPoolTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   swapToBoostedTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
+  setMaxSurgeFeeTx: { safeHash: undefined, wagmiHash: undefined, isSuccess: false },
   // UX controls
   isChooseTokenAmountsModalOpen: false,
 };
