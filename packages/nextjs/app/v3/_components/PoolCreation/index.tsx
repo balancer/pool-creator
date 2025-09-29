@@ -2,7 +2,7 @@ import { PoolDetails } from "../PoolDetails";
 import { SupportAndResetModals } from "../SupportAndResetModals";
 import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
 import { PoolCreatedView } from "./PoolCreatedView";
-import { PoolType } from "@balancer/sdk";
+import { useStableSurgeStep } from "./useStableSurgeStep";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import { useIsHyperEvm, useIsUsingBigBlocks, useToggleBlockSize } from "~~/hooks/hyperliquid";
 import {
@@ -14,8 +14,6 @@ import {
   useMultiSwap,
   useMultiSwapTxHash,
   usePoolCreationStore,
-  useSetMaxSurgeFee,
-  useSetMaxSurgeFeeTxHash,
 } from "~~/hooks/v3/";
 import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
 
@@ -23,17 +21,7 @@ import { getBlockExplorerTxLink } from "~~/utils/scaffold-eth";
  * Manages the pool creation process using a modal that cannot be closed after execution of the first step
  */
 export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) {
-  const {
-    step,
-    tokenConfigs,
-    createPoolTx,
-    swapToBoostedTx,
-    initPoolTx,
-    chain,
-    poolAddress,
-    poolType,
-    setMaxSurgeFeeTx,
-  } = usePoolCreationStore();
+  const { step, tokenConfigs, createPoolTx, swapToBoostedTx, initPoolTx, chain, poolAddress } = usePoolCreationStore();
   const { data: boostableWhitelist } = useBoostableWhitelist();
 
   const { mutate: createPool, isPending: isCreatePoolPending, error: createPoolError } = useCreatePool();
@@ -45,17 +33,9 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const { mutate: initPool, isPending: isInitPoolPending, error: initPoolError } = useInitializePool();
   const { isFetching: isInitPoolTxHashPending, error: initPoolTxHashError } = useInitializePoolTxHash();
 
-  const {
-    mutate: setMaxSurgeFee,
-    isPending: isSetMaxSurgeFeePending,
-    error: setMaxSurgeFeeError,
-  } = useSetMaxSurgeFee();
-  const { isFetching: isSetMaxSurgeFeeTxHashPending, error: setMaxSurgeFeeTxHashError } = useSetMaxSurgeFeeTxHash();
-
   const poolDeploymentUrl = createPoolTx.wagmiHash && getBlockExplorerTxLink(chain?.id, createPoolTx.wagmiHash);
   const multiSwapUrl = swapToBoostedTx.wagmiHash && getBlockExplorerTxLink(chain?.id, swapToBoostedTx.wagmiHash);
   const poolInitializationUrl = initPoolTx.wagmiHash && getBlockExplorerTxLink(chain?.id, initPoolTx.wagmiHash);
-  const setMaxSurgeFeeUrl = setMaxSurgeFeeTx.wagmiHash && getBlockExplorerTxLink(chain?.id, setMaxSurgeFeeTx.wagmiHash);
 
   const deployStep = transactionButtonManager({
     label: "Deploy Pool",
@@ -163,14 +143,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const showUseBigBlocksStep = isHyperEvm && !isUsingBigBlocks && step === 1;
   const showUseSmallBlocksStep = isHyperEvm && isUsingBigBlocks && step > 1;
 
-  const maxSurgeFeeStep = transactionButtonManager({
-    label: "Set Max Fee",
-    onSubmit: setMaxSurgeFee,
-    isPending: isSetMaxSurgeFeePending || isSetMaxSurgeFeeTxHashPending,
-    error: setMaxSurgeFeeError || setMaxSurgeFeeTxHashError,
-    blockExplorerUrl: setMaxSurgeFeeUrl,
-    infoMsg: "You must set the max stable surge fee to 10% for aggregators to route through this pool",
-  });
+  const { showSetMaxSurgeFeeStep, setMaxSurgeFeeStep, showWarnDaoMustUpdateFee } = useStableSurgeStep();
 
   const poolCreationSteps = [
     ...(showUseBigBlocksStep ? [useToggleBlockSizeStep] : []),
@@ -180,7 +153,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     ...swapToBoostedStep,
     ...approveOnBoostedVariantSteps,
     initializeStep,
-    ...(poolType === PoolType.StableSurge ? [maxSurgeFeeStep] : []),
+    ...(showSetMaxSurgeFeeStep ? [setMaxSurgeFeeStep] : []),
   ];
 
   return (
@@ -203,6 +176,16 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
                   <PoolDetails />
                 </div>
 
+                {showWarnDaoMustUpdateFee && (
+                  <Alert type="warning">
+                    Since you have chosen the Balancer DAO as the swap fee manager, ask for help{" "}
+                    <a href="https://discord.balancer.fi/" target="_blank" rel="noreferrer" className="link">
+                      on our Discord
+                    </a>{" "}
+                    to update the max surge fee for better integration with aggregators.
+                  </Alert>
+                )}
+
                 {step <= poolCreationSteps.length ? (
                   poolCreationSteps[step - 1].component
                 ) : (
@@ -211,6 +194,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
 
                 <SupportAndResetModals callback={() => setIsModalOpen(false)} />
               </div>
+
               {step > poolCreationSteps.length && (
                 <Alert type="success">
                   Your pool has been successfully initialized and will be available to view in the Balancer app shortly!
@@ -237,7 +221,7 @@ interface TransactionButtonManagerProps {
   infoMsg?: string;
 }
 
-function transactionButtonManager({
+export function transactionButtonManager({
   label,
   blockExplorerUrl,
   onSubmit,
