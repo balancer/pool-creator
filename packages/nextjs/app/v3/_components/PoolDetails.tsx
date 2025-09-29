@@ -39,6 +39,7 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
     eclpParams,
   } = usePoolCreationStore();
   const { poolHooksWhitelist } = usePoolHooksWhitelist(chain?.id);
+  const stableSurgeHookAddress = poolHooksWhitelist.find(hook => hook.label === "StableSurge")?.value;
 
   const { isOnlyInitializingPool } = useUserDataStore();
 
@@ -203,7 +204,17 @@ export function PoolDetails({ isPreview }: { isPreview?: boolean }) {
                 <div className="flex justify-between">
                   <div className="">Pool hooks contract</div>
                   <div>
-                    {poolHooksContract === zeroAddress ? (
+                    {poolType === PoolType.StableSurge && stableSurgeHookAddress ? (
+                      <a
+                        className="link text-info no-underline flex gap-1 items-center"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={getBlockExplorerAddressLink(targetNetwork, stableSurgeHookAddress)}
+                      >
+                        StableSurge
+                        <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </a>
+                    ) : poolHooksContract === zeroAddress ? (
                       "None"
                     ) : !poolHooksContract ? (
                       "-"

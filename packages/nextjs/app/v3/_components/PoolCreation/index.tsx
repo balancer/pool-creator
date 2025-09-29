@@ -2,6 +2,7 @@ import { PoolDetails } from "../PoolDetails";
 import { SupportAndResetModals } from "../SupportAndResetModals";
 import { ApproveOnTokenManager } from "./ApproveOnTokenManager";
 import { PoolCreatedView } from "./PoolCreatedView";
+import { useStableSurgeStep } from "./useStableSurgeStep";
 import { Alert, PoolStepsDisplay, TransactionButton } from "~~/components/common";
 import { useIsHyperEvm, useIsUsingBigBlocks, useToggleBlockSize } from "~~/hooks/hyperliquid";
 import {
@@ -142,6 +143,8 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
   const showUseBigBlocksStep = isHyperEvm && !isUsingBigBlocks && step === 1;
   const showUseSmallBlocksStep = isHyperEvm && isUsingBigBlocks && step > 1;
 
+  const { showSetMaxSurgeFeeStep, setMaxSurgeFeeStep, showWarnDaoMustUpdateFee } = useStableSurgeStep();
+
   const poolCreationSteps = [
     ...(showUseBigBlocksStep ? [useToggleBlockSizeStep] : []),
     deployStep,
@@ -150,6 +153,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
     ...swapToBoostedStep,
     ...approveOnBoostedVariantSteps,
     initializeStep,
+    ...(showSetMaxSurgeFeeStep ? [setMaxSurgeFeeStep] : []),
   ];
 
   return (
@@ -172,6 +176,16 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
                   <PoolDetails />
                 </div>
 
+                {showWarnDaoMustUpdateFee && (
+                  <Alert type="warning">
+                    Since you have chosen the Balancer DAO as the swap fee manager, ask for help{" "}
+                    <a href="https://discord.balancer.fi/" target="_blank" rel="noreferrer" className="link">
+                      on our Discord
+                    </a>{" "}
+                    to update the max surge fee for better integration with aggregators.
+                  </Alert>
+                )}
+
                 {step <= poolCreationSteps.length ? (
                   poolCreationSteps[step - 1].component
                 ) : (
@@ -180,6 +194,7 @@ export function PoolCreation({ setIsModalOpen }: { setIsModalOpen: (isOpen: bool
 
                 <SupportAndResetModals callback={() => setIsModalOpen(false)} />
               </div>
+
               {step > poolCreationSteps.length && (
                 <Alert type="success">
                   Your pool has been successfully initialized and will be available to view in the Balancer app shortly!
@@ -203,20 +218,23 @@ interface TransactionButtonManagerProps {
   onSubmit: () => void;
   isPending: boolean;
   error: Error | null;
+  infoMsg?: string;
 }
 
-function transactionButtonManager({
+export function transactionButtonManager({
   label,
   blockExplorerUrl,
   onSubmit,
   isPending,
   error,
+  infoMsg,
 }: TransactionButtonManagerProps) {
   return {
     label,
     blockExplorerUrl,
     component: (
       <div className="flex flex-col gap-3">
+        {infoMsg && <Alert type="info">{infoMsg}</Alert>}
         <TransactionButton onClick={onSubmit} title={label} isDisabled={isPending} isPending={isPending} />
         {error && (
           <Alert type="error">
