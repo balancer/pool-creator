@@ -1,9 +1,12 @@
 import React from "react";
 import { PoolTypeButton } from "./PoolTypeButton";
+import { usePoolCreationStore } from "~~/hooks/v3";
 import { type SupportedPoolTypes, poolTypeMap } from "~~/utils/constants";
 
 export function ChooseType() {
   const poolTypes = Object.keys(poolTypeMap) as SupportedPoolTypes[];
+
+  const { poolType } = usePoolCreationStore();
 
   return (
     <>
@@ -16,6 +19,10 @@ export function ChooseType() {
             ))}
           </div>
         </div>
+
+        {poolType ? (
+          <div className="text-xl bg-base-100 p-5 rounded-xl">{poolTypeMap[poolType].description}</div>
+        ) : null}
       </div>
     </>
   );
