@@ -23,7 +23,8 @@ export const poolTypeMap: Record<SupportedPoolTypes, PoolTypeDetails> = {
   [PoolType.StableSurge]: {
     label: "Stable Surge",
     maxTokens: 5,
-    description: "A stable pool that uses the stable surge hook deployed by Balancer's official stable surge factory",
+    description:
+      "A stable pool that uses the stable surge hook to automatically adjust the swap fee based on how balanced the pool is during a trade ",
   },
   [PoolType.Weighted]: {
     label: "Weighted",
