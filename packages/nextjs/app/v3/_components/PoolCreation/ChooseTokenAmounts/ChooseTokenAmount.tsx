@@ -94,7 +94,11 @@ export function ChooseTokenAmount({
   };
 
   const setAmountToUserBalance = () => {
-    updateTokenConfig(index, { amount: formatUnits(userTokenBalance || 0n, tokenInfo?.decimals || 0) });
+    const userBalanceAmount = formatUnits(userTokenBalance || 0n, tokenInfo?.decimals || 0);
+    const syntheticEvent = {
+      target: { value: userBalanceAmount },
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleAmountChange(syntheticEvent);
   };
 
   const {
