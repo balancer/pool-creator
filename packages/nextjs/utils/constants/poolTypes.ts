@@ -35,8 +35,7 @@ export const poolTypeMap: Record<SupportedPoolTypes, PoolTypeDetails> = {
   [PoolType.GyroE]: {
     label: "Gyro E-CLP",
     maxTokens: 2,
-    description:
-      "Gyro's elliptic concentrated liquidity pools concentrate liquidity within price bounds with the flexibility to asymmetrically focus liquidity",
+    description: "Gyro's elliptic concentrated liquidity pools offer the flexibility to asymmetrically focus liquidity",
   },
   [PoolType.ReClamm]: {
     label: "Readjusting CLAMM",

@@ -8,19 +8,25 @@ export const useValidateInitializationInputs = () => {
   const { data: walletClient } = useWalletClient();
   const { userTokenBalances, hasAgreedToWarning } = useUserDataStore();
 
-  const isTokenAmountsValid = tokenConfigs.every(token => {
-    if (!token.amount || !walletClient?.account.address || Number(token.amount) <= 0 || !token.tokenInfo?.decimals)
-      return false;
+  const isTokenAmountsValid =
+    tokenConfigs.every(token => {
+      if (
+        token.amount === "" ||
+        !walletClient?.account.address ||
+        Number(token.amount) < 0 ||
+        !token.tokenInfo?.decimals
+      )
+        return false;
 
-    const rawUserBalance: bigint = userTokenBalances[token.address] ? BigInt(userTokenBalances[token.address]) : 0n;
+      const rawUserBalance: bigint = userTokenBalances[token.address] ? BigInt(userTokenBalances[token.address]) : 0n;
 
-    const rawTokenInput = parseUnits(token.amount, token.tokenInfo.decimals);
+      const rawTokenInput = parseUnits(token.amount, token.tokenInfo.decimals);
 
-    // User must have enough token balance
-    if (rawTokenInput > rawUserBalance) return false;
+      // User must have enough token balance
+      if (rawTokenInput > rawUserBalance) return false;
 
-    return true;
-  });
+      return true;
+    }) && tokenConfigs.some(token => Number(token.amount) > 0);
 
   const hasAgreedToWeightedsWarning = poolType !== PoolType.Weighted || hasAgreedToWarning;
 

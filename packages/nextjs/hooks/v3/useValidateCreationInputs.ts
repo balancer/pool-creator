@@ -72,16 +72,20 @@ export function useValidateCreationInputs() {
     poolType !== PoolType.ReClamm || isReClammParamsValid,
   ].every(Boolean);
 
-  // TODO: Make info tab validatiosn less sloppy? (temporarily combining weighted and token amount validations with info)
   const isInfoValid =
-    !!name &&
-    !!symbol &&
-    name.length <= MAX_POOL_NAME_LENGTH &&
-    symbol.length <= MAX_POOL_SYMBOL_LENGTH &&
-    isValidTokenWeights;
+    !!name && !!symbol && name.length <= MAX_POOL_NAME_LENGTH && symbol.length <= MAX_POOL_SYMBOL_LENGTH;
 
   const isPoolCreationInputValid =
     isTypeValid && isTokensValid && isParametersValid && isInfoValid && isInitializePoolInputsValid;
+
+  console.log({
+    isParametersValid,
+    isTypeValid,
+    isInfoValid,
+    isTokensValid,
+    isPoolCreationInputValid,
+    isValidTokenWeights,
+  });
 
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights };
 }
