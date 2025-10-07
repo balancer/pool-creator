@@ -32,8 +32,6 @@ export function ChooseTokenAmounts() {
     }
   }, [shouldInvertEclpParams, invertEclpParams]);
 
-  console.log("autofillAmount", autofillAmount);
-
   return (
     <div className="rounded-xl flex flex-col gap-4">
       <div className="text-xl">Choose initialization amounts:</div>

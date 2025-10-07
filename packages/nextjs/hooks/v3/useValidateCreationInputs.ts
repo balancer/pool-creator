@@ -78,14 +78,5 @@ export function useValidateCreationInputs() {
   const isPoolCreationInputValid =
     isTypeValid && isTokensValid && isParametersValid && isInfoValid && isInitializePoolInputsValid;
 
-  console.log({
-    isParametersValid,
-    isTypeValid,
-    isInfoValid,
-    isTokensValid,
-    isPoolCreationInputValid,
-    isValidTokenWeights,
-  });
-
   return { isParametersValid, isTypeValid, isInfoValid, isTokensValid, isPoolCreationInputValid, isValidTokenWeights };
 }

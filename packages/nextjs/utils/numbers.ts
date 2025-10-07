@@ -287,5 +287,12 @@ export function safeParseFixedBigInt(value: string, decimals = 0): bigint {
   return parseUnits(safeValue, decimals);
 }
 
+// Converts a number to fixed decimal string to avoid scientific notation
+export const formatNumberToFixedDecimal = (num: number, maxDecimals = 18): string => {
+  const fixed = num.toFixed(maxDecimals);
+  // Remove trailing zeros after decimal point (but keep the decimal if needed)
+  return fixed.replace(/(\.\d*[1-9])0+$|\.0+$/, "$1");
+};
+
 export const isGreaterThanZeroValidation = (value: string): string | true =>
   isValidNumber(value) && !isZero(value) ? true : "Amount must be greater than 0";

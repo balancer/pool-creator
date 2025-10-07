@@ -1,10 +1,11 @@
 "use client";
 
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits } from "viem";
 import { ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
 import { TokenImage } from "~~/components/common";
 import { type Token } from "~~/hooks/token";
 import { COW_MIN_AMOUNT } from "~~/utils";
+import { safeParseFixedBigInt } from "~~/utils";
 
 interface TokenFieldProps {
   inputValue: string;
@@ -32,7 +33,8 @@ export const TokenAmountField: React.FC<TokenFieldProps> = ({
   setAmountToUserBalance,
 }) => {
   const amountGreaterThanBalance =
-    userTokenBalance !== undefined && parseUnits(inputValue ?? "0", selectedToken?.decimals || 0) > userTokenBalance;
+    userTokenBalance !== undefined &&
+    safeParseFixedBigInt(inputValue ?? "0", selectedToken?.decimals || 0) > userTokenBalance;
 
   return (
     <>

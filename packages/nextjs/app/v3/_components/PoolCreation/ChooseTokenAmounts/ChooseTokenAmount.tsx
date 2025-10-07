@@ -7,6 +7,7 @@ import { useAccount, useReadContract } from "wagmi";
 import { useEclpSpotPrice } from "~~/hooks/gyro";
 import { useTokenUsdValue } from "~~/hooks/token";
 import { type TokenConfig, useFetchTokenRate, usePoolCreationStore, useUserDataStore } from "~~/hooks/v3";
+import { formatNumberToFixedDecimal } from "~~/utils";
 import { getEclpInitAmountsRatio } from "~~/utils/gryo";
 
 export function ChooseTokenAmount({
@@ -82,7 +83,9 @@ export function ChooseTokenAmount({
           ? referenceAmount / initAmountsRatio // If entering tokenA, divide to get tokenB amount
           : referenceAmount * initAmountsRatio; // If entering tokenB, multiply to get tokenA amount
 
-        updateTokenConfig(otherIndex, { amount: Math.abs(otherTokenAmount).toString() });
+        // Convert to fixed decimal string to avoid scientific notation
+        const formattedAmount = formatNumberToFixedDecimal(Math.abs(otherTokenAmount));
+        updateTokenConfig(otherIndex, { amount: formattedAmount });
       }
       updateTokenConfig(index, { amount: e.target.value });
     } else {
