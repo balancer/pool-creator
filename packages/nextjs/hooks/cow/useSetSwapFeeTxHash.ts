@@ -48,7 +48,7 @@ export function useSetSwapFeeTxHash() {
 
         if (swapFee !== MAX_FEE) throw new Error("Swap fee is not set to max fee");
 
-        updatePoolCreation({ setSwapFeeTx: { safeHash, wagmiHash, isSuccess: true }, step: poolCreation?.step + 1 });
+        updatePoolCreation({ setSwapFeeTx: { safeHash, wagmiHash, isSuccess: true }, step: 7 });
         return { isSuccess: true };
       } else {
         throw new Error("Set swap fee transaction reverted");
