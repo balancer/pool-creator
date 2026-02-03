@@ -1,3 +1,10 @@
 {
-  "installCommand": "yarn install"
+  "installCommand": "yarn install",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://balancer.fi/create",
+      "permanent": true
+    }
+  ]
 }
